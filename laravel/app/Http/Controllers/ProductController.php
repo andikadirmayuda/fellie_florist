@@ -13,11 +13,10 @@ class ProductController extends Controller
 {    public function index(Request $request)
     {
         $categories = Category::orderBy('name')->pluck('name', 'id');
-        
-        $products = Product::with('category')
+          $products = Product::with('category')
             ->search($request->search)
             ->filterByCategory($request->category)
-            ->orderBy('code')
+            ->orderBy('auto_code')
             ->paginate(10)
             ->withQueryString();
 
@@ -40,13 +39,9 @@ class ProductController extends Controller
         DB::beginTransaction();
         try {
             $product = Product::create($request->except('prices'));
-
-            // Process prices
-            foreach ($request->prices as $priceData) {
-                if (!empty($priceData['price'])) {
-                    $product->prices()->create($priceData);
-                }
-            }
+            
+            // Process and save prices
+            $this->processPrices($product, $request->input('prices', []));
 
             DB::commit();
             return redirect()->route('products.index')
@@ -83,16 +78,9 @@ class ProductController extends Controller
         DB::beginTransaction();
         try {
             $product->update($request->except('prices'));
-
-            // Delete existing prices
-            $product->prices()->delete();
-
-            // Create new prices
-            foreach ($request->prices as $priceData) {
-                if (!empty($priceData['price'])) {
-                    $product->prices()->create($priceData);
-                }
-            }
+            
+            // Process and save prices
+            $this->processPrices($product, $request->input('prices', []));
 
             DB::commit();
             return redirect()->route('products.index')
@@ -112,6 +100,48 @@ class ProductController extends Controller
                 ->with('success', 'Produk berhasil dihapus.');
         } catch (\Exception $e) {
             return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Process and save product prices
+     *
+     * @param Product $product
+     * @param array $prices
+     * @return void
+     */
+    private function processPrices(Product $product, array $prices)
+    {
+        // Delete existing prices
+        $product->prices()->delete();
+
+        // Filter only prices that have values
+        $validPrices = collect($prices)->filter(function ($price) {
+            return !empty($price['price']);
+        })->values();
+
+        if ($validPrices->isEmpty()) {
+            return;
+        }
+
+        // Find the price marked as default
+        $defaultPrice = $validPrices->first(function ($price) {
+            return isset($price['is_default']) && $price['is_default'];
+        });
+
+        // If no default price is set, use the first price
+        if (!$defaultPrice) {
+            $validPrices->first()['is_default'] = true;
+        }
+
+        // Create all prices
+        foreach ($validPrices as $priceData) {
+            $product->prices()->create([
+                'type' => $priceData['type'],
+                'price' => $priceData['price'],
+                'unit_equivalent' => $priceData['unit_equivalent'] ?? ProductRequest::getDefaultUnitEquivalent($priceData['type']),
+                'is_default' => isset($priceData['is_default']) && $priceData['is_default'],
+            ]);
         }
     }
 }

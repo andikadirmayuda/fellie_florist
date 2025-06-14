@@ -16,9 +16,7 @@ class ProductRequest extends FormRequest
     {
         $productId = $this->route('product')?->id;
 
-        return [
-            'category_id' => ['required', 'exists:categories,id'],
-            'code' => ['required', 'string', 'max:50', Rule::unique('products', 'code')->ignore($productId)],
+        return [            'category_id' => ['required', 'exists:categories,id'],
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'base_unit' => ['required', 'in:tangkai,item'],
@@ -26,12 +24,21 @@ class ProductRequest extends FormRequest
             'min_stock' => ['required', 'integer', 'min:0'],
             'is_active' => ['boolean'],
 
-            // Validate prices
-            'prices' => ['required', 'array'],
-            'prices.*.type' => ['required', 'string', Rule::in($this->getPriceTypes())],
-            'prices.*.price' => ['required', 'numeric', 'min:0'],
-            'prices.*.unit_equivalent' => ['required', 'integer', 'min:1'],
+            // Validate prices            'prices' => ['array'],
+            'prices.*.type' => ['nullable', 'string', Rule::in($this->getPriceTypes())],
+            'prices.*.price' => ['nullable', 'numeric', 'min:0'],
+            'prices.*.unit_equivalent' => ['nullable', 'integer', 'min:1'],
             'prices.*.is_default' => ['boolean'],
+
+            // At least one price must be set if prices array exists
+            'prices' => [
+                'array',
+                function ($attribute, $value, $fail) {
+                    if (!empty($value) && !collect($value)->contains('price', '!=', null)) {
+                        $fail('Setidaknya satu harga harus diisi.');
+                    }
+                },
+            ],
         ];
     }
 
@@ -69,15 +76,17 @@ class ProductRequest extends FormRequest
             'ikat_20' => 20,
             default => 1,
         };
-    }
-
-    protected function prepareForValidation()
+    }    protected function prepareForValidation()
     {
+        // Get the selected default price type from the request
+        $defaultPriceType = $this->input('default_price_type');
+
         $this->merge([
             'is_active' => $this->boolean('is_active'),
-            'prices' => collect($this->prices ?? [])->map(function ($price) {
+            'prices' => collect($this->prices ?? [])->map(function ($price) use ($defaultPriceType) {
                 return array_merge($price, [
-                    'is_default' => isset($price['is_default']) && $price['is_default'] == $price['type']
+                    'is_default' => $defaultPriceType === $price['type'],
+                    'unit_equivalent' => $price['unit_equivalent'] ?? self::getDefaultUnitEquivalent($price['type'])
                 ]);
             })->toArray()
         ]);

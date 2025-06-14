@@ -21,7 +21,7 @@
                             <dl class="grid grid-cols-1 gap-4">
                                 <div>
                                     <dt class="text-sm font-medium text-gray-500">Kode</dt>
-                                    <dd class="mt-1 text-sm text-gray-900">{{ $product->code }}</dd>
+                                    <dd class="mt-1 text-sm text-gray-900">{{ $product->auto_code }}</dd>
                                 </div>
                                 <div>
                                     <dt class="text-sm font-medium text-gray-500">Nama</dt>

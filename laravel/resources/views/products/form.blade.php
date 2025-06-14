@@ -36,14 +36,14 @@
                                         </option>
                                     @endforeach
                                 </select>
-                            </div>
-
+                            </div>                            @if(isset($product))
                             <div>
-                                <label for="code" class="block text-sm font-medium text-gray-700">Kode Produk</label>
-                                <input type="text" name="code" id="code" 
-                                       value="{{ old('code', $product->code ?? '') }}"
-                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                                <label class="block text-sm font-medium text-gray-700">Kode Produk</label>
+                                <div class="mt-1 block w-full p-2 bg-gray-100 rounded-md">
+                                    {{ $product->auto_code }}
+                                </div>
                             </div>
+                            @endif
 
                             <div>
                                 <label for="name" class="block text-sm font-medium text-gray-700">Nama Produk</label>
@@ -128,24 +128,35 @@
                                                     {{ ucwords(str_replace('_', ' ', $type)) }}
                                                     <input type="hidden" name="prices[{{ $type }}][type]" value="{{ $type }}">
                                                 </td>
-                                                <td class="px-6 py-4">
+                                                <td class="px-6 py-4">                                                <div class="relative">
                                                     <input type="number" step="0.01"
                                                            name="prices[{{ $type }}][price]"
                                                            value="{{ old("prices.$type.price", $existingPrices[$type]->price ?? '') }}"
-                                                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                                                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm {{ $errors->has("prices.$type.price") ? 'border-red-300' : '' }}"
+                                                           placeholder="Opsional">
+                                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">
+                                                        <small>Rp</small>
+                                                    </div>
+                                                    @error("prices.$type.price")
+                                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                                    @enderror
+                                                </div>
                                                 </td>
-                                                <td class="px-6 py-4">
-                                                    <input type="number"
+                                                <td class="px-6 py-4">                                                    <input type="number"
                                                            name="prices[{{ $type }}][unit_equivalent]"
                                                            value="{{ old("prices.$type.unit_equivalent", 
                                                                         $existingPrices[$type]->unit_equivalent ?? 
                                                                         $defaultUnitEquivalents[$type]) }}"
-                                                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                                                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm {{ $errors->has("prices.$type.unit_equivalent") ? 'border-red-300' : '' }}">
+                                                    @error("prices.$type.unit_equivalent")
+                                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                                    @enderror
                                                 </td>
-                                                <td class="px-6 py-4">
-                                                    <input type="radio" name="prices_default" 
+                                                <td class="px-6 py-4">                                                    <input type="radio" 
+                                                           name="default_price_type" 
                                                            value="{{ $type }}"
-                                                           {{ (old('prices_default', isset($existingPrices[$type]) && $existingPrices[$type]->is_default) ? $type : '') == $type ? 'checked' : '' }}>
+                                                           {{ (old('default_price_type', $existingPrices[$type]->is_default ?? false) ? $type : '') === $type ? 'checked' : '' }}
+                                                           class="form-radio text-blue-600">
                                                 </td>
                                             </tr>
                                         @endforeach

@@ -8,12 +8,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Product extends Model
 {
-    use HasFactory, SoftDeletes;
-
-    public function scopeSearch($query, $search)
+    use HasFactory, SoftDeletes;    public function scopeSearch($query, $search)
     {
         return $query->where(function($q) use ($search) {
-            $q->where('code', 'like', "%{$search}%")
+            $q->where('auto_code', 'like', "%{$search}%")
               ->orWhere('name', 'like', "%{$search}%")
               ->orWhereHas('category', function($q) use ($search) {
                   $q->where('name', 'like', "%{$search}%");
@@ -39,9 +37,9 @@ class Product extends Model
     public function getNeedsRestockAttribute()
     {
         return $this->current_stock < $this->min_stock;
-    }protected $fillable = [
+    }    protected $fillable = [
         'category_id',
-        'code',
+        'auto_code',
         'name',
         'description',
         'base_unit',

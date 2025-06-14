@@ -13,8 +13,7 @@ class CreateProductsTable extends Migration
     {
         Schema::create('products', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('category_id')->constrained()->onDelete('restrict');
-            $table->string('code')->unique();
+            $table->foreignId('category_id')->constrained()->onDelete('restrict');            $table->string('auto_code')->unique();
             $table->string('name');
             $table->text('description')->nullable();
             $table->enum('base_unit', ['tangkai', 'item'])->default('tangkai');
@@ -24,7 +23,7 @@ class CreateProductsTable extends Migration
             $table->timestamps();
             $table->softDeletes();
 
-            $table->index('code');
+            $table->index('auto_code');
             $table->index('name');
             $table->index('is_active');
         });

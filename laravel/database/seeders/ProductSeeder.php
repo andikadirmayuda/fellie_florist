@@ -16,12 +16,9 @@ class ProductSeeder extends Seeder
 
         if (!$bungaPotong || !$bouquet) {
             throw new \Exception('Categories not found. Please ensure CategorySeeder has been run first.');
-        }
-
-        // Create Mawar Merah
+        }        // Create Mawar Merah
         $mawarMerah = Product::create([
             'category_id' => $bungaPotong->id,
-            'code' => 'MAWAR-MERAH',
             'name' => 'Mawar Merah',
             'description' => 'Bunga mawar merah segar',
             'base_unit' => 'tangkai',
@@ -50,12 +47,9 @@ class ProductSeeder extends Seeder
                 'unit_equivalent' => 20,
                 'is_default' => false,
             ],
-        ]);
-
-        // Create Bunga Matahari
+        ]);        // Create Bunga Matahari
         $bungaMatahari = Product::create([
             'category_id' => $bungaPotong->id,
-            'code' => 'SUNFLOWER',
             'name' => 'Bunga Matahari',
             'description' => 'Bunga matahari segar',
             'base_unit' => 'tangkai',
@@ -84,12 +78,9 @@ class ProductSeeder extends Seeder
                 'unit_equivalent' => 10,
                 'is_default' => false,
             ],
-        ]);
-
-        // Create Bouquet Romantis
+        ]);        // Create Bouquet Romantis
         $bouquetRomantis = Product::create([
             'category_id' => $bouquet->id,
-            'code' => 'BOUQUET-ROMANTIS',
             'name' => 'Bouquet Romantis',
             'description' => 'Bouquet bunga mawar mix dengan baby breath',
             'base_unit' => 'item',
