@@ -5,18 +5,23 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\ProductPrice;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Requests\ProductRequest;
 
 class ProductController extends Controller
-{
-    public function index()
+{    public function index(Request $request)
     {
+        $categories = Category::orderBy('name')->pluck('name', 'id');
+        
         $products = Product::with('category')
+            ->search($request->search)
+            ->filterByCategory($request->category)
             ->orderBy('code')
-            ->paginate(10);
+            ->paginate(10)
+            ->withQueryString();
 
-        return view('products.index', compact('products'));
+        return view('products.index', compact('products', 'categories'));
     }
 
     public function create()
