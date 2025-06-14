@@ -19,8 +19,7 @@ return new class extends Migration
             $table->string('name', 100);
             $table->string('email', 100)->unique();
             $table->string('password');
-            // Role and Status
-            $table->enum('role', ['owner', 'admin', 'kasir', 'karyawan', 'pelanggan']);
+            // Status
             $table->enum('status', ['active', 'inactive', 'suspended'])->default('active');
             
             $table->rememberToken();
