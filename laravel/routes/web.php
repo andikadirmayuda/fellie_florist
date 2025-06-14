@@ -3,6 +3,9 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ProductController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -22,6 +25,18 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:owner,admin')->group(function () {
         Route::resource('users', UserController::class);
     });
+
+    // Customer Management Routes
+    Route::resource('customers', CustomerController::class);
+
+    // Customer Trash Routes
+    Route::get('customers/trashed', [CustomerController::class, 'trashed'])->name('customers.trashed');
+    Route::patch('customers/{id}/restore', [CustomerController::class, 'restore'])->name('customers.restore');
+    Route::delete('customers/{id}/force-delete', [CustomerController::class, 'forceDelete'])->name('customers.force-delete');
+
+    // Product Management Routes
+    Route::resource('categories', CategoryController::class);
+    Route::resource('products', ProductController::class);
 });
 
 require __DIR__.'/auth.php';
