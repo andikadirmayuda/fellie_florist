@@ -66,4 +66,53 @@ class Product extends Model
     {
         return $this->prices()->where('type', $type)->first();
     }
+
+    // Relasi Inventaris
+    public function inventoryTransactions()
+    {
+        return $this->hasMany(InventoryTransaction::class);
+    }
+
+    public function stockHolds()
+    {
+        return $this->hasMany(StockHold::class);
+    }
+
+    public function stockAdjustments()
+    {
+        return $this->hasMany(StockAdjustment::class);
+    }
+
+    // Method untuk menampilkan stok dengan satuan
+    public function currentStock(): string
+    {
+        $activeHolds = $this->stockHolds()
+            ->active()
+            ->sum('quantity');
+
+        $availableStock = $this->current_stock - $activeHolds;
+        
+        return number_format($availableStock) . ' ' . $this->base_unit . 
+               ($activeHolds > 0 ? " (Hold: {$activeHolds})" : '');
+    }
+
+    // Method untuk riwayat stok 30 hari terakhir
+    public function stockHistory()
+    {
+        return $this->inventoryTransactions()
+            ->with(['creator:id,name'])
+            ->where('created_at', '>=', now()->subDays(30))
+            ->latest()
+            ->get()
+            ->map(function ($transaction) {
+                return [
+                    'date' => $transaction->created_at->format('Y-m-d H:i'),
+                    'type' => $transaction->getTransactionLabel(),
+                    'quantity' => $transaction->quantity,
+                    'source' => ucfirst($transaction->source),
+                    'notes' => $transaction->notes,
+                    'by' => $transaction->creator->name
+                ];
+            });
+    }
 }
