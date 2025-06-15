@@ -6,6 +6,8 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\InventoryController;
+use App\Http\Controllers\InventoryController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -37,6 +39,17 @@ Route::middleware('auth')->group(function () {
     // Product Management Routes
     Route::resource('categories', CategoryController::class);
     Route::resource('products', ProductController::class);
+
+    // Inventory Management Routes
+    Route::prefix('inventory')->name('inventory.')->group(function () {
+        Route::get('/', [InventoryController::class, 'index'])->name('index');
+        Route::get('/stock-in', [InventoryController::class, 'stockInForm'])->name('stock-in.form');
+        Route::post('/stock-in', [InventoryController::class, 'stockIn'])->name('stock-in.store');
+        Route::get('/adjustments', [InventoryController::class, 'adjustmentForm'])->name('adjustment.form');
+        Route::post('/adjustments', [InventoryController::class, 'adjustStock'])->name('adjustment.store');
+        Route::get('/holds', [InventoryController::class, 'stockHolds'])->name('holds');
+        Route::post('/holds/{id}/release', [InventoryController::class, 'releaseHold'])->name('holds.release');
+    });
 });
 
 require __DIR__.'/auth.php';
