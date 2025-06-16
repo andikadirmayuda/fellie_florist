@@ -1,11 +1,10 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ __('Inventory History') }} - {{ $product->name }}
+        <div class="flex justify-between items-center">            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                {{ __('Riwayat Inventaris') }} - {{ $product->name }}
             </h2>
             <a href="{{ route('inventory.index') }}" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
-                {{ __('Back to Inventory') }}
+                {{ __('Kembali ke Inventaris') }}
             </a>
         </div>
     </x-slot>
@@ -17,11 +16,11 @@
                     <!-- Product Info -->
                     <div class="mb-6 grid grid-cols-3 gap-4">
                         <div class="bg-gray-50 p-4 rounded">
-                            <h3 class="text-sm font-medium text-gray-500">Current Stock</h3>
+                            <h3 class="text-sm font-medium text-gray-500">Stok Saat Ini</h3>
                             <p class="mt-1 text-lg font-semibold">{{ $product->formatted_stock }}</p>
                         </div>
                         <div class="bg-gray-50 p-4 rounded">
-                            <h3 class="text-sm font-medium text-gray-500">Minimum Stock</h3>
+                            <h3 class="text-sm font-medium text-gray-500">Stok Minimal</h3>
                             <p class="mt-1 text-lg font-semibold">
                                 {{ number_format($product->min_stock) }} {{ $product->base_unit }}
                             </p>
@@ -44,23 +43,22 @@
 
                     <!-- History Table -->
                     <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
+                        <table class="min-w-full divide-y divide-gray-200">                    <thead class="bg-gray-50">
                                 <tr>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Date
+                                        Tanggal
                                     </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Type
+                                        Jenis
                                     </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Quantity Change
+                                        Perubahan Jumlah
                                     </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Reference
+                                        Referensi
                                     </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Notes
+                                        Catatan
                                     </th>
                                 </tr>
                             </thead>
