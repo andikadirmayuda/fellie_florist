@@ -5,10 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Product extends Model
 {
-    use HasFactory, SoftDeletes;    public function scopeSearch($query, $search)
+    use HasFactory, SoftDeletes;
+
+    public function scopeSearch($query, $search)
     {
         return $query->where(function($q) use ($search) {
             $q->where('auto_code', 'like', "%{$search}%")
@@ -114,5 +117,59 @@ class Product extends Model
                     'by' => $transaction->creator->name
                 ];
             });
+    }
+
+    /**
+     * Get all inventory logs for this product
+     */
+    public function inventoryLogs(): HasMany
+    {
+        return $this->hasMany(InventoryLog::class);
+    }
+
+    /**
+     * Add stock to product inventory
+     */
+    public function addStock(int $quantity, string $source, string $referenceId, ?string $notes = null): InventoryLog
+    {
+        $this->increment('current_stock', $quantity);
+
+        return $this->inventoryLogs()->create([
+            'qty' => $quantity,
+            'source' => $source,
+            'reference_id' => $referenceId,
+            'notes' => $notes,
+        ]);
+    }
+
+    /**
+     * Reduce stock from product inventory
+     */
+    public function reduceStock(int $quantity, string $source, string $referenceId, ?string $notes = null): InventoryLog
+    {
+        $this->decrement('current_stock', $quantity);
+
+        return $this->inventoryLogs()->create([
+            'qty' => -$quantity,
+            'source' => $source,
+            'reference_id' => $referenceId,
+            'notes' => $notes,
+        ]);
+    }
+
+    /**
+     * Adjust stock to specific amount
+     */
+    public function adjustStock(int $newQuantity, string $referenceId, ?string $notes = null): InventoryLog
+    {
+        $difference = $newQuantity - $this->current_stock;
+        $this->update(['current_stock' => $newQuantity]);
+
+        return $this->inventoryLogs()->create([
+            'qty' => $difference,
+            'source' => 'adjustment',
+            'reference_id' => $referenceId,
+            'notes' => $notes,
+        ]);
     }
 }
