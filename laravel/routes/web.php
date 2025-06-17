@@ -7,6 +7,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\InventoryController;
+use App\Http\Controllers\OrderController;
 
 use Illuminate\Support\Facades\Route;
 
@@ -45,6 +46,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/inventory/{product}/history', [InventoryController::class, 'history'])->name('inventory.history');
     Route::get('/inventory/{product}/adjust', [InventoryController::class, 'adjustForm'])->name('inventory.adjust-form');
     Route::post('/inventory/{product}/adjust', [InventoryController::class, 'adjust'])->name('inventory.adjust');
+
+    // Order Management Routes
+    Route::middleware(['auth', 'verified'])->group(function () {
+        Route::resource('orders', OrderController::class);
+    });
 });
 
 require __DIR__.'/auth.php';
