@@ -6,10 +6,58 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Product extends Model
 {
     use HasFactory, SoftDeletes;
+
+    protected $fillable = [
+        'category_id',
+        'auto_code',
+        'name',
+        'description',
+        'base_unit',
+        'current_stock',
+        'min_stock',
+        'is_active'
+    ];
+
+    protected $casts = [
+        'current_stock' => 'integer',
+        'min_stock' => 'integer',
+        'is_active' => 'boolean'
+    ];
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(Category::class);
+    }
+
+    public function prices(): HasMany
+    {
+        return $this->hasMany(ProductPrice::class);
+    }
+
+    public function inventoryLogs(): HasMany
+    {
+        return $this->hasMany(InventoryLog::class);
+    }
+
+    public function decrementStock($amount)
+    {
+        return $this->decrement('current_stock', $amount);
+    }
+
+    public function incrementStock($amount)
+    {
+        return $this->increment('current_stock', $amount);
+    }
+
+    public function hasEnoughStock($amount)
+    {
+        return $this->current_stock >= $amount;
+    }
 
     public function scopeSearch($query, $search)
     {
@@ -40,35 +88,7 @@ class Product extends Model
     public function getNeedsRestockAttribute()
     {
         return $this->current_stock < $this->min_stock;
-    }    protected $fillable = [
-        'category_id',
-        'auto_code',
-        'name',
-        'description',
-        'base_unit',
-        'current_stock',
-        'min_stock',
-        'is_active',
-    ];
-
-    protected $casts = [
-        'is_active' => 'boolean',
-        'current_stock' => 'integer',
-        'min_stock' => 'integer',
-    ];    public function category()
-    {
-        return $this->belongsTo(Category::class);
-    }
-
-    public function prices()
-    {
-        return $this->hasMany(ProductPrice::class);
-    }
-
-    public function getPriceByType($type)
-    {
-        return $this->prices()->where('type', $type)->first();
-    }
+    }   
 
     // Relasi Inventaris
     public function inventoryTransactions()
@@ -117,14 +137,6 @@ class Product extends Model
                     'by' => $transaction->creator->name
                 ];
             });
-    }
-
-    /**
-     * Get all inventory logs for this product
-     */
-    public function inventoryLogs(): HasMany
-    {
-        return $this->hasMany(InventoryLog::class);
     }
 
     /**

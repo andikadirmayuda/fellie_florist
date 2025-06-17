@@ -7,18 +7,31 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Carbon\Carbon;
 
 class StockHold extends Model
-{
-    protected $fillable = [
+{    protected $fillable = [
         'order_id',
         'product_id',
         'quantity',
-        'status',
-        'released_at'
+        'status'
     ];
 
     protected $casts = [
-        'released_at' => 'datetime',
+        'quantity' => 'integer'
     ];
+
+    // Konstanta untuk status
+    const STATUS_HELD = 'held';
+    const STATUS_RELEASED = 'released';
+    const STATUS_COMPLETED = 'completed';
+
+    // Validasi status
+    public static function getAllowedStatuses(): array
+    {
+        return [
+            self::STATUS_HELD,
+            self::STATUS_RELEASED,
+            self::STATUS_COMPLETED
+        ];
+    }
 
     // Relasi
     public function product(): BelongsTo

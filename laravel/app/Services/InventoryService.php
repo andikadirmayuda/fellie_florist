@@ -4,7 +4,11 @@ namespace App\Services;
 
 use App\Models\Product;
 use App\Models\InventoryLog;
+use App\Models\Order;
+use App\Models\OrderItem;
+use App\Models\ProductPrice;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class InventoryService
 {
@@ -67,5 +71,94 @@ class InventoryService
             referenceId: $referenceId,
             notes: $notes
         );
+    }
+
+    public function holdStock(Order $order)
+    {
+        foreach ($order->items as $item) {
+            // Dapatkan product price untuk mendapatkan unit_equivalent
+            $productPrice = ProductPrice::where([
+                'product_id' => $item->product_id,
+                'type' => $item->price_type
+            ])->first();
+
+            if (!$productPrice) {
+                throw new \Exception("Harga produk tidak ditemukan untuk {$item->product->name}");
+            }
+
+            // Hitung total unit yang akan dikurangi (qty * unit_equivalent)
+            $totalUnits = (int)$item->qty * (int)$productPrice->unit_equivalent;
+
+            // Periksa stok tersedia
+            if ($item->product->current_stock < $totalUnits) {
+                throw new \Exception("Stok tidak cukup untuk produk {$item->product->name}. Stok tersedia: {$item->product->current_stock}, Dibutuhkan: {$totalUnits}");
+            }
+
+            // Kurangi stok produk sesuai total unit
+            $item->product->decrement('current_stock', $totalUnits);
+
+            // Catat di inventory log
+            InventoryLog::create([
+                'product_id' => $item->product_id,
+                'qty' => -$totalUnits, // Negative karena stok berkurang
+                'source' => 'sale',
+                'reference_id' => $order->id,
+                'notes' => "Stok ditahan untuk pesanan #{$order->order_number}"
+            ]);
+
+            // Catat di stock hold
+            DB::table('stock_holds')->insert([
+                'product_id' => $item->product_id,
+                'order_id' => $order->id,
+                'quantity' => $totalUnits, // Simpan dalam unit dasar (tangkai)
+                'status' => 'held',
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+        }
+    }
+
+    public function releaseStock(Order $order)
+    {
+        foreach ($order->stockHolds as $hold) {
+            if ($hold->status === 'held') {
+                // Kembalikan stok sesuai quantity yang ditahan
+                $hold->product->increment('current_stock', (int)$hold->quantity);
+
+                // Catat di inventory log
+                InventoryLog::create([
+                    'product_id' => $hold->product_id,
+                    'qty' => (int)$hold->quantity, // Positive karena stok kembali
+                    'source' => 'return',
+                    'reference_id' => $order->id,
+                    'notes' => "Stok dikembalikan dari pembatalan pesanan #{$order->order_number}"
+                ]);
+
+                // Update status hold
+                $hold->update([
+                    'status' => 'released',
+                    'released_at' => now()
+                ]);
+            }
+        }
+    }
+
+    public function completeOrder(Order $order)
+    {
+        foreach ($order->stockHolds as $hold) {
+            if ($hold->status === 'held') {
+                // Update status hold menjadi completed
+                $hold->update(['status' => 'completed']);
+
+                // Catat di inventory log sebagai penjualan final
+                InventoryLog::create([
+                    'product_id' => $hold->product_id,
+                    'qty' => -$hold->quantity, // Negative karena stok berkurang permanent
+                    'source' => 'sale',
+                    'reference_id' => $order->id,
+                    'notes' => "Pesanan #{$order->order_number} selesai"
+                ]);
+            }
+        }
     }
 }

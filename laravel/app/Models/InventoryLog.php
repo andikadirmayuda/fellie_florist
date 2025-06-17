@@ -12,11 +12,11 @@ class InventoryLog extends Model
         'qty',
         'source',
         'reference_id',
-        'notes',
+        'notes'
     ];
 
     protected $casts = [
-        'qty' => 'integer',
+        'qty' => 'integer'
     ];
 
     /**
@@ -25,21 +25,5 @@ class InventoryLog extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
-    }
-
-    /**
-     * Scope for filtering logs by source
-     */
-    public function scopeBySource($query, string $source)
-    {
-        return $query->where('source', $source);
-    }
-
-    /**
-     * Get formatted quantity with sign
-     */
-    public function getFormattedQuantityAttribute(): string
-    {
-        return ($this->qty > 0 ? '+' : '') . $this->qty;
     }
 }

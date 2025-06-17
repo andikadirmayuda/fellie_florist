@@ -28,4 +28,19 @@ class Order extends Model
     {
         return $this->hasMany(OrderItem::class);
     }
+
+    public function stockHolds(): HasMany
+    {
+        return $this->hasMany(StockHold::class);
+    }
+
+    public static function boot()
+    {
+        parent::boot();
+
+        // Hapus stock holds saat order dihapus
+        static::deleting(function ($order) {
+            $order->stockHolds()->delete();
+        });
+    }
 }

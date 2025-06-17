@@ -4,12 +4,20 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\Product;
+use App\Services\InventoryService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
+    protected $inventoryService;
+
+    public function __construct(InventoryService $inventoryService)
+    {
+        $this->inventoryService = $inventoryService;
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -56,6 +64,12 @@ class OrderController extends Controller
             // Process each item
             foreach ($validated['items'] as $index => $item) {
                 $product = Product::findOrFail($item['product_id']);
+                
+                // Validasi stok
+                if ($product->current_stock < $item['qty']) {
+                    throw new \Exception("Stok tidak cukup untuk produk {$product->name}. Stok tersedia: {$product->current_stock}");
+                }
+
                 $productPrice = $product->prices()->where('type', $item['price_type'])->first();
                 
                 if (!$productPrice) {
@@ -79,13 +93,19 @@ class OrderController extends Controller
 
             $order->update(['total' => $total]);
 
+            // Hold stock untuk pesanan
+            $this->inventoryService->holdStock($order);
+
             DB::commit();
 
             return redirect()->route('orders.show', $order)
-                ->with('success', 'Order created successfully.');
+                ->with('success', 'Pesanan berhasil dibuat.');
+
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Error creating order: ' . $e->getMessage());
+            return back()
+                ->withInput()
+                ->with('error', 'Error membuat pesanan: ' . $e->getMessage());
         }
     }
 
@@ -94,7 +114,7 @@ class OrderController extends Controller
      */
     public function show(Order $order)
     {
-        $order->load(['customer', 'items.product']);
+        $order->load(['customer', 'items.product', 'stockHolds']);
         return view('orders.show', compact('order'));
     }
 
@@ -115,10 +135,33 @@ class OrderController extends Controller
             'status' => 'required|in:pending,processed,completed,cancelled',
         ]);
 
-        $order->update($validated);
+        $oldStatus = $order->status;
+        $newStatus = $validated['status'];
 
-        return redirect()->route('orders.show', $order)
-            ->with('success', 'Order updated successfully.');
+        try {
+            DB::beginTransaction();
+
+            $order->update($validated);
+
+            // Jika status berubah ke cancelled, kembalikan stok
+            if ($newStatus === 'cancelled' && $oldStatus !== 'cancelled') {
+                $this->inventoryService->releaseStock($order);
+            }
+            
+            // Jika status berubah ke completed, update inventory
+            if ($newStatus === 'completed' && $oldStatus !== 'completed') {
+                $this->inventoryService->completeOrder($order);
+            }
+
+            DB::commit();
+
+            return redirect()->route('orders.show', $order)
+                ->with('success', 'Status pesanan berhasil diperbarui.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Error mengupdate pesanan: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -126,9 +169,24 @@ class OrderController extends Controller
      */
     public function destroy(Order $order)
     {
-        $order->delete();
+        try {
+            DB::beginTransaction();
 
-        return redirect()->route('orders.index')
-            ->with('success', 'Order deleted successfully.');
+            // Jika pesanan belum selesai/batal, kembalikan stok
+            if (!in_array($order->status, ['completed', 'cancelled'])) {
+                $this->inventoryService->releaseStock($order);
+            }
+
+            $order->delete();
+
+            DB::commit();
+
+            return redirect()->route('orders.index')
+                ->with('success', 'Pesanan berhasil dihapus.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Error menghapus pesanan: ' . $e->getMessage());
+        }
     }
 }
