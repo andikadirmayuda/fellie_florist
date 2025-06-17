@@ -24,7 +24,7 @@ class OrderController extends Controller
      */
     public function create()
     {
-        $products = Product::all();
+        $products = Product::with('prices')->get();
         return view('orders.create', compact('products'));
     }
 
@@ -33,28 +33,39 @@ class OrderController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'customer_id' => 'required|exists:customers,id',
-            'items' => 'required|array|min:1',
-            'items.*.product_id' => 'required|exists:products,id',
-            'items.*.qty' => 'required|integer|min:1',
-            'items.*.price_type' => 'required|string',
-        ]);
-
         try {
+            $validated = $request->validate([
+                'customer_id' => 'required|exists:customers,id',
+                'items' => 'required|array|min:1',
+                'items.*.product_id' => 'required|exists:products,id',
+                'items.*.qty' => 'required|integer|min:1',
+                'items.*.price_type' => 'required|string',
+            ]);
+
             DB::beginTransaction();
 
+            // Create the order first
             $order = Order::create([
                 'order_number' => 'ORD-' . strtoupper(Str::random(8)),
                 'customer_id' => $validated['customer_id'],
                 'status' => 'pending',
-                'total' => 0, // Will be updated after adding items
+                'total' => 0,
             ]);
 
             $total = 0;
-            foreach ($validated['items'] as $item) {
+            // Process each item
+            foreach ($validated['items'] as $index => $item) {
                 $product = Product::findOrFail($item['product_id']);
-                $price = $product->prices()->where('type', $item['price_type'])->firstOrFail()->price;
+                $productPrice = $product->prices()->where('type', $item['price_type'])->first();
+                
+                if (!$productPrice) {
+                    DB::rollBack();
+                    return back()
+                        ->withInput()
+                        ->withErrors(["items.{$index}.price_type" => "Harga tidak tersedia untuk produk {$product->name} dengan tipe {$item['price_type']}"]);
+                }
+
+                $price = $productPrice->price;
                 
                 $order->items()->create([
                     'product_id' => $item['product_id'],
