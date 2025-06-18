@@ -8,6 +8,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\PublicInvoiceController;
 
 use Illuminate\Support\Facades\Route;
 
@@ -48,9 +49,12 @@ Route::middleware('auth')->group(function () {
     Route::post('/inventory/{product}/adjust', [InventoryController::class, 'adjust'])->name('inventory.adjust');
 
     // Order Management Routes
-    Route::middleware(['auth', 'verified'])->group(function () {
-        Route::resource('orders', OrderController::class);
-    });
+    Route::resource('orders', OrderController::class);
+    Route::get('/orders/{order}/invoice', [OrderController::class, 'invoice'])->name('orders.invoice');
+    Route::get('/orders/{order}/share-whatsapp', [OrderController::class, 'shareWhatsApp'])->name('orders.share-whatsapp');
 });
+
+// Public Invoice Route (No Auth Required)
+Route::get('/i/{token}', [PublicInvoiceController::class, 'show'])->name('public.invoice');
 
 require __DIR__.'/auth.php';

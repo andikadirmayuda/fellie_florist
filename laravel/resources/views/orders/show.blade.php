@@ -3,10 +3,12 @@
         <div class="flex justify-between items-center">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                 {{ __('Order Details') }} - {{ $order->order_number }}
-            </h2>
-            <div class="space-x-2">
+            </h2>            <div class="space-x-2">
                 <a href="{{ route('orders.edit', $order) }}" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
                     Edit Order
+                </a>
+                <a href="{{ route('orders.invoice', $order) }}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" target="_blank">
+                    Print Invoice
                 </a>
                 <a href="{{ route('orders.index') }}" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded">
                     Back to Orders
@@ -68,16 +70,12 @@
                             <h3 class="text-lg font-medium text-gray-900 mb-2">Customer Information</h3>
                             <dl class="grid grid-cols-1 gap-2">
                                 <div class="sm:grid sm:grid-cols-3 sm:gap-4">
-                                    <dt class="text-sm font-medium text-gray-500">Name:</dt>
-                                    <dd class="text-sm text-gray-900 sm:col-span-2">{{ $order->customer->name }}</dd>
+                                    <dt class="text-sm font-medium text-gray-500">Customer Name:</dt>
+                                    <dd class="text-sm text-gray-900 sm:col-span-2">{{ $order->customer ? $order->customer->name : '[Deleted Customer]' }}</dd>
                                 </div>
                                 <div class="sm:grid sm:grid-cols-3 sm:gap-4">
-                                    <dt class="text-sm font-medium text-gray-500">Email:</dt>
-                                    <dd class="text-sm text-gray-900 sm:col-span-2">{{ $order->customer->email }}</dd>
-                                </div>
-                                <div class="sm:grid sm:grid-cols-3 sm:gap-4">
-                                    <dt class="text-sm font-medium text-gray-500">Phone:</dt>
-                                    <dd class="text-sm text-gray-900 sm:col-span-2">{{ $order->customer->phone }}</dd>
+                                    <dt class="text-sm font-medium text-gray-500">Customer Contact:</dt>
+                                    <dd class="text-sm text-gray-900 sm:col-span-2">{{ $order->customer ? $order->customer->phone : '-' }}</dd>
                                 </div>
                             </dl>
                         </div>

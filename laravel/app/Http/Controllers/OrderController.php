@@ -8,6 +8,7 @@ use App\Services\InventoryService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
+use App\Models\PublicInvoice;
 
 class OrderController extends Controller
 {
@@ -282,5 +283,55 @@ class OrderController extends Controller
             DB::rollBack();
             return back()->with('error', 'Error menghapus pesanan: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Display the invoice for the order.
+     */
+    public function invoice(Order $order)
+    {
+        $order->load(['customer', 'items.product']);
+        return view('orders.invoice', compact('order'));
+    }
+
+    /**
+     * Get or create public invoice link
+     */
+    private function getPublicInvoiceLink(Order $order): string
+    {
+        $publicInvoice = PublicInvoice::firstOrCreate(
+            ['order_id' => $order->id],
+            ['token' => PublicInvoice::generateToken()]
+        );
+
+        return route('public.invoice', $publicInvoice->token);
+    }
+
+    /**
+     * Share invoice via WhatsApp
+     */
+    public function shareWhatsApp(Order $order)
+    {
+        $publicLink = $this->getPublicInvoiceLink($order);
+        
+        $message = sprintf(
+            "Fellie Florist - Invoice %s\n\n".
+            "Order: %s\n".
+            "Customer: %s\n".
+            "Pickup: %s\n".
+            "Total: Rp %s\n".
+            "Sisa Pembayaran: Rp %s\n\n".
+            "Link Invoice: %s\n\n".
+            "Terima kasih telah berbelanja di Fellie Florist!",
+            $order->order_number,
+            $order->order_number,
+            $order->customer->name,
+            $order->pickup_date->format('d M Y H:i'),
+            number_format($order->total + $order->delivery_fee, 0, ',', '.'),
+            number_format($order->remaining_payment, 0, ',', '.'),
+            $publicLink
+        );
+
+        return redirect()->away('https://wa.me/?text=' . urlencode($message));
     }
 }
