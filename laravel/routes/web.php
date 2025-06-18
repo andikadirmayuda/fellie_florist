@@ -9,6 +9,8 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PublicInvoiceController;
+use App\Http\Controllers\OrderHistoryController;
+use App\Http\Controllers\ArchiveSettingController;
 
 use Illuminate\Support\Facades\Route;
 
@@ -52,6 +54,14 @@ Route::middleware('auth')->group(function () {
     Route::resource('orders', OrderController::class);
     Route::get('/orders/{order}/invoice', [OrderController::class, 'invoice'])->name('orders.invoice');
     Route::get('/orders/{order}/share-whatsapp', [OrderController::class, 'shareWhatsApp'])->name('orders.share-whatsapp');
+
+    // Order History Routes
+    Route::get('order-histories', [OrderHistoryController::class, 'index'])->name('order-histories.index');
+    Route::get('order-histories/{history}', [OrderHistoryController::class, 'show'])->name('order-histories.show');
+
+    // Archive Settings Routes
+    Route::get('settings/archive', [ArchiveSettingController::class, 'index'])->name('settings.archive');
+    Route::put('settings/archive', [ArchiveSettingController::class, 'update'])->name('settings.archive.update');
 });
 
 // Public Invoice Route (No Auth Required)
