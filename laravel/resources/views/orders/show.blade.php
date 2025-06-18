@@ -47,7 +47,7 @@
                                 </div>
                                 <div class="sm:grid sm:grid-cols-3 sm:gap-4">
                                     <dt class="text-sm font-medium text-gray-500">Created Date:</dt>
-                                    <dd class="text-sm text-gray-900 sm:col-span-2">{{ $order->created_at->format('d M Y H:i') }}</dd>
+                                    <dd class="text-sm text-gray-900 sm:col-span-2">{{ $order->created_at->format('d M Y H:i:s') }}</dd>
                                 </div>
                             </dl>
                         </div>

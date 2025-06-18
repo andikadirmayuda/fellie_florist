@@ -19,6 +19,25 @@ class OrderController extends Controller
     }
 
     /**
+     * Generate nomor order dengan format ORD-DDMMYYYY###
+     */
+    private function generateOrderNumber(): string
+    {
+        $date = now()->format('dmY');
+        $lastOrder = Order::where('order_number', 'LIKE', "ORD-{$date}%")
+            ->orderBy('order_number', 'desc')
+            ->first();
+
+        $counter = 1;
+        if ($lastOrder) {
+            $lastCounter = (int) substr($lastOrder->order_number, -3);
+            $counter = $lastCounter + 1;
+        }
+
+        return sprintf("ORD-%s%03d", $date, $counter);
+    }
+
+    /**
      * Display a listing of the resource.
      */
     public function index()
@@ -54,7 +73,7 @@ class OrderController extends Controller
 
             // Create the order first
             $order = Order::create([
-                'order_number' => 'ORD-' . strtoupper(Str::random(8)),
+                'order_number' => $this->generateOrderNumber(),
                 'customer_id' => $validated['customer_id'],
                 'status' => 'pending',
                 'total' => 0,
