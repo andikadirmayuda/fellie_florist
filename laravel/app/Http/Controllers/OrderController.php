@@ -142,7 +142,8 @@ class OrderController extends Controller
      */
     public function edit(Order $order)
     {
-        return view('orders.edit', compact('order'));
+        $products = Product::with('prices')->get();
+        return view('orders.edit', compact('order', 'products'));
     }
 
     /**
@@ -152,6 +153,10 @@ class OrderController extends Controller
     {
         $validated = $request->validate([
             'status' => 'required|in:pending,processed,completed,cancelled',
+            'items' => 'required|array|min:1',
+            'items.*.product_id' => 'required|exists:products,id',
+            'items.*.qty' => 'required|integer|min:1',
+            'items.*.price_type' => 'required|string',
         ]);
 
         $oldStatus = $order->status;
@@ -160,15 +165,55 @@ class OrderController extends Controller
         try {
             DB::beginTransaction();
 
-            $order->update($validated);
+            // Update status
+            $order->update(['status' => $validated['status']]);
 
+            // Jika status masih pending, update items
+            if ($order->status === 'pending') {
+                // Lepaskan stock hold yang ada
+                $this->inventoryService->releaseStock($order);
+                
+                // Hapus item yang ada
+                $order->items()->delete();
+                
+                // Tambahkan item baru
+                $total = 0;
+                foreach ($validated['items'] as $item) {
+                    $product = Product::findOrFail($item['product_id']);
+                    $productPrice = $product->prices()->where('type', $item['price_type'])->first();
+                    
+                    if (!$productPrice) {
+                        throw new \Exception("Harga tidak tersedia untuk produk {$product->name}");
+                    }
+
+                    // Validasi stok
+                    if ($product->current_stock < $item['qty']) {
+                        throw new \Exception("Stok tidak cukup untuk produk {$product->name}. Stok tersedia: {$product->current_stock}");
+                    }
+
+                    $price = $productPrice->price;
+                    
+                    $order->items()->create([
+                        'product_id' => $item['product_id'],
+                        'qty' => $item['qty'],
+                        'price' => $price,
+                        'price_type' => $item['price_type']
+                    ]);
+
+                    $total += $price * $item['qty'];
+                }
+
+                $order->update(['total' => $total]);
+
+                // Hold stock untuk pesanan yang diupdate
+                $this->inventoryService->holdStock($order);
+            }
             // Jika status berubah ke cancelled, kembalikan stok
-            if ($newStatus === 'cancelled' && $oldStatus !== 'cancelled') {
+            else if ($newStatus === 'cancelled' && $oldStatus !== 'cancelled') {
                 $this->inventoryService->releaseStock($order);
             }
-            
             // Jika status berubah ke completed, update inventory
-            if ($newStatus === 'completed' && $oldStatus !== 'completed') {
+            else if ($newStatus === 'completed' && $oldStatus !== 'completed') {
                 $this->inventoryService->completeOrder($order);
             }
 
