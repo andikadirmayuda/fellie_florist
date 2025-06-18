@@ -12,14 +12,43 @@ class Order extends Model
         'order_number',
         'customer_id',
         'status',
-        'total'
+        'total',
+        'pickup_date',
+        'delivery_method',
+        'down_payment',
+        'delivery_address',
+        'delivery_fee'
     ];
 
     protected $casts = [
         'total' => 'decimal:2',
+        'down_payment' => 'decimal:2',
+        'delivery_fee' => 'decimal:2',
+        'pickup_date' => 'datetime',
         'created_at' => 'datetime:Y-m-d H:i:s',
         'updated_at' => 'datetime:Y-m-d H:i:s'
     ];
+
+    /**
+     * Get the remaining payment amount
+     */
+    public function getRemainingPaymentAttribute(): float
+    {
+        return $this->total + $this->delivery_fee - $this->down_payment;
+    }
+
+    /**
+     * Get the formatted delivery method
+     */
+    public function getDeliveryMethodLabelAttribute(): string
+    {
+        return match($this->delivery_method) {
+            'pickup' => 'Ambil Langsung',
+            'gosend' => 'GoSend',
+            'gocar' => 'GoCar',
+            default => 'Ambil Langsung'
+        };
+    }
 
     public function customer(): BelongsTo
     {

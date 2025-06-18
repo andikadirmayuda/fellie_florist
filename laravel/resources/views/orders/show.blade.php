@@ -23,9 +23,7 @@
                         <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
                             <span class="block sm:inline">{{ session('success') }}</span>
                         </div>
-                    @endif
-
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    @endif                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                         <div>
                             <h3 class="text-lg font-medium text-gray-900 mb-2">Order Information</h3>
                             <dl class="grid grid-cols-1 gap-2">
@@ -49,6 +47,20 @@
                                     <dt class="text-sm font-medium text-gray-500">Created Date:</dt>
                                     <dd class="text-sm text-gray-900 sm:col-span-2">{{ $order->created_at->format('d M Y H:i:s') }}</dd>
                                 </div>
+                                <div class="sm:grid sm:grid-cols-3 sm:gap-4">
+                                    <dt class="text-sm font-medium text-gray-500">Pickup Date:</dt>
+                                    <dd class="text-sm text-gray-900 sm:col-span-2">{{ $order->pickup_date->format('d M Y H:i') }}</dd>
+                                </div>
+                                <div class="sm:grid sm:grid-cols-3 sm:gap-4">
+                                    <dt class="text-sm font-medium text-gray-500">Delivery Method:</dt>
+                                    <dd class="text-sm text-gray-900 sm:col-span-2">{{ $order->delivery_method_label }}</dd>
+                                </div>
+                                @if($order->delivery_method !== 'pickup')
+                                <div class="sm:grid sm:grid-cols-3 sm:gap-4">
+                                    <dt class="text-sm font-medium text-gray-500">Delivery Address:</dt>
+                                    <dd class="text-sm text-gray-900 sm:col-span-2">{{ $order->delivery_address }}</dd>
+                                </div>
+                                @endif
                             </dl>
                         </div>
 
@@ -93,10 +105,27 @@
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-right">{{ $item->qty }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-right">Rp {{ number_format($item->subtotal, 2) }}</td>
                                         </tr>
-                                    @endforeach
+                                    @endforeach                                    <tr class="bg-gray-50">
+                                        <td colspan="4" class="px-6 py-4 whitespace-nowrap text-sm font-medium text-right">Subtotal:</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-right">Rp {{ number_format($order->total, 0, ',', '.') }}</td>
+                                    </tr>
+                                    @if($order->delivery_fee > 0)
                                     <tr class="bg-gray-50">
-                                        <td colspan="4" class="px-6 py-4 whitespace-nowrap text-sm font-medium text-right">Total:</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-right">Rp {{ number_format($order->total, 2) }}</td>
+                                        <td colspan="4" class="px-6 py-4 whitespace-nowrap text-sm font-medium text-right">Biaya Pengiriman:</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-right">Rp {{ number_format($order->delivery_fee, 0, ',', '.') }}</td>
+                                    </tr>
+                                    <tr class="bg-gray-50">
+                                        <td colspan="4" class="px-6 py-4 whitespace-nowrap text-sm font-medium text-right">Total + Ongkir:</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-right">Rp {{ number_format($order->total + $order->delivery_fee, 0, ',', '.') }}</td>
+                                    </tr>
+                                    @endif
+                                    <tr class="bg-gray-50">
+                                        <td colspan="4" class="px-6 py-4 whitespace-nowrap text-sm font-medium text-right">Down Payment:</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-right text-green-600">Rp {{ number_format($order->down_payment, 0, ',', '.') }}</td>
+                                    </tr>
+                                    <tr class="bg-gray-50">
+                                        <td colspan="4" class="px-6 py-4 whitespace-nowrap text-sm font-medium text-right">Sisa Pembayaran:</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-right text-blue-600">Rp {{ number_format($order->remaining_payment, 0, ',', '.') }}</td>
                                     </tr>
                                 </tbody>
                             </table>

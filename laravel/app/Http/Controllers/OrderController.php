@@ -71,12 +71,30 @@ class OrderController extends Controller
 
             DB::beginTransaction();
 
+            $validated = $request->validate([
+                'customer_id' => 'required|exists:customers,id',
+                'items' => 'required|array|min:1',
+                'items.*.product_id' => 'required|exists:products,id',
+                'items.*.qty' => 'required|integer|min:1',
+                'items.*.price_type' => 'required|string',
+                'pickup_date' => 'required|date',
+                'delivery_method' => 'required|in:pickup,gosend,gocar',
+                'delivery_address' => 'required_unless:delivery_method,pickup',
+                'delivery_fee' => 'required|numeric|min:0',
+                'down_payment' => 'required|numeric|min:0',
+            ]);
+
             // Create the order first
             $order = Order::create([
                 'order_number' => $this->generateOrderNumber(),
                 'customer_id' => $validated['customer_id'],
                 'status' => 'pending',
                 'total' => 0,
+                'pickup_date' => $validated['pickup_date'],
+                'delivery_method' => $validated['delivery_method'],
+                'delivery_address' => $validated['delivery_method'] === 'pickup' ? null : $validated['delivery_address'],
+                'delivery_fee' => $validated['delivery_fee'],
+                'down_payment' => $validated['down_payment'],
             ]);
 
             $total = 0;
@@ -157,6 +175,11 @@ class OrderController extends Controller
             'items.*.product_id' => 'required|exists:products,id',
             'items.*.qty' => 'required|integer|min:1',
             'items.*.price_type' => 'required|string',
+            'pickup_date' => 'required|date',
+            'delivery_method' => 'required|in:pickup,gosend,gocar',
+            'delivery_address' => 'required_unless:delivery_method,pickup',
+            'delivery_fee' => 'required|numeric|min:0',
+            'down_payment' => 'required|numeric|min:0',
         ]);
 
         $oldStatus = $order->status;
@@ -165,8 +188,15 @@ class OrderController extends Controller
         try {
             DB::beginTransaction();
 
-            // Update status
-            $order->update(['status' => $validated['status']]);
+            // Update order details
+            $order->update([
+                'status' => $validated['status'],
+                'pickup_date' => $validated['pickup_date'],
+                'delivery_method' => $validated['delivery_method'],
+                'delivery_address' => $validated['delivery_method'] === 'pickup' ? null : $validated['delivery_address'],
+                'delivery_fee' => $validated['delivery_fee'],
+                'down_payment' => $validated['down_payment']
+            ]);
 
             // Jika status masih pending, update items
             if ($order->status === 'pending') {

@@ -25,12 +25,103 @@
                             @error('customer_id')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
+                        </div>                        <!-- Informasi Pengiriman dan Pembayaran -->
+                        <div class="mb-6">
+                            <h3 class="text-lg font-medium text-gray-900 mb-4">Informasi Pengiriman & Pembayaran</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="pickup_date" class="block text-sm font-medium text-gray-700">Tanggal Pengambilan</label>
+                                    <input type="datetime-local" name="pickup_date" id="pickup_date" 
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                                        required>
+                                    @error('pickup_date')
+                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
+                                </div>
+
+                                <div>
+                                    <label for="delivery_method" class="block text-sm font-medium text-gray-700">Metode Pengiriman</label>
+                                    <select name="delivery_method" id="delivery_method" 
+                                        onchange="toggleDeliveryAddress(this)"
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                        <option value="pickup">Ambil Langsung</option>
+                                        <option value="gosend">GoSend</option>
+                                        <option value="gocar">GoCar</option>
+                                    </select>
+                                    @error('delivery_method')
+                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
+                                </div>
+
+                                <div id="deliveryAddressContainer" class="md:col-span-2 hidden">
+                                    <label for="delivery_address" class="block text-sm font-medium text-gray-700">Alamat Pengiriman</label>
+                                    <textarea name="delivery_address" id="delivery_address" rows="3"
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"></textarea>
+                                    @error('delivery_address')
+                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
+                                </div>
+
+                                <div>
+                                    <label for="delivery_fee" class="block text-sm font-medium text-gray-700">Biaya Pengiriman</label>
+                                    <div class="mt-1 relative rounded-md shadow-sm">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <span class="text-gray-500 sm:text-sm">Rp</span>
+                                        </div>
+                                        <input type="number" name="delivery_fee" id="delivery_fee" value="0"
+                                            class="pl-12 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                                            onchange="updateTotalAndRemaining()">
+                                    </div>
+                                    @error('delivery_fee')
+                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
+                                </div>
+
+                                <div>
+                                    <label for="down_payment" class="block text-sm font-medium text-gray-700">Down Payment (DP)</label>
+                                    <div class="mt-1 relative rounded-md shadow-sm">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <span class="text-gray-500 sm:text-sm">Rp</span>
+                                        </div>
+                                        <input type="number" name="down_payment" id="down_payment" value="0"
+                                            class="pl-12 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                                            onchange="updateRemaining()">
+                                    </div>
+                                    @error('down_payment')
+                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
+                                </div>
+
+                                <div class="md:col-span-2">
+                                    <div class="bg-gray-50 p-4 rounded-lg">
+                                        <dl class="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <dt class="text-sm font-medium text-gray-500">Total Pesanan:</dt>
+                                                <dd class="mt-1 text-lg font-semibold text-gray-900" id="totalAmount">Rp 0</dd>
+                                            </div>
+                                            <div>
+                                                <dt class="text-sm font-medium text-gray-500">Total + Ongkir:</dt>
+                                                <dd class="mt-1 text-lg font-semibold text-gray-900" id="totalWithDelivery">Rp 0</dd>
+                                            </div>
+                                            <div>
+                                                <dt class="text-sm font-medium text-gray-500">Down Payment:</dt>
+                                                <dd class="mt-1 text-lg font-semibold text-green-600" id="dpAmount">Rp 0</dd>
+                                            </div>
+                                            <div>
+                                                <dt class="text-sm font-medium text-gray-500">Sisa Pembayaran:</dt>
+                                                <dd class="mt-1 text-lg font-semibold text-blue-600" id="remainingAmount">Rp 0</dd>
+                                            </div>
+                                        </dl>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="mb-4">
-                            <div class="flex justify-between items-center mb-2">
-                                <label class="block text-sm font-medium text-gray-700">Order Items</label>
-                                <button type="button" onclick="addOrderItem()" class="bg-green-500 hover:bg-green-600 text-white text-sm py-1 px-2 rounded">
+                        <!-- Order Items -->
+                        <div class="mb-6">
+                            <h3 class="text-lg font-medium text-gray-900 mb-4">Order Items</h3>
+                            <div class="flex justify-end mb-2">
+                                <button type="button" onclick="addOrderItem()" class="bg-green-500 hover:bg-green-600 text-white text-sm py-2 px-4 rounded">
                                     Add Item
                                 </button>
                             </div>
@@ -93,14 +184,53 @@
                 </div>
             </div>
         </div>
-    </template>
-
-    <script>
+    </template>    <script>
         let itemIndex = 0;
         const priceFormatter = new Intl.NumberFormat('id-ID', {
             style: 'currency',
-            currency: 'IDR'
+            currency: 'IDR',
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
         });
+
+        function toggleDeliveryAddress(select) {
+            const container = document.getElementById('deliveryAddressContainer');
+            if (select.value === 'pickup') {
+                container.classList.add('hidden');
+                document.getElementById('delivery_address').value = '';
+                document.getElementById('delivery_fee').value = 0;
+            } else {
+                container.classList.remove('hidden');
+            }
+            updateTotalAndRemaining();
+        }
+
+        function updateTotalAndRemaining() {
+            const subtotals = Array.from(document.querySelectorAll('.subtotal')).map(el => {
+                const text = el.textContent;
+                return text ? parseInt(text.replace(/[^0-9]/g, '')) : 0;
+            });
+
+            const total = subtotals.reduce((a, b) => a + b, 0);
+            const deliveryFee = parseFloat(document.getElementById('delivery_fee').value) || 0;
+            const dp = parseFloat(document.getElementById('down_payment').value) || 0;
+            const totalWithDelivery = total + deliveryFee;
+            const remaining = totalWithDelivery - dp;
+
+            document.getElementById('totalAmount').textContent = priceFormatter.format(total);
+            document.getElementById('totalWithDelivery').textContent = priceFormatter.format(totalWithDelivery);
+            document.getElementById('dpAmount').textContent = priceFormatter.format(dp);
+            document.getElementById('remainingAmount').textContent = priceFormatter.format(remaining);
+        }
+
+        function updateRemaining() {
+            const totalWithDelivery = parseFloat(document.getElementById('totalWithDelivery').textContent.replace(/[^0-9]/g, ''));
+            const dp = parseFloat(document.getElementById('down_payment').value) || 0;
+            const remaining = totalWithDelivery - dp;
+
+            document.getElementById('dpAmount').textContent = priceFormatter.format(dp);
+            document.getElementById('remainingAmount').textContent = priceFormatter.format(remaining);
+        }
 
         function addOrderItem() {
             const template = document.getElementById('orderItemTemplate');
