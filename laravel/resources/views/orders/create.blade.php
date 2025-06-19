@@ -13,9 +13,9 @@
                         @csrf
 
                         <div class="mb-4">
-                            <label for="customer_id" class="block text-sm font-medium text-gray-700">Customer</label>
+                            <label for="customer_id" class="block text-sm font-medium text-gray-700">Pelanggan</label>
                             <select name="customer_id" id="customer_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" required>
-                                <option value="">Select Customer</option>
+                                <option value="">Pilih Pelanggan</option>
                                 @foreach(\App\Models\Customer::all() as $customer)
                                     <option value="{{ $customer->id }}" {{ old('customer_id') == $customer->id ? 'selected' : '' }}>
                                         {{ $customer->name }}
@@ -27,7 +27,7 @@
                             @enderror
                         </div>                        <!-- Informasi Pengiriman dan Pembayaran -->
                         <div class="mb-6">
-                            <h3 class="text-lg font-medium text-gray-900 mb-4">Informasi Pengiriman & Pembayaran</h3>
+                            <h2 class="text-lg font-medium text-gray-900 mb-4">Informasi Pengiriman & Pembayaran</h2>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label for="pickup_date" class="block text-sm font-medium text-gray-700">Tanggal Pengambilan</label>
@@ -78,7 +78,7 @@
                                 </div>
 
                                 <div>
-                                    <label for="down_payment" class="block text-sm font-medium text-gray-700">Down Payment (DP)</label>
+                                    <label for="down_payment" class="block text-sm font-medium text-gray-700">Uang Muka (DP)</label>
                                     <div class="mt-1 relative rounded-md shadow-sm">
                                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                             <span class="text-gray-500 sm:text-sm">Rp</span>
@@ -104,7 +104,7 @@
                                                 <dd class="mt-1 text-lg font-semibold text-gray-900" id="totalWithDelivery">Rp 0</dd>
                                             </div>
                                             <div>
-                                                <dt class="text-sm font-medium text-gray-500">Down Payment:</dt>
+                                                <dt class="text-sm font-medium text-gray-500">Uang Muka:</dt>
                                                 <dd class="mt-1 text-lg font-semibold text-green-600" id="dpAmount">Rp 0</dd>
                                             </div>
                                             <div>
@@ -119,10 +119,10 @@
 
                         <!-- Order Items -->
                         <div class="mb-6">
-                            <h3 class="text-lg font-medium text-gray-900 mb-4">Order Items</h3>
+                            <h3 class="text-lg font-medium text-gray-900">Item Pesanan</h3>
                             <div class="flex justify-end mb-2">
                                 <button type="button" onclick="addOrderItem()" class="bg-green-500 hover:bg-green-600 text-white text-sm py-2 px-4 rounded">
-                                    Add Item
+                                    Tambah Item Baru
                                 </button>
                             </div>
                             <div id="orderItems" class="space-y-4">

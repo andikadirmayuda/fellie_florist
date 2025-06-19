@@ -52,41 +52,59 @@ class User extends Authenticatable
      */
     public function roles()
     {
-        return $this->belongsToMany(Role::class, 'user_has_roles');
+        return $this->belongsToMany(Role::class);
+    }
+
+    /**
+     * Get the permissions that belong to the user.
+     */
+    public function permissions()
+    {
+        return $this->belongsToMany(Permission::class);
     }
 
     /**
      * Check if the user has a specific role.
      */
-    public function hasRole(string $roleName): bool
+    public function hasRole($roleName)
     {
-        return $this->roles()->where('name', $roleName)->exists();
-    }
-
-    /**
-     * Check if the user has any of the given roles.
-     */
-    public function hasAnyRole(array $roleNames): bool
-    {
-        return $this->roles()->whereIn('name', $roleNames)->exists();
-    }
-
-    /**
-     * Check if the user has all of the given roles.
-     */
-    public function hasAllRoles(array $roleNames): bool
-    {
-        return $this->roles()->whereIn('name', $roleNames)->count() === count($roleNames);
+        if (is_string($roleName)) {
+            return $this->roles->contains('name', $roleName);
+        }
+        
+        // Jika parameter adalah array atau multiple arguments
+        foreach ($this->roles as $role) {
+            if (is_array($roleName)) {
+                if (in_array($role->name, $roleName)) {
+                    return true;
+                }
+            } else {
+                if ($role->name === $roleName) {
+                    return true;
+                }
+            }
+        }
+        
+        return false;
     }
 
     /**
      * Check if the user has permission through any of their roles.
      */
-    public function hasPermission(string $permissionName): bool
+    public function hasPermission($permissionName)
     {
-        return $this->roles()
-            ->whereHas('permissions', function ($query) use ($permissionName) {
-                $query->where('name', $permissionName);
-            })->exists();
+        // Cek permission langsung
+        if ($this->permissions->contains('name', $permissionName)) {
+            return true;
+        }
+
+        // Cek permission melalui roles
+        foreach ($this->roles as $role) {
+            if ($role->permissions->contains('name', $permissionName)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

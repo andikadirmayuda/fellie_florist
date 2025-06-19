@@ -48,10 +48,10 @@
                 <table class="w-full">
                     <thead>
                         <tr class="text-left bg-gray-50">
-                            <th class="py-2 px-4">Product</th>
-                            <th class="py-2 px-4">Price Type</th>
-                            <th class="py-2 px-4 text-right">Price</th>
-                            <th class="py-2 px-4 text-right">Quantity</th>
+                            <th class="py-2 px-4">Produk</th>
+                            <th class="py-2 px-4">Tipe Harga</th>
+                            <th class="py-2 px-4 text-right">Harga</th>
+                            <th class="py-2 px-4 text-right">Jumlah</th>
                             <th class="py-2 px-4 text-right">Subtotal</th>
                         </tr>
                     </thead>
@@ -78,16 +78,16 @@
                         </div>
                         @if($order->delivery_fee > 0)
                         <div class="flex justify-between mb-2">
-                            <span class="font-semibold">Delivery Fee:</span>
+                            <span class="font-semibold">Biaya Pengiriman:</span>
                             <span>Rp {{ number_format($order->delivery_fee, 0, ',', '.') }}</span>
                         </div>
                         <div class="flex justify-between mb-2">
-                            <span class="font-semibold">Total + Delivery:</span>
+                            <span class="font-semibold">Total + Ongkir:</span>
                             <span>Rp {{ number_format($order->total + $order->delivery_fee, 0, ',', '.') }}</span>
                         </div>
                         @endif
                         <div class="flex justify-between mb-2 text-green-600">
-                            <span class="font-semibold">Down Payment:</span>
+                            <span class="font-semibold">Uang Muka:</span>
                             <span>Rp {{ number_format($order->down_payment, 0, ',', '.') }}</span>
                         </div>
                         <div class="flex justify-between text-blue-600 font-bold">

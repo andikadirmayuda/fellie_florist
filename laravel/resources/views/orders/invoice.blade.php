@@ -108,10 +108,10 @@
     <table>
         <thead>
             <tr>
-                <th>Product</th>
-                <th>Price Type</th>
-                <th class="text-right">Price</th>
-                <th class="text-right">Quantity</th>
+                <th>Produk</th>
+                <th>Tipe Harga</th>
+                <th class="text-right">Harga</th>
+                <th class="text-right">Jumlah</th>
                 <th class="text-right">Subtotal</th>
             </tr>
         </thead>
@@ -136,20 +136,20 @@
             </tr>
             @if($order->delivery_fee > 0)
             <tr>
-                <td><strong>Delivery Fee:</strong></td>
+                <td><strong>Biaya Pengiriman:</strong></td>
                 <td class="text-right">Rp {{ number_format($order->delivery_fee, 0, ',', '.') }}</td>
             </tr>
             <tr>
-                <td><strong>Total + Delivery:</strong></td>
+                <td><strong>Total + Ongkir:</strong></td>
                 <td class="text-right">Rp {{ number_format($order->total + $order->delivery_fee, 0, ',', '.') }}</td>
             </tr>
             @endif
             <tr>
-                <td><strong>Down Payment:</strong></td>
+                <td><strong>Uang Muka:</strong></td>
                 <td class="text-right">Rp {{ number_format($order->down_payment, 0, ',', '.') }}</td>
             </tr>
             <tr>
-                <td><strong>Remaining Payment:</strong></td>
+                <td><strong>Sisa Pembayaran:</strong></td>
                 <td class="text-right">Rp {{ number_format($order->remaining_payment, 0, ',', '.') }}</td>
             </tr>
         </table>

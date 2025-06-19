@@ -2,16 +2,17 @@
     <x-slot name="header">
         <div class="flex justify-between items-center">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ __('Order Details') }} - {{ $order->order_number }}
-            </h2>            <div class="space-x-2">
+                {{ __('Detail Pesanan') }} - {{ $order->order_number }}
+            </h2>
+            <div class="space-x-2">
                 <a href="{{ route('orders.edit', $order) }}" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
-                    Edit Order
+                    Ubah Pesanan
                 </a>
                 <a href="{{ route('orders.invoice', $order) }}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" target="_blank">
-                    Print Invoice
+                    Cetak Faktur
                 </a>
                 <a href="{{ route('orders.index') }}" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded">
-                    Back to Orders
+                    Kembali ke Daftar Pesanan
                 </a>
             </div>
         </div>
@@ -25,12 +26,13 @@
                         <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
                             <span class="block sm:inline">{{ session('success') }}</span>
                         </div>
-                    @endif                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    @endif
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                         <div>
-                            <h3 class="text-lg font-medium text-gray-900 mb-2">Order Information</h3>
+                            <h3 class="text-lg font-medium text-gray-900 mb-2">Informasi Pesanan</h3>
                             <dl class="grid grid-cols-1 gap-2">
                                 <div class="sm:grid sm:grid-cols-3 sm:gap-4">
-                                    <dt class="text-sm font-medium text-gray-500">Order Number:</dt>
+                                    <dt class="text-sm font-medium text-gray-500">Nomor Pesanan:</dt>
                                     <dd class="text-sm text-gray-900 sm:col-span-2">{{ $order->order_number }}</dd>
                                 </div>
                                 <div class="sm:grid sm:grid-cols-3 sm:gap-4">
@@ -46,20 +48,20 @@
                                     </dd>
                                 </div>
                                 <div class="sm:grid sm:grid-cols-3 sm:gap-4">
-                                    <dt class="text-sm font-medium text-gray-500">Created Date:</dt>
+                                    <dt class="text-sm font-medium text-gray-500">Tanggal Dibuat:</dt>
                                     <dd class="text-sm text-gray-900 sm:col-span-2">{{ $order->created_at->format('d M Y H:i:s') }}</dd>
                                 </div>
                                 <div class="sm:grid sm:grid-cols-3 sm:gap-4">
-                                    <dt class="text-sm font-medium text-gray-500">Pickup Date:</dt>
+                                    <dt class="text-sm font-medium text-gray-500">Tanggal Ambil:</dt>
                                     <dd class="text-sm text-gray-900 sm:col-span-2">{{ $order->pickup_date->format('d M Y H:i') }}</dd>
                                 </div>
                                 <div class="sm:grid sm:grid-cols-3 sm:gap-4">
-                                    <dt class="text-sm font-medium text-gray-500">Delivery Method:</dt>
+                                    <dt class="text-sm font-medium text-gray-500">Metode Pengiriman:</dt>
                                     <dd class="text-sm text-gray-900 sm:col-span-2">{{ $order->delivery_method_label }}</dd>
                                 </div>
                                 @if($order->delivery_method !== 'pickup')
                                 <div class="sm:grid sm:grid-cols-3 sm:gap-4">
-                                    <dt class="text-sm font-medium text-gray-500">Delivery Address:</dt>
+                                    <dt class="text-sm font-medium text-gray-500">Alamat Pengiriman:</dt>
                                     <dd class="text-sm text-gray-900 sm:col-span-2">{{ $order->delivery_address }}</dd>
                                 </div>
                                 @endif
@@ -67,14 +69,14 @@
                         </div>
 
                         <div>
-                            <h3 class="text-lg font-medium text-gray-900 mb-2">Customer Information</h3>
+                            <h3 class="text-lg font-medium text-gray-900 mb-2">Informasi Pelanggan</h3>
                             <dl class="grid grid-cols-1 gap-2">
                                 <div class="sm:grid sm:grid-cols-3 sm:gap-4">
-                                    <dt class="text-sm font-medium text-gray-500">Customer Name:</dt>
-                                    <dd class="text-sm text-gray-900 sm:col-span-2">{{ $order->customer ? $order->customer->name : '[Deleted Customer]' }}</dd>
+                                    <dt class="text-sm font-medium text-gray-500">Nama Pelanggan:</dt>
+                                    <dd class="text-sm text-gray-900 sm:col-span-2">{{ $order->customer ? $order->customer->name : '[Pelanggan Dihapus]' }}</dd>
                                 </div>
                                 <div class="sm:grid sm:grid-cols-3 sm:gap-4">
-                                    <dt class="text-sm font-medium text-gray-500">Customer Contact:</dt>
+                                    <dt class="text-sm font-medium text-gray-500">Kontak Pelanggan:</dt>
                                     <dd class="text-sm text-gray-900 sm:col-span-2">{{ $order->customer ? $order->customer->phone : '-' }}</dd>
                                 </div>
                             </dl>
@@ -82,15 +84,15 @@
                     </div>
 
                     <div>
-                        <h3 class="text-lg font-medium text-gray-900 mb-4">Order Items</h3>
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Item Pesanan</h3>
                         <div class="overflow-x-auto">
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead class="bg-gray-50">
                                     <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price Type</th>
-                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Produk</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipe Harga</th>
+                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Harga</th>
+                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Kuantitas</th>
                                         <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Subtotal</th>
                                     </tr>
                                 </thead>
@@ -118,7 +120,7 @@
                                     </tr>
                                     @endif
                                     <tr class="bg-gray-50">
-                                        <td colspan="4" class="px-6 py-4 whitespace-nowrap text-sm font-medium text-right">Down Payment:</td>
+                                        <td colspan="4" class="px-6 py-4 whitespace-nowrap text-sm font-medium text-right">Uang Muka:</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-right text-green-600">Rp {{ number_format($order->down_payment, 0, ',', '.') }}</td>
                                     </tr>
                                     <tr class="bg-gray-50">

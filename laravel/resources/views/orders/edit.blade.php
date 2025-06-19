@@ -112,7 +112,7 @@
                                                 <dd class="mt-1 text-lg font-semibold text-gray-900" id="totalWithDelivery">Rp {{ number_format($order->total + $order->delivery_fee, 0, ',', '.') }}</dd>
                                             </div>
                                             <div>
-                                                <dt class="text-sm font-medium text-gray-500">Down Payment:</dt>
+                                                <dt class="text-sm font-medium text-gray-500">Uang Muka:</dt>
                                                 <dd class="mt-1 text-lg font-semibold text-green-600" id="dpAmount">Rp {{ number_format($order->down_payment, 0, ',', '.') }}</dd>
                                             </div>
                                             <div>
@@ -128,9 +128,9 @@
                         <!-- Item Pesanan -->
                         <div class="mb-6">
                             <div class="flex justify-between items-center mb-4">
-                                <h3 class="text-lg font-medium text-gray-900">Order Items</h3>
+                                <h3 class="text-lg font-medium text-gray-900">Item Pesanan</h3>
                                 <button type="button" onclick="addOrderItem()" class="bg-green-500 hover:bg-green-600 text-white text-sm py-2 px-4 rounded">
-                                    Add New Item
+                                    Tambah Item Baru
                                 </button>
                             </div>
 

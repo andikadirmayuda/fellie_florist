@@ -11,6 +11,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PublicInvoiceController;
 use App\Http\Controllers\OrderHistoryController;
 use App\Http\Controllers\ArchiveSettingController;
+use App\Http\Controllers\HistorySettingController;
 
 use Illuminate\Support\Facades\Route;
 
@@ -59,9 +60,16 @@ Route::middleware('auth')->group(function () {
     Route::get('order-histories', [OrderHistoryController::class, 'index'])->name('order-histories.index');
     Route::get('order-histories/{history}', [OrderHistoryController::class, 'show'])->name('order-histories.show');
 
-    // Archive Settings Routes
-    Route::get('settings/archive', [ArchiveSettingController::class, 'index'])->name('settings.archive');
-    Route::put('settings/archive', [ArchiveSettingController::class, 'update'])->name('settings.archive.update');
+    // Settings Routes
+    Route::prefix('settings')->name('settings.')->middleware(['auth', 'role:owner,admin'])->group(function () {
+        // Archive Settings
+        Route::get('/archive', [ArchiveSettingController::class, 'index'])->name('archive');
+        Route::post('/archive', [ArchiveSettingController::class, 'update'])->name('archive.update');
+        
+        // History Settings
+        Route::get('/history', [HistorySettingController::class, 'index'])->name('history');
+        Route::put('/history', [HistorySettingController::class, 'update'])->name('history.update');
+    });
 });
 
 // Public Invoice Route (No Auth Required)

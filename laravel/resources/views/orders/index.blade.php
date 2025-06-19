@@ -2,10 +2,10 @@
     <x-slot name="header">
         <div class="flex justify-between items-center">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ __('Orders') }}
+                {{ __('Daftar Pesanan') }}
             </h2>
             <a href="{{ route('orders.create') }}" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded">
-                Create New Order
+                Buat Pesanan Baru
             </a>
         </div>
     </x-slot>
@@ -24,12 +24,12 @@
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order Number</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nomor Pesanan</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pelanggan</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
@@ -37,7 +37,7 @@
                                     <tr>
                                         <td class="px-6 py-4 whitespace-nowrap">{{ $order->order_number }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            {{ $order->customer ? $order->customer->name : '[Deleted Customer]' }}
+                                            {{ $order->customer ? $order->customer->name : '[Pelanggan Dihapus]' }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
@@ -51,18 +51,18 @@
                                         <td class="px-6 py-4 whitespace-nowrap">Rp {{ number_format($order->total, 2) }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap">{{ $order->created_at->format('d M Y H:i') }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                                            <a href="{{ route('orders.show', $order) }}" class="text-indigo-600 hover:text-indigo-900">View</a>
-                                            <a href="{{ route('orders.edit', $order) }}" class="text-green-600 hover:text-green-900">Edit</a>
+                                            <a href="{{ route('orders.show', $order) }}" class="text-indigo-600 hover:text-indigo-900">Lihat</a>
+                                            <a href="{{ route('orders.edit', $order) }}" class="text-green-600 hover:text-green-900">Ubah</a>
                                             <form action="{{ route('orders.destroy', $order) }}" method="POST" class="inline">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="text-red-600 hover:text-red-900" onclick="return confirm('Are you sure you want to delete this order?')">Delete</button>
+                                                <button type="submit" class="text-red-600 hover:text-red-900" onclick="return confirm('Apakah Anda yakin ingin menghapus pesanan ini?')">Hapus</button>
                                             </form>
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="6" class="px-6 py-4 text-center text-gray-500">No orders found</td>
+                                        <td colspan="6" class="px-6 py-4 text-center text-gray-500">Tidak ada pesanan ditemukan</td>
                                     </tr>
                                 @endforelse
                             </tbody>

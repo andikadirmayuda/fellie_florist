@@ -41,23 +41,21 @@
                                             {{ ucfirst($history->status) }}
                                         </span>
                                     </dd>
-                                </div>
-                                <div class="sm:grid sm:grid-cols-3 sm:gap-4">
+                                </div>                                <div class="sm:grid sm:grid-cols-3 sm:gap-4">
                                     <dt class="text-sm font-medium text-gray-500">Original Created Date:</dt>
-                                    <dd class="text-sm text-gray-900 sm:col-span-2">{{ $history->original_created_at->format('d M Y H:i:s') }}</dd>
+                                    <dd class="text-sm text-gray-900 sm:col-span-2">{{ $history->original_created_at ? $history->original_created_at->format('d M Y H:i:s') : '-' }}</dd>
                                 </div>
                                 <div class="sm:grid sm:grid-cols-3 sm:gap-4">
                                     <dt class="text-sm font-medium text-gray-500">Archived Date:</dt>
-                                    <dd class="text-sm text-gray-900 sm:col-span-2">{{ $history->archived_at->format('d M Y H:i:s') }}</dd>
+                                    <dd class="text-sm text-gray-900 sm:col-span-2">{{ $history->archived_at ? $history->archived_at->format('d M Y H:i:s') : '-' }}</dd>
                                 </div>
                             </dl>
                         </div>
                         <div>
                             <h3 class="text-lg font-medium text-gray-900 mb-2">Delivery Information</h3>
-                            <dl class="grid grid-cols-1 gap-2">
-                                <div class="sm:grid sm:grid-cols-3 sm:gap-4">
+                            <dl class="grid grid-cols-1 gap-2">                                <div class="sm:grid sm:grid-cols-3 sm:gap-4">
                                     <dt class="text-sm font-medium text-gray-500">Pickup Date:</dt>
-                                    <dd class="text-sm text-gray-900 sm:col-span-2">{{ $history->pickup_date->format('d M Y H:i') }}</dd>
+                                    <dd class="text-sm text-gray-900 sm:col-span-2">{{ $history->pickup_date ? $history->pickup_date->format('d M Y H:i') : '-' }}</dd>
                                 </div>
                                 <div class="sm:grid sm:grid-cols-3 sm:gap-4">
                                     <dt class="text-sm font-medium text-gray-500">Delivery Method:</dt>
