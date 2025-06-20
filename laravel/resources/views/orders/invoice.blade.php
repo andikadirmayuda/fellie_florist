@@ -5,11 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Invoice #{{ $order->order_number }}</title>
     <style>
+        @media print {
+            body, html {
+                width: 210mm;
+                height: 297mm;
+                margin: 0 auto;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            .invoice-container {
+                width: 190mm;
+                min-height: 277mm;
+                margin: 0 auto;
+                padding: 10mm;
+                background: #fff;
+                box-sizing: border-box;
+            }
+        }
         body {
             font-family: Arial, sans-serif;
             line-height: 1.6;
             margin: 0;
             padding: 20px;
+            background: #f8fafc;
+        }
+        .invoice-container {
+            background: #fff;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 32px 24px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
         }
         .invoice-header {
             text-align: center;
@@ -75,89 +101,91 @@
         </a>
     </div>
 
-    <div class="invoice-header">
-        <h1>Fellie Florist</h1>
-        <p>Invoice #{{ $order->order_number }}</p>
-    </div>
+    <div class="invoice-container">
+        <div class="invoice-header">
+            <h1>Fellie Florist</h1>
+            <p>Invoice #{{ $order->order_number }}</p>
+        </div>
 
-    <div class="invoice-details">
-        <div class="invoice-details-grid">
-            <div class="invoice-to">
-                <h3>Invoice To:</h3>
-                <p>
-                    <strong>{{ $order->customer ? $order->customer->name : '[Deleted Customer]' }}</strong><br>
-                    {{ $order->customer ? ($order->customer->phone ?: 'No Phone') : 'No Contact Info' }}<br>
-                    {{ $order->customer ? ($order->customer->email ?: 'No Email') : '' }}
-                </p>
-            </div>
-            <div class="invoice-info">
-                <h3>Order Details:</h3>
-                <p>
-                    <strong>Order Date:</strong> {{ $order->created_at->format('d M Y H:i') }}<br>
-                    <strong>Pickup Date:</strong> {{ $order->pickup_date->format('d M Y H:i') }}<br>
-                    <strong>Status:</strong> {{ ucfirst($order->status) }}<br>
-                    <strong>Delivery Method:</strong> {{ $order->delivery_method_label }}
-                    @if($order->delivery_method !== 'pickup')
-                    <br><strong>Delivery Address:</strong> {{ $order->delivery_address }}
-                    @endif
-                </p>
+        <div class="invoice-details">
+            <div class="invoice-details-grid">
+                <div class="invoice-to">
+                    <h3>Invoice To:</h3>
+                    <p>
+                        <strong>{{ $order->customer ? $order->customer->name : '[Deleted Customer]' }}</strong><br>
+                        {{ $order->customer ? ($order->customer->phone ?: 'No Phone') : 'No Contact Info' }}<br>
+                        {{ $order->customer ? ($order->customer->email ?: 'No Email') : '' }}
+                    </p>
+                </div>
+                <div class="invoice-info">
+                    <h3>Order Details:</h3>
+                    <p>
+                        <strong>Order Date:</strong> {{ $order->created_at->format('d M Y H:i') }}<br>
+                        <strong>Pickup Date:</strong> {{ $order->pickup_date->format('d M Y H:i') }}<br>
+                        <strong>Status:</strong> {{ ucfirst($order->status) }}<br>
+                        <strong>Delivery Method:</strong> {{ $order->delivery_method_label }}
+                        @if($order->delivery_method !== 'pickup')
+                        <br><strong>Delivery Address:</strong> {{ $order->delivery_address }}
+                        @endif
+                    </p>
+                </div>
             </div>
         </div>
-    </div>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Produk</th>
-                <th>Tipe Harga</th>
-                <th class="text-right">Harga</th>
-                <th class="text-right">Jumlah</th>
-                <th class="text-right">Subtotal</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($order->items as $item)
-            <tr>
-                <td>{{ $item->product->name }}</td>
-                <td>{{ ucfirst(str_replace('_', ' ', $item->price_type)) }}</td>
-                <td class="text-right">Rp {{ number_format($item->price, 0, ',', '.') }}</td>
-                <td class="text-right">{{ $item->qty }}</td>
-                <td class="text-right">Rp {{ number_format($item->subtotal, 0, ',', '.') }}</td>
-            </tr>
-            @endforeach
-        </tbody>
-    </table>
-
-    <div class="total-section">
         <table>
-            <tr>
-                <td><strong>Subtotal:</strong></td>
-                <td class="text-right">Rp {{ number_format($order->total, 0, ',', '.') }}</td>
-            </tr>
-            @if($order->delivery_fee > 0)
-            <tr>
-                <td><strong>Biaya Pengiriman:</strong></td>
-                <td class="text-right">Rp {{ number_format($order->delivery_fee, 0, ',', '.') }}</td>
-            </tr>
-            <tr>
-                <td><strong>Total + Ongkir:</strong></td>
-                <td class="text-right">Rp {{ number_format($order->total + $order->delivery_fee, 0, ',', '.') }}</td>
-            </tr>
-            @endif
-            <tr>
-                <td><strong>Uang Muka:</strong></td>
-                <td class="text-right">Rp {{ number_format($order->down_payment, 0, ',', '.') }}</td>
-            </tr>
-            <tr>
-                <td><strong>Sisa Pembayaran:</strong></td>
-                <td class="text-right">Rp {{ number_format($order->remaining_payment, 0, ',', '.') }}</td>
-            </tr>
+            <thead>
+                <tr>
+                    <th>Produk</th>
+                    <th>Tipe Harga</th>
+                    <th class="text-right">Harga</th>
+                    <th class="text-right">Jumlah</th>
+                    <th class="text-right">Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($order->items as $item)
+                <tr>
+                    <td>{{ $item->product->name }}</td>
+                    <td>{{ ucfirst(str_replace('_', ' ', $item->price_type)) }}</td>
+                    <td class="text-right">Rp {{ number_format($item->price, 0, ',', '.') }}</td>
+                    <td class="text-right">{{ $item->qty }}</td>
+                    <td class="text-right">Rp {{ number_format($item->subtotal, 0, ',', '.') }}</td>
+                </tr>
+                @endforeach
+            </tbody>
         </table>
-    </div>
 
-    <div class="footer">
-        <p>Thank you for your order!</p>
-        <p>For any questions, please contact us at: 08XXXXXXXXXX</p>
+        <div class="total-section">
+            <table>
+                <tr>
+                    <td><strong>Subtotal:</strong></td>
+                    <td class="text-right">Rp {{ number_format($order->total, 0, ',', '.') }}</td>
+                </tr>
+                @if($order->delivery_fee > 0)
+                <tr>
+                    <td><strong>Biaya Pengiriman:</strong></td>
+                    <td class="text-right">Rp {{ number_format($order->delivery_fee, 0, ',', '.') }}</td>
+                </tr>
+                <tr>
+                    <td><strong>Total + Ongkir:</strong></td>
+                    <td class="text-right">Rp {{ number_format($order->total + $order->delivery_fee, 0, ',', '.') }}</td>
+                </tr>
+                @endif
+                <tr>
+                    <td><strong>Uang Muka:</strong></td>
+                    <td class="text-right">Rp {{ number_format($order->down_payment, 0, ',', '.') }}</td>
+                </tr>
+                <tr>
+                    <td><strong>Sisa Pembayaran:</strong></td>
+                    <td class="text-right">Rp {{ number_format($order->remaining_payment, 0, ',', '.') }}</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="footer">
+            <p>Thank you for your order!</p>
+            <p>For any questions, please contact us at: 08XXXXXXXXXX</p>
+        </div>
     </div>
 
     <script>

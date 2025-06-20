@@ -52,8 +52,8 @@ class OrderController extends Controller
      */
     public function create()
     {
-        $products = Product::with('prices')->get();
-        return view('orders.create', compact('products'));
+        $categories = \App\Models\Category::with('products.prices')->get();
+        return view('orders.create', compact('categories'));
     }
 
     /**
