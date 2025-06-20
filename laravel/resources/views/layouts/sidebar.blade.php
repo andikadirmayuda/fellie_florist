@@ -82,6 +82,15 @@
                 </x-slot>
                 {{ __('Pengaturan Riwayat') }}
             </x-sidebar-link>
+
+            <x-sidebar-link :href="route('sales.index')" :active="request()->routeIs('sales.*')">
+                <x-slot name="icon">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h18M9 3v18m6-18v18M4 21h16a1 1 0 001-1V4a1 1 0 00-1-1H4a1 1 0 00-1 1v16a1 1 0 001 1z" />
+                    </svg>
+                </x-slot>
+                {{ __('Penjualan') }}
+            </x-sidebar-link>
         </ul>
     </div>
 </nav>

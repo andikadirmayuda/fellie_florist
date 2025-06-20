@@ -12,6 +12,7 @@ use App\Http\Controllers\PublicInvoiceController;
 use App\Http\Controllers\OrderHistoryController;
 use App\Http\Controllers\ArchiveSettingController;
 use App\Http\Controllers\HistorySettingController;
+use App\Http\Controllers\SaleController;
 
 use Illuminate\Support\Facades\Route;
 
@@ -59,6 +60,14 @@ Route::middleware('auth')->group(function () {
     // Order History Routes
     Route::get('order-histories', [OrderHistoryController::class, 'index'])->name('order-histories.index');
     Route::get('order-histories/{history}', [OrderHistoryController::class, 'show'])->name('order-histories.show');
+
+    // Sales Routes
+    Route::resource('sales', App\Http\Controllers\SaleController::class)->names([
+        'index' => 'sales.index',
+        'create' => 'sales.create',
+        'store' => 'sales.store',
+        'show' => 'sales.show',
+    ]);
 
     // Settings Routes
     Route::prefix('settings')->name('settings.')->middleware(['auth'])->group(function () {
