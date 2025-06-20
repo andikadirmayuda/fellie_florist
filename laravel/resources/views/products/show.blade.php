@@ -79,7 +79,7 @@
                                             Harga (Rp)
                                         </th>
                                         <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Unit Equivalent
+                                            Satuan Setara
                                         </th>
                                         <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Status
@@ -96,7 +96,7 @@
                                                 {{ number_format($price->price, 0, ',', '.') }}
                                             </td>
                                             <td class="px-6 py-4 text-sm text-gray-900">
-                                                {{ $price->unit_equivalent }}
+                                                {{ $price->unit_equivalent }} 
                                             </td>
                                             <td class="px-6 py-4 text-sm text-gray-900">
                                                 @if($price->is_default)

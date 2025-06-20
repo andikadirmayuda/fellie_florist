@@ -114,4 +114,11 @@ class CustomerController extends Controller
         $customers = Customer::onlyTrashed()->latest()->paginate(10);
         return view('customers.trashed', compact('customers'));
     }
+
+    public function orderHistory($id)
+    {
+        $customer = Customer::findOrFail($id);
+        $orders = $customer->orders()->latest()->get();
+        return view('customers.history', compact('customer', 'orders'));
+    }
 }

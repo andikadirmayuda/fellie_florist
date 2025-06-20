@@ -70,6 +70,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/history', [HistorySettingController::class, 'index'])->name('history');
         Route::put('/history', [HistorySettingController::class, 'update'])->name('history.update');
     });
+    Route::get('customers/{id}/history', [CustomerController::class, 'orderHistory'])->name('customers.history');
 });
 
 // Public Invoice Route (No Auth Required)

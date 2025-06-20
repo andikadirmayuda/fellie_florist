@@ -63,4 +63,12 @@ class Customer extends Model
     {
         return $query->where('type', $type);
     }
+
+    /**
+     * Relasi ke orders
+     */
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
 }

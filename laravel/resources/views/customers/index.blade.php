@@ -97,6 +97,7 @@
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <div class="flex justify-end space-x-2">
                                                 <a href="{{ route('customers.edit', $customer) }}" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300">Edit</a>
+                                                <a href="{{ route('customers.history', $customer->id) }}" class="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300">Riwayat</a>
                                                 <form action="{{ route('customers.destroy', $customer) }}" method="POST" class="inline-block">
                                                     @csrf
                                                     @method('DELETE')
