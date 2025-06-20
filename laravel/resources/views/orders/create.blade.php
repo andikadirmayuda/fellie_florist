@@ -90,9 +90,9 @@
                                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                             <span class="text-gray-500 sm:text-sm">Rp</span>
                                         </div>
-                                        <input type="number" name="delivery_fee" id="delivery_fee" value="0"
+                                        <input type="text" name="delivery_fee" id="delivery_fee" value="0"
                                             class="pl-12 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                                            onchange="updateTotalAndRemaining()">
+                                            onchange="updateTotalAndRemaining()" placeholder="0">
                                     </div>
                                     @error('delivery_fee')
                                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -104,9 +104,9 @@
                                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                             <span class="text-gray-500 sm:text-sm">Rp</span>
                                         </div>
-                                        <input type="number" name="down_payment" id="down_payment" value="0"
+                                        <input type="text" name="down_payment" id="down_payment" value="0"
                                             class="pl-12 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                                            onchange="updateRemaining()">
+                                            onchange="updateRemaining()" placeholder="0">
                                     </div>
                                     @error('down_payment')
                                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -219,8 +219,11 @@ const categoriesData = @json($categories);
             });
 
             const total = subtotals.reduce((a, b) => a + b, 0);
-            const deliveryFee = parseFloat(document.getElementById('delivery_fee').value) || 0;
-            const dp = parseFloat(document.getElementById('down_payment').value) || 0;
+            // Ambil value delivery_fee dan down_payment tanpa titik
+            const deliveryFeeRaw = document.getElementById('delivery_fee').value.replace(/[^0-9]/g, '');
+            const deliveryFee = parseInt(deliveryFeeRaw) || 0;
+            const dpRaw = document.getElementById('down_payment').value.replace(/[^0-9]/g, '');
+            const dp = parseInt(dpRaw) || 0;
             const totalWithDelivery = total + deliveryFee;
             const remaining = totalWithDelivery - dp;
 
@@ -232,7 +235,9 @@ const categoriesData = @json($categories);
 
         function updateRemaining() {
             const totalWithDelivery = parseFloat(document.getElementById('totalWithDelivery').textContent.replace(/[^0-9]/g, ''));
-            const dp = parseFloat(document.getElementById('down_payment').value) || 0;
+            // Ambil value DP dan hapus semua karakter non-angka
+            const dpRaw = document.getElementById('down_payment').value.replace(/[^0-9]/g, '');
+            const dp = parseFloat(dpRaw) || 0;
             const remaining = totalWithDelivery - dp;
 
             document.getElementById('dpAmount').textContent = priceFormatter.format(dp);
@@ -349,11 +354,34 @@ const categoriesData = @json($categories);
                 const price = parseFloat(selectedOption.dataset.price);
                 const qty = parseInt(qtyInput.value) || 0;
                 const subtotal = price * qty;
-                subtotalElement.textContent = `Subtotal: ${priceFormatter.format(subtotal)}`;
+                subtotalElement.textContent = `${subtotal}`; // Simpan angka murni
             } else {
                 subtotalElement.textContent = '';
             }
+            // Setelah update subtotal, update total dan sisa pembayaran
+            updateTotalAndRemaining();
         }
+
+        // Format angka ribuan pada input delivery_fee dan down_payment
+        function formatNumberInput(input) {
+            let value = input.value.replace(/\D/g, '');
+            if (!value) value = '0';
+            input.value = parseInt(value, 10).toLocaleString('id-ID');
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+            const deliveryInput = document.getElementById('delivery_fee');
+            const downPaymentInput = document.getElementById('down_payment');
+            if (deliveryInput) {
+                deliveryInput.addEventListener('input', function() {
+                    formatNumberInput(this);
+                });
+            }
+            if (downPaymentInput) {
+                downPaymentInput.addEventListener('input', function() {
+                    formatNumberInput(this);
+                });
+            }
+        });
 
         // Add first item by default
         document.addEventListener('DOMContentLoaded', function() {

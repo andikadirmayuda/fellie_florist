@@ -125,7 +125,7 @@
                                     </tr>
                                     <tr class="bg-gray-50">
                                         <td colspan="4" class="px-6 py-4 whitespace-nowrap text-sm font-medium text-right">Sisa Pembayaran:</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-right text-blue-600">Rp {{ number_format($order->remaining_payment, 0, ',', '.') }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-right text-blue-600">Rp {{ number_format($order->total + $order->delivery_fee - $order->down_payment, 0, ',', '.') }}</td>
                                     </tr>
                                 </tbody>
                             </table>

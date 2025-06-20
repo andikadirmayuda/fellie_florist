@@ -52,7 +52,8 @@ class User extends Authenticatable
      */
     public function roles()
     {
-        return $this->belongsToMany(Role::class);
+        // Pastikan relasi menggunakan tabel pivot yang benar
+        return $this->belongsToMany(Role::class, 'user_has_roles');
     }
 
     /**
@@ -68,23 +69,14 @@ class User extends Authenticatable
      */
     public function hasRole($roleName)
     {
+        // Ambil koleksi roles dari relasi
+        $roles = $this->roles;
         if (is_string($roleName)) {
-            return $this->roles->contains('name', $roleName);
+            return $roles->contains('name', $roleName);
         }
-        
-        // Jika parameter adalah array atau multiple arguments
-        foreach ($this->roles as $role) {
-            if (is_array($roleName)) {
-                if (in_array($role->name, $roleName)) {
-                    return true;
-                }
-            } else {
-                if ($role->name === $roleName) {
-                    return true;
-                }
-            }
+        if (is_array($roleName)) {
+            return $roles->whereIn('name', $roleName)->isNotEmpty();
         }
-        
         return false;
     }
 
@@ -106,5 +98,18 @@ class User extends Authenticatable
         }
 
         return false;
+    }
+
+    /**
+     * Cek apakah user memiliki salah satu dari beberapa role.
+     * @param array|string $roles
+     * @return bool
+     */
+    public function hasAnyRole($roles)
+    {
+        if (is_string($roles)) {
+            $roles = func_get_args();
+        }
+        return $this->roles()->whereIn('name', $roles)->exists();
     }
 }

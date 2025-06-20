@@ -61,7 +61,7 @@ Route::middleware('auth')->group(function () {
     Route::get('order-histories/{history}', [OrderHistoryController::class, 'show'])->name('order-histories.show');
 
     // Settings Routes
-    Route::prefix('settings')->name('settings.')->middleware(['auth', 'role:owner,admin'])->group(function () {
+    Route::prefix('settings')->name('settings.')->middleware(['auth'])->group(function () {
         // Archive Settings
         Route::get('/archive', [ArchiveSettingController::class, 'index'])->name('archive');
         Route::post('/archive', [ArchiveSettingController::class, 'update'])->name('archive.update');

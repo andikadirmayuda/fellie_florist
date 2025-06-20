@@ -255,8 +255,11 @@
             });
 
             const total = subtotals.reduce((a, b) => a + b, 0);
-            const deliveryFee = parseFloat(document.getElementById('delivery_fee').value) || 0;
-            const dp = parseFloat(document.getElementById('down_payment').value) || 0;
+            // Ambil value delivery_fee dan down_payment tanpa titik
+            const deliveryFeeRaw = document.getElementById('delivery_fee').value.replace(/[^0-9]/g, '');
+            const deliveryFee = parseInt(deliveryFeeRaw) || 0;
+            const dpRaw = document.getElementById('down_payment').value.replace(/[^0-9]/g, '');
+            const dp = parseInt(dpRaw) || 0;
             const totalWithDelivery = total + deliveryFee;
             const remaining = totalWithDelivery - dp;
 
@@ -268,7 +271,8 @@
 
         function updateRemaining() {
             const totalWithDelivery = parseFloat(document.getElementById('totalWithDelivery').textContent.replace(/[^0-9]/g, ''));
-            const dp = parseFloat(document.getElementById('down_payment').value) || 0;
+            const dpRaw = document.getElementById('down_payment').value.replace(/[^0-9]/g, '');
+            const dp = parseInt(dpRaw) || 0;
             const remaining = totalWithDelivery - dp;
 
             document.getElementById('dpAmount').textContent = priceFormatter.format(dp);
@@ -351,10 +355,12 @@
                 const price = parseFloat(selectedOption.dataset.price);
                 const qty = parseInt(qtyInput.value) || 0;
                 const subtotal = price * qty;
-                subtotalElement.textContent = `Subtotal: ${priceFormatter.format(subtotal)}`;
+                subtotalElement.textContent = `${subtotal}`; // Simpan angka murni
             } else {
                 subtotalElement.textContent = '';
             }
+            // Setelah update subtotal, update total dan sisa pembayaran
+            updateTotalAndRemaining();
         }
 
         // Initialize price types for existing items
@@ -370,6 +376,27 @@
                         option.selected = true;
                         updatePrice(priceTypeSelect);
                     }
+                });
+            }
+        });
+
+        // Format angka ribuan pada input delivery_fee dan down_payment
+        function formatNumberInput(input) {
+            let value = input.value.replace(/\D/g, '');
+            if (!value) value = '0';
+            input.value = parseInt(value, 10).toLocaleString('id-ID');
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+            const deliveryInput = document.getElementById('delivery_fee');
+            const downPaymentInput = document.getElementById('down_payment');
+            if (deliveryInput) {
+                deliveryInput.addEventListener('input', function() {
+                    formatNumberInput(this);
+                });
+            }
+            if (downPaymentInput) {
+                downPaymentInput.addEventListener('input', function() {
+                    formatNumberInput(this);
                 });
             }
         });

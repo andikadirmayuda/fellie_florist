@@ -62,15 +62,11 @@ class OrderController extends Controller
     public function store(Request $request)
     {
         try {
-            $validated = $request->validate([
-                'customer_id' => 'required|exists:customers,id',
-                'items' => 'required|array|min:1',
-                'items.*.product_id' => 'required|exists:products,id',
-                'items.*.qty' => 'required|integer|min:1',
-                'items.*.price_type' => 'required|string',
+            // Bersihkan format ribuan pada input delivery_fee dan down_payment sebelum validasi
+            $request->merge([
+                'delivery_fee' => preg_replace('/[^0-9]/', '', $request->input('delivery_fee')),
+                'down_payment' => preg_replace('/[^0-9]/', '', $request->input('down_payment')),
             ]);
-
-            DB::beginTransaction();
 
             $validated = $request->validate([
                 'customer_id' => 'required|exists:customers,id',
@@ -84,6 +80,8 @@ class OrderController extends Controller
                 'delivery_fee' => 'required|numeric|min:0',
                 'down_payment' => 'required|numeric|min:0',
             ]);
+
+            DB::beginTransaction();
 
             // Create the order first
             $order = Order::create([
@@ -170,6 +168,12 @@ class OrderController extends Controller
      */
     public function update(Request $request, Order $order)
     {
+        // Bersihkan format ribuan pada input delivery_fee dan down_payment sebelum validasi
+        $request->merge([
+            'delivery_fee' => preg_replace('/[^0-9]/', '', $request->input('delivery_fee')),
+            'down_payment' => preg_replace('/[^0-9]/', '', $request->input('down_payment')),
+        ]);
+
         $validated = $request->validate([
             'status' => 'required|in:pending,processed,completed,cancelled',
             'items' => 'required|array|min:1',
