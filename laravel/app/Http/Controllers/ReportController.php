@@ -49,12 +49,39 @@ class ReportController extends Controller
         return view('reports.sales', compact('sales', 'start', 'end', 'totalPendapatan', 'totalTransaksi', 'produkTerlaris', 'produkKurangLaku'));
     }
 
-    // Laporan Stok
+    // Laporan Stok Terintegrasi
     public function stock(Request $request)
     {
+        $start = $request->input('start_date', now()->startOfMonth()->toDateString());
+        $end = $request->input('end_date', now()->endOfMonth()->toDateString());
+
         $products = Product::with('category')->get();
-        $logs = InventoryLog::latest()->limit(100)->get();
-        return view('reports.stock', compact('products', 'logs'));
+        $logs = InventoryLog::whereBetween('created_at', [$start, $end])->latest()->limit(100)->get();
+
+        // Rekap stok masuk, keluar, penyesuaian, dan total per produk
+        $rekap = [];
+        foreach ($products as $product) {
+            $masuk = InventoryLog::where('product_id', $product->id)
+                ->where('qty', '>', 0)
+                ->whereBetween('created_at', [$start, $end])
+                ->sum('qty');
+            $keluar = InventoryLog::where('product_id', $product->id)
+                ->where('qty', '<', 0)
+                ->whereBetween('created_at', [$start, $end])
+                ->sum('qty');
+            $penyesuaian = InventoryLog::where('product_id', $product->id)
+                ->where('source', 'adjustment')
+                ->whereBetween('created_at', [$start, $end])
+                ->sum('qty');
+            $rekap[$product->id] = [
+                'masuk' => $masuk,
+                'keluar' => abs($keluar),
+                'penyesuaian' => $penyesuaian,
+                'stok_akhir' => $product->current_stock,
+            ];
+        }
+
+        return view('reports.stock', compact('products', 'logs', 'rekap', 'start', 'end'));
     }
 
     // Ekspor laporan penjualan ke PDF
