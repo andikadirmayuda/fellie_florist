@@ -125,6 +125,14 @@
                 </x-slot>
                 Laporan Pelanggan
             </x-sidebar-link>
+            <x-sidebar-link :href="route('reports.income')" :active="request()->routeIs('reports.income')">
+                <x-slot name="icon">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3-1.343-3-3-3zm0 0V4m0 10v4m8-8a8 8 0 11-16 0 8 8 0 0116 0z"/>
+                    </svg>
+                </x-slot>
+                Laporan Pendapatan
+            </x-sidebar-link>
         </ul>
     </div>
 </nav>

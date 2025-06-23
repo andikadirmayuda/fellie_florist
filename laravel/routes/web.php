@@ -97,6 +97,7 @@ Route::prefix('reports')->name('reports.')->group(function () {
     Route::get('/sales/pdf', [ReportController::class, 'salesPdf'])->name('sales.pdf');
     Route::get('/orders', [ReportController::class, 'orders'])->name('orders'); // laporan pemesanan
     Route::get('/customers', [ReportController::class, 'customers'])->name('customers'); // laporan pelanggan
+    Route::get('/income', [ReportController::class, 'income'])->name('income'); // laporan pendapatan
     // Route berikut bisa diaktifkan jika fitur Excel sudah tersedia
     // Route::get('/sales/excel', [ReportController::class, 'salesExcel'])->name('sales.excel');
 });

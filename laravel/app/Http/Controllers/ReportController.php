@@ -108,4 +108,54 @@ class ReportController extends Controller
 
         return view('reports.customers', compact('customers', 'start', 'end', 'totalCustomer', 'totalOrder', 'topCustomer'));
     }
+
+    // Laporan Pendapatan
+    public function income(Request $request)
+    {
+        $start = $request->input('start_date', now()->startOfMonth()->toDateString());
+        $end = $request->input('end_date', now()->endOfMonth()->toDateString());
+
+        // Total pendapatan dari penjualan
+        $totalPenjualan = \App\Models\Sale::whereBetween('created_at', [$start, $end])->sum('total');
+        // Total pendapatan dari pemesanan (order + ongkir)
+        $totalPemesanan = \App\Models\Order::whereBetween('created_at', [$start, $end])->sum(\DB::raw('total + delivery_fee'));
+        // Total pendapatan gabungan
+        $totalPendapatan = $totalPenjualan + $totalPemesanan;
+
+        // Pendapatan harian
+        $harian = [];
+        foreach (range(0, now()->parse($end)->diffInDays(now()->parse($start))) as $i) {
+            $date = now()->parse($start)->copy()->addDays($i)->toDateString();
+            $harian[$date] = [
+                'penjualan' => \App\Models\Sale::whereDate('created_at', $date)->sum('total'),
+                'pemesanan' => \App\Models\Order::whereDate('created_at', $date)->sum(\DB::raw('total + delivery_fee')),
+            ];
+        }
+        // Pendapatan mingguan
+        $mingguan = [];
+        $startWeek = now()->parse($start)->startOfWeek();
+        $endWeek = now()->parse($end)->endOfWeek();
+        for ($date = $startWeek->copy(); $date <= $endWeek; $date->addWeek()) {
+            $weekStart = $date->copy();
+            $weekEnd = $date->copy()->endOfWeek();
+            $mingguan[$weekStart->format('Y-m-d')] = [
+                'penjualan' => \App\Models\Sale::whereBetween('created_at', [$weekStart, $weekEnd])->sum('total'),
+                'pemesanan' => \App\Models\Order::whereBetween('created_at', [$weekStart, $weekEnd])->sum(\DB::raw('total + delivery_fee')),
+            ];
+        }
+        // Pendapatan bulanan
+        $bulanan = [];
+        $startMonth = now()->parse($start)->startOfYear();
+        $endMonth = now()->parse($end)->endOfYear();
+        for ($date = $startMonth->copy(); $date <= $endMonth; $date->addMonth()) {
+            $monthStart = $date->copy()->startOfMonth();
+            $monthEnd = $date->copy()->endOfMonth();
+            $bulanan[$monthStart->format('Y-m')] = [
+                'penjualan' => \App\Models\Sale::whereBetween('created_at', [$monthStart, $monthEnd])->sum('total'),
+                'pemesanan' => \App\Models\Order::whereBetween('created_at', [$monthStart, $monthEnd])->sum(\DB::raw('total + delivery_fee')),
+            ];
+        }
+
+        return view('reports.income', compact('start', 'end', 'totalPenjualan', 'totalPemesanan', 'totalPendapatan', 'harian', 'mingguan', 'bulanan'));
+    }
 }
