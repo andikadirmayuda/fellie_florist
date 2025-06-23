@@ -53,7 +53,8 @@ class OrderController extends Controller
     public function create()
     {
         $categories = \App\Models\Category::with('products.prices')->get();
-        return view('orders.create', compact('categories'));
+        $products = \App\Models\Product::with('prices')->get();
+        return view('orders.create', compact('categories', 'products'));
     }
 
     /**
@@ -62,6 +63,10 @@ class OrderController extends Controller
     public function store(Request $request)
     {
         try {
+            // Jika items dikirim dalam bentuk string JSON, decode dulu
+            if ($request->has('items') && is_string($request->items)) {
+                $request->merge(['items' => json_decode($request->items, true) ?: []]);
+            }
             // Bersihkan format ribuan pada input delivery_fee dan down_payment sebelum validasi
             $request->merge([
                 'delivery_fee' => preg_replace('/[^0-9]/', '', $request->input('delivery_fee')),
@@ -100,30 +105,25 @@ class OrderController extends Controller
             // Process each item
             foreach ($validated['items'] as $index => $item) {
                 $product = Product::findOrFail($item['product_id']);
-                
-                // Validasi stok
-                if ($product->current_stock < $item['qty']) {
-                    throw new \Exception("Stok tidak cukup untuk produk {$product->name}. Stok tersedia: {$product->current_stock}");
-                }
-
                 $productPrice = $product->prices()->where('type', $item['price_type'])->first();
-                
+                $unitEquivalent = $productPrice && $productPrice->unit_equivalent ? (int)$productPrice->unit_equivalent : 1;
+                $totalButuh = $item['qty'] * $unitEquivalent;
+                if ($product->current_stock < $totalButuh) {
+                    throw new \Exception("Stok tidak cukup untuk produk {$product->name}. Stok tersedia: {$product->current_stock}, dibutuhkan: {$totalButuh}");
+                }
                 if (!$productPrice) {
                     DB::rollBack();
                     return back()
                         ->withInput()
                         ->withErrors(["items.{$index}.price_type" => "Harga tidak tersedia untuk produk {$product->name} dengan tipe {$item['price_type']}"]);
                 }
-
                 $price = $productPrice->price;
-                
                 $order->items()->create([
                     'product_id' => $item['product_id'],
                     'qty' => $item['qty'],
                     'price' => $price,
                     'price_type' => $item['price_type']
                 ]);
-
                 $total += $price * $item['qty'];
             }
 
@@ -221,9 +221,12 @@ class OrderController extends Controller
                         throw new \Exception("Harga tidak tersedia untuk produk {$product->name}");
                     }
 
-                    // Validasi stok
-                    if ($product->current_stock < $item['qty']) {
-                        throw new \Exception("Stok tidak cukup untuk produk {$product->name}. Stok tersedia: {$product->current_stock}");
+                    // Validasi stok dengan memperhitungkan unit_equivalent jika ada
+                    $productPrice = $product->prices()->where('type', $item['price_type'])->first();
+                    $unitEquivalent = $productPrice && $productPrice->unit_equivalent ? (int)$productPrice->unit_equivalent : 1;
+                    $totalButuh = $item['qty'] * $unitEquivalent;
+                    if ($product->current_stock < $totalButuh) {
+                        throw new \Exception("Stok tidak cukup untuk produk {$product->name}. Stok tersedia: {$product->current_stock}, dibutuhkan: {$totalButuh}");
                     }
 
                     $price = $productPrice->price;

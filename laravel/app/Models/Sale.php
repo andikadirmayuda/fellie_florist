@@ -15,6 +15,7 @@ class Sale extends Model
         'total',
         'subtotal',
         'payment_method',
+        'public_code', // untuk public receipt
     ];
 
     public function items()

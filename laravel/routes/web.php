@@ -13,6 +13,8 @@ use App\Http\Controllers\OrderHistoryController;
 use App\Http\Controllers\ArchiveSettingController;
 use App\Http\Controllers\HistorySettingController;
 use App\Http\Controllers\SaleController;
+use App\Http\Controllers\SaleReceiptController;
+use App\Http\Controllers\PublicSaleController;
 
 use Illuminate\Support\Facades\Route;
 
@@ -68,6 +70,7 @@ Route::middleware('auth')->group(function () {
         'store' => 'sales.store',
         'show' => 'sales.show',
     ]);
+    Route::get('/sales/{sale}/download-pdf', [App\Http\Controllers\SaleController::class, 'downloadPdf'])->name('sales.download_pdf');
 
     // Settings Routes
     Route::prefix('settings')->name('settings.')->middleware(['auth'])->group(function () {
@@ -84,5 +87,6 @@ Route::middleware('auth')->group(function () {
 
 // Public Invoice Route (No Auth Required)
 Route::get('/i/{token}', [PublicInvoiceController::class, 'show'])->name('public.invoice');
+Route::get('/public/receipt/{public_code}', [PublicSaleController::class, 'show'])->name('sales.public_receipt');
 
 require __DIR__.'/auth.php';

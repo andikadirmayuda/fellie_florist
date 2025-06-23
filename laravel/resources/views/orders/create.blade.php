@@ -9,8 +9,44 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 bg-white border-b border-gray-200">
+                    @if(session('error'))
+                        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
+                            {{ session('error') }}
+                        </div>
+                    @endif
+                    @if($errors->any())
+                        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
+                            <ul>
+                                @foreach($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
                     <form action="{{ route('orders.store') }}" method="POST" id="orderForm">
                         @csrf
+
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700">No. Order (Otomatis)</label>
+                            <input type="text" class="form-input w-full rounded-md border-gray-300" value="(Akan otomatis)" disabled>
+                        </div>
+                        <div class="mb-4">
+                            <label for="status" class="block text-sm font-medium text-gray-700">Status Pesanan</label>
+                            <select name="status" id="status" class="form-input w-full rounded-md border-gray-300" required>
+                                <option value="pending" {{ old('status') == 'pending' ? 'selected' : '' }}>Menunggu</option>
+                                <option value="processed" {{ old('status') == 'processed' ? 'selected' : '' }}>Diproses</option>
+                                <option value="completed" {{ old('status') == 'completed' ? 'selected' : '' }}>Selesai</option>
+                                <option value="cancelled" {{ old('status') == 'cancelled' ? 'selected' : '' }}>Dibatalkan</option>
+                            </select>
+                            @error('status')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700">Tanggal Order</label>
+                            <input type="text" class="form-input w-full rounded-md border-gray-300" value="{{ now()->format('d-m-Y H:i') }}" disabled>
+                        </div>
 
                         <div class="mb-4">
                             <label for="customer_id" class="block text-sm font-medium text-gray-700">Pelanggan</label>
@@ -67,17 +103,57 @@
                         <!-- Order Items -->
                         <div class="mb-6">
                             <h3 class="text-lg font-medium text-gray-900">Item Pesanan</h3>
-                            <div class="flex justify-end mb-2">
-                                <button type="button" onclick="addOrderItem()" class="bg-green-500 hover:bg-green-600 text-white text-sm py-2 px-4 rounded">
-                                    Tambah Item Baru
-                                </button>
+                            <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-2">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Kategori</label>
+                                    <select id="orderCategorySelect" class="category-select mt-1 block w-full rounded-md border-gray-300" >
+                                        <option value="">Pilih Kategori</option>
+                                        @foreach($categories as $category)
+                                            <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Produk</label>
+                                    <select id="orderProductSelect" class="product-select mt-1 block w-full rounded-md border-gray-300">
+                                        <option value="">Pilih Produk</option>
+                                        @foreach($products as $product)
+                                            <option value="{{ $product->id }}" data-category="{{ $product->category_id }}">{{ $product->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Tipe Harga</label>
+                                    <select id="orderPriceTypeSelect" class="price-type-select mt-1 block w-full rounded-md border-gray-300">
+                                        <option value="">Pilih Tipe Harga</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Jumlah</label>
+                                    <input type="number" id="orderQtyInput" class="form-input w-full rounded-md border-gray-300" min="1" value="1">
+                                </div>
+                                <div class="flex items-end">
+                                    <button type="button" class="bg-green-500 hover:bg-green-600 text-white text-sm py-2 px-4 rounded" id="addOrderItemBtn">Tambah Item</button>
+                                </div>
                             </div>
-                            <div id="orderItems" class="space-y-4">
-                                <!-- Order items will be added here dynamically -->
+                            <div class="overflow-x-auto rounded-lg shadow mb-2">
+                                <table class="min-w-full divide-y divide-gray-200 bg-white" id="orderItemsTable">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Produk</th>
+                                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Tipe Harga</th>
+                                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Harga</th>
+                                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Jumlah</th>
+                                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Subtotal</th>
+                                            <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-gray-200">
+                                        <!-- Daftar item pesanan akan diisi oleh JS -->
+                                    </tbody>
+                                </table>
                             </div>
-                            @error('items')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
+                            <input type="hidden" name="items" id="orderItemsInput">
                         </div>
 
                         <!-- Biaya & Pembayaran -->
@@ -191,201 +267,142 @@
         </div>
     </template>
     <script>
-const categoriesData = @json($categories);
-        let itemIndex = 0;
-        const priceFormatter = new Intl.NumberFormat('id-ID', {
-            style: 'currency',
-            currency: 'IDR',
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0
+        let orderItems = [];
+        const orderProducts = @json($products);
+        const orderProductPrices = {};
+        orderProducts.forEach(p => {
+            orderProductPrices[p.id] = p.prices;
         });
+        function updateOrderItemsTable() {
+            let tbody = document.querySelector('#orderItemsTable tbody');
+            tbody.innerHTML = '';
+            let subtotal = 0;
+            if (orderItems.length === 0) {
+                tbody.innerHTML = `<tr><td colspan='6' class='px-4 py-6 text-center text-gray-400'>Belum ada item ditambahkan.</td></tr>`;
+            } else {
+                orderItems.forEach((item, idx) => {
+                    subtotal += item.price * item.quantity;
+                    tbody.innerHTML += `
+                        <tr>
+                            <td class='px-4 py-2'>${item.product_name}</td>
+                            <td class='px-4 py-2'>${item.price_type.replaceAll('_',' ').toUpperCase()}</td>
+                            <td class='px-4 py-2'>${item.price.toLocaleString()}</td>
+                            <td class='px-4 py-2'>${item.quantity}</td>
+                            <td class='px-4 py-2'>${(item.price * item.quantity).toLocaleString()}</td>
+                            <td class='px-4 py-2 text-center'><button type="button" class="text-red-600 hover:underline font-medium" onclick="removeOrderItem(${idx})">Hapus</button></td>
+                        </tr>
+                    `;
+                });
+            }
+            document.getElementById('orderItemsInput').value = JSON.stringify(orderItems);
+            updateOrderTotals();
+        }
+        function updateOrderTotals() {
+            let subtotal = orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const deliveryFeeRaw = document.getElementById('delivery_fee').value.replace(/[^0-9]/g, '');
+            const deliveryFee = parseInt(deliveryFeeRaw) || 0;
+            const dpRaw = document.getElementById('down_payment').value.replace(/[^0-9]/g, '');
+            const dp = parseInt(dpRaw) || 0;
+            const totalWithDelivery = subtotal + deliveryFee;
+            const remaining = totalWithDelivery - dp;
+            document.getElementById('totalAmount').textContent = subtotal.toLocaleString('id-ID', {style:'currency',currency:'IDR'});
+            document.getElementById('totalWithDelivery').textContent = totalWithDelivery.toLocaleString('id-ID', {style:'currency',currency:'IDR'});
+            document.getElementById('dpAmount').textContent = dp.toLocaleString('id-ID', {style:'currency',currency:'IDR'});
+            document.getElementById('remainingAmount').textContent = remaining.toLocaleString('id-ID', {style:'currency',currency:'IDR'});
+        }
+        document.getElementById('delivery_fee').addEventListener('input', updateOrderTotals);
+        document.getElementById('down_payment').addEventListener('input', updateOrderTotals);
+        function removeOrderItem(idx) {
+            orderItems.splice(idx, 1);
+            updateOrderItemsTable();
+        }
+        function showStockAlert(stokTersedia, totalButuh) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Stok Tidak Cukup',
+                html: `Stok produk tidak mencukupi!<br><b>Stok tersedia:</b> ${stokTersedia}, <b>dibutuhkan:</b> ${totalButuh}`,
+                confirmButtonText: 'Oke',
+                customClass: {
+                    confirmButton: 'bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600',
+                }
+            });
+        }
+        document.getElementById('addOrderItemBtn').onclick = function() {
+            let productId = document.getElementById('orderProductSelect').value;
+            let priceType = document.getElementById('orderPriceTypeSelect').value;
+            let priceTypeOption = document.querySelector(`#orderPriceTypeSelect option[value='${priceType}']`);
+            let quantity = parseInt(document.getElementById('orderQtyInput').value);
+            if (!productId || !priceType || !quantity || quantity < 1) return Swal.fire('Lengkapi data item!');
+            let product = orderProducts.find(p => p.id == productId);
+            let price = priceTypeOption ? parseFloat(priceTypeOption.getAttribute('data-price')) : 0;
+            // Cek stok produk sebelum tambah
+            let priceObj = (product.prices || []).find(pr => pr.type === priceType);
+            let unitEquivalent = priceObj && priceObj.unit_equivalent ? parseInt(priceObj.unit_equivalent) : 1;
+            let stokTersedia = product.current_stock;
+            let totalButuh = quantity * unitEquivalent;
+            if (stokTersedia < totalButuh) {
+                showStockAlert(stokTersedia, totalButuh);
+                return;
+            }
+            orderItems.push({
+                product_id: product.id,
+                product_name: product.name,
+                price_type: priceType,
+                quantity: quantity,
+                price: price,
+                qty: quantity // pastikan qty selalu ada
+            });
+            updateOrderItemsTable();
+        };
+        document.getElementById('orderCategorySelect').onchange = function() {
+            let catId = this.value;
+            let productSelect = document.getElementById('orderProductSelect');
+            Array.from(productSelect.options).forEach(opt => {
+                if (!opt.value) return;
+                opt.style.display = opt.getAttribute('data-category') == catId ? '' : 'none';
+            });
+            productSelect.value = '';
+        };
+        document.getElementById('orderProductSelect').onchange = function() {
+            let productId = this.value;
+            let priceTypeSelect = document.getElementById('orderPriceTypeSelect');
+            priceTypeSelect.innerHTML = '<option value="">Pilih Tipe Harga</option>';
+            if (orderProductPrices[productId]) {
+                orderProductPrices[productId].forEach(price => {
+                    priceTypeSelect.innerHTML += `<option value="${price.type}" data-price="${price.price}">${price.type.replaceAll('_',' ').toUpperCase()} (Rp ${parseFloat(price.price).toLocaleString()})</option>`;
+                });
+            }
+        };
+        document.getElementById('orderForm').onsubmit = function() {
+            if (orderItems.length === 0) {
+                alert('Tambahkan minimal 1 item pesanan sebelum membuat pesanan!');
+                return false;
+            }
+            // Pastikan qty selalu ada di setiap item
+            orderItems = orderItems.map(item => ({...item, qty: item.quantity || item.qty || 1}));
+            document.getElementById('orderItemsInput').value = JSON.stringify(orderItems);
+        };
+        // Inisialisasi tabel pertama kali
+        updateOrderItemsTable();
 
         function toggleDeliveryAddress(select) {
             const container = document.getElementById('deliveryAddressContainer');
-            if (select.value === 'pickup') {
+            const value = select.value.toLowerCase();
+            if (value === 'pickup' || value === 'ambil langsung') {
                 container.classList.add('hidden');
                 document.getElementById('delivery_address').value = '';
                 document.getElementById('delivery_fee').value = 0;
             } else {
                 container.classList.remove('hidden');
             }
-            updateTotalAndRemaining();
+            updateOrderTotals && updateOrderTotals();
         }
-
-        function updateTotalAndRemaining() {
-            const subtotals = Array.from(document.querySelectorAll('.subtotal')).map(el => {
-                const text = el.textContent;
-                return text ? parseInt(text.replace(/[^0-9]/g, '')) : 0;
-            });
-
-            const total = subtotals.reduce((a, b) => a + b, 0);
-            // Ambil value delivery_fee dan down_payment tanpa titik
-            const deliveryFeeRaw = document.getElementById('delivery_fee').value.replace(/[^0-9]/g, '');
-            const deliveryFee = parseInt(deliveryFeeRaw) || 0;
-            const dpRaw = document.getElementById('down_payment').value.replace(/[^0-9]/g, '');
-            const dp = parseInt(dpRaw) || 0;
-            const totalWithDelivery = total + deliveryFee;
-            const remaining = totalWithDelivery - dp;
-
-            document.getElementById('totalAmount').textContent = priceFormatter.format(total);
-            document.getElementById('totalWithDelivery').textContent = priceFormatter.format(totalWithDelivery);
-            document.getElementById('dpAmount').textContent = priceFormatter.format(dp);
-            document.getElementById('remainingAmount').textContent = priceFormatter.format(remaining);
-        }
-
-        function updateRemaining() {
-            const totalWithDelivery = parseFloat(document.getElementById('totalWithDelivery').textContent.replace(/[^0-9]/g, ''));
-            // Ambil value DP dan hapus semua karakter non-angka
-            const dpRaw = document.getElementById('down_payment').value.replace(/[^0-9]/g, '');
-            const dp = parseFloat(dpRaw) || 0;
-            const remaining = totalWithDelivery - dp;
-
-            document.getElementById('dpAmount').textContent = priceFormatter.format(dp);
-            document.getElementById('remainingAmount').textContent = priceFormatter.format(remaining);
-        }
-
-        function updateProductOptions(categorySelect) {
-            const orderItem = categorySelect.closest('.order-item');
-            const productSelect = orderItem.querySelector('.product-select');
-            const priceTypeSelect = orderItem.querySelector('.price-type-select');
-            const selectedCategoryId = categorySelect.value;
-            productSelect.innerHTML = '<option value="">Pilih Produk</option>';
-            priceTypeSelect.innerHTML = '<option value="">Pilih Tipe Harga</option>';
-            priceTypeSelect.disabled = true;
-            if (!selectedCategoryId) {
-                productSelect.disabled = true;
-                return;
-            }
-            const category = categoriesData.find(cat => cat.id == selectedCategoryId);
-            if (category && category.products && category.products.length > 0) {
-                category.products.forEach(product => {
-                    const option = document.createElement('option');
-                    option.value = product.id;
-                    option.textContent = product.name;
-                    option.dataset.prices = JSON.stringify(product.prices);
-                    productSelect.appendChild(option);
-                });
-                productSelect.disabled = false;
-            } else {
-                productSelect.disabled = false; // Perbaiki: tetap enable agar user bisa klik meski kosong
-            }
-        }
-
-        function addOrderItem() {
-            const template = document.getElementById('orderItemTemplate');
-            const orderItems = document.getElementById('orderItems');
-            const clone = template.content.cloneNode(true);
-            itemIndex++;
-            const inputs = clone.querySelectorAll('input, select');
-            inputs.forEach(input => {
-                const field = input.dataset.field;
-                if (field) input.name = `items[${itemIndex}][${field}]`;
-            });
-            // Tambah event listener kategori
-            const categorySelect = clone.querySelector('.category-select');
-            categorySelect.addEventListener('change', function() {
-                updateProductOptions(this);
-            });
-            // Tambah event listener produk
-            const productSelect = clone.querySelector('.product-select');
-            productSelect.addEventListener('change', function() {
-                loadPriceTypes(this);
-            });
-            orderItems.appendChild(clone);
-        }
-
-        function loadPriceTypes(productSelect) {
-            const orderItem = productSelect.closest('.order-item');
-            const priceTypeSelect = orderItem.querySelector('.price-type-select');
-            const selectedPrice = orderItem.querySelector('.selected-price');
-            const option = productSelect.options[productSelect.selectedIndex];
-            
-            // Reset price type select
-            priceTypeSelect.innerHTML = '<option value="">Select Price Type</option>';
-            selectedPrice.textContent = '';
-            
-            if (option.value) {
-                const prices = JSON.parse(option.dataset.prices);
-                priceTypeSelect.disabled = false;
-
-                prices.forEach(price => {
-                    const typeLabel = price.type
-                        .split('_')
-                        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-                        .join(' ');
-                    
-                    const option = new Option(
-                        `${typeLabel} - ${priceFormatter.format(price.price)}`, 
-                        price.type
-                    );
-                    option.dataset.price = price.price;
-                    priceTypeSelect.add(option);
-                });
-            } else {
-                priceTypeSelect.disabled = true;
-            }
-
-            updateSubtotal(productSelect);
-        }
-
-        function updatePrice(priceTypeSelect) {
-            const orderItem = priceTypeSelect.closest('.order-item');
-            const selectedPrice = orderItem.querySelector('.selected-price');
-            const option = priceTypeSelect.options[priceTypeSelect.selectedIndex];
-
-            if (option.value) {
-                const price = option.dataset.price;
-                selectedPrice.textContent = `Price: ${priceFormatter.format(price)}`;
-            } else {
-                selectedPrice.textContent = '';
-            }
-
-            updateSubtotal(priceTypeSelect);
-        }
-
-        function updateSubtotal(element) {
-            const orderItem = element.closest('.order-item');
-            const priceTypeSelect = orderItem.querySelector('.price-type-select');
-            const qtyInput = orderItem.querySelector('input[data-field="qty"]');
-            const subtotalElement = orderItem.querySelector('.subtotal');
-
-            const selectedOption = priceTypeSelect.options[priceTypeSelect.selectedIndex];
-            if (selectedOption && selectedOption.dataset.price) {
-                const price = parseFloat(selectedOption.dataset.price);
-                const qty = parseInt(qtyInput.value) || 0;
-                const subtotal = price * qty;
-                subtotalElement.textContent = `${subtotal}`; // Simpan angka murni
-            } else {
-                subtotalElement.textContent = '';
-            }
-            // Setelah update subtotal, update total dan sisa pembayaran
-            updateTotalAndRemaining();
-        }
-
-        // Format angka ribuan pada input delivery_fee dan down_payment
-        function formatNumberInput(input) {
-            let value = input.value.replace(/\D/g, '');
-            if (!value) value = '0';
-            input.value = parseInt(value, 10).toLocaleString('id-ID');
-        }
+        // Pastikan field alamat pengiriman muncul/tersembunyi sesuai pilihan saat halaman pertama kali dibuka
         document.addEventListener('DOMContentLoaded', function() {
-            const deliveryInput = document.getElementById('delivery_fee');
-            const downPaymentInput = document.getElementById('down_payment');
-            if (deliveryInput) {
-                deliveryInput.addEventListener('input', function() {
-                    formatNumberInput(this);
-                });
-            }
-            if (downPaymentInput) {
-                downPaymentInput.addEventListener('input', function() {
-                    formatNumberInput(this);
-                });
-            }
-        });
-
-        // Add first item by default
-        document.addEventListener('DOMContentLoaded', function() {
-            addOrderItem();
+            toggleDeliveryAddress(document.getElementById('delivery_method'));
+            document.getElementById('delivery_method').addEventListener('change', function() {
+                toggleDeliveryAddress(this);
+            });
         });
     </script>
 </x-app-layout>

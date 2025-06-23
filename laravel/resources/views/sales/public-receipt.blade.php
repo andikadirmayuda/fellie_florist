@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Struk Penjualan</title>
+    <title>Struk Penjualan - Fellie Florist</title>
     <style>
         body { font-family: 'Inter', Arial, sans-serif; background: #f5f6fa; }
         .receipt {
@@ -26,14 +26,14 @@
         .brand-logo {
             width: 54px;
             height: 54px;
-            margin: 0 auto 8px auto;
+            margin-bottom: 8px;
         }
         .brand-title {
             font-size: 1.25rem;
             font-weight: 700;
             color: #2563eb;
             letter-spacing: 1px;
-            text-align: center;
+            text-align:center;
         }
         .brand-address {
             font-size: 0.95rem;
@@ -101,10 +101,10 @@
 </head>
 <body>
     <div class="receipt">
-        <div class="brand-header" style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; margin-bottom: 18px;">
-            <img src="{{ public_path('logo-fellie.png') }}" alt="Logo" class="brand-logo" style="display:block; margin:0 auto 8px auto;">
-            <div class="brand-title" style="font-size: 1.25rem; font-weight: 700; color: #2563eb; letter-spacing: 1px; text-align:center;">Fellie Florist</div>
-            <div class="brand-address" style="font-size: 0.95rem; color: #666; text-align: center; margin-bottom: 2px;">Jl. Mawar No. 123, Jakarta<br>Telp: 08XXXXXXXXXX</div>
+        <div class="brand-header">
+            <img src="{{ public_path('logo-fellie.png') }}" alt="Logo" class="brand-logo">
+            <div class="brand-title">Fellie Florist</div>
+            <div class="brand-address">Jl. Mawar No. 123, Jakarta<br>Telp: 08XXXXXXXXXX</div>
         </div>
         <h2>Struk Penjualan</h2>
         <table class="info-table">

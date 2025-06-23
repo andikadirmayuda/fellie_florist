@@ -8,6 +8,7 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class SaleController extends Controller
 {
@@ -35,6 +36,14 @@ class SaleController extends Controller
             'payment_method' => 'required|in:cash,debit,transfer',
         ]);
 
+        // Cek stok produk sebelum transaksi
+        foreach ($request->items as $item) {
+            $product = Product::find($item['product_id']);
+            if (!$product || !$product->hasEnoughStock($item['quantity'])) {
+                return back()->withErrors(['error' => 'Stok produk ' . ($product ? $product->name : 'tidak ditemukan') . ' tidak mencukupi!'])->withInput();
+            }
+        }
+
         DB::beginTransaction();
         try {
             $today = Carbon::now()->format('dmY');
@@ -46,12 +55,16 @@ class SaleController extends Controller
             });
             $total = $subtotal; // Bisa ditambah diskon/pajak jika perlu
 
+            // Generate kode unik public_code
+            $public_code = bin2hex(random_bytes(8));
+
             $sale = Sale::create([
                 'order_number' => $order_number,
                 'order_time' => now(),
                 'total' => $total,
                 'subtotal' => $subtotal,
                 'payment_method' => $request->payment_method,
+                'public_code' => $public_code,
             ]);
 
             foreach ($request->items as $item) {
@@ -62,6 +75,23 @@ class SaleController extends Controller
                     'quantity' => $item['quantity'],
                     'price' => $item['price'],
                     'subtotal' => $item['price'] * $item['quantity'],
+                ]);
+                // Update stok produk sesuai tipe harga
+                $product = Product::find($item['product_id']);
+                $qtyToReduce = $item['quantity'];
+                // Cek jika ada unit_equivalent di product_prices
+                $price = $product->prices->where('type', $item['price_type'])->first();
+                if ($price && $price->unit_equivalent && $price->unit_equivalent > 0) {
+                    $qtyToReduce = $item['quantity'] * $price->unit_equivalent;
+                }
+                $product->decrementStock($qtyToReduce);
+                // Catat log inventaris
+                \App\Models\InventoryLog::create([
+                    'product_id' => $item['product_id'],
+                    'qty' => -abs($qtyToReduce),
+                    'source' => 'sale',
+                    'reference_id' => $sale->id,
+                    'notes' => 'Pengurangan stok karena penjualan',
                 ]);
             }
 
@@ -80,5 +110,13 @@ class SaleController extends Controller
             return view('sales.receipt', compact('sale'));
         }
         return view('sales.show', compact('sale'));
+    }
+
+    public function downloadPdf($id)
+    {
+        $sale = \App\Models\Sale::with('items.product')->findOrFail($id);
+        $pdf = Pdf::loadView('sales.receipt', compact('sale'));
+        $filename = 'Struk-Penjualan-' . $sale->order_number . '.pdf';
+        return $pdf->download($filename);
     }
 }

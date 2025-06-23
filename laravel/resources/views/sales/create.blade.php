@@ -39,7 +39,12 @@
                     <select class="form-select w-full rounded-md border-gray-300 dark:bg-gray-800 dark:text-gray-100" id="productSelect">
                         <option value="">Pilih Produk</option>
                         @foreach($products as $product)
-                            <option value="{{ $product->id }}" data-category="{{ $product->category_id }}">{{ $product->name }}</option>
+                            <option value="{{ $product->id }}" data-category="{{ $product->category_id }}" @if($product->current_stock == 0) disabled @endif>
+                                {{ $product->name }}
+                                @if($product->current_stock == 0)
+                                    (Stok Habis)
+                                @endif
+                            </option>
                         @endforeach
                     </select>
                 </div>
@@ -157,6 +162,15 @@
         if (!productId || !priceType || quantity < 1) return alert('Lengkapi data produk!');
         let product = products.find(p => p.id == productId);
         let price = priceTypeOption ? parseFloat(priceTypeOption.getAttribute('data-price')) : 0;
+        // Cek stok produk sebelum menambah
+        let priceObj = (product.prices || []).find(pr => pr.type === priceType);
+        let unitEquivalent = priceObj && priceObj.unit_equivalent ? parseInt(priceObj.unit_equivalent) : 1;
+        let stokTersedia = product.current_stock;
+        let totalButuh = quantity * unitEquivalent;
+        if (stokTersedia < totalButuh) {
+            alert('Stok produk tidak mencukupi! (Stok tersedia: ' + stokTersedia + ', dibutuhkan: ' + totalButuh + ')');
+            return;
+        }
         items.push({
             product_id: product.id,
             product_name: product.name,
