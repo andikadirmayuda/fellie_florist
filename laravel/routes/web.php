@@ -15,11 +15,12 @@ use App\Http\Controllers\HistorySettingController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\SaleReceiptController;
 use App\Http\Controllers\PublicSaleController;
+use App\Http\Controllers\ReportController;
 
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('login');
 });
 
 Route::get('/dashboard', [DashboardController::class, 'index'])
@@ -88,5 +89,14 @@ Route::middleware('auth')->group(function () {
 // Public Invoice Route (No Auth Required)
 Route::get('/i/{token}', [PublicInvoiceController::class, 'show'])->name('public.invoice');
 Route::get('/public/receipt/{public_code}', [PublicSaleController::class, 'show'])->name('sales.public_receipt');
+
+// Report Routes - Tanpa middleware, dapat diakses publik
+Route::prefix('reports')->name('reports.')->group(function () {
+    Route::get('/sales', [ReportController::class, 'sales'])->name('sales');
+    Route::get('/stock', [ReportController::class, 'stock'])->name('stock');
+    Route::get('/sales/pdf', [ReportController::class, 'salesPdf'])->name('sales.pdf');
+    // Route berikut bisa diaktifkan jika fitur Excel sudah tersedia
+    // Route::get('/sales/excel', [ReportController::class, 'salesExcel'])->name('sales.excel');
+});
 
 require __DIR__.'/auth.php';

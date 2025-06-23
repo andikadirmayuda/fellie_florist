@@ -91,6 +91,28 @@
                 </x-slot>
                 {{ __('Penjualan') }}
             </x-sidebar-link>
+
+            <li class="mt-4">
+                <div class="font-bold text-xs text-gray-500 uppercase mb-1">Laporan</div>
+                <ul class="space-y-1">
+                    <x-sidebar-link :href="route('reports.sales')" :active="request()->routeIs('reports.sales')">
+                        <x-slot name="icon">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-6a2 2 0 012-2h2a2 2 0 012 2v6m-6 0h6" />
+                            </svg>
+                        </x-slot>
+                        Laporan Penjualan
+                    </x-sidebar-link>
+                    <x-sidebar-link :href="route('reports.stock')" :active="request()->routeIs('reports.stock')">
+                        <x-slot name="icon">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h18M3 12h18M3 17h18" />
+                            </svg>
+                        </x-slot>
+                        Laporan Stok
+                    </x-sidebar-link>
+                </ul>
+            </li>
         </ul>
     </div>
 </nav>
