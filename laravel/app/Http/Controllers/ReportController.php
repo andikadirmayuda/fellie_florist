@@ -68,4 +68,44 @@ class ReportController extends Controller
         $pdf = Pdf::loadView('reports.sales_pdf', compact('sales', 'start', 'end'));
         return $pdf->download('laporan_penjualan.pdf');
     }
+
+    // Laporan Pemesanan
+    public function orders(Request $request)
+    {
+        $start = $request->input('start_date', now()->startOfMonth()->toDateString());
+        $end = $request->input('end_date', now()->endOfMonth()->toDateString());
+
+        $orders = \App\Models\Order::with(['customer'])
+            ->whereBetween('created_at', [$start, $end])
+            ->latest()
+            ->get();
+
+        $totalOrder = $orders->count();
+        $totalNominal = $orders->sum(function($order) {
+            return $order->total + $order->delivery_fee;
+        });
+        $totalLunas = $orders->where('status', 'completed')->count();
+        $totalBelumLunas = $orders->where('status', '!=', 'completed')->count();
+
+        return view('reports.orders', compact('orders', 'start', 'end', 'totalOrder', 'totalNominal', 'totalLunas', 'totalBelumLunas'));
+    }
+
+    // Laporan Pelanggan
+    public function customers(Request $request)
+    {
+        $start = $request->input('start_date', now()->startOfMonth()->toDateString());
+        $end = $request->input('end_date', now()->endOfMonth()->toDateString());
+
+        $customers = \App\Models\Customer::withCount(['orders' => function($q) use ($start, $end) {
+            $q->whereBetween('created_at', [$start, $end]);
+        }])->with(['orders' => function($q) use ($start, $end) {
+            $q->whereBetween('created_at', [$start, $end]);
+        }])->get();
+
+        $totalCustomer = $customers->count();
+        $totalOrder = $customers->sum('orders_count');
+        $topCustomer = $customers->sortByDesc(function($c) { return $c->orders->sum('total'); })->first();
+
+        return view('reports.customers', compact('customers', 'start', 'end', 'totalCustomer', 'totalOrder', 'topCustomer'));
+    }
 }
