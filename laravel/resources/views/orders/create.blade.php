@@ -28,7 +28,7 @@
                         @csrf
 
                         <div class="mb-4">
-                            <label class="block text-sm font-medium text-gray-700">No. Order (Otomatis)</label>
+                            <label class="block text-sm font-medium text-gray-700">No. Order (Yang Otomatis)</label>
                             <input type="text" class="form-input w-full rounded-md border-gray-300" value="(Akan otomatis)" disabled>
                         </div>
                         <div class="mb-4">
