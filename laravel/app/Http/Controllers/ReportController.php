@@ -29,7 +29,7 @@ class ReportController extends Controller
             ->join('sale_items', 'products.id', '=', 'sale_items.product_id')
             ->join('sales', 'sales.id', '=', 'sale_items.sale_id')
             ->whereBetween('sales.created_at', [$start, $end])
-            ->selectRaw('SUM(sale_items.qty) as total_terjual')
+            ->selectRaw('SUM(sale_items.quantity) as total_terjual')
             ->groupBy('products.id')
             ->orderByDesc('total_terjual')
             ->first();
@@ -41,7 +41,7 @@ class ReportController extends Controller
                 $q->whereNull('sales.created_at')
                   ->orWhereBetween('sales.created_at', [$start, $end]);
             })
-            ->selectRaw('COALESCE(SUM(sale_items.qty),0) as total_terjual')
+            ->selectRaw('COALESCE(SUM(sale_items.quantity),0) as total_terjual')
             ->groupBy('products.id')
             ->orderBy('total_terjual', 'asc')
             ->first();
