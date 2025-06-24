@@ -14,7 +14,7 @@ class Product extends Model
 
     protected $fillable = [
         'category_id',
-        'auto_code',
+        'code',
         'name',
         'description',
         'base_unit',
@@ -62,7 +62,7 @@ class Product extends Model
     public function scopeSearch($query, $search)
     {
         return $query->where(function($q) use ($search) {
-            $q->where('auto_code', 'like', "%{$search}%")
+            $q->where('code', 'like', "%{$search}%")
               ->orWhere('name', 'like', "%{$search}%")
               ->orWhereHas('category', function($q) use ($search) {
                   $q->where('name', 'like', "%{$search}%");

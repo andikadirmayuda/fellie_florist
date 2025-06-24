@@ -70,7 +70,7 @@
                             </thead>
                             <tbody>
                                 @forelse($products as $product)                                    <tr class="border-b hover:bg-gray-50">
-                                        <td class="px-4 py-2">{{ $product->auto_code }}</td>
+                                        <td class="px-4 py-2">{{ $product->code }}</td>
                                         <td class="px-4 py-2">{{ $product->name }}</td>
                                         <td class="px-4 py-2">{{ $product->category->name }}</td>
                                         <td class="px-4 py-2">

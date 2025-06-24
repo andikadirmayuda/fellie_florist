@@ -38,10 +38,10 @@
                                 </select>
                             </div>                            @if(isset($product))
                             <div>
-                                <label class="block text-sm font-medium text-gray-700">Kode Produk</label>
-                                <div class="mt-1 block w-full p-2 bg-gray-100 rounded-md">
-                                    {{ $product->auto_code }}
-                                </div>
+                                <label for="code" class="block text-sm font-medium text-gray-700">Kode Produk</label>
+                                <input type="text" name="code" id="code"
+                                       value="{{ old('code', $product->code ?? '') }}"
+                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>
                             </div>
                             @endif
 
