@@ -1,17 +1,17 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-100 leading-tight">
-            Detail Penjualan
+            Detail Transaksi Penjualan
         </h2>
     </x-slot>
     <div class="max-w-4xl mx-auto py-8 px-4">
         <div class="bg-white rounded-xl shadow-lg p-8 border border-gray-100">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
                 <div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Informasi Penjualan</h3>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Informasi Pemesanan</h3>
                     <dl class="space-y-2">
                         <div class="flex justify-between">
-                            <dt class="text-gray-600">No. Penjualan:</dt>
+                            <dt class="text-gray-600">No. Transaksi:</dt>
                             <dd class="font-semibold text-blue-700">{{ $sale->order_number }}</dd>
                         </div>
                         <div class="flex justify-between">
@@ -58,6 +58,16 @@
                         <span class="font-semibold text-gray-700">Total</span>
                         <span class="font-bold text-lg text-blue-700">Rp {{ number_format($sale->total, 0, ',', '.') }}</span>
                     </div>
+                    @if($sale->payment_method == 'cash')
+                    <div class="flex justify-between mb-2">
+                        <span class="text-gray-700">Uang Diberikan</span>
+                        <span class="text-gray-900">Rp {{ number_format($sale->cash_given ?? 0, 0, ',', '.') }}</span>
+                    </div>
+                    <div class="flex justify-between mb-2">
+                        <span class="text-gray-700">Kembalian</span>
+                        <span class="text-gray-900">Rp {{ number_format($sale->change ?? 0, 0, ',', '.') }}</span>
+                    </div>
+                    @endif
                 </div>
             </div>
             <div class="mt-4 mb-2 text-sm text-blue-700">

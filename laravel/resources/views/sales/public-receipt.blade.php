@@ -24,14 +24,16 @@
             margin-bottom: 18px;
         }
         .brand-logo {
-            width: 54px;
-            height: 54px;
+            width: 100px;
+            height: auto;
             margin-bottom: 8px;
+            object-fit: contain;
+            display: block;
         }
         .brand-title {
             font-size: 1.25rem;
             font-weight: 700;
-            color: #2563eb;
+            color: #000000;
             letter-spacing: 1px;
             text-align:center;
         }
@@ -90,7 +92,7 @@
             margin-bottom: 18px;
         }
         .total-label { color: #444; font-weight: 600; }
-        .total-value { color: #2563eb; font-weight: 700; font-size: 1.2rem; }
+        .total-value { color: #ff0000; font-weight: 700; font-size: 1.2rem; }
         .footer {
             text-align: center;
             color: #888;
@@ -102,16 +104,17 @@
 <body>
     <div class="receipt">
         <div class="brand-header">
-            <img src="{{ public_path('logo-fellie.png') }}" alt="Logo" class="brand-logo">
+            <img src="{{ asset('logo-fellie.png') }}" alt="Logo" class="brand-logo">
             <div class="brand-title">Fellie Florist</div>
-            <div class="brand-address">Jl. Mawar No. 123, Jakarta<br>Telp: 08XXXXXXXXXX</div>
+            <hr style="border: 0; border-top: 2px solid #000000; width: 7%; margin: 8px 0;">
+            <div class="brand-address">Jl. Lunjuk Jaya No.5, Bukit Lama, Kec. Ilir Bar. I<br>Kota Palembang, Sumatera Selatan 30139<br>Telp: 0821-7792-9879<br>Instagram: @fellieflorist</div>
         </div>
-        <h2>Struk Penjualan</h2>
+        {{-- <h2>STRUK PEMESANAN</h2> --}}
         <table class="info-table">
             <tr>
-                <td>No. Penjualan</td>
+                <td>No. Transaksi</td>
                 <td style="width:10px;">:</td>
-                <td class="text-blue-700" style="color:#2563eb;font-weight:600;">{{ $sale->order_number }}</td>
+                <td class="text-blue-700" style="color:#000000;font-weight:600;">{{ $sale->order_number }}</td>
             </tr>
             <tr>
                 <td>Tanggal</td>
@@ -155,9 +158,19 @@
             <span class="total-label">Total</span>
             <span class="total-value">Rp {{ number_format($sale->total, 0, ',', '.') }}</span>
         </div>
+        @if($sale->payment_method == 'cash')
+        <div class="total-box" style="background:#e6f7e6;">
+            <span class="total-label">Uang Diberikan</span>
+            <span class="total-value" style="color:#222;">Rp {{ number_format($sale->cash_given ?? 0, 0, ',', '.') }}</span>
+        </div>
+        <div class="total-box" style="background:#f8e6e6;">
+            <span class="total-label">Kembalian</span>
+            <span class="total-value" style="color:#222;">Rp {{ number_format($sale->change ?? 0, 0, ',', '.') }}</span>
+        </div>
+        @endif
         <div class="footer">
             Terima kasih telah berbelanja di Fellie Florist!<br>
-            <span>Untuk pertanyaan, hubungi: 08XXXXXXXXXX</span>
+            <span>Untuk pertanyaan, hubungi: 0821-7792-9879</span>
         </div>
     </div>
 </body>

@@ -59,6 +59,13 @@
                     <input type="number" class="form-input w-full rounded-md border-gray-300 dark:bg-gray-800 dark:text-gray-100" id="quantityInput" min="1" value="1">
                 </div>
             </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Cari Produk dengan Kode</label>
+                    <input type="text" id="searchByCodeInput" class="form-input w-full rounded-md border-gray-300 dark:bg-gray-800 dark:text-gray-100" placeholder="Scan/masukkan kode produk...">
+                </div>
+            </div>
+            <div id="searchByCodeResult" class="my-2"></div>
             <div>
                 <button type="button" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded transition mt-2" id="addItemBtn">Tambah Produk</button>
             </div>
@@ -94,10 +101,19 @@
             <div class="mt-4">
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Metode Pembayaran</label>
                 <select class="form-select w-full rounded-md border-gray-300 dark:bg-gray-800 dark:text-gray-100" name="payment_method" required>
+                    <option value="pilih">Pilih Metode Pembayaran</option>
                     <option value="cash">Cash</option>
                     <option value="debit">Debit</option>
                     <option value="transfer">Transfer</option>
                 </select>
+            </div>
+            <div id="cashSection" class="mt-4" style="display:none;">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Uang Diberikan</label>
+                <input type="number" min="0" step="100" id="cashGivenInput" class="form-input w-full rounded-md border-gray-300 dark:bg-gray-800 dark:text-gray-100" placeholder="Masukkan nominal uang cash...">
+                <div class="mt-2 text-sm">
+                    <span>Kembalian: </span>
+                    <span id="cashChange" class="font-bold text-green-600">Rp 0</span>
+                </div>
             </div>
             <input type="hidden" name="items" id="itemsInput">
             <div class="flex justify-end mt-6">
@@ -194,8 +210,120 @@
             alert('Tambahkan minimal 1 produk!');
             return false;
         }
+        const paymentSelect = document.querySelector('select[name="payment_method"]');
+        if (paymentSelect.value === 'cash') {
+            const total = parseInt(document.getElementById('totalInput').value.replace(/[^0-9]/g, '')) || 0;
+            const given = parseInt(document.getElementById('cashGivenInput').value) || 0;
+            if (given < total) {
+                alert('Uang yang diberikan kurang dari total belanja!');
+                document.getElementById('cashGivenInput').focus();
+                return false;
+            }
+        }
         document.getElementById('itemsInput').value = JSON.stringify(items);
         return true;
     };
+    // Fitur pencarian produk berdasarkan kode
+    document.getElementById('searchByCodeInput').addEventListener('change', function() {
+        const code = this.value.trim();
+        const resultDiv = document.getElementById('searchByCodeResult');
+        if (!code) {
+            resultDiv.innerHTML = '';
+            return;
+        }
+        const product = products.find(p => p.code == code);
+        if (!product) {
+            resultDiv.innerHTML = '<div class="text-red-600">Produk dengan kode tersebut tidak ditemukan.</div>';
+            return;
+        }
+        // Tampilkan form pilih tipe harga dan jumlah
+        let priceOptions = '';
+        (product.prices || []).forEach(price => {
+            priceOptions += `<option value="${price.type}" data-price="${price.price}">${price.type.replaceAll('_',' ').toUpperCase()} (Rp ${parseFloat(price.price).toLocaleString()})</option>`;
+        });
+        resultDiv.innerHTML = `
+            <div class='p-3 bg-gray-100 dark:bg-gray-700 rounded mb-2'>
+                <div class='font-semibold mb-1'>${product.name}</div>
+                <div class='mb-2'>Stok: ${product.current_stock} ${product.base_unit}</div>
+                <div class='mb-2'>
+                    <label class='block text-sm mb-1'>Tipe Harga</label>
+                    <select id='codePriceTypeSelect' class='form-select w-full rounded-md border-gray-300'>
+                        <option value=''>Pilih Tipe Harga</option>
+                        ${priceOptions}
+                    </select>
+                </div>
+                <div class='mb-2'>
+                    <label class='block text-sm mb-1'>Jumlah</label>
+                    <input type='number' id='codeQuantityInput' class='form-input w-full rounded-md border-gray-300' min='1' value='1'>
+                </div>
+                <button type='button' class='bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded' id='addByCodeBtn'>Tambah Produk</button>
+            </div>
+        `;
+        document.getElementById('addByCodeBtn').onclick = function(e) {
+            e.preventDefault();
+            const priceType = document.getElementById('codePriceTypeSelect').value;
+            const priceTypeOption = document.querySelector(`#codePriceTypeSelect option[value='${priceType}']`);
+            const quantity = parseInt(document.getElementById('codeQuantityInput').value);
+            if (!priceType || quantity < 1) return alert('Lengkapi tipe harga dan jumlah!');
+            let priceObj = (product.prices || []).find(pr => pr.type === priceType);
+            let unitEquivalent = priceObj && priceObj.unit_equivalent ? parseInt(priceObj.unit_equivalent) : 1;
+            let stokTersedia = product.current_stock;
+            let totalButuh = quantity * unitEquivalent;
+            if (stokTersedia < totalButuh) {
+                alert('Stok produk tidak mencukupi! (Stok tersedia: ' + stokTersedia + ', dibutuhkan: ' + totalButuh + ')');
+                return;
+            }
+            let price = priceTypeOption ? parseFloat(priceTypeOption.getAttribute('data-price')) : 0;
+            items.push({
+                product_id: product.id,
+                product_name: product.name,
+                price_type: priceType,
+                quantity: quantity,
+                price: price
+            });
+            updateTable();
+            resultDiv.innerHTML = '';
+            document.getElementById('searchByCodeInput').value = '';
+        };
+    });
+    document.getElementById('searchByCodeInput').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            return false;
+        }
+    });
+    const paymentSelect = document.querySelector('select[name="payment_method"]');
+    const cashSection = document.getElementById('cashSection');
+    const cashGivenInput = document.getElementById('cashGivenInput');
+    const cashChange = document.getElementById('cashChange');
+    const totalInput = document.getElementById('totalInput');
+
+    paymentSelect.addEventListener('change', function() {
+        if (this.value === 'cash') {
+            cashSection.style.display = '';
+        } else {
+            cashSection.style.display = 'none';
+            cashGivenInput.value = '';
+            cashChange.textContent = 'Rp 0';
+        }
+    });
+
+    function formatRupiah(num) {
+        return 'Rp ' + (parseInt(num)||0).toLocaleString('id-ID');
+    }
+
+    cashGivenInput && cashGivenInput.addEventListener('input', function() {
+        const total = parseInt(totalInput.value.replace(/[^0-9]/g, '')) || 0;
+        const given = parseInt(this.value) || 0;
+        let change = given - total;
+        cashChange.textContent = formatRupiah(change >= 0 ? change : 0);
+        if (given < total) {
+            cashChange.classList.remove('text-green-600');
+            cashChange.classList.add('text-red-600');
+        } else {
+            cashChange.classList.remove('text-red-600');
+            cashChange.classList.add('text-green-600');
+        }
+    });
 </script>
 </x-app-layout>
