@@ -16,6 +16,8 @@ class Sale extends Model
         'subtotal',
         'payment_method',
         'public_code', // untuk public receipt
+        'cash_given',
+        'change',
     ];
 
     public function items()

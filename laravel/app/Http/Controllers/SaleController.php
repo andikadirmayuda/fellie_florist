@@ -58,6 +58,12 @@ class SaleController extends Controller
             // Generate kode unik public_code
             $public_code = bin2hex(random_bytes(8));
 
+            $cash_given = null;
+            $change = null;
+            if ($request->payment_method === 'cash') {
+                $cash_given = $request->input('cash_given') ?? 0;
+                $change = $cash_given - $total;
+            }
             $sale = Sale::create([
                 'order_number' => $order_number,
                 'order_time' => now(),
@@ -65,6 +71,8 @@ class SaleController extends Controller
                 'subtotal' => $subtotal,
                 'payment_method' => $request->payment_method,
                 'public_code' => $public_code,
+                'cash_given' => $cash_given,
+                'change' => $change,
             ]);
 
             foreach ($request->items as $item) {

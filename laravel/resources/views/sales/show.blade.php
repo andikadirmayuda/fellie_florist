@@ -60,7 +60,7 @@
                     </div>
                     @if($sale->payment_method == 'cash')
                     <div class="flex justify-between mb-2">
-                        <span class="text-gray-700">Uang Diberikan</span>
+                        <span class="text-gray-700">Bayar (Cash)</span>
                         <span class="text-gray-900">Rp {{ number_format($sale->cash_given ?? 0, 0, ',', '.') }}</span>
                     </div>
                     <div class="flex justify-between mb-2">

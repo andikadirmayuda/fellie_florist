@@ -108,7 +108,7 @@
                 </select>
             </div>
             <div id="cashSection" class="mt-4" style="display:none;">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Uang Diberikan</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Bayar (Cash)</label>
                 <input type="number" min="0" step="100" id="cashGivenInput" class="form-input w-full rounded-md border-gray-300 dark:bg-gray-800 dark:text-gray-100" placeholder="Masukkan nominal uang cash...">
                 <div class="mt-2 text-sm">
                     <span>Kembalian: </span>
@@ -116,6 +116,7 @@
                 </div>
             </div>
             <input type="hidden" name="items" id="itemsInput">
+            <input type="hidden" name="cash_given" id="hiddenCashGivenInput">
             <div class="flex justify-end mt-6">
                 <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded transition">Simpan</button>
             </div>
@@ -141,6 +142,21 @@
         }
     };
 
+    function updateCashChange() {
+        const total = parseInt(totalInput.value.replace(/[^0-9]/g, '')) || 0;
+        const given = parseInt(cashGivenInput.value) || 0;
+        let change = given - total;
+        cashChange.textContent = formatRupiah(change >= 0 ? change : 0);
+        document.getElementById('hiddenCashGivenInput').value = given;
+        if (given < total) {
+            cashChange.classList.remove('text-green-600');
+            cashChange.classList.add('text-red-600');
+        } else {
+            cashChange.classList.remove('text-red-600');
+            cashChange.classList.add('text-green-600');
+        }
+    }
+
     function updateTable() {
         let tbody = document.querySelector('#itemsTable tbody');
         tbody.innerHTML = '';
@@ -165,6 +181,7 @@
         document.getElementById('subtotalInput').value = subtotal.toLocaleString();
         document.getElementById('totalInput').value = subtotal.toLocaleString();
         document.getElementById('itemsInput').value = JSON.stringify(items);
+        updateCashChange(); // <-- update kembalian setiap kali tabel diupdate
     }
     function removeItem(idx) {
         items.splice(idx, 1);
@@ -312,18 +329,6 @@
         return 'Rp ' + (parseInt(num)||0).toLocaleString('id-ID');
     }
 
-    cashGivenInput && cashGivenInput.addEventListener('input', function() {
-        const total = parseInt(totalInput.value.replace(/[^0-9]/g, '')) || 0;
-        const given = parseInt(this.value) || 0;
-        let change = given - total;
-        cashChange.textContent = formatRupiah(change >= 0 ? change : 0);
-        if (given < total) {
-            cashChange.classList.remove('text-green-600');
-            cashChange.classList.add('text-red-600');
-        } else {
-            cashChange.classList.remove('text-red-600');
-            cashChange.classList.add('text-green-600');
-        }
-    });
+    cashGivenInput && cashGivenInput.addEventListener('input', updateCashChange);
 </script>
 </x-app-layout>

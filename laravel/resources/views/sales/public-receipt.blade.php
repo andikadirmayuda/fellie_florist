@@ -160,7 +160,7 @@
         </div>
         @if($sale->payment_method == 'cash')
         <div class="total-box" style="background:#e6f7e6;">
-            <span class="total-label">Uang Diberikan</span>
+            <span class="total-label">Bayar Cash</span>
             <span class="total-value" style="color:#222;">Rp {{ number_format($sale->cash_given ?? 0, 0, ',', '.') }}</span>
         </div>
         <div class="total-box" style="background:#f8e6e6;">
