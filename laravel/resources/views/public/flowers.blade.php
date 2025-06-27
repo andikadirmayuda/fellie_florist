@@ -13,6 +13,7 @@
                 <thead class="bg-black text-white">
                     <tr>
                         <th class="py-2 px-3 text-left">No</th>
+                        <th class="py-2 px-3 text-left">Gambar</th>
                         <th class="py-2 px-3 text-left">Nama Bunga</th>
                         <th class="py-2 px-3 text-left">Kategori</th>
                         <th class="py-2 px-3 text-left">Stok</th>
@@ -22,6 +23,13 @@
                     @forelse($flowers as $flower)
                     <tr class="border-b border-black hover:bg-gray-100">
                         <td class="py-2 px-3">{{ $loop->iteration }}</td>
+                        <td class="py-2 px-3">
+                            @if($flower->image)
+                                <img src="{{ asset('storage/' . $flower->image) }}" alt="{{ $flower->name }}" class="h-12 w-12 object-cover rounded">
+                            @else
+                                <span class="text-gray-400 italic">-</span>
+                            @endif
+                        </td>
                         <td class="py-2 px-3">{{ $flower->name }}</td>
                         <td class="py-2 px-3">{{ $flower->category->name ?? '-' }}</td>
                         <td class="py-2 px-3">{{ $flower->current_stock }}</td>

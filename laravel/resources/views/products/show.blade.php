@@ -35,6 +35,12 @@
                                     <dt class="text-sm font-medium text-gray-500">Deskripsi</dt>
                                     <dd class="mt-1 text-sm text-gray-900">{{ $product->description ?: '-' }}</dd>
                                 </div>
+                                @if($product->image)
+                                <div>
+                                    <dt class="text-sm font-medium text-gray-500">Gambar</dt>
+                                    <dd class="mt-1"><img src="{{ asset('storage/' . $product->image) }}" alt="Gambar Produk" class="h-32 rounded"></dd>
+                                </div>
+                                @endif
                             </dl>
                         </div>
 

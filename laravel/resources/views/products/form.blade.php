@@ -20,12 +20,21 @@
                     @endif
 
                     <form action="{{ isset($product) ? route('products.update', $product) : route('products.store') }}" 
-                          method="POST" class="space-y-6">
+                          method="POST" class="space-y-6" enctype="multipart/form-data">
                         @csrf
                         @if(isset($product)) @method('PUT') @endif
 
                         <!-- Basic Information -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="image" class="block text-sm font-medium text-gray-700">Gambar Produk (opsional)</label>
+                                <input type="file" name="image" id="image" accept="image/*" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                                @if(isset($product) && $product->image)
+                                    <div class="mt-2">
+                                        <img src="{{ asset('storage/' . $product->image) }}" alt="Gambar Produk" class="h-24 rounded">
+                                    </div>
+                                @endif
+                            </div>
                             <div>
                                 <label for="category_id" class="block text-sm font-medium text-gray-700">Kategori</label>
                                 <select name="category_id" id="category_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">

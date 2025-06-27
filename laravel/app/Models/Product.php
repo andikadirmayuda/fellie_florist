@@ -17,6 +17,7 @@ class Product extends Model
         'code',
         'name',
         'description',
+        'image',
         'base_unit',
         'current_stock',
         'min_stock',

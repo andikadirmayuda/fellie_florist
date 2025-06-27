@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\ProductPrice;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\ProductRequest;
 
 class ProductController extends Controller
@@ -38,8 +39,11 @@ class ProductController extends Controller
     {
         DB::beginTransaction();
         try {
-            $product = Product::create($request->except('prices'));
-            
+            $data = $request->except('prices');
+            if ($request->hasFile('image')) {
+                $data['image'] = $request->file('image')->store('products', 'public');
+            }
+            $product = Product::create($data);
             // Process and save prices
             $this->processPrices($product, $request->input('prices', []));
 
@@ -77,8 +81,15 @@ class ProductController extends Controller
     {
         DB::beginTransaction();
         try {
-            $product->update($request->except('prices'));
-            
+            $data = $request->except('prices');
+            if ($request->hasFile('image')) {
+                // Hapus gambar lama jika ada
+                if ($product->image && Storage::disk('public')->exists($product->image)) {
+                    Storage::disk('public')->delete($product->image);
+                }
+                $data['image'] = $request->file('image')->store('products', 'public');
+            }
+            $product->update($data);
             // Process and save prices
             $this->processPrices($product, $request->input('prices', []));
 
