@@ -1,57 +1,116 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+        <h2 class="font-semibold text-xl text-gray-900 dark:text-white leading-tight">
             {{ __('Dashboard') }}
         </h2>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900 dark:text-gray-100">
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <!-- Owner & Admin Section -->
-                        @if ($user->hasRole('owner') || $user->hasRole('admin'))
-                        <div class="p-4 bg-blue-100 dark:bg-blue-900 rounded-lg">
-                            <h4 class="font-bold text-lg mb-2">User Management</h4>
-                            <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">Manage system users and their roles</p>
-                            <a href="{{ route('users.index') }}" class="inline-block bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-                                Manage Users
-                            </a>
-                        </div>
-                        @endif
+    <div class="py-8 bg-white dark:bg-black min-h-screen">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Summary Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="bg-black dark:bg-white shadow rounded-2xl p-6 flex flex-col items-center transition-colors">
+                    <span class="text-3xl font-bold text-white dark:text-black">{{ $totalCustomers ?? 0 }}</span>
+                    <span class="text-gray-400 dark:text-gray-600 mt-2">Pelanggan</span>
+                </div>
+                <div class="bg-black dark:bg-white shadow rounded-2xl p-6 flex flex-col items-center transition-colors">
+                    <span class="text-3xl font-bold text-white dark:text-black">{{ $totalProducts ?? 0 }}</span>
+                    <span class="text-gray-400 dark:text-gray-600 mt-2">Produk</span>
+                </div>
+                <div class="bg-black dark:bg-white shadow rounded-2xl p-6 flex flex-col items-center transition-colors">
+                    <span class="text-3xl font-bold text-white dark:text-black">{{ $totalOrders ?? 0 }}</span>
+                    <span class="text-gray-400 dark:text-gray-600 mt-2">Pesanan</span>
+                </div>
+                <div class="bg-black dark:bg-white shadow rounded-2xl p-6 flex flex-col items-center transition-colors">
+                    <span class="text-3xl font-bold text-white dark:text-black">Rp {{ number_format($totalSales ?? 0,0,',','.') }}</span>
+                    <span class="text-gray-400 dark:text-gray-600 mt-2">Penjualan</span>
+                </div>
+            </div>
 
-                        <!-- Products Section -->
-                        <div class="p-4 bg-green-100 dark:bg-green-900 rounded-lg">
-                            <h4 class="font-bold text-lg mb-2">Products</h4>
-                            <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">Browse and manage flower products</p>
-                            <a href="#" class="inline-block bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
-                                View Products
-                            </a>
-                        </div>
+            <!-- Grafik Penjualan & Pesanan (Chart.js) -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <div class="bg-gray-100 dark:bg-gray-800 rounded-2xl h-56 flex flex-col justify-end p-6">
+                    <h3 class="font-semibold text-lg text-black dark:text-white mb-4">Grafik Penjualan</h3>
+                    <canvas id="salesChart" class="w-full h-32"></canvas>
+                </div>
+                <div class="bg-gray-100 dark:bg-gray-800 rounded-2xl h-56 flex flex-col justify-end p-6">
+                    <h3 class="font-semibold text-lg text-black dark:text-white mb-4">Grafik Pesanan</h3>
+                    <canvas id="ordersChart" class="w-full h-32"></canvas>
+                </div>
+            </div>
 
-                        <!-- Orders Section -->
-                        <div class="p-4 bg-purple-100 dark:bg-purple-900 rounded-lg">
-                            <h4 class="font-bold text-lg mb-2">Orders</h4>
-                            <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">View and manage flower orders</p>
-                            <a href="#" class="inline-block bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600">
-                                Manage Orders
-                            </a>
-                        </div>
-
-                        <!-- Reports Section - Only for Owner, Admin, and Kasir -->
-                        @if ($user->hasAnyRole(['owner', 'admin', 'kasir']))
-                        <div class="p-4 bg-yellow-100 dark:bg-yellow-900 rounded-lg">
-                            <h4 class="font-bold text-lg mb-2">Reports</h4>
-                            <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">View sales and inventory reports</p>
-                            <a href="#" class="inline-block bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">
-                                View Reports
-                            </a>
-                        </div>
-                        @endif
+            <!-- Notifikasi & Quick Action -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                <div class="lg:col-span-2 bg-black dark:bg-white shadow rounded-2xl p-6 mb-6 lg:mb-0">
+                    <h3 class="font-semibold text-lg text-white dark:text-black mb-4">Notifikasi</h3>
+                    <ul class="space-y-2">
+                        @forelse($lowStockProducts ?? [] as $product)
+                            <li class="text-red-500 dark:text-red-400">Stok menipis: {{ $product->name }} ({{ $product->stock }})</li>
+                        @empty
+                            <li class="text-gray-500 dark:text-gray-300">Tidak ada notifikasi stok menipis.</li>
+                        @endforelse
+                        @forelse($recentOrders ?? [] as $order)
+                            <li class="text-blue-500 dark:text-blue-400">Pesanan baru: #{{ $order->id }} oleh {{ $order->customer->name }}</li>
+                        @empty
+                        @endforelse
+                    </ul>
+                </div>
+                <div class="bg-black dark:bg-white shadow rounded-2xl p-6 flex flex-col justify-between">
+                    <h3 class="font-semibold text-lg text-white dark:text-black mb-4">Aksi Cepat</h3>
+                    <div class="flex flex-col space-y-2">
+                        <a href="{{ route('products.create') }}" class="bg-white text-black font-semibold px-4 py-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-900 transition">Tambah Produk</a>
+                        <a href="{{ route('orders.create') }}" class="bg-white text-black font-semibold px-4 py-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-900 transition">Buat Pesanan</a>
                     </div>
+                </div>
+            </div>
+
+            <!-- Tabel Bunga Ready Stock -->
+            <div class="bg-black dark:bg-gray-900 rounded-2xl shadow p-6">
+                <h3 class="font-semibold text-lg text-white mb-4">Bunga Ready Stock</h3>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-sm text-left">
+                        <thead>
+                            <tr class="border-b border-gray-700">
+                                <th class="px-4 py-2 text-white font-semibold">Nama Bunga</th>
+                                <th class="px-4 py-2 text-white font-semibold">Kategori</th>
+                                <th class="px-4 py-2 text-white font-semibold">Stok</th>
+                                {{-- <th class="px-4 py-2 text-white font-semibold">Harga</th> --}}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse(($readyProducts ?? []) as $product)
+                                @if(is_object($product))
+                                <tr class="border-b border-gray-800 hover:bg-gray-800">
+                                    <td class="px-4 py-2 text-white">{{ data_get($product, 'name', '-') }}</td>
+                                    <td class="px-4 py-2 text-white">{{ data_get($product, 'category.name', '-') }}</td>
+                                    <td class="px-4 py-2 text-white">{{ data_get($product, 'current_stock', 0) }}</td>
+                                    {{-- <td class="px-4 py-2 text-white">Rp {{ number_format(data_get($product, 'prices.0.price', 0),0,',','.') }}</td> --}}
+                                </tr>
+                                @endif
+                            @empty
+                                <tr><td colspan="4" class="px-4 py-2 text-white text-center">Tidak ada produk ready stock.</td></tr>
+                            @endforelse
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const salesCtx = document.getElementById('salesChart').getContext('2d');
+        const ordersCtx = document.getElementById('ordersChart').getContext('2d');
+        new Chart(salesCtx, {
+            type: 'line',
+            data: @json($salesChartData ?? ['labels'=>[], 'datasets'=>[]]),
+            options: {responsive: true, plugins: {legend: {display: false}}}
+        });
+        new Chart(ordersCtx, {
+            type: 'bar',
+            data: @json($ordersChartData ?? ['labels'=>[], 'datasets'=>[]]),
+            options: {responsive: true, plugins: {legend: {display: false}}}
+        });
+    </script>
 </x-app-layout>
