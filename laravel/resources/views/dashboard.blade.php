@@ -66,7 +66,12 @@
 
             <!-- Tabel Bunga Ready Stock -->
             <div class="bg-black dark:bg-gray-900 rounded-2xl shadow p-6">
-                <h3 class="font-semibold text-lg text-white mb-4">Bunga Ready Stock</h3>
+                <h3 class="font-semibold text-lg text-white mb-4">
+                    Bunga Ready Stock
+                    <span class="ml-2 text-base font-normal">
+                        | <a href="{{ url('/bunga-ready') }}" target="_blank" class="text-blue-400 underline hover:text-blue-600 transition">Lihat Publik</a>
+                    </span>
+                </h3>
                 <div class="overflow-x-auto">
                     <table class="min-w-full text-sm text-left">
                         <thead>
