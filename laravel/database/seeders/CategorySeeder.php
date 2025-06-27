@@ -13,9 +13,9 @@ class CategorySeeder extends Seeder
     {
         $categories = [
             [
-                'code' => 'BP',
-                'name' => 'Bunga Potong',
-                'prefix' => 'BP',
+                'code' => 'FF',
+                'name' => 'Fresh Flowers',
+                'prefix' => 'FF',
                 'next_number' => 1,
                 'created_at' => now(),
                 'updated_at' => now(),

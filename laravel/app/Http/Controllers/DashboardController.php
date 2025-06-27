@@ -16,14 +16,12 @@ class DashboardController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $role = $user->roles()->first();
-        $roleName = $role ? $role->name : 'default';
 
         // Statistik utama
         $totalCustomers = Customer::count();
         $totalProducts = Product::count();
         $totalOrders = Order::count();
-        $totalSales = Sale::sum('total');
+        $totalSales = Sale::count();
 
         // Produk stok menipis
         $lowStockProducts = Product::whereColumn('current_stock', '<=', 'min_stock')->get();
@@ -83,11 +81,7 @@ class DashboardController extends Controller
             'readyProducts' // tambahkan ini
         );
 
-        // Try to load role-specific dashboard, fallback to default if not found
-        if (view()->exists("dashboard.{$roleName}")) {
-            return view("dashboard.{$roleName}", $data);
-        }
-        
+        // Selalu arahkan ke dashboard utama
         return view('dashboard', $data);
     }
 }

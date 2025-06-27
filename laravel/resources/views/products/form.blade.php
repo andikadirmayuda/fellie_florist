@@ -45,14 +45,13 @@
                                         </option>
                                     @endforeach
                                 </select>
-                            </div>                            @if(isset($product))
+                            </div>
                             <div>
-                                <label for="code" class="block text-sm font-medium text-gray-700">Kode Produk</label>
+                                <label for="code" class="block text-sm font-medium text-gray-700">Kode Produk <span class="text-xs text-gray-400">(opsional, isi manual jika perlu)</span></label>
                                 <input type="text" name="code" id="code"
                                        value="{{ old('code', $product->code ?? '') }}"
-                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>
+                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
                             </div>
-                            @endif
 
                             <div>
                                 <label for="name" class="block text-sm font-medium text-gray-700">Nama Produk</label>

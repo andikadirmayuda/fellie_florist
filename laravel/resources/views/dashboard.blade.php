@@ -22,7 +22,7 @@
                     <span class="text-gray-400 dark:text-gray-600 mt-2">Pesanan</span>
                 </div>
                 <div class="bg-black dark:bg-white shadow rounded-2xl p-6 flex flex-col items-center transition-colors">
-                    <span class="text-3xl font-bold text-white dark:text-black">Rp {{ number_format($totalSales ?? 0,0,',','.') }}</span>
+                    <span class="text-3xl font-bold text-white dark:text-black">{{ number_format($totalSales ?? 0,0,',','.') }}</span>
                     <span class="text-gray-400 dark:text-gray-600 mt-2">Penjualan</span>
                 </div>
             </div>
@@ -30,11 +30,11 @@
             <!-- Grafik Penjualan & Pesanan (Chart.js) -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
                 <div class="bg-gray-100 dark:bg-gray-800 rounded-2xl h-56 flex flex-col justify-end p-6">
-                    <h3 class="font-semibold text-lg text-black dark:text-white mb-4">Grafik Penjualan</h3>
+                    <h3 class="font-semibold text-lg text-black dark:text-white mb-8 mt-4">Grafik Penjualan</h3>
                     <canvas id="salesChart" class="w-full h-32"></canvas>
                 </div>
                 <div class="bg-gray-100 dark:bg-gray-800 rounded-2xl h-56 flex flex-col justify-end p-6">
-                    <h3 class="font-semibold text-lg text-black dark:text-white mb-4">Grafik Pesanan</h3>
+                    <h3 class="font-semibold text-lg text-black dark:text-white m-10">Grafik Pesanan</h3>
                     <canvas id="ordersChart" class="w-full h-32"></canvas>
                 </div>
             </div>
@@ -89,7 +89,6 @@
                                     <td class="px-4 py-2 text-white">{{ data_get($product, 'name', '-') }}</td>
                                     <td class="px-4 py-2 text-white">{{ data_get($product, 'category.name', '-') }}</td>
                                     <td class="px-4 py-2 text-white">{{ data_get($product, 'current_stock', 0) }}</td>
-                                    {{-- <td class="px-4 py-2 text-white">Rp {{ number_format(data_get($product, 'prices.0.price', 0),0,',','.') }}</td> --}}
                                 </tr>
                                 @endif
                             @empty

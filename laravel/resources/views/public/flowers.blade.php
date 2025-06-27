@@ -8,39 +8,69 @@
         <h1 class="text-2xl md:text-3xl font-bold mb-6 text-center">
             🌸 Daftar Bunga Ready Stock
         </h1>
-        <div class="w-full max-w-2xl overflow-x-auto">
-            <table class="min-w-full border border-black rounded-lg overflow-hidden">
-                <thead class="bg-black text-white">
-                    <tr>
-                        <th class="py-2 px-3 text-left">No</th>
-                        <th class="py-2 px-3 text-left">Gambar</th>
-                        <th class="py-2 px-3 text-left">Nama Bunga</th>
-                        <th class="py-2 px-3 text-left">Kategori</th>
-                        <th class="py-2 px-3 text-left">Stok</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($flowers as $flower)
-                    <tr class="border-b border-black hover:bg-gray-100">
-                        <td class="py-2 px-3">{{ $loop->iteration }}</td>
-                        <td class="py-2 px-3">
-                            @if($flower->image)
-                                <img src="{{ asset('storage/' . $flower->image) }}" alt="{{ $flower->name }}" class="h-12 w-12 object-cover rounded">
-                            @else
-                                <span class="text-gray-400 italic">-</span>
-                            @endif
-                        </td>
-                        <td class="py-2 px-3">{{ $flower->name }}</td>
-                        <td class="py-2 px-3">{{ $flower->category->name ?? '-' }}</td>
-                        <td class="py-2 px-3">{{ $flower->current_stock }}</td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="4" class="py-4 text-center text-gray-500">Tidak ada bunga ready stock.</td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
+        <div class="w-full max-w-6xl mx-auto">
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
+                @forelse($flowers as $flower)
+                <div class="bg-white border border-black rounded-xl shadow hover:shadow-lg transition group flex flex-col overflow-hidden relative">
+                    <div class="relative h-48 sm:h-56 md:h-60 w-full overflow-hidden flex items-center justify-center bg-black">
+                        @if($flower->image)
+                            <img src="{{ asset('storage/' . $flower->image) }}" alt="{{ $flower->name }}" class="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300">
+                        @else
+                            <div class="flex items-center justify-center w-full h-full text-gray-400 text-6xl">-</div>
+                        @endif
+                        <div class="absolute bottom-0 left-0 w-full bg-black bg-opacity-60 px-2 py-1">
+                            <span class="text-white font-semibold text-base truncate block">{{ $flower->name }}</span>
+                        </div>
+                    </div>
+                    <div class="flex-1 flex flex-col justify-between p-3">
+                        <div class="mb-2">
+                            <span class="block text-xs text-gray-500">Kategori</span>
+                            <span class="block text-sm font-medium text-black">{{ $flower->category->name ?? '-' }}</span>
+                        </div>
+                        <div class="mb-2">
+                            <span class="block text-xs text-gray-500">Deskripsi</span>
+                            <span class="block text-sm text-black line-clamp-2">{{ $flower->description ?: '-' }}</span>
+                        </div>
+                        <div class="mb-2">
+                            <span class="block text-xs text-gray-500">Harga per Tangkai</span>
+                            <span class="block text-sm font-semibold text-green-700">
+                                @php
+                                    $stemPrice = $flower->prices->firstWhere('type', 'per_tangkai');
+                                @endphp
+                                @if($stemPrice)
+                                    Rp{{ number_format($stemPrice->price,0,',','.') }}
+                                @else
+                                    -
+                                @endif
+                            </span>
+                        </div>
+                        <div class="mb-2">
+                            <span class="block text-xs text-gray-500">Harga per Ikat</span>
+                            <span class="block text-sm font-semibold text-blue-700">
+                                @php
+                                    // Ambil harga per ikat prioritas: ikat_20, lalu ikat_10, lalu ikat_5
+                                    $bundlePrice = $flower->prices->firstWhere('type', 'ikat_20')
+                                        ?? $flower->prices->firstWhere('type', 'ikat_10')
+                                        ?? $flower->prices->firstWhere('type', 'ikat_5');
+                                @endphp
+                                @if($bundlePrice)
+                                    Rp{{ number_format($bundlePrice->price,0,',','.') }}
+                                    <span class="text-xs text-gray-500">/{{ str_replace('_', ' ', $bundlePrice->type) }}</span>
+                                @else
+                                    -
+                                @endif
+                            </span>
+                        </div>
+                        <div class="flex items-center justify-between mt-auto">
+                            <span class="text-xs text-gray-500">Stok Tersedia</span>
+                            <span class="text-lg font-bold text-black">{{ $flower->current_stock }} Tangkai</span>
+                        </div>
+                    </div>
+                </div>
+                @empty
+                <div class="col-span-full text-center text-gray-500 py-8">Tidak ada bunga ready stock.</div>
+                @endforelse
+            </div>
         </div>
     </div>
 </x-app-layout>

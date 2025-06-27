@@ -17,7 +17,7 @@ class ProductController extends Controller
           $products = Product::with('category')
             ->search($request->search)
             ->filterByCategory($request->category)
-            ->orderBy('auto_code')
+            ->orderBy('code')
             ->paginate(10)
             ->withQueryString();
 

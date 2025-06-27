@@ -11,7 +11,7 @@ class PublicFlowerController extends Controller
     public function index()
     {
         // Ambil semua produk yang stoknya > 0, tampilkan semua kategori
-        $flowers = Product::with('category')
+        $flowers = Product::with(['category', 'prices'])
             ->where('current_stock', '>', 0)
             ->orderBy('name')
             ->get();
