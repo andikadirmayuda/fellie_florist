@@ -1,5 +1,6 @@
 <nav class="space-y-2 font-sans">
-    <div class="px-4 py-6 bg-white shadow-lg rounded-2xl border border-gray-100 mt-4 mx-2">
+    {{-- <div class="px-4 py-6 bg-black shadow-sm rounded-2xl border border-gray-100 mt-4 mx-2"> --}}
+        <div class="px-4 py-6 bg-black border-r border-gray-700 h-full">
         <ul class="space-y-2">
             <x-sidebar-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 <x-slot name="icon">

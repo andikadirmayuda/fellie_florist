@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+        <title>{{ config('app.name', 'Fellie Florist') }}</title>
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -13,12 +13,12 @@
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
-        
+
         <!-- Bootstrap Icons CDN -->
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     </head>
     <body class="font-sans antialiased">
-        <div class="min-h-screen bg-gray-100 dark:bg-gray-900" 
+        <div class="min-h-screen bg-black" 
             x-data="{ 
                 isSidebarOpen: localStorage.getItem('sidebarOpen') === 'true',
                 toggleSidebar() {
@@ -60,7 +60,7 @@
                 :class="{ 'lg:ml-64': isSidebarOpen }"
             >
                 <!-- Top Navigation -->
-                <div class="bg-white dark:bg-gray-800 shadow">
+                <div class="bg-black dark:bg-white-800 shadow">
                     <div class="flex items-center h-16 px-4">
                         <button 
                             @click="toggleSidebar"
@@ -79,7 +79,8 @@
                         <div class="ml-auto flex items-center">
                             <x-dropdown align="right" width="48">
                                 <x-slot name="trigger">
-                                    <button class="flex items-center text-sm font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
+                                    <button class="flex items-center text-sm font-medium text-white-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
+                                        
                                         <div>{{ Auth::user()->name }}</div>
                                         <div class="ml-1">
                                             <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
@@ -111,9 +112,10 @@
 
             <!-- Page Heading -->
             @isset($header)
-                <header class="bg-white dark:bg-gray-800 shadow">
-                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                        {{ $header }}
+                <header class="bg-white shadow-lg rounded-2xl mt-6 mb-6 mx-4 flex items-center px-6 py-4">
+                    <i class="bi bi-flower2 text-2xl text-pink-400 mr-4"></i>
+                    <div class="flex-1">
+                        <div class="text-xl font-bold text-black font-sans">{{ $header }}</div>
                     </div>
                 </header>
             @endisset

@@ -1,4 +1,4 @@
-<nav x-data="{ open: false }" class="bg-white border-b border-gray-100 shadow-lg rounded-b-2xl font-sans">
+<nav x-data="{ open: false }" class="bg-[#181f2a] text-white border-b border-[#181f2a] shadow-lg font-sans">
     <!-- Primary Navigation Menu -->
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -7,24 +7,24 @@
                 <!-- Logo -->
                 <a href="{{ route('dashboard') }}" class="flex items-center">
                     <i class="bi bi-flower2 text-2xl text-pink-400 mr-2"></i>
-                    <span class="font-bold text-lg text-gray-800">Fellie Florist</span>
+                    <span class="font-bold text-lg text-white">Fellie Florist</span>
                 </a>
                 <!-- Navigation Links -->
                 <div class="hidden space-x-6 sm:flex ml-8">
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                        <i class="bi bi-house-door-fill mr-1"></i> {{ __('Dashboard') }}
+                        <i class="bi bi-house-door-fill mr-1"></i> <span class="text-white">{{ __('Dashboard') }}</span>
                     </x-nav-link>
                     <x-nav-link :href="route('orders.index')" :active="request()->routeIs('orders.*')">
-                        <i class="bi bi-cart-fill mr-1"></i> {{ __('Orders') }}
+                        <i class="bi bi-cart-fill mr-1"></i> <span class="text-white">{{ __('Orders') }}</span>
                     </x-nav-link>
                     <x-nav-link :href="route('order-histories.index')" :active="request()->routeIs('order-histories.*')">
-                        <i class="bi bi-clock-history mr-1"></i> {{ __('Order History') }}
+                        <i class="bi bi-clock-history mr-1"></i> <span class="text-white">{{ __('Order History') }}</span>
                     </x-nav-link>
                     <x-nav-link :href="route('customers.index')" :active="request()->routeIs('customers.*')">
-                        <i class="bi bi-people-fill mr-1"></i> {{ __('Customers') }}
+                        <i class="bi bi-people-fill mr-1"></i> <span class="text-white">{{ __('Customers') }}</span>
                     </x-nav-link>
                     <x-nav-link :href="route('products.index')" :active="request()->routeIs('products.*')">
-                        <i class="bi bi-box-seam mr-1"></i> {{ __('Products') }}
+                        <i class="bi bi-box-seam mr-1"></i> <span class="text-white">{{ __('Products') }}</span>
                     </x-nav-link>
                 </div>
             </div>
@@ -33,7 +33,7 @@
             <div class="hidden sm:flex sm:items-center sm:ml-6">
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
-                        <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-full text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150 shadow">
+                        <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-full text-white bg-black hover:bg-gray-800 focus:outline-none transition ease-in-out duration-150 shadow">
                             <i class="bi bi-person-circle text-xl mr-2"></i>
                             <span>{{ Auth::user()->name }}</span>
                             <i class="bi bi-chevron-down ml-2"></i>
