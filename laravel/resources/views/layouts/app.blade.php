@@ -112,7 +112,7 @@
 
             <!-- Page Heading -->
             @isset($header)
-                <header class="bg-white shadow-lg rounded-2xl mt-6 mb-6 mx-4 flex items-center px-6 py-4">
+                <header class="bg-white shadow-lg rounded-sm mt-6 mb-6 mx-4 flex items-center px-6 py-4">
                     <i class="bi bi-flower2 text-2xl text-pink-400 mr-4"></i>
                     <div class="flex-1">
                         <div class="text-xl font-bold text-black font-sans">{{ $header }}</div>

@@ -16,31 +16,31 @@
             <i class="bi bi-flower2 mr-2 text-pink-400"></i>Daftar Bunga Ready Stock
         </h1>
         <div class="w-full max-w-6xl mx-auto">
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+            <div class="grid grid-cols-3 lg:grid-cols-4 gap-3">
                 @forelse($flowers as $flower)
-                <div class="bg-white shadow-lg rounded-2xl hover:shadow-xl transition group flex flex-col overflow-hidden relative border border-gray-100">
-                    <div class="relative h-48 sm:h-56 md:h-60 w-full overflow-hidden flex items-center justify-center bg-black">
+                <div class="bg-white shadow-lg rounded-sm hover:shadow-xl transition group flex flex-col overflow-hidden relative border border-gray-100 p-2 sm:p-3">
+                    <div class="relative h-28 sm:h-32 md:h-36 w-full overflow-hidden flex items-center justify-center bg-black rounded-sm">
                         @if($flower->image)
                             <img src="{{ asset('storage/' . $flower->image) }}" alt="{{ $flower->name }}" class="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300">
                         @else
-                            <div class="flex items-center justify-center w-full h-full text-gray-400 text-6xl"><i class="bi bi-flower2"></i></div>
+                            <div class="flex items-center justify-center w-full h-full text-gray-400 text-3xl sm:text-4xl"><i class="bi bi-flower2"></i></div>
                         @endif
                         <div class="absolute bottom-0 left-0 w-full bg-black bg-opacity-60 px-2 py-1">
-                            <span class="text-white font-semibold text-base truncate block"><i class="bi bi-tag mr-1"></i>{{ $flower->name }}</span>
+                            <span class="text-white font-semibold text-xs sm:text-sm truncate block"><i class="bi bi-tag mr-1"></i>{{ $flower->name }}</span>
                         </div>
                     </div>
-                    <div class="flex-1 flex flex-col justify-between p-4">
-                        <div class="mb-2">
-                            <span class="block text-xs text-gray-500"><i class="bi bi-bookmark mr-1"></i>Kategori</span>
-                            <span class="block text-sm font-medium text-black">{{ $flower->category->name ?? '-' }}</span>
+                    <div class="flex-1 flex flex-col justify-between p-2 sm:p-3">
+                        <div class="mb-1">
+                            <span class="block text-[10px] text-gray-500"><i class="bi bi-bookmark mr-1"></i>Kategori</span>
+                            <span class="block text-xs font-medium text-black">{{ $flower->category->name ?? '-' }}</span>
                         </div>
-                        <div class="mb-2">
-                            <span class="block text-xs text-gray-500"><i class="bi bi-card-text mr-1"></i>Deskripsi</span>
-                            <span class="block text-sm text-black line-clamp-2">{{ $flower->description ?: '-' }}</span>
+                        <div class="mb-1">
+                            <span class="block text-[10px] text-gray-500"><i class="bi bi-card-text mr-1"></i>Deskripsi</span>
+                            <span class="block text-xs text-black line-clamp-2">{{ $flower->description ?: '-' }}</span>
                         </div>
-                        <div class="mb-2">
-                            <span class="block text-xs text-gray-500"><i class="bi bi-currency-dollar mr-1"></i>Harga per Tangkai</span>
-                            <span class="block text-sm font-semibold text-green-700">
+                        <div class="mb-1">
+                            <span class="block text-[10px] text-gray-500"><i class="bi bi-currency-dollar mr-1"></i>Harga per Tangkai</span>
+                            <span class="block text-xs font-semibold text-green-700">
                                 @php
                                     $stemPrice = $flower->prices->firstWhere('type', 'per_tangkai');
                                 @endphp
@@ -51,9 +51,9 @@
                                 @endif
                             </span>
                         </div>
-                        <div class="mb-2">
-                            <span class="block text-xs text-gray-500"><i class="bi bi-currency-exchange mr-1"></i>Harga per Ikat</span>
-                            <span class="block text-sm font-semibold text-blue-700">
+                        <div class="mb-1">
+                            <span class="block text-[10px] text-gray-500"><i class="bi bi-currency-exchange mr-1"></i>Harga per Ikat</span>
+                            <span class="block text-xs font-semibold text-blue-700">
                                 @php
                                     // Ambil harga per ikat prioritas: ikat_20, lalu ikat_10, lalu ikat_5
                                     $bundlePrice = $flower->prices->firstWhere('type', 'ikat_20')
@@ -62,15 +62,15 @@
                                 @endphp
                                 @if($bundlePrice)
                                     Rp{{ number_format($bundlePrice->price,0,',','.') }}
-                                    <span class="text-xs text-gray-500">/{{ str_replace('_', ' ', $bundlePrice->type) }}</span>
+                                    {{-- <span class="text-[10px] text-gray-500">/{{ str_replace('_', ' ', $bundlePrice->type) }}</span> --}}
                                 @else
                                     -
                                 @endif
                             </span>
                         </div>
                         <div class="flex items-center justify-between mt-auto">
-                            <span class="text-xs text-gray-500"><i class="bi bi-box2-heart mr-1"></i>Stok Tersedia</span>
-                            <span class="text-lg font-bold text-black">{{ $flower->current_stock }} Tangkai</span>
+                            <span class="text-[10px] text-gray-500"><i class="bi bi-box2-heart mr-1"></i>Stok Tersedia</span>
+                            <span class="text-xs sm:text-sm font-bold text-black">{{ $flower->current_stock }} <span class="font-normal">Tangkai</span></span>
                         </div>
                     </div>
                 </div>

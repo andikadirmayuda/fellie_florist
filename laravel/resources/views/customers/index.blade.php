@@ -12,19 +12,19 @@
                 <i class="bi bi-people-fill mr-2 text-indigo-500"></i> Daftar Customer
             </h2>
             <div class="flex flex-wrap gap-2">
-                <a href="{{ route('customers.trashed') }}" class="inline-flex items-center px-3 py-2 sm:px-4 sm:py-2 bg-gray-600 border border-transparent rounded-full font-semibold text-xs sm:text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                <a href="{{ route('customers.trashed') }}" class="inline-flex items-center px-3 py-2 sm:px-4 sm:py-2 bg-gray-600 border border-transparent rounded-sm font-semibold text-xs sm:text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition ease-in-out duration-150">
                     <i class="bi bi-trash3 mr-1"></i> <span class="hidden xs:inline">{{ __('Sampah') }}</span>
                 </a>
-                <a href="{{ route('customers.create') }}" class="inline-flex items-center px-3 py-2 sm:px-4 sm:py-2 bg-indigo-600 border border-transparent rounded-full font-semibold text-xs sm:text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                <a href="{{ route('customers.create') }}" class="inline-flex items-center px-3 py-2 sm:px-4 sm:py-2 bg-indigo-600 border border-transparent rounded-sm font-semibold text-xs sm:text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
                     <i class="bi bi-person-plus-fill mr-1"></i> <span class="hidden xs:inline">{{ __('Tambah Customer') }}</span>
                 </a>
             </div>
         </div>
     </x-slot>
 
-    <div class="py-6 bg-white font-sans">
+    <div class="py-6  font-sans">
         <div class="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-lg rounded-2xl border border-gray-100">
+            <div class="bg-white overflow-hidden shadow-lg rounded-sm border border-gray-100">
                 <div class="p-4 sm:p-6 lg:p-8 text-gray-900">
                     <!-- Search and Filter -->
                     <div class="mb-6">
@@ -35,11 +35,11 @@
                                     name="search"
                                     placeholder="Cari nama, email, atau telepon..."
                                     value="{{ request('search') }}"
-                                    class="w-full rounded-2xl shadow-md border-gray-200 focus:border-indigo-400 focus:ring-indigo-400 font-sans text-sm"
+                                    class="w-full rounded-sm shadow-md border-gray-200 focus:border-indigo-400 focus:ring-indigo-400 font-sans text-sm"
                                 />
                             </div>
                             <div class="w-full md:w-48">
-                                <select name="type" class="w-full rounded-2xl shadow-md border-gray-200 focus:border-indigo-400 focus:ring-indigo-400 font-sans text-sm">
+                                <select name="type" class="w-full rounded-sm shadow-md border-gray-200 focus:border-indigo-400 focus:ring-indigo-400 font-sans text-sm">
                                     <option value="">Semua Tipe</option>
                                     @foreach($customerTypes as $type)
                                         <option value="{{ $type }}" {{ request('type') === $type ? 'selected' : '' }}>
@@ -48,7 +48,7 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <x-primary-button type="submit" class="rounded-2xl shadow-md font-sans text-sm flex items-center justify-center w-full md:w-auto">
+                            <x-primary-button type="submit" class="rounded-sm shadow-md font-sans text-sm flex items-center justify-center w-full md:w-auto">
                                 <i class="bi bi-search mr-1"></i> <span class="hidden sm:inline">{{ __('Cari') }}</span>
                             </x-primary-button>
                         </form>
@@ -96,12 +96,12 @@
                                         </td>
                                         <td class="px-2 sm:px-4 py-4 whitespace-nowrap text-right text-xs sm:text-sm font-medium">
                                             <div class="flex flex-col sm:flex-row justify-end items-end sm:items-center gap-2 sm:gap-2">
-                                                <a href="{{ route('customers.edit', $customer) }}" class="inline-flex items-center text-indigo-600 hover:text-white hover:bg-indigo-600 font-semibold px-3 py-1 rounded-2xl bg-indigo-50 shadow transition text-xs sm:text-sm"><i class="bi bi-pencil-square mr-1"></i>Edit</a>
-                                                <a href="{{ route('customers.history', $customer->id) }}" class="inline-flex items-center text-green-600 hover:text-white hover:bg-green-600 font-semibold px-3 py-1 rounded-2xl bg-green-50 shadow transition text-xs sm:text-sm"><i class="bi bi-clock-history mr-1"></i>Riwayat</a>
+                                                <a href="{{ route('customers.edit', $customer) }}" class="inline-flex items-center text-indigo-600 hover:text-white hover:bg-indigo-600 font-semibold px-3 py-1 rounded-sm bg-indigo-50 shadow transition text-xs sm:text-sm"><i class="bi bi-pencil-square mr-1"></i>Edit</a>
+                                                <a href="{{ route('customers.history', $customer->id) }}" class="inline-flex items-center text-green-600 hover:text-white hover:bg-green-600 font-semibold px-3 py-1 rounded-sm bg-green-50 shadow transition text-xs sm:text-sm"><i class="bi bi-clock-history mr-1"></i>Riwayat</a>
                                                 <form action="{{ route('customers.destroy', $customer) }}" method="POST" class="inline-block">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="inline-flex items-center text-red-600 hover:text-white hover:bg-red-600 font-semibold px-3 py-1 rounded-2xl bg-red-50 shadow transition text-xs sm:text-sm" onclick="return confirm('Apakah Anda yakin ingin menghapus customer ini?')">
+                                                    <button type="submit" class="inline-flex items-center text-red-600 hover:text-white hover:bg-red-600 font-semibold px-3 py-1 rounded-sm bg-red-50 shadow transition text-xs sm:text-sm" onclick="return confirm('Apakah Anda yakin ingin menghapus customer ini?')">
                                                         <i class="bi bi-trash3 mr-1"></i>Hapus
                                                     </button>
                                                 </form>

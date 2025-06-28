@@ -1,5 +1,5 @@
 <x-guest-layout>
-    <div class="w-full max-w-md bg-white rounded-2xl shadow-lg p-10 flex flex-col items-center">
+    <div class="w-full max-w-md bg-white rounded-sm shadow-lg p-10 flex flex-col items-center">
         <h1 class="text-2xl font-bold text-black mb-8 tracking-tight">Fellie Florist</h1>
         <form method="POST" action="{{ route('login') }}" class="w-full space-y-6">
             @csrf
@@ -31,7 +31,7 @@
                     </a>
                 @endif
             </div>
-            <button type="submit" class="w-full py-3 bg-black text-white rounded-lg font-semibold hover:bg-gray-900 transition">LOGIN</button>
+            <button type="submit" class="w-full py-3 bg-black text-white rounded-sm font-semibold hover:bg-gray-900 transition">LOGIN</button>
         </form>
         {{-- <div class="mt-2">
             <span class="text-xs text-gray-400">Or Sign Up with </span>

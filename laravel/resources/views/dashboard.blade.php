@@ -17,22 +17,22 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <!-- Summary Cards with Icons -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-                <div class="bg-white shadow-lg rounded-2xl p-8 flex flex-col items-center min-h-[140px] border border-gray-100 transition hover:shadow-xl">
+                <div class="bg-white shadow-lg rounded-sm p-8 flex flex-col items-center min-h-[140px] border border-gray-100 transition hover:shadow-xl">
                     <span class="mb-2"><i class="bi bi-people text-4xl text-black/60"></i></span>
                     <span class="text-3xl font-bold text-black">{{ $totalCustomers ?? 0 }}</span>
                     <span class="text-gray-500 mt-2">Pelanggan</span>
                 </div>
-                <div class="bg-white shadow-lg rounded-2xl p-8 flex flex-col items-center min-h-[140px] border border-gray-100 transition hover:shadow-xl">
+                <div class="bg-white shadow-lg rounded-sm p-8 flex flex-col items-center min-h-[140px] border border-gray-100 transition hover:shadow-xl">
                     <span class="mb-2"><i class="bi bi-box-seam text-4xl text-black/60"></i></span>
                     <span class="text-3xl font-bold text-black">{{ $totalProducts ?? 0 }}</span>
                     <span class="text-gray-500 mt-2">Produk</span>
                 </div>
-                <div class="bg-white shadow-lg rounded-2xl p-8 flex flex-col items-center min-h-[140px] border border-gray-100 transition hover:shadow-xl">
+                <div class="bg-white shadow-lg rounded-sm p-8 flex flex-col items-center min-h-[140px] border border-gray-100 transition hover:shadow-xl">
                     <span class="mb-2"><i class="bi bi-cart text-4xl text-black/60"></i></span>
                     <span class="text-3xl font-bold text-black">{{ $totalOrders ?? 0 }}</span>
                     <span class="text-gray-500 mt-2">Pesanan</span>
                 </div>
-                <div class="bg-white shadow-lg rounded-2xl p-8 flex flex-col items-center min-h-[140px] border border-gray-100 transition hover:shadow-xl">
+                <div class="bg-white shadow-lg rounded-sm p-8 flex flex-col items-center min-h-[140px] border border-gray-100 transition hover:shadow-xl">
                     <span class="mb-2"><i class="bi bi-cash-stack text-4xl text-black/60"></i></span>
                     <span class="text-3xl font-bold text-black">{{ number_format($totalSales ?? 0,0,',','.') }}</span>
                     <span class="text-gray-500 mt-2">Penjualan</span>
@@ -41,11 +41,11 @@
 
             <!-- Grafik Penjualan & Pesanan (Chart.js) -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-                <div class="bg-white rounded-2xl shadow-lg flex flex-col p-8 border border-gray-100">
+                <div class="bg-white rounded-sm shadow-lg flex flex-col p-8 border border-gray-100">
                     <h3 class="font-semibold text-lg text-black mb-6 flex items-center"><i class="bi bi-graph-up-arrow mr-2 text-black/60"></i> Sales Performance</h3>
                     <canvas id="salesChart" class="w-full h-40"></canvas>
                 </div>
-                <div class="bg-white rounded-2xl shadow-lg flex flex-col p-8 border border-gray-100">
+                <div class="bg-white rounded-sm shadow-lg flex flex-col p-8 border border-gray-100">
                     <h3 class="font-semibold text-lg text-black mb-6 flex items-center"><i class="bi bi-pie-chart mr-2 text-black/60"></i> Popular Categories</h3>
                     <canvas id="ordersChart" class="w-full h-40"></canvas>
                 </div>
@@ -53,7 +53,7 @@
 
             <!-- Notifikasi & Quick Action -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
-                <div class="lg:col-span-2 bg-white shadow-lg rounded-2xl p-8 mb-6 lg:mb-0 border border-gray-100">
+                <div class="lg:col-span-2 bg-white shadow-lg rounded-sm p-8 mb-6 lg:mb-0 border border-gray-100">
                     <h3 class="font-semibold text-lg text-black mb-4 flex items-center"><i class="bi bi-bell mr-2 text-black/60"></i> Notifikasi</h3>
                     <ul class="space-y-2">
                         @forelse($lowStockProducts ?? [] as $product)
@@ -71,7 +71,7 @@
                         @endforelse
                     </ul>
                 </div>
-                <div class="bg-white shadow-lg rounded-2xl p-8 flex flex-col justify-between border border-gray-100">
+                <div class="bg-white shadow-lg rounded-sm p-8 flex flex-col justify-between border border-gray-100">
                     <h3 class="font-semibold text-lg text-black mb-4 flex items-center"><i class="bi bi-lightning-charge mr-2 text-black/60"></i> Aksi Cepat</h3>
                     <div class="flex flex-col space-y-2">
                         <a href="{{ route('products.create') }}" class="bg-black text-white font-semibold px-4 py-2 rounded-full hover:bg-gray-100 transition flex items-center justify-center"><i class="bi bi-plus mr-2"></i>Tambah Produk</a>
@@ -81,7 +81,7 @@
             </div>
 
             <!-- Tabel Bunga Ready Stock -->
-            <div class="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
+            <div class="bg-white rounded-sm shadow-lg p-8 border border-gray-100">
                 <h3 class="font-semibold text-lg text-black mb-4 flex items-center"><i class="bi bi-flower2 mr-2 text-black/60"></i> Bunga Ready Stock
                     <span class="ml-2 text-base font-normal">| <a href="{{ url('/bunga-ready') }}" target="_blank" class="text-blue-700 underline hover:text-blue-900 transition">Lihat Publik</a></span>
                 </h3>
