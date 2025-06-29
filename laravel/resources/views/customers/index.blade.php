@@ -29,17 +29,19 @@
                     <!-- Search and Filter -->
                     <div class="mb-6">
                         <form method="GET" action="{{ route('customers.index') }}" class="flex flex-col md:flex-row gap-2 md:gap-4">
-                            <div class="flex-1 min-w-0">
-                                <x-text-input
+                            <div class="flex-1 min-w-0 relative">
+                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-white text-sm"><i class="bi bi-search"></i></span>
+                                <input
                                     type="text"
                                     name="search"
                                     placeholder="Cari nama, email, atau telepon..."
                                     value="{{ request('search') }}"
-                                    class="w-full rounded-sm shadow-md border-gray-200 focus:border-indigo-400 focus:ring-indigo-400 font-sans text-sm"
+                                    class="w-full rounded-sm shadow-md border border-gray-900 bg-black text-white placeholder-white font-sans text-sm pl-9 py-2 focus:border-indigo-400 focus:ring-indigo-400"
                                 />
                             </div>
-                            <div class="w-full md:w-48">
-                                <select name="type" class="w-full rounded-sm shadow-md border-gray-200 focus:border-indigo-400 focus:ring-indigo-400 font-sans text-sm">
+                            <div class="w-full md:w-48 relative">
+                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-700 text-xs"><i class="bi bi-award"></i></span>
+                                <select name="type" class="w-full rounded-sm shadow-md border border-gray-900 bg-white text-black font-sans text-sm pl-9 py-2 focus:border-indigo-400 focus:ring-indigo-400">
                                     <option value="">Semua Tipe</option>
                                     @foreach($customerTypes as $type)
                                         <option value="{{ $type }}" {{ request('type') === $type ? 'selected' : '' }}>
@@ -79,29 +81,45 @@
                             <tbody class="bg-white divide-y divide-gray-100">
                                 @forelse ($customers as $customer)
                                     <tr class="hover:bg-gray-50 transition">
-                                        <td class="px-2 sm:px-4 py-4 whitespace-nowrap">
-                                            <div class="text-xs sm:text-sm font-semibold text-gray-900 flex items-center"><i class="bi bi-person-circle mr-2 text-indigo-400"></i>{{ $customer->name }}</div>
+                                        <td class="px-2 sm:px-4 py-4 whitespace-nowrap align-top">
+                                            <div class="text-xs sm:text-sm font-semibold text-gray-900 flex items-center mb-1"><i class="bi bi-person-circle mr-2 text-indigo-400"></i>{{ $customer->name }}</div>
+                                            <div class="block md:hidden text-xs text-gray-700 mb-1 flex items-center"><i class="bi bi-geo-alt mr-1 text-gray-400"></i>{{ $customer->full_address ?: '-' }}</div>
+                                            <div class="block md:hidden mb-1">{!! $customer->type_badge ?? '<span class=\"text-gray-400 italic\">-</span>' !!}</div>
+                                            <div class="block md:hidden flex flex-wrap gap-1 mt-2">
+                                                <a href="{{ route('customers.edit', $customer) }}" class="inline-flex items-center text-indigo-600 hover:text-white hover:bg-indigo-600 font-semibold px-2 py-1 rounded-sm bg-indigo-50 shadow transition text-xs"><i class="bi bi-pencil-square mr-1"></i>Edit</a>
+                                                <a href="{{ route('customers.history', $customer->id) }}" class="inline-flex items-center text-green-600 hover:text-white hover:bg-green-600 font-semibold px-2 py-1 rounded-sm bg-green-50 shadow transition text-xs"><i class="bi bi-clock-history mr-1"></i>Riwayat</a>
+                                                <form action="{{ route('customers.destroy', $customer) }}" method="POST" class="inline-block delete-customer-form">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="button" class="inline-flex items-center text-red-600 hover:text-white hover:bg-red-600 font-semibold px-2 py-1 rounded-sm bg-red-50 shadow transition text-xs btn-modal-delete">
+                                                        <i class="bi bi-trash3 mr-1"></i>Hapus
+                                                    </button>
+                                                </form>
+                                            </div>
                                         </td>
-                                        <td class="px-2 sm:px-4 py-4 whitespace-nowrap">
-                                            <div class="text-xs sm:text-sm text-gray-900 flex items-center"><i class="bi bi-telephone mr-2 text-gray-400"></i>{{ $customer->phone }}</div>
+                                        <td class="px-2 sm:px-4 py-4 whitespace-nowrap align-top">
+                                            <div class="text-xs sm:text-sm text-gray-900 flex items-center mb-1"><i class="bi bi-telephone mr-2 text-gray-400"></i>{{ $customer->phone }}</div>
                                             @if($customer->email)
                                                 <div class="text-[10px] sm:text-xs text-gray-500 flex items-center"><i class="bi bi-envelope mr-1"></i>{{ $customer->email }}</div>
                                             @endif
                                         </td>
-                                        <td class="px-2 sm:px-4 py-4 whitespace-nowrap hidden xs:table-cell">
-                                            {!! $customer->type_badge !!}
+                                        <td class="px-2 sm:px-4 py-4 whitespace-nowrap hidden xs:table-cell align-top">
+                                            {!! $customer->type_badge ?? '<span class="text-gray-400 italic">-</span>' !!}
                                         </td>
-                                        <td class="px-2 sm:px-4 py-4 hidden md:table-cell">
-                                            <div class="text-xs sm:text-sm text-gray-900 flex items-center"><i class="bi bi-geo-alt mr-2 text-gray-400"></i>{{ $customer->full_address ?: '-' }}</div>
+                                        <td class="px-2 sm:px-4 py-4 hidden md:table-cell align-top">
+                                            <div class="flex flex-col gap-1">
+                                                <div class="text-xs sm:text-sm text-gray-900 flex items-center"><i class="bi bi-geo-alt mr-2 text-gray-400"></i>{{ $customer->full_address ?: '-' }}</div>
+                                                <div class="mt-1">{!! $customer->type_badge ?? '<span class=\"text-gray-400 italic\">-</span>' !!}</div>
+                                            </div>
                                         </td>
-                                        <td class="px-2 sm:px-4 py-4 whitespace-nowrap text-right text-xs sm:text-sm font-medium">
+                                        <td class="px-2 sm:px-4 py-4 whitespace-nowrap text-right text-xs sm:text-sm font-medium align-top hidden md:table-cell">
                                             <div class="flex flex-col sm:flex-row justify-end items-end sm:items-center gap-2 sm:gap-2">
                                                 <a href="{{ route('customers.edit', $customer) }}" class="inline-flex items-center text-indigo-600 hover:text-white hover:bg-indigo-600 font-semibold px-3 py-1 rounded-sm bg-indigo-50 shadow transition text-xs sm:text-sm"><i class="bi bi-pencil-square mr-1"></i>Edit</a>
                                                 <a href="{{ route('customers.history', $customer->id) }}" class="inline-flex items-center text-green-600 hover:text-white hover:bg-green-600 font-semibold px-3 py-1 rounded-sm bg-green-50 shadow transition text-xs sm:text-sm"><i class="bi bi-clock-history mr-1"></i>Riwayat</a>
-                                                <form action="{{ route('customers.destroy', $customer) }}" method="POST" class="inline-block">
+                                                <form action="{{ route('customers.destroy', $customer) }}" method="POST" class="inline-block delete-customer-form">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="inline-flex items-center text-red-600 hover:text-white hover:bg-red-600 font-semibold px-3 py-1 rounded-sm bg-red-50 shadow transition text-xs sm:text-sm" onclick="return confirm('Apakah Anda yakin ingin menghapus customer ini?')">
+                                                    <button type="button" class="inline-flex items-center text-red-600 hover:text-white hover:bg-red-600 font-semibold px-3 py-1 rounded-sm bg-red-50 shadow transition text-xs sm:text-sm btn-modal-delete">
                                                         <i class="bi bi-trash3 mr-1"></i>Hapus
                                                     </button>
                                                 </form>
@@ -127,4 +145,39 @@
             </div>
         </div>
     </div>
+
+</div>
+
+<!-- Modal Konfirmasi Hapus Alpine.js -->
+<div x-data="{ open: false, form: null }" @open-modal-delete.window="open = true; form = $event.detail.form" class="">
+    <div x-show="open" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40" style="display: none;">
+        <div class="bg-white rounded-sm shadow-lg p-8 max-w-md w-full text-center border">
+            <div class="flex flex-col items-center justify-center mb-4">
+                <i class="bi bi-exclamation-circle text-6xl text-orange-300 mb-2"></i>
+                <span class="text-black text-xl font-bold mb-2">Apakah Anda yakin?</span>
+                <span class="text-gray-600 text-sm mb-2">Data yang dihapus tidak dapat dikembalikan!</span>
+            </div>
+            <div class="flex justify-center gap-4 mt-6">
+                <button @click="if(form){ form.submit(); open = false; }" class="inline-flex items-center gap-2 bg-black text-white rounded-sm px-5 py-2 hover:bg-gray-900 font-semibold text-sm">
+                    <i class="bi bi-trash3"></i> Ya, hapus!
+                </button>
+                <button @click="open = false" class="inline-flex items-center gap-2 bg-gray-200 text-black rounded-sm px-5 py-2 hover:bg-gray-300 font-semibold text-sm">
+                    <i class="bi bi-x-circle"></i> Batal
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.btn-modal-delete').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const form = btn.closest('form');
+                window.dispatchEvent(new CustomEvent('open-modal-delete', { detail: { form } }));
+            });
+        });
+    });
+</script>
 </x-app-layout>

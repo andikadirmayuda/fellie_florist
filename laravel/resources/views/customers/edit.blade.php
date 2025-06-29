@@ -1,29 +1,37 @@
 <x-app-layout>
+    <x-slot name="head">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+        <link href="https://fonts.bunny.net/css?family=figtree:400,600,700" rel="stylesheet" />
+        <style>
+            body, .font-sans { font-family: 'Figtree', theme('fontFamily.sans'), sans-serif; }
+        </style>
+    </x-slot>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            {{ __('Edit Customer') }}
-        </h2>
+        <div class="flex items-center gap-2">
+            <i class="bi bi-pencil-square text-indigo-500 text-2xl"></i>
+            <h2 class="font-semibold text-xl text-black leading-tight font-sans">
+                {{ __('Edit Customer') }}
+            </h2>
+        </div>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900 dark:text-gray-100">
-                    <form method="POST" action="{{ route('customers.update', $customer) }}" class="max-w-xl">
-                        @csrf
-                        @method('PATCH')
-                        @include('customers.partials.form')
+    <div class="py-8 bg-gray-50 min-h-screen font-sans">
+        <div class="max-w-2xl mx-auto px-2 sm:px-4">
+            <div class="bg-white shadow-lg rounded-sm border border-gray-100 p-6 sm:p-8">
+                <form method="POST" action="{{ route('customers.update', $customer) }}" class="space-y-5">
+                    @csrf
+                    @method('PATCH')
+                    @include('customers.partials.form')
 
-                        <div class="mt-6 flex items-center justify-end gap-x-6">
-                            <a href="{{ route('customers.index') }}" class="text-sm font-semibold leading-6 text-gray-900 dark:text-gray-100">
-                                Batal
-                            </a>
-                            <x-primary-button>
-                                {{ __('Simpan Perubahan') }}
-                            </x-primary-button>
-                        </div>
-                    </form>
-                </div>
+                    <div class="mt-6 flex flex-col sm:flex-row items-center justify-end gap-3">
+                        <a href="{{ route('customers.index') }}" class="inline-flex items-center text-sm font-semibold text-white bg-black shadow-lg hover:bg-gray-900 transition px-5 py-2 rounded-sm font-sans">
+                            <i class="bi bi-arrow-left-circle mr-1"></i> Batal
+                        </a>
+                        <button type="submit" class="inline-flex items-center gap-1 px-5 py-2 rounded-sm shadow-lg font-sans text-white bg-black hover:bg-gray-900 transition font-semibold">
+                            <i class="bi bi-save2 mr-1"></i> {{ __('Simpan Perubahan') }}
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
