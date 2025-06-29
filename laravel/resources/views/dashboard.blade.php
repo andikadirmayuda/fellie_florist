@@ -83,8 +83,12 @@
             <!-- Tabel Bunga Ready Stock -->
             <div class="bg-white rounded-sm shadow-lg p-8 border border-gray-100">
                 <h3 class="font-semibold text-lg text-black mb-4 flex items-center"><i class="bi bi-flower2 mr-2 text-black/60"></i> Bunga Ready Stock
-                    <span class="ml-2 text-base font-normal">| <a href="{{ url('/bunga-ready') }}" target="_blank" class="text-blue-700 underline hover:text-blue-900 transition">Lihat Publik</a></span>
                 </h3>
+                <div class="mb-4 text-sm text-blue-700">
+                    <strong>Informasi Bunga Ready Stock (Publik):</strong><br>
+                    <a href="{{ url('/bunga-ready') }}" target="_blank" class="underline text-blue-700 hover:text-blue-900">{{ url('/bunga-ready') }}</a>
+                    <span class="block text-xs text-gray-400">(Link ini dapat dibagikan ke pelanggan, dapat diakses tanpa login)</span>
+                </div>
                 <div class="overflow-x-auto">
                     <table class="min-w-full text-sm text-left">
                         <thead>
