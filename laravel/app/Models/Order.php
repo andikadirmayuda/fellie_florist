@@ -14,6 +14,7 @@ class Order extends Model
     protected $fillable = [
         'order_number',
         'customer_id',
+        'customer_name', // field baru
         'status',
         'total',
         'pickup_date',

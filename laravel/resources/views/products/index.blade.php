@@ -12,6 +12,15 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <!-- Tombol Ekspor & Form Impor JSON -->
+            <div class="flex justify-end mb-4 space-x-2">
+                <form action="{{ route('products.import-json') }}" method="POST" enctype="multipart/form-data" class="flex items-center space-x-2">
+                    @csrf
+                    <input type="file" name="json_file" accept=".json" required class="border rounded px-2 py-1 text-sm" />
+                    <button type="submit" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">Impor JSON</button>
+                </form>
+                <a href="{{ route('products.export-json') }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Ekspor JSON</a>
+            </div>
             <!-- Search and Filter -->
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
                 <div class="p-6">

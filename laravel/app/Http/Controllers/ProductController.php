@@ -10,8 +10,12 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\ProductRequest;
 
+use Maatwebsite\Excel\Facades\Excel;
+
 class ProductController extends Controller
-{    public function index(Request $request)
+{
+
+    public function index(Request $request)
     {
         $categories = Category::orderBy('name')->pluck('name', 'id');
           $products = Product::with('category')

@@ -44,6 +44,14 @@
                 {{ __('Pesanan') }}
             </x-sidebar-link>
 
+
+            <x-sidebar-link :href="route('admin.public-orders.index')" :active="request()->routeIs('admin.public-orders.*')">
+                <x-slot name="icon">
+                    <i class="bi bi-globe2 text-lg mr-1"></i>
+                </x-slot>
+                Pesanan Publik
+            </x-sidebar-link>
+
             <x-sidebar-link :href="route('order-histories.index')" :active="request()->routeIs('order-histories.*')">
                 <x-slot name="icon">
                     <i class="bi bi-clock-history text-lg mr-1"></i>
@@ -70,6 +78,13 @@
                     <i class="bi bi-cash-stack text-lg mr-1"></i>
                 </x-slot>
                 {{ __('Penjualan') }}
+            </x-sidebar-link>
+
+            <x-sidebar-link :href="route('order.whatsapp.form')" :active="request()->routeIs('order.whatsapp.form')">
+                <x-slot name="icon">
+                    <i class="bi bi-whatsapp text-lg mr-1"></i>
+                </x-slot>
+                Order via WhatsApp
             </x-sidebar-link>
 
             <li class="mt-4 mb-1 text-xs font-semibold text-gray-500 uppercase tracking-wider">Laporan</li>
