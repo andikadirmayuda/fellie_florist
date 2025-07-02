@@ -33,9 +33,14 @@
     
     
     <div class="max-w-4xl mx-auto text-center mb-10">
-        <h2 class="text-2xl sm:text-3xl font-semibold text-black">
-          Daftar Bunga Stock Ready
+        <h2 class="text-2xl sm:text-3xl font-semibold text-pink">
+            🌸Daftar Stok Bunga Ready🌸
         </h2>
+        <h6 class="mt-2 text-sm sm:text-3xl font-semibold text-pink-600 bg-pink-200/50 backdrop-blur-sm px-4 py-1 inline-block rounded-md shadow-sm">
+            ~ Fellie Florist ~
+        </h6>
+        <br>             
+        <hr style="border: 0; border-top: 2px solid #fffffff6; width: 7%; margin: 8px auto;">
         <p class="mt-1 text-sm text-gray-500 flex items-center justify-center gap-1">
           <i class="bi bi-clock-history text-gray-400"></i>
           Terakhir diperbarui: 
@@ -43,6 +48,8 @@
             {{ $lastUpdated ? \Carbon\Carbon::parse($lastUpdated)->translatedFormat('d F Y H:i') : '-' }}
           </span>
         </p>
+        <hr style="border: 0; border-top: 2px solid #ffffff; width: 10%; margin: 8px auto;">
+
       
     
         {{--
@@ -68,14 +75,22 @@
         </form>
     </div> --}}
 
-    <div class="w-full max-w-6xl mx-auto">
 
-        <div class="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
+
+    <!-- Filter & Search Bar (centered under last updated) -->
+    <div class="w-full max-w-6xl mx-auto mb-6 flex flex-col items-center">
+        <div class="flex flex-col sm:flex-row sm:items-center gap-3 mb-4 w-full max-w-md">
+            <input id="flowerSearch" type="text" placeholder="Cari bunga..." class="w-full border border-gray-200 rounded-sm px-4 py-2 text-sm focus:ring-2 focus:ring-pink-400 focus:outline-none shadow-sm transition" oninput="filterFlowers()">
+        </div>
+        <div id="categoryChips" class="flex flex-wrap gap-2 justify-center mb-2"></div>
+    </div>
+
+        <div id="flowersGrid" class="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
             @forelse($flowers as $flower)
-            <div class="relative group flex flex-col">
+            <div class="flower-card relative group flex flex-col" data-name="{{ strtolower($flower->name) }}" data-category="{{ $flower->category->name ?? 'lainnya' }}">
                 <div class="absolute -inset-1 bg-white/60 rounded-sm blur-xl opacity-70 group-hover:opacity-90 transition-all duration-300 z-0"></div>
-                <div class="relative z-10 bg-white/80 backdrop-blur-lg border border-gray-100 rounded-sm shadow-xl hover:shadow-2xl ring-1 ring-gray-100 transition-all duration-300 p-4 sm:p-6 flex flex-col items-center min-h-[340px] sm:min-h-[380px] md:min-h-[420px] w-full">
-                    <div class="relative h-28 xs:h-32 sm:h-36 md:h-40 w-full overflow-hidden flex items-center justify-center bg-black rounded-sm mb-3">
+                <div class="relative z-10 bg-white/80 backdrop-blur-lg border border-gray-100 rounded-sm shadow-xl hover:shadow-2xl ring-1 ring-gray-100 transition-all duration-300 p-3 sm:p-4 md:p-6 flex flex-col items-center min-h-[320px] sm:min-h-[360px] md:min-h-[420px] w-full">
+                    <div class="relative h-28 sm:h-32 md:h-36 lg:h-40 w-full overflow-hidden flex items-center justify-center bg-black rounded-sm mb-3">
                         @if($flower->image)
                             <img src="{{ asset('storage/' . $flower->image) }}" alt="{{ $flower->name }}" class="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300 max-h-40">
                         @else
@@ -219,10 +234,54 @@
 </div>
 
 <script>
-    // Data produk dari backend (untuk dropdown)
+    // Data produk dari backend (untuk dropdown & filter)
     const allFlowers = @json($flowers);
     let selectedFlower = null;
 
+    // --- FILTER & SEARCH ---
+    // Ambil semua kategori unik
+    const categories = Array.from(new Set(allFlowers.map(f => f.category?.name || 'Lainnya')));
+    const categoryChips = document.getElementById('categoryChips');
+    let selectedCategory = '';
+
+    function renderCategoryChips() {
+        let html = `<button type="button" class="chip-btn px-4 py-1 rounded-full border border-gray-300 bg-white text-gray-700 text-xs font-semibold shadow-sm hover:bg-pink-100 focus:bg-pink-200 focus:text-pink-700 transition" onclick="selectCategory('')">Semua</button>`;
+        categories.forEach(cat => {
+            html += `<button type="button" class="chip-btn px-4 py-1 rounded-full border border-gray-300 bg-white text-gray-700 text-xs font-semibold shadow-sm hover:bg-pink-100 focus:bg-pink-200 focus:text-pink-700 transition" onclick="selectCategory('${cat.replace(/'/g, '\'')}')">${cat}</button>`;
+        });
+        categoryChips.innerHTML = html;
+    }
+
+    function selectCategory(cat) {
+        selectedCategory = cat;
+        // Highlight chip
+        document.querySelectorAll('.chip-btn').forEach(btn => {
+            btn.classList.remove('bg-pink-500', 'text-white');
+            btn.classList.add('bg-white', 'text-gray-700');
+            if (btn.textContent === cat || (cat === '' && btn.textContent === 'Semua')) {
+                btn.classList.add('bg-pink-500', 'text-white');
+                btn.classList.remove('bg-white', 'text-gray-700');
+            }
+        });
+        filterFlowers();
+    }
+
+    function filterFlowers() {
+        const search = document.getElementById('flowerSearch').value.toLowerCase();
+        document.querySelectorAll('.flower-card').forEach(card => {
+            const name = card.getAttribute('data-name');
+            const category = card.getAttribute('data-category');
+            const matchSearch = name.includes(search);
+            const matchCategory = !selectedCategory || category === selectedCategory;
+            card.style.display = (matchSearch && matchCategory) ? '' : 'none';
+        });
+    }
+
+    // Render chips & set default
+    renderCategoryChips();
+    selectCategory('');
+
+    // --- CART MODAL ---
     function openCartModal(flowerId) {
         selectedFlower = allFlowers.find(f => f.id === flowerId);
         if (!selectedFlower) return;
