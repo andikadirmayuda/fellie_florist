@@ -101,12 +101,22 @@ class RoleAndPermissionSeeder extends Seeder
                     ]
                 ],
                 [
-                    'name' => 'gudang',
-                    'display_name' => 'Staff Gudang',
-                    'description' => 'Warehouse staff',
+                    'name' => 'karyawan',
+                    'display_name' => 'Karyawan',
+                    'description' => 'Staff Karyawan',
                     'permissions' => [
                         'view-products', 'edit-product',
                         'view-orders'
+                    ]
+                ],
+                [
+                    'name' => 'customers service',
+                    'display_name' => 'Customers Service',
+                    'description' => 'Customer Service',
+                    'permissions' => [
+                        'view-orders', 'create-order', 'edit-order',
+                        'view-reports',
+                        'view-users' // jika perlu akses data pelanggan
                     ]
                 ]
             ];

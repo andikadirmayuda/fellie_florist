@@ -16,7 +16,7 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         // Check if required roles exist
-        $roles = ['owner', 'admin', 'kasir', 'gudang'];
+        $roles = ['owner', 'admin', 'kasir', 'karyawan', 'customers service'];
         foreach ($roles as $roleName) {
             if (!Role::where('name', $roleName)->exists()) {
                 throw new Exception("Role '$roleName' not found. Please run RoleAndPermissionSeeder first.");
@@ -56,15 +56,26 @@ class UserSeeder extends Seeder
         );
         $kasir->roles()->sync([Role::where('name', 'kasir')->first()->id]);
 
-        // Create Staff Gudang
-        $gudang = User::updateOrCreate(
-            ['email' => 'gudang@florist.com'],
+        // Create Staff
+        $karyawan = User::updateOrCreate(
+            ['email' => 'karyawan@florist.com'],
             [
-                'name' => 'Staff Gudang',
+                'name' => 'karyawan',
                 'password' => Hash::make('password123'),
                 'status' => 'active',
             ]
         );
-        $gudang->roles()->sync([Role::where('name', 'gudang')->first()->id]);
+        $karyawan->roles()->sync([Role::where('name', 'karyawan')->first()->id]);
+
+        // Create Customers Service
+        $cs = User::updateOrCreate(
+            ['email' => 'cs@florist.com'],
+            [
+                'name' => 'Customers Service',
+                'password' => Hash::make('password123'),
+                'status' => 'active',
+            ]
+        );
+        $cs->roles()->sync([Role::where('name', 'customers service')->first()->id]);
     }
 }
