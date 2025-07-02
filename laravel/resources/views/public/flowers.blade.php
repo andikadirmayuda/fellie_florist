@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>🌸 Daftar Bunga Ready Stock</title>
+    <title>🌸 Daftar Bunga Ready Stock Fellie Florist</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <!-- Bootstrap Icons -->
@@ -28,17 +28,25 @@
         }
     </style>
 </head>
-<body class="min-h-screen bg-white text-black flex flex-col items-center py-10 px-2 font-sans">
+<body class="min-h-screen bg-dark text-black flex flex-col items-center py-10 px-2 font-sans">
 
-    <div class="mt-2 text-sm text-gray-600 text-center">
-        <i class="bi bi-clock-history mr-1"></i>Terakhir diperbarui: {{ $lastUpdated ? \Carbon\Carbon::parse($lastUpdated)->translatedFormat('d F Y H:i') : '-' }}
-    </div>
-
-    <div class="flex justify-between items-center mb-8 w-full max-w-6xl mx-auto">
-        <h1 class="text-3xl md:text-4xl font-bold text-center tracking-tight flex-1">
-            <i class="bi bi-flower2 mr-2 text-pink-400"></i>Daftar Bunga Ready Stock
-        </h1>
-        <div class="flex items-center">
+    
+    
+    <div class="max-w-4xl mx-auto text-center mb-10">
+        <h2 class="text-2xl sm:text-3xl font-semibold text-black">
+          Daftar Bunga Stock Ready
+        </h2>
+        <p class="mt-1 text-sm text-gray-500 flex items-center justify-center gap-1">
+          <i class="bi bi-clock-history text-gray-400"></i>
+          Terakhir diperbarui: 
+          <span class="text-gray-800 font-medium">
+            {{ $lastUpdated ? \Carbon\Carbon::parse($lastUpdated)->translatedFormat('d F Y H:i') : '-' }}
+          </span>
+        </p>
+      
+    
+        {{--
+        <div class="flex items-center justify-center mt-2">
             <a href="{{ route('public.cart.index') }}" class="ml-4 bg-pink-100 hover:bg-pink-200 text-pink-700 font-bold px-4 py-2 rounded flex items-center text-sm">
                 <i class="bi bi-cart3 mr-2"></i>Lihat Keranjang
             </a>
@@ -48,79 +56,81 @@
                 </a>
             @endif
         </div>
+        --}}
     </div>
 
     <!-- Form Lacak Pesanan -->
-    <div class="w-full max-w-2xl mx-auto mb-8">
+    {{-- <div class="w-full max-w-2xl mx-auto mb-8">
         <form method="GET" action="{{ route('public.order.track') }}" class="flex flex-col sm:flex-row items-center gap-2 bg-gray-50 p-4 rounded shadow">
             <label class="text-sm font-semibold">Lacak Pesanan Anda:</label>
             <input type="text" name="wa_number" class="border rounded px-3 py-2 text-sm flex-1" placeholder="Masukkan No. WhatsApp" required>
             <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-bold px-4 py-2 rounded">Lacak</button>
         </form>
-    </div>
+    </div> --}}
 
     <div class="w-full max-w-6xl mx-auto">
-        <div class="grid grid-cols-3 lg:grid-cols-4 gap-3">
+
+        <div class="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
             @forelse($flowers as $flower)
-            <div class="bg-white shadow-lg rounded-sm hover:shadow-xl transition group flex flex-col overflow-hidden relative border border-gray-100 p-2 sm:p-3">
-                <div class="relative h-28 sm:h-32 md:h-36 w-full overflow-hidden flex items-center justify-center bg-black rounded-sm">
-                    @if($flower->image)
-                        <img src="{{ asset('storage/' . $flower->image) }}" alt="{{ $flower->name }}" class="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300">
-                    @else
-                        <div class="flex items-center justify-center w-full h-full text-gray-400 text-3xl sm:text-4xl">
-                            <i class="bi bi-flower2"></i>
+            <div class="relative group flex flex-col">
+                <div class="absolute -inset-1 bg-white/60 rounded-sm blur-xl opacity-70 group-hover:opacity-90 transition-all duration-300 z-0"></div>
+                <div class="relative z-10 bg-white/80 backdrop-blur-lg border border-gray-100 rounded-sm shadow-xl hover:shadow-2xl ring-1 ring-gray-100 transition-all duration-300 p-4 sm:p-6 flex flex-col items-center min-h-[340px] sm:min-h-[380px] md:min-h-[420px] w-full">
+                    <div class="relative h-28 xs:h-32 sm:h-36 md:h-40 w-full overflow-hidden flex items-center justify-center bg-black rounded-sm mb-3">
+                        @if($flower->image)
+                            <img src="{{ asset('storage/' . $flower->image) }}" alt="{{ $flower->name }}" class="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300 max-h-40">
+                        @else
+                            <div class="flex items-center justify-center w-full h-full text-gray-400 text-2xl xs:text-3xl sm:text-4xl">
+                                <i class="bi bi-flower2"></i>
+                            </div>
+                        @endif
+                        <div class="absolute bottom-0 left-0 w-full bg-black bg-opacity-60 px-2 py-1 rounded-b-xl">
+                            <span class="text-white font-semibold text-xs sm:text-sm truncate block">
+                                <i class="bi bi-tag mr-1"></i>{{ $flower->name }}
+                            </span>
                         </div>
-                    @endif
-                    <div class="absolute bottom-0 left-0 w-full bg-black bg-opacity-60 px-2 py-1">
-                        <span class="text-white font-semibold text-xs sm:text-sm truncate block">
-                            <i class="bi bi-tag mr-1"></i>{{ $flower->name }}
-                        </span>
                     </div>
-                </div>
-                <div class="flex-1 flex flex-col justify-between p-2 sm:p-3">
-                    <div class="mb-1">
-                        <span class="block text-[10px] text-gray-500"><i class="bi bi-bookmark mr-1"></i>Kategori</span>
-                        <span class="block text-xs font-medium text-black">{{ $flower->category->name ?? '-' }}</span>
+                    <div class="flex-1 flex flex-col justify-between w-full mt-2">
+                        <div class="mb-2">
+                            <span class="block text-[11px] text-gray-500"><i class="bi bi-bookmark mr-1"></i>Kategori</span>
+                            <span class="block text-xs font-medium text-black">{{ $flower->category->name ?? '-' }}</span>
+                        </div>
+                        <div class="mb-2">
+                            <span class="block text-[11px] text-gray-500"><i class="bi bi-card-text mr-1"></i>Deskripsi</span>
+                            <span class="block text-xs text-black line-clamp-2">{{ $flower->description ?: '-' }}</span>
+                        </div>
+                        <div class="mb-2">
+                            <span class="block text-[11px] text-gray-500"><i class="bi bi-currency-dollar mr-1"></i>Harga per Tangkai</span>
+                            <span class="block text-xs font-semibold text-green-700">
+                                @php
+                                    $stemPrice = $flower->prices->firstWhere('type', 'per_tangkai');
+                                @endphp
+                                @if($stemPrice)
+                                    Rp{{ number_format($stemPrice->price,0,',','.') }}
+                                @else
+                                    -
+                                @endif
+                            </span>
+                        </div>
+                        <div class="mb-2">
+                            <span class="block text-[11px] text-gray-500"><i class="bi bi-currency-exchange mr-1"></i>Harga per Ikat</span>
+                            <span class="block text-xs font-semibold text-blue-700">
+                                @php
+                                    $bundlePrice = $flower->prices->firstWhere('type', 'ikat_20')
+                                        ?? $flower->prices->firstWhere('type', 'ikat_10')
+                                        ?? $flower->prices->firstWhere('type', 'ikat_5');
+                                @endphp
+                                @if($bundlePrice)
+                                    Rp{{ number_format($bundlePrice->price,0,',','.') }}
+                                @else
+                                    -
+                                @endif
+                            </span>
+                        </div>
+                        <div class="flex items-center justify-between mt-auto">
+                            <span class="text-[11px] text-gray-500"><i class="bi bi-box2-heart mr-1"></i>Stok Tersedia</span>
+                            <span class="text-xs sm:text-sm font-bold text-black">{{ $flower->current_stock }} <span class="font-normal">Tangkai</span></span>
+                        </div>
                     </div>
-                    <div class="mb-1">
-                        <span class="block text-[10px] text-gray-500"><i class="bi bi-card-text mr-1"></i>Deskripsi</span>
-                        <span class="block text-xs text-black line-clamp-2">{{ $flower->description ?: '-' }}</span>
-                    </div>
-                    <div class="mb-1">
-                        <span class="block text-[10px] text-gray-500"><i class="bi bi-currency-dollar mr-1"></i>Harga per Tangkai</span>
-                        <span class="block text-xs font-semibold text-green-700">
-                            @php
-                                $stemPrice = $flower->prices->firstWhere('type', 'per_tangkai');
-                            @endphp
-                            @if($stemPrice)
-                                Rp{{ number_format($stemPrice->price,0,',','.') }}
-                            @else
-                                -
-                            @endif
-                        </span>
-                    </div>
-                    <div class="mb-1">
-                        <span class="block text-[10px] text-gray-500"><i class="bi bi-currency-exchange mr-1"></i>Harga per Ikat</span>
-                        <span class="block text-xs font-semibold text-blue-700">
-                            @php
-                                $bundlePrice = $flower->prices->firstWhere('type', 'ikat_20')
-                                    ?? $flower->prices->firstWhere('type', 'ikat_10')
-                                    ?? $flower->prices->firstWhere('type', 'ikat_5');
-                            @endphp
-                            @if($bundlePrice)
-                                Rp{{ number_format($bundlePrice->price,0,',','.') }}
-                            @else
-                                -
-                            @endif
-                        </span>
-                    </div>
-                    <div class="flex items-center justify-between mt-auto">
-                        <span class="text-[10px] text-gray-500"><i class="bi bi-box2-heart mr-1"></i>Stok Tersedia</span>
-                        <span class="text-xs sm:text-sm font-bold text-black">{{ $flower->current_stock }} <span class="font-normal">Tangkai</span></span>
-                    </div>
-                    <button type="button" onclick="openCartModal({{ $flower->id }})" class="w-full bg-pink-500 hover:bg-pink-600 text-white text-xs font-bold py-2 rounded transition">
-                        <i class="bi bi-cart-plus mr-1"></i>Tambah ke Keranjang
-                    </button>
                 </div>
             </div>
             @empty

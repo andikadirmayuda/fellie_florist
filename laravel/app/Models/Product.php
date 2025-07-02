@@ -30,6 +30,14 @@ class Product extends Model
         'is_active' => 'boolean'
     ];
 
+    /**
+     * Relasi ke riwayat stok (InventoryLog)
+     */
+    public function histories()
+    {
+        return $this->hasMany(\App\Models\InventoryLog::class, 'product_id');
+    }
+
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);

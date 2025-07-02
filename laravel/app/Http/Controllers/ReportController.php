@@ -9,6 +9,7 @@ use App\Models\InventoryLog;
 use Carbon\Carbon;
 use Barryvdh\DomPDF\Facades\Pdf;
 
+
 class ReportController extends Controller
 {
     // Laporan Penjualan

@@ -159,4 +159,15 @@ class ProductController extends Controller
             ]);
         }
     }
+
+    /**
+     * API: Get current stock for a product (for AJAX stock info)
+     */
+    public function apiStock(Product $product)
+    {
+        return response()->json([
+            'current_stock' => $product->current_stock,
+            'base_unit' => $product->base_unit,
+        ]);
+    }
 }

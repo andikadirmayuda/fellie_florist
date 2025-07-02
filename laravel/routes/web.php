@@ -57,8 +57,13 @@ Route::middleware('auth')->group(function () {
     // Inventory Routes
     Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory.index');
     Route::get('/inventory/{product}/history', [InventoryController::class, 'history'])->name('inventory.history');
+    Route::get('/inventory/adjust', [InventoryController::class, 'adjustForm'])->name('inventory.adjust.form');
     Route::get('/inventory/{product}/adjust', [InventoryController::class, 'adjustForm'])->name('inventory.adjust-form');
     Route::post('/inventory/{product}/adjust', [InventoryController::class, 'adjust'])->name('inventory.adjust');
+
+    // API untuk modal penyesuaian stok
+    Route::get('/api/categories/{category}/products', [App\Http\Controllers\ProductController::class, 'apiByCategory']);
+    Route::get('/api/products/{product}/stock', [App\Http\Controllers\ProductController::class, 'apiStock']);
     
     // Order Management Routes
     Route::resource('orders', OrderController::class);
