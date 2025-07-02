@@ -3,16 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Invoice Pemesanan Publik - Fellie Florist</title>
+    <title>Detail Pemesanan - Fellie Florist</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
 <body class="bg-gray-100 min-h-screen">
-    <div class="container mx-auto px-1 sm:px-4 py-2 sm:py-8 flex justify-center items-center min-h-screen text-[13px] sm:text-base">
-        <div class="bg-white rounded-lg shadow-lg p-1 sm:p-6 w-full max-w-[95vw] sm:max-w-2xl mx-auto">
+    <div class="container mx-auto px-2 sm:px-4 py-4 sm:py-8 flex justify-center items-center min-h-screen text-[13px] sm:text-base">
+        <div class="bg-white rounded-lg shadow-lg p-2 sm:p-6 w-full max-w-[95vw] sm:max-w-2xl mx-auto">
             <div class="text-center mb-4 sm:mb-8">
                 <h1 class="text-xl sm:text-3xl font-bold text-pink-600">Fellie Florist</h1>
-                <p class="text-gray-600 text-xs sm:text-base">Invoice Pemesanan Publik</p>
+                <p class="text-gray-600 text-xs sm:text-base">Detail Pemesanan Publik</p>
             </div>
+            <!-- Stepper Status -->
+            <div class="flex justify-between items-center mb-6">
+                @php
+                    $steps = [
+                        'pending' => 'Pesanan Diterima',
+                        'processing' => 'Diproses',
+                        'packing' => 'Dikemas',
+                        'shipped' => 'Dikirim',
+                        'done' => 'Selesai',
+                        'cancelled' => 'Dibatalkan',
+                    ];
+                    // Mapping status dari database ke key steps
+                    $statusMap = [
+                        'pending' => 'pending',
+                        'processing' => 'processing',
+                        'packing' => 'packing',
+                        'shipped' => 'shipped',
+                        'done' => 'done',
+                        'completed' => 'done', // mapping Completed ke done
+                        'cancelled' => 'cancelled',
+                        'canceled' => 'cancelled',
+                    ];
+                    $currentStatus = strtolower($order->status);
+                    $currentStatus = $statusMap[$currentStatus] ?? $currentStatus;
+                    $stepKeys = array_keys($steps);
+                    $currentIndex = array_search($currentStatus, $stepKeys);
+                @endphp
+                <div class="flex w-full justify-between">
+                    @foreach($steps as $key => $label)
+                        <div class="flex-1 flex flex-col items-center">
+                            <div class="rounded-full w-8 h-8 flex items-center justify-center mb-1 {{ $currentStatus === $key || $currentIndex > array_search($key, $stepKeys) ? 'bg-pink-600 text-white' : 'bg-gray-300 text-gray-500' }}">
+                                {{ $loop->iteration }}
+                            </div>
+                            <div class="text-xs text-center {{ $currentStatus === $key || $currentIndex > array_search($key, $stepKeys) ? 'text-pink-600 font-bold' : 'text-gray-500' }}">{{ $label }}</div>
+                        </div>
+                        @if(!$loop->last)
+                            <div class="flex-1 h-1 bg-gray-300 mx-1 sm:mx-2 mt-3 {{ $currentIndex >= $loop->index ? 'bg-pink-600' : '' }}"></div>
+                        @endif
+                    @endforeach
+                </div>
+            </div>
+            <!-- Info Pemesanan -->
             <div class="mb-4 sm:mb-6 border-b pb-2">
                 <div class="mb-0.5 text-xs sm:text-base">Nama: <b>{{ $order->customer_name }}</b></div>
                 <div class="mb-0.5 text-xs sm:text-base">No. WhatsApp: <b>{{ $order->wa_number }}</b></div>
@@ -55,27 +97,12 @@
                     </tr>
                 </tfoot>
             </table>
-            {{-- <div class="text-center mt-6">
-                <a href="https://wa.me/{{ preg_replace('/^0/', '62', preg_replace('/[^0-9]/', '', $order->wa_number)) }}?text={{ urlencode('Terima kasih telah memesan di Fellie Florist! Berikut link invoice pesanan Anda: ' . url()->current()) }}" target="_blank" class="inline-block bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
-                    <i class="bi bi-whatsapp mr-1"></i>Kirim Invoice ke WhatsApp
-                </a>
-            </div> --}}
             <div class="text-center text-gray-600 text-xs sm:text-sm mt-4 sm:mt-8">
                 <p>Terima kasih telah memesan di Fellie Florist!</p>
                 <p class="mt-1 sm:mt-2">Jika ada pertanyaan, silakan hubungi admin kami.</p>
-                <p class="mt-4">
-                    @if($order->status === 'pending' && config('public_order.enable_public_order_edit'))
-                        <a href="{{ route('public.order.edit', ['public_code' => $order->public_code]) }}" class="inline-block bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded">Edit Pesanan</a>
-                    @endif
-                </p>
                 <p class="mt-2 sm:mt-4">Fellie Florist &copy; {{ date('Y') }}</p>
             </div>
         </div>
-    </div>
-    <div class="fixed bottom-2 right-2 sm:bottom-4 sm:right-4 print:hidden z-50">
-        <button onclick="window.print()" class="bg-pink-600 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-lg shadow hover:bg-pink-700 text-xs sm:text-base">
-            Print Invoice
-        </button>
     </div>
 </body>
 </html>

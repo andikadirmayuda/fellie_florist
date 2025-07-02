@@ -1,8 +1,4 @@
-
 <?php
-
-// Public Order (API) - untuk form pemesanan publik
-Route::post('/public-order', [App\Http\Controllers\PublicOrderController::class, 'store']);
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
@@ -29,27 +25,27 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', [DashboardController::class, 'index'])
-    ->middleware(['auth', 'verified'])
-    ->name('dashboard');
+->middleware(['auth', 'verified'])
+->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-
+    
     // User Management Routes - Only accessible by owner and admin
     Route::middleware('role:owner,admin')->group(function () {
         Route::resource('users', UserController::class);
     });
-
+    
     // Customer Management Routes
     Route::resource('customers', CustomerController::class);
-
+    
     // Customer Trash Routes
     Route::get('customers/trashed', [CustomerController::class, 'trashed'])->name('customers.trashed');
     Route::patch('customers/{id}/restore', [CustomerController::class, 'restore'])->name('customers.restore');
     Route::delete('customers/{id}/force-delete', [CustomerController::class, 'forceDelete'])->name('customers.force-delete');
-
+    
     // Product Management Routes
     Route::resource('categories', CategoryController::class);
     // Ekspor & Impor Produk Excel
@@ -57,22 +53,22 @@ Route::middleware('auth')->group(function () {
     Route::get('products/export-json', [App\Http\Controllers\ProductJsonController::class, 'export'])->name('products.export-json');
     Route::post('products/import-json', [App\Http\Controllers\ProductJsonController::class, 'import'])->name('products.import-json');
     Route::resource('products', ProductController::class);
-
+    
     // Inventory Routes
     Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory.index');
     Route::get('/inventory/{product}/history', [InventoryController::class, 'history'])->name('inventory.history');
     Route::get('/inventory/{product}/adjust', [InventoryController::class, 'adjustForm'])->name('inventory.adjust-form');
     Route::post('/inventory/{product}/adjust', [InventoryController::class, 'adjust'])->name('inventory.adjust');
-
+    
     // Order Management Routes
     Route::resource('orders', OrderController::class);
     Route::get('/orders/{order}/invoice', [OrderController::class, 'invoice'])->name('orders.invoice');
     Route::get('/orders/{order}/share-whatsapp', [OrderController::class, 'shareWhatsApp'])->name('orders.share-whatsapp');
-
+    
     // Order History Routes
     Route::get('order-histories', [OrderHistoryController::class, 'index'])->name('order-histories.index');
     Route::get('order-histories/{history}', [OrderHistoryController::class, 'show'])->name('order-histories.show');
-
+    
     // Sales Routes
     Route::resource('sales', App\Http\Controllers\SaleController::class)->names([
         'index' => 'sales.index',
@@ -81,7 +77,7 @@ Route::middleware('auth')->group(function () {
         'show' => 'sales.show',
     ]);
     Route::get('/sales/{sale}/download-pdf', [App\Http\Controllers\SaleController::class, 'downloadPdf'])->name('sales.download_pdf');
-
+    
     // Settings Routes
     Route::prefix('settings')->name('settings.')->middleware(['auth'])->group(function () {
         // Archive Settings
@@ -125,5 +121,17 @@ Route::middleware(['auth'])->group(function () {
 
 // Route untuk invoice publik khusus pemesanan publik (PUBLIC, tanpa auth)
 Route::get('/invoice/{public_code}', [App\Http\Controllers\PublicOrderController::class, 'publicInvoice'])->name('public.order.invoice');
+
+// Public Order (API) - untuk form pemesanan publik
+Route::post('/public-order', [App\Http\Controllers\PublicOrderController::class, 'store']);
+Route::post('/admin/public-orders/{id}/update-status', [App\Http\Controllers\AdminPublicOrderController::class, 'updateStatus'])->name('admin.public-orders.update-status');
+
+// =====================
+// Keranjang belanja publik (tanpa login)
+// =====================
+Route::get('/cart', [App\Http\Controllers\PublicCartController::class, 'index'])->name('public.cart.index');
+Route::post('/cart/add', [App\Http\Controllers\PublicCartController::class, 'add'])->name('public.cart.add');
+Route::post('/cart/remove/{product_id}', [App\Http\Controllers\PublicCartController::class, 'remove'])->name('public.cart.remove');
+Route::post('/cart/clear', [App\Http\Controllers\PublicCartController::class, 'clear'])->name('public.cart.clear');
 
 require __DIR__.'/auth.php';

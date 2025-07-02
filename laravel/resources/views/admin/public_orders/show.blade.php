@@ -14,7 +14,39 @@
             <div class="mb-2">Waktu Ambil/Pengiriman: <b>{{ $order->pickup_time }}</b></div>
             <div class="mb-2">Metode Pengiriman: <b>{{ $order->delivery_method }}</b></div>
             <div class="mb-2">Tujuan Pengiriman: <b>{{ $order->destination }}</b></div>
-            <div class="mb-2">Status: <b>{{ ucfirst($order->status) }}</b></div>
+            <div class="mb-2">
+                @php
+                    $status = $order->status;
+                @endphp
+                @if($status === 'pending')
+                <form method="POST" action="{{ route('admin.public-orders.update-status', $order->id) }}" class="inline">
+                    @csrf
+                    <label for="status" class="font-semibold">Status:</label>
+                    <select name="status" id="status" class="border rounded p-1 mx-2">
+                        <option value="pending" @if($status=='pending') selected @endif>Menunggu</option>
+                        <option value="processed">Diproses</option>
+                        <option value="completed">Selesai</option>
+                        <option value="cancelled">Dibatalkan</option>
+                    </select>
+                    <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded">Ubah</button>
+                </form>
+                @elseif($status === 'processed')
+                    <span class="font-semibold">Status:</span>
+                    <form method="POST" action="{{ route('admin.public-orders.update-status', $order->id) }}" class="inline">
+                        @csrf
+                        <select name="status" id="status" class="border rounded p-1 mx-2">
+                            <option value="processed" selected>Diproses</option>
+                            <option value="completed">Selesai</option>
+                        </select>
+                        <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded">Ubah</button>
+                    </form>
+                @else
+                    <span class="font-semibold">Status:</span>
+                    <span class="ml-2 px-2 py-1 rounded {{ $status=='completed' ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800' }}">
+                        {{ ucfirst($status) }}
+                    </span>
+                @endif
+            </div>
         </div>
         <div class="bg-white rounded shadow p-6">
         <div class="mb-6 text-center">
@@ -22,12 +54,14 @@
                 <a href="{{ route('public.order.invoice', ['public_code' => $order->public_code]) }}" target="_blank" class="inline-block bg-pink-600 hover:bg-pink-700 text-white font-bold py-2 px-4 rounded mb-2">
                     <i class="bi bi-receipt mr-1"></i>Lihat Invoice Publik
                 </a>
-                {{-- <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $order->wa_number) }}?text={{ urlencode('Berikut link invoice pesanan Anda di Fellie Florist: ' . route('public.order.invoice', ['public_code' => $order->public_code])) }}" target="_blank" class="inline-block bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded ml-2">
-                    <i class="bi bi-whatsapp mr-1"></i>Share Invoice ke WhatsApp
-                </a> --}}
-                <a href="https://wa.me/{{ preg_replace('/^0/', '62', preg_replace('/[^0-9]/', '', $order->wa_number)) }}?text={{ urlencode('Terima kasih telah memesan di Fellie Florist! Berikut link invoice pesanan Anda: ' . url()->current()) }}" target="_blank" class="inline-block bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
+                <a href="https://wa.me/{{ preg_replace('/^0/', '62', preg_replace('/[^0-9]/', '', $order->wa_number)) }}?text={{ urlencode('Terima kasih telah memesan di Fellie Florist! Berikut link invoice pesanan Anda: ' . route('public.order.invoice', ['public_code' => $order->public_code])) }}" target="_blank" class="inline-block bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
                     <i class="bi bi-whatsapp mr-1"></i>Kirim Invoice ke WhatsApp
                 </a>
+                @if(config('public_order.enable_public_order_edit') && $order->status === 'pending')
+                    <a href="{{ route('public.order.edit', ['public_code' => $order->public_code]) }}" target="_blank" class="inline-block bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded mb-2">
+                        <i class="bi bi-pencil mr-1"></i>Edit Pesanan (Publik)
+                    </a>
+                @endif
             @else
                 <div class="text-red-600 font-semibold">Kode invoice publik belum tersedia. Silakan edit/migrasi data order ini.</div>
             @endif
