@@ -1,12 +1,14 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-100 leading-tight">
-            Transaksi Penjualan
+        <h2 class="font-sans text-xl text-black leading-tight flex items-center">
+            <i class="bi bi-cart-plus mr-2"></i>Transaksi Penjualan
         </h2>
     </x-slot>
-    <div class="max-w-3xl mx-auto py-8 px-4">
+    <!-- Bootstrap Icons CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <div class="max-w-3xl mx-auto py-8 px-4 sm:px-8 font-sans bg-white shadow-lg rounded-sm border">
         @if ($errors->any())
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4 dark:bg-red-900 dark:text-red-200">
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-sm mb-4">
                 <ul>
                     @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>
@@ -18,16 +20,21 @@
             @csrf
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">No. Penjualan (Otomatis)</label>
-                    <input type="text" class="form-input w-full rounded-md border-gray-300 dark:bg-gray-800 dark:text-gray-100" value="(Akan otomatis)" disabled>
+                    <label class="text-black text-xs font-semibold flex items-center mb-1"><i class="bi bi-whatsapp mr-1"></i>No. WhatsApp (WA)</label>
+                    <input type="text" name="wa_number" class="bg-gray-50 text-black placeholder-gray-400 border border-gray-300 w-full rounded-sm px-3 py-2 focus:outline-none" placeholder="08xxxxxxxxxx" autocomplete="off">
+                    <small class="text-gray-500 text-xs">Masukkan nomor WhatsApp customer untuk mengirim link invoice.</small>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Waktu Pemesanan</label>
-                    <input type="text" class="form-input w-full rounded-md border-gray-300 dark:bg-gray-800 dark:text-gray-100" value="{{ now() }}" disabled>
+                    <label class="text-black text-xs font-semibold flex items-center mb-1"><i class="bi bi-hash mr-1"></i>No. Penjualan (Otomatis)</label>
+                    <input type="text" class="bg-gray-50 text-black placeholder-gray-400 border border-gray-300 w-full rounded-sm px-3 py-2 focus:outline-none" value="(Akan otomatis)" disabled>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Kategori Produk</label>
-                    <select class="form-select w-full rounded-md border-gray-300 dark:bg-gray-800 dark:text-gray-100" id="categorySelect">
+                    <label class="text-black text-xs font-semibold flex items-center mb-1"><i class="bi bi-clock mr-1"></i>Waktu Pemesanan</label>
+                    <input type="text" class="bg-gray-50 text-black placeholder-gray-400 border border-gray-300 w-full rounded-sm px-3 py-2 focus:outline-none" value="{{ now() }}" disabled>
+                </div>
+                <div>
+                    <label class="text-black text-xs font-semibold flex items-center mb-1"><i class="bi bi-tags mr-1"></i>Kategori Produk</label>
+                    <select class="bg-gray-50 text-black border border-gray-300 w-full rounded-sm px-3 py-2" id="categorySelect">
                         <option value="">Pilih Kategori</option>
                         @foreach($categories as $category)
                             <option value="{{ $category->id }}">{{ $category->name }}</option>
@@ -35,8 +42,8 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Produk</label>
-                    <select class="form-select w-full rounded-md border-gray-300 dark:bg-gray-800 dark:text-gray-100" id="productSelect">
+                    <label class="text-black text-xs font-semibold flex items-center mb-1"><i class="bi bi-box mr-1"></i>Produk</label>
+                    <select class="bg-gray-50 text-black border border-gray-300 w-full rounded-sm px-3 py-2" id="productSelect">
                         <option value="">Pilih Produk</option>
                         @foreach($products as $product)
                             <option value="{{ $product->id }}" data-category="{{ $product->category_id }}" @if($product->current_stock == 0) disabled @endif>
@@ -49,58 +56,63 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Tipe Harga</label>
-                    <select class="form-select w-full rounded-md border-gray-300 dark:bg-gray-800 dark:text-gray-100" id="priceTypeSelect">
+                    <label class="text-black text-xs font-semibold flex items-center mb-1"><i class="bi bi-cash-coin mr-1"></i>Tipe Harga</label>
+                    <select class="bg-gray-50 text-black border border-gray-300 w-full rounded-sm px-3 py-2" id="priceTypeSelect">
                         <option value="">Pilih Tipe Harga</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Jumlah</label>
-                    <input type="number" class="form-input w-full rounded-md border-gray-300 dark:bg-gray-800 dark:text-gray-100" id="quantityInput" min="1" value="1">
+                    <label class="text-black text-xs font-semibold flex items-center mb-1"><i class="bi bi-123 mr-1"></i>Jumlah</label>
+                    <input type="number" class="bg-gray-50 text-black placeholder-gray-400 border border-gray-300 w-full rounded-sm px-3 py-2" id="quantityInput" min="1" value="1">
                 </div>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Cari Produk dengan Kode</label>
-                    <input type="text" id="searchByCodeInput" class="form-input w-full rounded-md border-gray-300 dark:bg-gray-800 dark:text-gray-100" placeholder="Scan/masukkan kode produk...">
+                    <label class="text-black text-xs font-semibold flex items-center mb-1"><i class="bi bi-upc-scan mr-1"></i>Cari Produk dengan Kode</label>
+                    <div class="relative">
+                    <input type="text" id="searchByCodeInput" class="bg-gray-50 text-black placeholder-gray-400 border border-gray-300 w-full rounded-sm px-3 py-2 pr-10" placeholder="Scan/masukkan kode produk...">
+                        <span class="absolute right-3 top-1/2 -translate-y-1/2 text-white"><i class="bi bi-search"></i></span>
+                    </div>
                 </div>
             </div>
             <div id="searchByCodeResult" class="my-2"></div>
             <div>
-                <button type="button" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded transition mt-2" id="addItemBtn">Tambah Produk</button>
+                <button type="button" class="bg-black text-white rounded-sm px-5 py-2 flex items-center gap-2 hover:bg-gray-900 transition mt-2" id="addItemBtn">
+                    <i class="bi bi-plus-circle"></i> Tambah Produk
+                </button>
             </div>
             <hr class="my-4 border-gray-300 dark:border-gray-700">
-            <h4 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">Daftar Produk</h4>
-            <div class="overflow-x-auto rounded-lg shadow">
-                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800" id="itemsTable">
-                    <thead class="bg-gray-50 dark:bg-gray-700">
+            <h4 class="text-black text-xs font-semibold flex items-center mb-2"><i class="bi bi-list-ul mr-1"></i>Daftar Produk</h4>
+            <div class="overflow-x-auto rounded-sm shadow border">
+                <table class="min-w-full divide-y divide-gray-200 bg-white text-sm" id="itemsTable">
+                    <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-200 uppercase tracking-wider">Produk</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-200 uppercase tracking-wider">Tipe Harga</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-200 uppercase tracking-wider">Harga</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-200 uppercase tracking-wider">Jumlah</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-200 uppercase tracking-wider">Subtotal</th>
-                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-200 uppercase tracking-wider">Aksi</th>
+                            <th class="px-3 py-2 text-left text-xs font-semibold text-black uppercase tracking-wider">Produk</th>
+                            <th class="px-3 py-2 text-left text-xs font-semibold text-black uppercase tracking-wider">Tipe Harga</th>
+                            <th class="px-3 py-2 text-left text-xs font-semibold text-black uppercase tracking-wider">Harga</th>
+                            <th class="px-3 py-2 text-left text-xs font-semibold text-black uppercase tracking-wider">Jumlah</th>
+                            <th class="px-3 py-2 text-left text-xs font-semibold text-black uppercase tracking-wider">Subtotal</th>
+                            <th class="px-3 py-2 text-center text-xs font-semibold text-black uppercase tracking-wider">Aksi</th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                    <tbody class="bg-white divide-y divide-gray-200">
                         <!-- Daftar produk akan diisi oleh JS -->
                     </tbody>
                 </table>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Subtotal</label>
-                    <input type="text" class="form-input w-full rounded-md border-gray-300 dark:bg-gray-800 dark:text-gray-100" id="subtotalInput" name="subtotal" readonly>
+                    <label class="text-black text-xs font-semibold flex items-center mb-1"><i class="bi bi-calculator mr-1"></i>Subtotal</label>
+                    <input type="text" class="bg-gray-50 text-black placeholder-gray-400 border border-gray-300 w-full rounded-sm px-3 py-2" id="subtotalInput" name="subtotal" readonly>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Total</label>
-                    <input type="text" class="form-input w-full rounded-md border-gray-300 dark:bg-gray-800 dark:text-gray-100" id="totalInput" name="total" readonly>
+                    <label class="text-black text-xs font-semibold flex items-center mb-1"><i class="bi bi-cash-stack mr-1"></i>Total</label>
+                    <input type="text" class="bg-gray-50 text-black placeholder-gray-400 border border-gray-300 w-full rounded-sm px-3 py-2" id="totalInput" name="total" readonly>
                 </div>
             </div>
             <div class="mt-4">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Metode Pembayaran</label>
-                <select class="form-select w-full rounded-md border-gray-300 dark:bg-gray-800 dark:text-gray-100" name="payment_method" required>
+                <label class="text-black text-xs font-semibold flex items-center mb-1"><i class="bi bi-credit-card mr-1"></i>Metode Pembayaran</label>
+                <select class="bg-gray-50 text-black border border-gray-300 w-full rounded-sm px-3 py-2" name="payment_method" required>
                     <option value="pilih">Pilih Metode Pembayaran</option>
                     <option value="cash">Cash</option>
                     <option value="debit">Debit</option>
@@ -108,8 +120,8 @@
                 </select>
             </div>
             <div id="cashSection" class="mt-4" style="display:none;">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Bayar (Cash)</label>
-                <input type="number" min="0" step="100" id="cashGivenInput" class="form-input w-full rounded-md border-gray-300 dark:bg-gray-800 dark:text-gray-100" placeholder="Masukkan nominal uang cash...">
+                <label class="text-black text-xs font-semibold flex items-center mb-1"><i class="bi bi-cash mr-1"></i>Bayar (Cash)</label>
+                <input type="text" min="0" id="cashGivenInput" class="bg-gray-50 text-black placeholder-gray-400 border border-gray-300 w-full rounded-sm px-3 py-2" placeholder="Masukkan nominal uang cash..." autocomplete="off">
                 <div class="mt-2 text-sm">
                     <span>Kembalian: </span>
                     <span id="cashChange" class="font-bold text-green-600">Rp 0</span>
@@ -118,7 +130,9 @@
             <input type="hidden" name="items" id="itemsInput">
             <input type="hidden" name="cash_given" id="hiddenCashGivenInput">
             <div class="flex justify-end mt-6">
-                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded transition">Simpan</button>
+                <button type="submit" class="bg-black text-white rounded-sm px-5 py-2 flex items-center gap-2 hover:bg-gray-900 transition">
+                    <i class="bi bi-save"></i> Simpan
+                </button>
             </div>
         </form>
     </div>
@@ -143,8 +157,8 @@
     };
 
     function updateCashChange() {
-        const total = parseInt(totalInput.value.replace(/[^0-9]/g, '')) || 0;
-        const given = parseInt(cashGivenInput.value) || 0;
+        const total = parseInt((totalInput.value || '').replace(/[^0-9]/g, '')) || 0;
+        const given = parseInt((cashGivenInput.value || '').replace(/\./g, '').replace(/[^0-9]/g, '')) || 0;
         let change = given - total;
         cashChange.textContent = formatRupiah(change >= 0 ? change : 0);
         document.getElementById('hiddenCashGivenInput').value = given;
@@ -168,12 +182,12 @@
                 subtotal += item.price * item.quantity;
                 tbody.innerHTML += `
                     <tr>
-                        <td class='px-6 py-3 text-gray-900 dark:text-gray-100'>${item.product_name}</td>
-                        <td class='px-6 py-3 text-gray-900 dark:text-gray-100'>${item.price_type.replaceAll('_',' ').toUpperCase()}</td>
-                        <td class='px-6 py-3 text-gray-900 dark:text-gray-100'>${item.price.toLocaleString()}</td>
-                        <td class='px-6 py-3 text-gray-900 dark:text-gray-100'>${item.quantity}</td>
-                        <td class='px-6 py-3 text-gray-900 dark:text-gray-100'>${(item.price * item.quantity).toLocaleString()}</td>
-                        <td class='px-6 py-3 text-center'><button type="button" class="text-red-600 hover:underline font-medium" onclick="removeItem(${idx})">Hapus</button></td>
+                        <td class='px-3 py-2 text-black'>${item.product_name}</td>
+                        <td class='px-3 py-2 text-black'>${item.price_type.replaceAll('_',' ').toUpperCase()}</td>
+                        <td class='px-3 py-2 text-black'>${item.price.toLocaleString()}</td>
+                        <td class='px-3 py-2 text-black'>${item.quantity}</td>
+                        <td class='px-3 py-2 text-black'>${(item.price * item.quantity).toLocaleString()}</td>
+                        <td class='px-3 py-2 text-center'><button type="button" class="text-red-600 hover:underline font-medium" onclick="removeItem(${idx})">Hapus</button></td>
                     </tr>
                 `;
             });
@@ -229,8 +243,8 @@
         }
         const paymentSelect = document.querySelector('select[name="payment_method"]');
         if (paymentSelect.value === 'cash') {
-            const total = parseInt(document.getElementById('totalInput').value.replace(/[^0-9]/g, '')) || 0;
-            const given = parseInt(document.getElementById('cashGivenInput').value) || 0;
+            const total = parseInt((document.getElementById('totalInput').value || '').replace(/[^0-9]/g, '')) || 0;
+            const given = parseInt((document.getElementById('cashGivenInput').value || '').replace(/\./g, '').replace(/[^0-9]/g, '')) || 0;
             if (given < total) {
                 alert('Uang yang diberikan kurang dari total belanja!');
                 document.getElementById('cashGivenInput').focus();
@@ -329,6 +343,21 @@
         return 'Rp ' + (parseInt(num)||0).toLocaleString('id-ID');
     }
 
-    cashGivenInput && cashGivenInput.addEventListener('input', updateCashChange);
+    // Format input cash dengan titik ribuan
+    cashGivenInput && cashGivenInput.addEventListener('input', function(e) {
+        let value = this.value.replace(/[^\d]/g, '');
+        if (value) {
+            this.value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        } else {
+            this.value = '';
+        }
+        updateCashChange();
+    });
+    // Saat submit, hapus titik pada input cash
+    document.getElementById('saleForm').addEventListener('submit', function() {
+        if (cashGivenInput) {
+            cashGivenInput.value = cashGivenInput.value.replace(/\./g, '');
+        }
+    });
 </script>
 </x-app-layout>

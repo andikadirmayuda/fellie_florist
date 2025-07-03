@@ -15,6 +15,7 @@ return new class extends Migration
             $table->decimal('total', 15, 2);
             $table->decimal('subtotal', 15, 2);
             $table->enum('payment_method', ['cash', 'debit', 'transfer']);
+            $table->string('wa_number')->nullable();
             $table->timestamps();
         });
 

@@ -1,6 +1,6 @@
 <nav class="space-y-2 font-sans">
     {{-- <div class="px-4 py-6 bg-black shadow-sm rounded-2xl border border-gray-100 mt-4 mx-2"> --}}
-        <div class="px-4 py-6 bg-black border-r border-gray-700 h-screen min-h-screen">
+        <div class="px-4 py-6 bg-black border-r border-gray-700 h-full min-h-screen">
         <ul class="space-y-2">
 
             {{-- Dashboard: Semua user --}}
@@ -104,14 +104,14 @@
             @endif
 
             {{-- Order via WhatsApp: owner, admin, kasir, customers service --}}
-            @if(auth()->user()->hasRole('owner') || auth()->user()->hasRole('admin') || auth()->user()->hasRole('kasir') || auth()->user()->hasRole('customers service'))
+            {{-- @if(auth()->user()->hasRole('owner') || auth()->user()->hasRole('admin') || auth()->user()->hasRole('kasir') || auth()->user()->hasRole('customers service'))
             <x-sidebar-link :href="route('order.whatsapp.form')" :active="request()->routeIs('order.whatsapp.form')">
                 <x-slot name="icon">
                     <i class="bi bi-whatsapp text-lg mr-1"></i>
                 </x-slot>
                 Order via WhatsApp
             </x-sidebar-link>
-            @endif
+            @endif --}}
 
             {{-- Laporan: tampil sesuai role --}}
             <li class="mt-4 mb-1 text-xs font-semibold text-gray-500 uppercase tracking-wider">Laporan</li>

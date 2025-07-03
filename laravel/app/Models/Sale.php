@@ -18,6 +18,7 @@ class Sale extends Model
         'public_code', // untuk public receipt
         'cash_given',
         'change',
+        'wa_number',
     ];
 
     public function items()

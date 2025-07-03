@@ -137,11 +137,11 @@
                                                     <input type="hidden" name="prices[{{ $type }}][type]" value="{{ $type }}">
                                                 </td>
                                                 <td class="px-6 py-4">                                                <div class="relative">
-                                                    <input type="number" step="0.01"
+                                                    <input type="text"
                                                            name="prices[{{ $type }}][price]"
-                                                           value="{{ old("prices.$type.price", $existingPrices[$type]->price ?? '') }}"
-                                                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm {{ $errors->has("prices.$type.price") ? 'border-red-300' : '' }}"
-                                                           placeholder="Opsional">
+                                                           value="{{ old("prices.$type.price", isset($existingPrices[$type]->price) ? number_format($existingPrices[$type]->price, 0, ',', '.') : '') }}"
+                                                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm price-input {{ $errors->has("prices.$type.price") ? 'border-red-300' : '' }}"
+                                                           placeholder="Opsional" autocomplete="off">
                                                     <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">
                                                         <small>Rp</small>
                                                     </div>
@@ -184,6 +184,25 @@
                             </button>
                         </div>
                     </form>
+                    <script>
+                    // Format input harga dengan titik ribuan
+                    document.querySelectorAll('.price-input').forEach(function(input) {
+                        input.addEventListener('input', function(e) {
+                            let value = this.value.replace(/[^\d]/g, '');
+                            if (value) {
+                                this.value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+                            } else {
+                                this.value = '';
+                            }
+                        });
+                        // Saat form submit, ubah ke format angka tanpa titik
+                        input.form && input.form.addEventListener('submit', function() {
+                            document.querySelectorAll('.price-input').forEach(function(i) {
+                                i.value = i.value.replace(/\./g, '');
+                            });
+                        });
+                    });
+                    </script>
                 </div>
             </div>
         </div>

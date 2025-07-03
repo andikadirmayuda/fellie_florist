@@ -73,6 +73,7 @@ class SaleController extends Controller
                 'public_code' => $public_code,
                 'cash_given' => $cash_given,
                 'change' => $change,
+                'wa_number' => $request->wa_number,
             ]);
 
             foreach ($request->items as $item) {

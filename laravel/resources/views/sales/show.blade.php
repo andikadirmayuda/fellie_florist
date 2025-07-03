@@ -15,6 +15,10 @@
                             <dd class="font-semibold text-blue-700">{{ $sale->order_number }}</dd>
                         </div>
                         <div class="flex justify-between">
+                            <dt class="text-gray-600">No. WhatsApp:</dt>
+                            <dd class="text-gray-900">{{ $sale->wa_number ?? '-' }}</dd>
+                        </div>
+                        <div class="flex justify-between">
                             <dt class="text-gray-600">Tanggal:</dt>
                             <dd class="text-gray-900">{{ \Carbon\Carbon::parse($sale->order_time)->format('d-m-Y H:i') }}</dd>
                         </div>
@@ -75,7 +79,7 @@
                 <a href="{{ route('sales.public_receipt', $sale->public_code) }}" target="_blank" class="underline text-blue-700 hover:text-blue-900">{{ route('sales.public_receipt', $sale->public_code) }}</a>
                 <span class="block text-xs text-gray-400">(Link ini dapat dibagikan ke pelanggan, dapat diakses tanpa login)</span>
             </div>
-            <div class="mt-4 mb-2 text-sm text-gray-600">
+            {{-- <div class="mt-4 mb-2 text-sm text-gray-600">
                 <strong>Catatan:</strong> Untuk mengirim struk PDF ke WhatsApp pelanggan, silakan:
                 <ol class="list-decimal ml-6 mt-1">
                     <li>Download PDF struk dengan klik tombol <b>Download PDF</b> di bawah.</li>
@@ -83,10 +87,15 @@
                     <li>Setelah pesan terkirim, lampirkan file PDF yang sudah diunduh ke chat WhatsApp pelanggan.</li>
                 </ol>
                 <span class="text-xs text-gray-400">(Pengiriman file PDF otomatis hanya tersedia untuk WhatsApp Business API)</span>
-            </div>
+            </div> --}}
             <div class="mt-8 flex flex-wrap justify-end gap-2">
                 <a href="{{ route('sales.index') }}" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded transition">Kembali</a>
-                <button id="wa-share" type="button" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded transition">Bagikan via WhatsApp</button>
+                {{-- <button id="wa-share" type="button" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded transition">Bagikan via WhatsApp</button> --}}
+                @if($sale->wa_number)
+                <button id="wa-link-share" type="button" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition flex items-center gap-2">
+                    <i class="bi bi-whatsapp"></i> Kirim Link ke WhatsApp
+                </button>
+                @endif
                 <a href="{{ route('sales.download_pdf', $sale->id) }}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition">Download PDF</a>
             </div>
         </div>
@@ -102,5 +111,17 @@
                 `(Struk terlampir dalam bentuk PDF)`;
             window.open(`https://wa.me/?text=${message}`);
         };
+        // Tombol kirim link public invoice ke WhatsApp
+        const waLinkBtn = document.getElementById('wa-link-share');
+        if (waLinkBtn) {
+            waLinkBtn.onclick = function() {
+                const wa = @json($sale->wa_number);
+                let waNum = wa.replace(/[^0-9]/g, '');
+                if (waNum.startsWith('0')) waNum = '62' + waNum.slice(1);
+                const link = @json(route('sales.public_receipt', $sale->public_code));
+                const msg = `Hallo, berikut link struk pembelian Anda di Fellie Florist:%0A${link}`;
+                window.open(`https://wa.me/${waNum}?text=${msg}`);
+            }
+        }
     </script>
 </x-app-layout>
