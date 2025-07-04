@@ -18,9 +18,10 @@ class BouquetOrderController extends Controller
 
     public function create()
     {
-        // Ambil produk dengan current_stock > 0
-        $products = \App\Models\Product::where('current_stock', '>', 0)->get();
-        return view('bouquet.orders', compact('products'));
+        // Ambil produk dan kategori
+        $products = \App\Models\Product::with('prices')->where('current_stock', '>', 0)->get();
+        $categories = \App\Models\Category::all();
+        return view('bouquet.orders', compact('products', 'categories'));
     }
 
     public function store(Request $request)
@@ -28,19 +29,24 @@ class BouquetOrderController extends Controller
         $request->validate([
             'customer_name' => 'required',
             'wa_number' => 'required',
-            'flowers' => 'required|array',
-            'flowers.*.product_id' => 'required|exists:products,id',
-            'flowers.*.quantity' => 'required|integer|min:1',
+            'items' => 'required|string',
         ]);
+        $items = json_decode($request->items, true);
+        if (!is_array($items) || count($items) == 0) {
+            return back()->withErrors(['items' => 'Item buket harus diisi minimal 1.'])->withInput();
+        }
         DB::beginTransaction();
         try {
             $total = 0;
-            foreach ($request->flowers as $flower) {
-                $product = Product::find($flower['product_id']);
-                if ($product->stock < $flower['quantity']) {
-                    return back()->withErrors(['msg' => "Stok bunga {$product->name} tidak cukup!"])->withInput();
+            foreach ($items as $item) {
+                $product = Product::find($item['product_id']);
+                if (!$product) {
+                    return back()->withErrors(['items' => 'Produk tidak ditemukan.'])->withInput();
                 }
-                $total += $product->price * $flower['quantity'];
+                if ($product->current_stock < $item['qty']) {
+                    return back()->withErrors(['items' => "Stok produk {$product->name} tidak cukup!"])->withInput();
+                }
+                $total += $item['price'] * $item['qty'];
             }
             $order = BouquetOrder::create([
                 'customer_name' => $request->customer_name,
@@ -48,15 +54,15 @@ class BouquetOrderController extends Controller
                 'notes' => $request->notes,
                 'total_price' => $total,
             ]);
-            foreach ($request->flowers as $flower) {
-                $product = Product::find($flower['product_id']);
+            foreach ($items as $item) {
+                $product = Product::find($item['product_id']);
                 BouquetOrderItem::create([
                     'bouquet_order_id' => $order->id,
                     'product_id' => $product->id,
-                    'quantity' => $flower['quantity'],
-                    'price' => $product->price,
+                    'quantity' => $item['qty'],
+                    'price' => $item['price'],
                 ]);
-                $product->stock -= $flower['quantity'];
+                $product->current_stock -= $item['qty'];
                 $product->save();
             }
             DB::commit();

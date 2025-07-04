@@ -4,7 +4,11 @@
         <div class="bg-white rounded shadow p-6 mb-4">
             <div><b>Nama:</b> {{ $order->customer_name }}</div>
             <div><b>No. WA:</b> {{ $order->wa_number }}</div>
-            <div><b>Tanggal:</b> {{ $order->created_at->format('d-m-Y H:i') }}</div>
+            <div><b>Tanggal Order:</b> {{ $order->created_at->format('d-m-Y H:i') }}</div>
+            <div><b>Status Pesanan:</b> {{ ucfirst($order->status) }}</div>
+            <div><b>Metode Pengiriman:</b> {{ $order->delivery_method }} @if($order->delivery_note) ({{ $order->delivery_note }}) @endif</div>
+            <div><b>Tanggal & Waktu Pengiriman:</b> {{ $order->delivery_at ? \Carbon\Carbon::parse($order->delivery_at)->format('d-m-Y H:i') : '-' }}</div>
+            <div><b>Tanggal & Waktu Pengambilan:</b> {{ $order->pickup_at ? \Carbon\Carbon::parse($order->pickup_at)->format('d-m-Y H:i') : '-' }}</div>
             <div><b>Catatan:</b> {{ $order->notes }}</div>
             <div><b>Total:</b> Rp{{ number_format($order->total_price,0,',','.') }}</div>
         </div>
