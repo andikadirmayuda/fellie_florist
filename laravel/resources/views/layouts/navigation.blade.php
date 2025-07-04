@@ -26,6 +26,12 @@
                     <x-nav-link :href="route('products.index')" :active="request()->routeIs('products.*')">
                         <i class="bi bi-box-seam mr-1"></i> <span class="text-white">{{ __('Products') }}</span>
                     </x-nav-link>
+                    <x-nav-link :href="route('bouquet.orders.index')" :active="request()->routeIs('bouquet.orders.*')">
+                        <i class="bi bi-bag-heart mr-1"></i> <span class="text-white">Pemesanan Buket</span>
+                    </x-nav-link>
+                    <x-nav-link :href="route('bouquet.sales.index')" :active="request()->routeIs('bouquet.sales.*')">
+                        <i class="bi bi-cash-coin mr-1"></i> <span class="text-white">Penjualan Buket</span>
+                    </x-nav-link>
                 </div>
             </div>
 
@@ -85,6 +91,12 @@
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('products.index')" :active="request()->routeIs('products.*')">
                 {{ __('Products') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('bouquet.orders.index')" :active="request()->routeIs('bouquet.orders.*')">
+                Pemesanan Buket
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('bouquet.sales.index')" :active="request()->routeIs('bouquet.sales.*')">
+                Penjualan Buket
             </x-responsive-nav-link>
         </div>
 

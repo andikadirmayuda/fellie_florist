@@ -17,6 +17,8 @@ use App\Http\Controllers\SaleReceiptController;
 use App\Http\Controllers\PublicSaleController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\AdminPublicOrderController;
+use App\Http\Controllers\BouquetOrderController;
+use App\Http\Controllers\BouquetSaleController;
 
 use Illuminate\Support\Facades\Route;
 
@@ -98,6 +100,15 @@ Route::middleware('auth')->group(function () {
 
 // Public Invoice Route (No Auth Required)
 Route::get('/i/{token}', [PublicInvoiceController::class, 'show'])->name('public.invoice');
+
+// Pemesanan & Penjualan Buket (khusus)
+// Hapus route manual berikut karena sudah digantikan oleh resource CRUD di bawah:
+// use App\Http\Controllers\BouquetOrderController;
+// use App\Http\Controllers\BouquetSaleController;
+// Route::get('/bouquet/orders', [BouquetOrderController::class, 'create'])->name('bouquet.orders');
+// Route::post('/bouquet/orders', [BouquetOrderController::class, 'store'])->name('bouquet.orders.store');
+// Route::get('/bouquet/sales', [BouquetSaleController::class, 'create'])->name('bouquet.sales');
+// Route::post('/bouquet/sales', [BouquetSaleController::class, 'store'])->name('bouquet.sales.store');
 Route::get('/public/receipt/{public_code}', [PublicSaleController::class, 'show'])->name('sales.public_receipt');
 
 // Report Routes - Tanpa middleware, dapat diakses publik
@@ -138,5 +149,30 @@ Route::get('/cart', [App\Http\Controllers\PublicCartController::class, 'index'])
 Route::post('/cart/add', [App\Http\Controllers\PublicCartController::class, 'add'])->name('public.cart.add');
 Route::post('/cart/remove/{product_id}', [App\Http\Controllers\PublicCartController::class, 'remove'])->name('public.cart.remove');
 Route::post('/cart/clear', [App\Http\Controllers\PublicCartController::class, 'clear'])->name('public.cart.clear');
+
+// CRUD Pemesanan Buket
+Route::resource('bouquet/orders', BouquetOrderController::class, [
+    'names' => [
+        'index' => 'bouquet.orders.index',
+        'create' => 'bouquet.orders.create',
+        'store' => 'bouquet.orders.store',
+        'show' => 'bouquet.orders.show',
+        'edit' => 'bouquet.orders.edit',
+        'update' => 'bouquet.orders.update',
+        'destroy' => 'bouquet.orders.destroy',
+    ]
+]);
+// CRUD Penjualan Buket
+Route::resource('bouquet/sales', BouquetSaleController::class, [
+    'names' => [
+        'index' => 'bouquet.sales.index',
+        'create' => 'bouquet.sales.create',
+        'store' => 'bouquet.sales.store',
+        'show' => 'bouquet.sales.show',
+        'edit' => 'bouquet.sales.edit',
+        'update' => 'bouquet.sales.update',
+        'destroy' => 'bouquet.sales.destroy',
+    ]
+]);
 
 require __DIR__.'/auth.php';

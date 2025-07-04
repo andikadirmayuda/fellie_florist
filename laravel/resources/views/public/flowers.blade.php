@@ -52,7 +52,7 @@
 
       
     
-        {{--
+        
         <div class="flex items-center justify-center mt-2">
             <a href="{{ route('public.cart.index') }}" class="ml-4 bg-pink-100 hover:bg-pink-200 text-pink-700 font-bold px-4 py-2 rounded flex items-center text-sm">
                 <i class="bi bi-cart3 mr-2"></i>Lihat Keranjang
@@ -63,17 +63,17 @@
                 </a>
             @endif
         </div>
-        --}}
+       
     </div>
 
     <!-- Form Lacak Pesanan -->
-    {{-- <div class="w-full max-w-2xl mx-auto mb-8">
+    <div class="w-full max-w-2xl mx-auto mb-8">
         <form method="GET" action="{{ route('public.order.track') }}" class="flex flex-col sm:flex-row items-center gap-2 bg-gray-50 p-4 rounded shadow">
             <label class="text-sm font-semibold">Lacak Pesanan Anda:</label>
             <input type="text" name="wa_number" class="border rounded px-3 py-2 text-sm flex-1" placeholder="Masukkan No. WhatsApp" required>
             <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-bold px-4 py-2 rounded">Lacak</button>
         </form>
-    </div> --}}
+    </div>
 
 
 
@@ -145,6 +145,9 @@
                             <span class="text-[11px] text-gray-500"><i class="bi bi-box2-heart mr-1"></i>Stok Tersedia</span>
                             <span class="text-xs sm:text-sm font-bold text-black">{{ $flower->current_stock }} <span class="font-normal">Tangkai</span></span>
                         </div>
+                        <button  class="mt-3 w-full bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 rounded transition"
+                        onclick="openCartModal({{ $flower->id }})">
+                        <i class="bi bi-cart-plus mr-1"></i>Tambah ke Keranjang</button>                
                     </div>
                 </div>
             </div>

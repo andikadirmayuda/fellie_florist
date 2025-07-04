@@ -55,6 +55,12 @@
                 </x-slot>
                 {{ __('Pesanan') }}
             </x-sidebar-link>
+            <x-sidebar-link :href="route('bouquet.orders.index')" :active="request()->routeIs('bouquet.orders.*')">
+                <x-slot name="icon">
+                    <i class="bi bi-bag-heart text-lg mr-1"></i>
+                </x-slot>
+                Pemesanan Buket
+            </x-sidebar-link>
             @endif
 
             {{-- Pesanan Publik: owner, admin --}}
@@ -100,6 +106,12 @@
                     <i class="bi bi-cash-stack text-lg mr-1"></i>
                 </x-slot>
                 {{ __('Penjualan') }}
+            </x-sidebar-link>
+            <x-sidebar-link :href="route('bouquet.sales.index')" :active="request()->routeIs('bouquet.sales.*')">
+                <x-slot name="icon">
+                    <i class="bi bi-cash-coin text-lg mr-1"></i>
+                </x-slot>
+                Penjualan Buket
             </x-sidebar-link>
             @endif
 
