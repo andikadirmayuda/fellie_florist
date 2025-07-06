@@ -132,6 +132,7 @@ Route::get('/order-whatsapp', [\App\Http\Controllers\OrderWhatsAppController::cl
 // Admin Public Order Routes - Bisa diakses semua user yang login
 Route::middleware(['auth'])->group(function () {
     Route::get('/admin/public-orders', [AdminPublicOrderController::class, 'index'])->name('admin.public-orders.index');
+    Route::get('/admin/public-orders/filter', [AdminPublicOrderController::class, 'filter'])->name('admin.public-orders.filter');
     Route::get('/admin/public-orders/{id}', [AdminPublicOrderController::class, 'show'])->name('admin.public-orders.show');
 });
 

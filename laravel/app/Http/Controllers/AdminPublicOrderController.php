@@ -139,4 +139,38 @@ class AdminPublicOrderController extends Controller
     }
 
 
+
+    public function filter(Request $request)
+    {
+        $query = PublicOrder::query();
+
+        if ($request->filled('nama')) {
+            $query->where('customer_name', 'like', '%' . $request->nama . '%');
+        }
+        if ($request->filled('tanggal')) {
+            $query->whereDate('pickup_date', $request->tanggal);
+        }
+        if ($request->filled('metode')) {
+            $query->where('delivery_method', $request->metode);
+        }
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+        if ($request->filled('bayar')) {
+            $query->where('payment_status', $request->bayar);
+        }
+
+        $orders = $query->orderByDesc('created_at')->paginate(20);
+
+        $rows = '';
+        foreach ($orders as $order) {
+            $rows .= view('admin.public_orders._order_row', compact('order'))->render();
+        }
+        $pagination = $orders->links()->render();
+
+        return response()->json([
+            'rows' => $rows,
+            'pagination' => $pagination,
+        ]);
+    }
 }
