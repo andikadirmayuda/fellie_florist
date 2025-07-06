@@ -9,6 +9,40 @@ use Illuminate\Support\Facades\DB;
 
 class PublicOrderController extends Controller
 {
+    /**
+     * Proses pembayaran DP atau pelunasan untuk PublicOrder
+     */
+    public function pay(Request $request, $public_code)
+    {
+        $order = PublicOrder::where('public_code', $public_code)->firstOrFail();
+        $validated = $request->validate([
+            'amount' => 'required|numeric|min:1',
+        ]);
+
+        $amount = $validated['amount'];
+        $order->amount_paid = ($order->amount_paid ?? 0) + $amount;
+
+        // Asumsi ada field total_price di order, jika tidak, silakan sesuaikan
+        $total = $order->total_price ?? 0;
+        if ($order->amount_paid >= $total && $total > 0) {
+            $order->payment_status = 'paid';
+        } else {
+            $order->payment_status = 'dp';
+        }
+        $order->save();
+
+        // (Opsional) Update status order jika sudah lunas
+        if ($order->payment_status === 'paid') {
+            $order->status = 'confirmed';
+            $order->save();
+        }
+
+        return response()->json([
+            'success' => true,
+            'payment_status' => $order->payment_status,
+            'amount_paid' => $order->amount_paid,
+        ]);
+    }
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -39,6 +73,7 @@ class PublicOrderController extends Controller
                 'destination' => $validated['destination'] ?? null,
                 'wa_number' => $validated['wa_number'] ?? null,
                 'status' => 'pending',
+                'payment_status' => 'waiting_confirmation', // default status pembayaran
             ]);
 
             foreach ($validated['items'] as $item) {

@@ -140,7 +140,10 @@ Route::get('/invoice/{public_code}', [App\Http\Controllers\PublicOrderController
 
 // Public Order (API) - untuk form pemesanan publik
 Route::post('/public-order', [App\Http\Controllers\PublicOrderController::class, 'store']);
+// Pembayaran DP atau pelunasan public order
+Route::post('/public-order/{public_code}/pay', [App\Http\Controllers\PublicOrderController::class, 'pay'])->name('public.order.pay');
 Route::post('/admin/public-orders/{id}/update-status', [App\Http\Controllers\AdminPublicOrderController::class, 'updateStatus'])->name('admin.public-orders.update-status');
+Route::post('/admin/public-orders/{id}/update-payment-status', [App\Http\Controllers\AdminPublicOrderController::class, 'updatePaymentStatus'])->name('admin.public-orders.update-payment-status');
 
 // =====================
 // Keranjang belanja publik (tanpa login)
@@ -174,5 +177,26 @@ Route::resource('bouquet/sales', BouquetSaleController::class, [
         'destroy' => 'bouquet.sales.destroy',
     ]
 ]);
+
+// Route test upload sederhana
+Route::get('/test-upload', function() {
+    return '<form method="POST" action="/test-upload" enctype="multipart/form-data">'
+        .csrf_field().
+        '<input type="file" name="testfile" />'
+        .'<button type="submit">Upload</button>'
+        .'</form>';
+});
+
+Route::post('/test-upload', function(\Illuminate\Http\Request $request) {
+    if ($request->hasFile('testfile')) {
+        $file = $request->file('testfile');
+        if (!$file->isValid()) {
+            return 'File upload tidak valid!';
+        }
+        $path = $file->store('public/packing_photos');
+        return 'Upload berhasil! Path: ' . $path;
+    }
+    return 'Tidak ada file terupload!';
+});
 
 require __DIR__.'/auth.php';

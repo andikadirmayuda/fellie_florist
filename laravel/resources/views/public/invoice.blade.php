@@ -55,6 +55,30 @@
                     </tr>
                 </tfoot>
             </table>
+
+            {{-- Form update pembayaran untuk pengguna --}}
+            @if(!in_array($order->payment_status, ['paid']) && !in_array($order->status, ['cancelled','completed','done']))
+            <div class="bg-yellow-50 border border-yellow-200 rounded p-3 mb-4">
+                <form method="POST" action="{{ route('public.order.pay', $order->public_code) }}" enctype="multipart/form-data" class="space-y-2">
+                    @csrf
+                    <div class="flex flex-col sm:flex-row gap-2 items-center">
+                        <label class="font-semibold">Status Pembayaran:</label>
+                        <select name="payment_type" class="border rounded p-1" required>
+                            <option value="dp">DP (Uang Muka)</option>
+                            <option value="lunas">Lunas</option>
+                        </select>
+                        <input type="number" name="amount" class="border rounded p-1" placeholder="Nominal (Rp)" min="1" required>
+                    </div>
+                    <div class="flex flex-col sm:flex-row gap-2 items-center">
+                        <label class="font-semibold">Upload Bukti Pembayaran:</label>
+                        <input type="file" name="payment_proof" accept="image/*,application/pdf" class="border rounded p-1" required>
+                    </div>
+                    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">Kirim Pembayaran</button>
+                </form>
+            </div>
+            @endif
+                </tfoot>
+            </table>
             {{-- <div class="text-center mt-6">
                 <a href="https://wa.me/{{ preg_replace('/^0/', '62', preg_replace('/[^0-9]/', '', $order->wa_number)) }}?text={{ urlencode('Terima kasih telah memesan di Fellie Florist! Berikut link invoice pesanan Anda: ' . url()->current()) }}" target="_blank" class="inline-block bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
                     <i class="bi bi-whatsapp mr-1"></i>Kirim Invoice ke WhatsApp

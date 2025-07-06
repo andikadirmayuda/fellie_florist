@@ -14,7 +14,11 @@ class PublicOrder extends Model
         'delivery_method',
         'destination',
         'status',
+        'payment_status',
+        'amount_paid',
+        'payment_proof',
         'wa_number',
+        'packing_photo',
     ];
 
     public function items()

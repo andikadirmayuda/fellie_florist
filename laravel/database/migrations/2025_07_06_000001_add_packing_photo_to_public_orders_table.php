@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('bouquet_orders', function (Blueprint $table) {
-            $table->string('order_number')->unique()->after('id');
+        Schema::table('public_orders', function (Blueprint $table) {
+            $table->string('packing_photo')->nullable()->after('status');
         });
     }
 
@@ -21,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('bouquet_orders', function (Blueprint $table) {
-            $table->dropColumn('order_number');
+        Schema::table('public_orders', function (Blueprint $table) {
+            $table->dropColumn('packing_photo');
         });
     }
 };

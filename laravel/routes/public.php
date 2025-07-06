@@ -24,10 +24,14 @@ Route::post('/cart/remove/{product_id}', [PublicCartController::class, 'remove']
 Route::post('/cart/clear', [PublicCartController::class, 'clear'])->name('public.cart.clear');
 
 // Invoice publik (detail pesanan publik)
-Route::get('/invoice/{public_code}', [PublicOrderController::class, 'publicInvoice'])->name('public.order.invoice');
+Route::get('/invoice/{public_code}', [PublicOrderController::class, 'publicInvoice'])
+    ->middleware('throttle:10,1') // Maksimal 10x akses per menit per IP
+    ->name('public.order.invoice');
 
 // Halaman detail pemesanan publik (tracking)
-Route::get('/order/{public_code}', [PublicOrderController::class, 'publicOrderDetail'])->name('public.order.detail');
+Route::get('/order/{public_code}', [PublicOrderController::class, 'publicOrderDetail'])
+    ->middleware('throttle:10,1') // Maksimal 10x akses per menit per IP
+    ->name('public.order.detail');
 
 // Tracking pesanan publik berdasarkan nomor WhatsApp
 Route::get('/track-order', [App\Http\Controllers\PublicOrderController::class, 'trackOrderForm'])->name('public.order.track');
