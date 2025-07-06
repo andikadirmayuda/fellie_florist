@@ -48,11 +48,28 @@ class BouquetOrderController extends Controller
                 }
                 $total += $item['price'] * $item['qty'];
             }
+
+            // Generate order_number unik
+            $today = date('Ymd');
+            $lastOrder = BouquetOrder::whereDate('created_at', now()->toDateString())
+                ->orderByDesc('order_number')->first();
+            $lastNumber = 0;
+            if ($lastOrder && preg_match('/BOUQ-' . $today . '-(\d{3})/', $lastOrder->order_number, $m)) {
+                $lastNumber = (int)$m[1];
+            }
+            $orderNumber = 'BOUQ-' . $today . '-' . str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
+
             $order = BouquetOrder::create([
+                'order_number' => $orderNumber,
                 'customer_name' => $request->customer_name,
                 'wa_number' => $request->wa_number,
                 'notes' => $request->notes,
                 'total_price' => $total,
+                'status' => 'diproses',
+                'delivery_method' => $request->delivery_method ?? null,
+                'delivery_note' => $request->delivery_note ?? null,
+                'delivery_at' => $request->delivery_at ?? null,
+                'pickup_at' => $request->pickup_at ?? null,
             ]);
             foreach ($items as $item) {
                 $product = Product::find($item['product_id']);

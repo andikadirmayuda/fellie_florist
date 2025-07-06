@@ -62,20 +62,28 @@
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
-                        <!-- Informasi Pengiriman -->
+                        <!-- Informasi Pengiriman & Catatan -->
                         <div class="mb-6">
                             <h2 class="text-lg font-medium text-gray-900 mb-4">Informasi Pengiriman</h2>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label for="pickup_date" class="block text-sm font-medium text-gray-700">Tanggal Pengambilan</label>
-                                    <input type="datetime-local" name="pickup_date" id="pickup_date" 
+                                    <label for="delivery_at" class="block text-sm font-medium text-gray-700">Tanggal & Waktu Pengiriman</label>
+                                    <input type="datetime-local" name="delivery_at" id="delivery_at"
                                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                                        required>
-                                    @error('pickup_date')
+                                        value="{{ old('delivery_at') }}">
+                                    @error('delivery_at')
                                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                     @enderror
                                 </div>
-
+                                <div>
+                                    <label for="pickup_at" class="block text-sm font-medium text-gray-700">Tanggal & Waktu Pengambilan</label>
+                                    <input type="datetime-local" name="pickup_at" id="pickup_at"
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                                        value="{{ old('pickup_at') }}">
+                                    @error('pickup_at')
+                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
+                                </div>
                                 <div>
                                     <label for="delivery_method" class="block text-sm font-medium text-gray-700">Metode Pengiriman</label>
                                     <select name="delivery_method" id="delivery_method" 
@@ -89,12 +97,18 @@
                                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                     @enderror
                                 </div>
-
                                 <div id="deliveryAddressContainer" class="md:col-span-2 hidden">
                                     <label for="delivery_address" class="block text-sm font-medium text-gray-700">Alamat Pengiriman</label>
                                     <textarea name="delivery_address" id="delivery_address" rows="3"
                                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"></textarea>
                                     @error('delivery_address')
+                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label for="notes" class="block text-sm font-medium text-gray-700">Catatan</label>
+                                    <textarea name="notes" id="notes" rows="2" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">{{ old('notes') }}</textarea>
+                                    @error('notes')
                                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                     @enderror
                                 </div>
