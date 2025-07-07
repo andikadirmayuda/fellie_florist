@@ -53,27 +53,55 @@
       
     
         
-        <div class="flex items-center justify-center mt-2">
-            <a href="{{ route('public.cart.index') }}" class="ml-4 bg-pink-100 hover:bg-pink-200 text-pink-700 font-bold px-4 py-2 rounded flex items-center text-sm">
-                <i class="bi bi-cart3 mr-2"></i>Lihat Keranjang
-            </a>
-            @if(session('last_public_order_code'))
-                <a href="{{ route('public.order.detail', ['public_code' => session('last_public_order_code')]) }}" class="ml-2 bg-green-500 hover:bg-green-600 text-white font-bold px-4 py-2 rounded flex items-center text-sm">
-                    <i class="bi bi-receipt mr-1"></i>Lihat Detail Pemesanan
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-3 mt-4 mb-8 w-full max-w-3xl mx-auto">
+            <div class="flex flex-col sm:flex-row gap-1 w-full max-w-xl mx-auto items-center justify-center">
+                <a href="{{ route('public.cart.index') }}" class="flex-1 min-w-[90px] max-w-[120px] bg-pink-500 hover:bg-pink-600 text-white font-bold px-2 py-1.5 rounded-md flex items-center justify-center text-xs shadow transition duration-200 focus:ring-2 focus:ring-pink-300 outline-none h-9">
+                    <i class="bi bi-cart3 mr-1 text-sm"></i>Keranjang
                 </a>
-            @endif
-        </div>
-       
+                @if(session('last_public_order_code'))
+                    <a href="{{ route('public.order.detail', ['public_code' => session('last_public_order_code')]) }}" class="flex-1 min-w-[90px] max-w-[120px] bg-pink-500 hover:bg-pink-600 text-white font-bold px-2 py-1.5 rounded-md flex items-center justify-center text-xs shadow transition duration-200 focus:ring-2 focus:ring-pink-300 outline-none h-9">
+                        <i class="bi bi-receipt mr-1 text-sm"></i>Pemesanan
+                    </a>
+                @endif
+                {{-- <form method="GET" action="{{ route('public.order.track') }}" class="flex-1 min-w-[140px] max-w-[180px] flex flex-col items-stretch bg-pink-50 border border-pink-200 p-1.5 rounded-md shadow transition hover:shadow-lg h-auto">
+                    <div class="flex flex-row items-center gap-1">
+                        <label class="text-xs font-semibold text-pink-700 whitespace-nowrap flex items-center gap-1">
+                            <i class="bi bi-search"></i> Lacak:
+                        </label>
+                        <input type="text" name="wa_number" class="border border-pink-200 rounded px-2 py-1.5 text-xs flex-1 focus:ring-2 focus:ring-pink-300 focus:outline-none h-8" placeholder="08xxxxxxxxxx" required aria-label="Nomor WhatsApp">
+                        <button type="submit" class="bg-pink-500 hover:bg-pink-600 text-white font-bold px-2.5 py-1.5 rounded-md transition flex items-center gap-1 text-xs focus:ring-2 focus:ring-pink-300 outline-none h-8">
+                            <i class="bi bi-arrow-right-circle"></i> Lacak
+                        </button>
+                    </div>
+                    <span class="block w-full text-[7px] text-pink-700 mt-1 text-left leading-tight pb-1">Masukkan nomor WhatsApp yang digunakan saat memesan.</span>
+                </form> --}}
+                <form method="GET" action="{{ route('public.order.track') }}" 
+      class="w-full sm:max-w-xs bg-pink-50 border border-pink-200 p-3 rounded-xl shadow-sm hover:shadow-md transition-all space-y-2">
+    
+    <label for="wa_number" class="flex items-center text-sm font-semibold text-pink-700 gap-1">
+        <i class="bi bi-search text-base"></i> Lacak Pesanan:
+    </label>
+
+    <div class="flex gap-2">
+        <input type="text" name="wa_number" id="wa_number"
+            class="flex-1 rounded-md border border-pink-300 focus:ring-2 focus:ring-pink-300 focus:outline-none text-sm px-3 py-2"
+            placeholder="08xxxxxxxxxx" required aria-label="Nomor WhatsApp">
+        <button type="submit"
+            class="bg-pink-500 hover:bg-pink-600 text-white font-semibold px-4 py-2 rounded-md flex items-center gap-1 text-sm transition focus:ring-2 focus:ring-pink-300">
+            <i class="bi bi-arrow-right-circle"></i>
+            Lacak
+        </button>
     </div>
 
-    <!-- Form Lacak Pesanan -->
-    <div class="w-full max-w-2xl mx-auto mb-8">
-        <form method="GET" action="{{ route('public.order.track') }}" class="flex flex-col sm:flex-row items-center gap-2 bg-gray-50 p-4 rounded shadow">
-            <label class="text-sm font-semibold">Lacak Pesanan Anda:</label>
-            <input type="text" name="wa_number" class="border rounded px-3 py-2 text-sm flex-1" placeholder="Masukkan No. WhatsApp" required>
-            <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-bold px-4 py-2 rounded">Lacak</button>
-        </form>
+    <p class="text-[11px] text-pink-600 leading-snug">
+        Masukkan nomor WhatsApp yang digunakan saat memesan.
+    </p>
+</form>
+
+            </div>
+        </div>
     </div>
+
 
 
 

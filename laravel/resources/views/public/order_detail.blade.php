@@ -14,7 +14,7 @@
                 <h1 class="text-2xl sm:text-3xl font-extrabold text-pink-600 tracking-tight mb-1 flex items-center justify-center gap-2">
                     <i class="bi bi-flower1 text-pink-400 text-2xl"></i> Fellie Florist
                 </h1>
-                <p class="text-gray-500 text-xs sm:text-base font-medium">Detail Pemesanan Publik</p>
+                <p class="text-gray-500 text-xs sm:text-base font-medium">Detail Pemesanan Via - Website</p>
             </div>
             <!-- Status Badge -->
             <div class="flex flex-col sm:flex-row gap-2 justify-center items-center mb-6">
@@ -220,6 +220,11 @@
                 <p class="mt-2 sm:mt-4">Fellie Florist &copy; {{ date('Y') }}</p>
             </div>
         </div>
+    </div>
+    <div class="w-full flex justify-center mt-4 mb-4">
+        <a href="{{ route('public.flowers') }}" class="inline-flex items-center gap-2 bg-pink-500 hover:bg-pink-600 text-white font-bold px-4 py-2 rounded-lg shadow transition">
+            <i class="bi bi-arrow-left-circle"></i> Kembali ke Daftar Bunga Ready
+        </a>
     </div>
 </body>
 </html>
