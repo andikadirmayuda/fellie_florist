@@ -127,6 +127,20 @@
                             <th colspan="5" class="text-right px-2 py-2 sm:px-4 sm:py-2 font-semibold">Total</th>
                             <th class="px-2 py-2 sm:px-4 sm:py-2 text-right font-semibold text-green-600 text-base">Rp{{ number_format($total, 0, ',', '.') }}</th>
                         </tr>
+                        @php
+                            $totalPaid = $order->payments ? $order->payments->sum('amount') : 0;
+                            $sisa = max($total - $totalPaid, 0);
+                        @endphp
+                        <tr>
+                            <th colspan="5" class="text-right px-2 py-2 sm:px-4 sm:py-2 font-semibold">Total Sudah Dibayar</th>
+                            <th class="px-2 py-2 sm:px-4 sm:py-2 text-right font-semibold text-blue-600">Rp{{ number_format($totalPaid, 0, ',', '.') }}</th>
+                        </tr>
+                        @if($sisa > 0)
+                        <tr>
+                            <th colspan="5" class="text-right px-2 py-2 sm:px-4 sm:py-2 font-semibold">Sisa Pembayaran</th>
+                            <th class="px-2 py-2 sm:px-4 sm:py-2 text-right font-semibold text-red-600">Rp{{ number_format($sisa, 0, ',', '.') }}</th>
+                        </tr>
+                        @endif
                     </tfoot>
                 </table>
             </div>
@@ -148,6 +162,47 @@
                         <a href="{{ asset('storage/' . $order->payment_proof) }}" target="_blank" class="text-blue-600 underline">Download Bukti Pembayaran</a>
                     @endif
                     <div id="payment-proof-error" style="display:none; color:red;">Bukti pembayaran tidak ditemukan di server.</div>
+                </div>
+            @endif
+
+            @if($order->payments && $order->payments->count())
+                <div class="my-8">
+                    <h3 class="font-semibold text-base mb-2 flex items-center gap-2 justify-center"><i class="bi bi-clock-history"></i> Riwayat Pembayaran</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs sm:text-sm table-fixed border rounded-lg overflow-hidden">
+                            <thead>
+                                <tr class="bg-gray-50 text-left">
+                                    <th class="py-2 px-2 sm:px-4 font-semibold">Tanggal</th>
+                                    <th class="py-2 px-2 sm:px-4 font-semibold text-right">Jumlah</th>
+                                    <th class="py-2 px-2 sm:px-4 font-semibold">Catatan</th>
+                                    <th class="py-2 px-2 sm:px-4 font-semibold">Bukti</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y">
+                                @foreach($order->payments as $payment)
+                                    <tr>
+                                        <td class="py-2 px-2 sm:px-4 align-top">{{ $payment->created_at ? $payment->created_at->format('Y-m-d H:i') : '-' }}</td>
+                                        <td class="py-2 px-2 sm:px-4 text-right align-top">Rp{{ number_format($payment->amount, 0, ',', '.') }}</td>
+                                        <td class="py-2 px-2 sm:px-4 align-top">{{ $payment->note ?? '-' }}</td>
+                                        <td class="py-2 px-2 sm:px-4 align-top">
+                                            @if($payment->proof)
+                                                @php $ext = pathinfo($payment->proof, PATHINFO_EXTENSION); @endphp
+                                                @if(in_array(strtolower($ext), ['jpg','jpeg','png','gif','webp']))
+                                                    <a href="{{ asset('storage/' . $payment->proof) }}" target="_blank"><img src="{{ asset('storage/' . $payment->proof) }}" alt="Bukti" class="inline-block rounded shadow max-h-12 border" style="max-width:60px;" /></a>
+                                                @elseif(strtolower($ext) == 'pdf')
+                                                    <a href="{{ asset('storage/' . $payment->proof) }}" target="_blank" class="text-blue-600 underline">PDF</a>
+                                                @else
+                                                    <a href="{{ asset('storage/' . $payment->proof) }}" target="_blank" class="text-blue-600 underline">File</a>
+                                                @endif
+                                            @else
+                                                -
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             @endif
             @if(!empty($order->packing_photo))

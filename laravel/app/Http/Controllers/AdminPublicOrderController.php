@@ -4,10 +4,42 @@ namespace App\Http\Controllers;
 
 use App\Models\PublicOrder;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 
 class AdminPublicOrderController extends Controller
 {
+    /**
+     * Hapus semua pesanan publik dengan status tertentu.
+     */
+    public function bulkDelete(Request $request)
+    {
+        $statuses = $request->input('statuses', []);
+        if (!is_array($statuses) || empty($statuses)) {
+            return back()->with('error', 'Pilih minimal satu status yang ingin dihapus.');
+        }
+        $orders = PublicOrder::whereIn('status', $statuses)->get();
+        $count = $orders->count();
+        if ($count === 0) {
+            return back()->with('info', 'Tidak ada pesanan publik dengan status yang dipilih.');
+        }
+
+        $deleted = 0;
+        foreach ($orders as $order) {
+            if (method_exists($order, 'items')) {
+                $order->items()->delete();
+            }
+            if ($order->payment_proof && Storage::disk('public')->exists($order->payment_proof)) {
+                Storage::disk('public')->delete($order->payment_proof);
+            }
+            if ($order->packing_photo && Storage::disk('public')->exists($order->packing_photo)) {
+                Storage::disk('public')->delete($order->packing_photo);
+            }
+            $order->delete();
+            $deleted++;
+        }
+        return back()->with('success', "$deleted pesanan publik dengan status terpilih berhasil dihapus.");
+    }
     public function index()
     {
         $orders = PublicOrder::orderByDesc('created_at')->paginate(20);

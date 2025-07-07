@@ -13,14 +13,25 @@
                 <h1 class="text-xl sm:text-3xl font-bold text-pink-600">Fellie Florist</h1>
                 <p class="text-gray-600 text-xs sm:text-base">Invoice Pemesanan Publik</p>
             </div>
-            <div class="mb-4 sm:mb-6 border-b pb-2">
-                <div class="mb-0.5 text-xs sm:text-base">Nama: <b>{{ $order->customer_name }}</b></div>
-                <div class="mb-0.5 text-xs sm:text-base">No. WhatsApp: <b>{{ $order->wa_number }}</b></div>
-                <div class="mb-0.5 text-xs sm:text-base">Tanggal Ambil/Kirim: <b>{{ $order->pickup_date }}</b></div>
-                <div class="mb-0.5 text-xs sm:text-base">Waktu Ambil/Pengiriman: <b>{{ $order->pickup_time }}</b></div>
-                <div class="mb-0.5 text-xs sm:text-base">Metode Pengiriman: <b>{{ $order->delivery_method }}</b></div>
-                <div class="mb-0.5 text-xs sm:text-base">Tujuan Pengiriman: <b>{{ $order->destination }}</b></div>
-                <div class="mb-0.5 text-xs sm:text-base">Status: <b>{{ ucfirst($order->status) }}</b></div>
+            <div class="mb-4 sm:mb-6 border-b pb-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div>
+                    <div class="mb-0.5 text-xs sm:text-base"><span class="font-semibold">Invoice untuk:</span> <b>{{ $order->customer_name }}</b></div>
+                    <div class="mb-0.5 text-xs sm:text-base"><span class="font-semibold">No. WhatsApp:</span> <b>{{ $order->wa_number }}</b></div>
+                    <div class="mb-0.5 text-xs sm:text-base"><span class="font-semibold">Tanggal Ambil/Kirim:</span> <b>{{ $order->pickup_date }}</b></div>
+                    <div class="mb-0.5 text-xs sm:text-base"><span class="font-semibold">Waktu Ambil/Pengiriman:</span> <b>{{ $order->pickup_time }}</b></div>
+                    <div class="mb-0.5 text-xs sm:text-base"><span class="font-semibold">Metode Pengiriman:</span> <b>{{ $order->delivery_method }}</b></div>
+                    <div class="mb-0.5 text-xs sm:text-base"><span class="font-semibold">Tujuan Pengiriman:</span> <b>{{ $order->destination }}</b></div>
+                </div>
+                <div class="sm:text-right">
+                    <div class="mb-0.5 text-xs sm:text-base"><span class="font-semibold">Status Pesanan:</span> <b>{{ ucfirst($order->status) }}</b></div>
+                    <div class="mb-0.5 text-xs sm:text-base"><span class="font-semibold">Status Pembayaran:</span> <b>{{ $order->payment_status ?? '-' }}</b></div>
+                    @php
+                        $total = 0;
+                        foreach($order->items as $item) {
+                            $total += ($item->price ?? 0) * ($item->quantity ?? 0);
+                        }
+                    @endphp
+                </div>
             </div>
             <h2 class="text-base sm:text-lg font-semibold mb-1 sm:mb-2">Produk Dipesan</h2>
             <table class="w-full mb-4 sm:mb-8 text-[10px] sm:text-base table-fixed">
@@ -53,30 +64,44 @@
                         <th colspan="5" class="text-right px-0.5 py-1 sm:px-4 sm:py-2">Total</th>
                         <th class="px-0.5 py-1 sm:px-4 sm:py-2 text-right">Rp{{ number_format($total, 0, ',', '.') }}</th>
                     </tr>
+                    @php $total_paid = $order->total_paid ?? ($order->payments ? $order->payments->sum('amount') : 0); @endphp
+                    @if($total_paid > 0)
+                    <tr>
+                        <th colspan="5" class="text-right px-0.5 py-1 sm:px-4 sm:py-2">Total Sudah Dibayar</th>
+                        <th class="px-0.5 py-1 sm:px-4 sm:py-2 text-right">Rp{{ number_format($total_paid, 0, ',', '.') }}</th>
+                    </tr>
+                    <tr>
+                        <th colspan="5" class="text-right px-0.5 py-1 sm:px-4 sm:py-2">Sisa Pembayaran</th>
+                        <th class="px-0.5 py-1 sm:px-4 sm:py-2 text-right">Rp{{ number_format(max($total - $total_paid, 0), 0, ',', '.') }}</th>
+                    </tr>
+                    @endif
                 </tfoot>
+
             </table>
 
-            {{-- Form update pembayaran untuk pengguna --}}
-            @if(!in_array($order->payment_status, ['paid']) && !in_array($order->status, ['cancelled','completed','done']))
-            <div class="bg-yellow-50 border border-yellow-200 rounded p-3 mb-4">
-                <form method="POST" action="{{ route('public.order.pay', $order->public_code) }}" enctype="multipart/form-data" class="space-y-2">
-                    @csrf
-                    <div class="flex flex-col sm:flex-row gap-2 items-center">
-                        <label class="font-semibold">Status Pembayaran:</label>
-                        <select name="payment_type" class="border rounded p-1" required>
-                            <option value="dp">DP (Uang Muka)</option>
-                            <option value="lunas">Lunas</option>
-                        </select>
-                        <input type="number" name="amount" class="border rounded p-1" placeholder="Nominal (Rp)" min="1" required>
-                    </div>
-                    <div class="flex flex-col sm:flex-row gap-2 items-center">
-                        <label class="font-semibold">Upload Bukti Pembayaran:</label>
-                        <input type="file" name="payment_proof" accept="image/*,application/pdf" class="border rounded p-1" required>
-                    </div>
-                    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">Kirim Pembayaran</button>
-                </form>
-            </div>
+            {{-- Bukti Pembayaran --}}
+            @if(!empty($order->payment_proof))
+                <div class="my-8 text-center">
+                    <h3 class="font-semibold text-base mb-2 flex items-center gap-2 justify-center"><i class="bi bi-receipt"></i> Bukti Pembayaran</h3>
+                    @php
+                        $ext = pathinfo($order->payment_proof, PATHINFO_EXTENSION);
+                    @endphp
+                    @if(in_array(strtolower($ext), ['jpg','jpeg','png','gif','webp']))
+                        <img src="{{ asset('storage/' . $order->payment_proof) }}"
+                             alt="Bukti Pembayaran"
+                             class="mx-auto rounded shadow max-h-64 border mb-2"
+                             style="max-width:300px;"
+                             onerror="this.style.display='none'; document.getElementById('payment-proof-error').style.display='block';" />
+                    @elseif(strtolower($ext) == 'pdf')
+                        <a href="{{ asset('storage/' . $order->payment_proof) }}" target="_blank" class="text-blue-600 underline">Lihat Bukti Pembayaran (PDF)</a>
+                    @else
+                        <a href="{{ asset('storage/' . $order->payment_proof) }}" target="_blank" class="text-blue-600 underline">Download Bukti Pembayaran</a>
+                    @endif
+                    <div id="payment-proof-error" style="display:none; color:red;">Bukti pembayaran tidak ditemukan di server.</div>
+                </div>
             @endif
+
+            {{-- Riwayat Pembayaran dihapus sesuai permintaan --}}
                 </tfoot>
             </table>
             {{-- <div class="text-center mt-6">

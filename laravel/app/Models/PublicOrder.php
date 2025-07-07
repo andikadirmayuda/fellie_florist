@@ -25,4 +25,9 @@ class PublicOrder extends Model
     {
         return $this->hasMany(PublicOrderItem::class);
     }
+
+    public function payments()
+    {
+        return $this->hasMany(PublicOrderPayment::class, 'public_order_id');
+    }
 }

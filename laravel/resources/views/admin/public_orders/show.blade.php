@@ -158,6 +158,62 @@
             </div>
         </div>
         <div class="bg-white rounded shadow p-6 mb-6">
+            <h3 class="font-semibold mb-2">Riwayat Pembayaran</h3>
+            <table class="min-w-full bg-white border border-gray-200 mb-4">
+                <thead>
+                    <tr>
+                        <th class="px-4 py-2 border">Tanggal</th>
+                        <th class="px-4 py-2 border">Nominal</th>
+                        <th class="px-4 py-2 border">Catatan</th>
+                        <th class="px-4 py-2 border">Bukti</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($order->payments as $payment)
+                    <tr>
+                        <td class="px-4 py-2 border">{{ $payment->created_at->format('Y-m-d H:i') }}</td>
+                        <td class="px-4 py-2 border">Rp{{ number_format($payment->amount, 0, ',', '.') }}</td>
+                        <td class="px-4 py-2 border">{{ $payment->note ?? '-' }}</td>
+                        <td class="px-4 py-2 border">
+                            @if($payment->proof)
+                                @php $ext = pathinfo($payment->proof, PATHINFO_EXTENSION); @endphp
+                                @if(in_array(strtolower($ext), ['jpg','jpeg','png','gif','webp']))
+                                    <a href="{{ asset('storage/' . $payment->proof) }}" target="_blank"><img src="{{ asset('storage/' . $payment->proof) }}" alt="Bukti" class="h-12 rounded shadow border inline-block"></a>
+                                @elseif(strtolower($ext) == 'pdf')
+                                    <a href="{{ asset('storage/' . $payment->proof) }}" target="_blank" class="text-blue-600 underline">PDF</a>
+                                @else
+                                    <a href="{{ asset('storage/' . $payment->proof) }}" target="_blank" class="text-blue-600 underline">Download</a>
+                                @endif
+                            @else
+                                -
+                            @endif
+                        </td>
+                    </tr>
+                    @empty
+                    <tr><td colspan="4" class="text-center text-gray-500">Belum ada pembayaran.</td></tr>
+                    @endforelse
+                </tbody>
+            </table>
+            @if(auth()->user() && auth()->user()->hasRole(['owner','admin']) && !in_array($order->payment_status, ['paid','rejected','cancelled']) && !in_array($order->status, ['cancelled','completed','done']))
+            <form method="POST" action="{{ route('admin.public-orders.add-payment', $order->id) }}" enctype="multipart/form-data" class="flex flex-col md:flex-row md:items-end gap-2 border-t pt-4">
+                @csrf
+                <div>
+                    <label class="block text-xs font-semibold mb-1">Nominal Pembayaran</label>
+                    <input type="number" name="amount" min="1" required class="border rounded px-2 py-1 w-36" placeholder="Nominal">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold mb-1">Catatan</label>
+                    <input type="text" name="note" class="border rounded px-2 py-1 w-48" placeholder="(Opsional)">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold mb-1">Bukti Pembayaran</label>
+                    <input type="file" name="proof" accept="image/*,application/pdf" class="border rounded px-2 py-1 w-48">
+                </div>
+                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded shadow">Tambah Pembayaran</button>
+            </form>
+            @endif
+        </div>
+        <div class="bg-white rounded shadow p-6 mb-6">
             <h2 class="text-lg font-semibold mb-2">Produk Dipesan</h2>
             <table class="min-w-full bg-white border border-gray-200 mb-4">
                 <thead>

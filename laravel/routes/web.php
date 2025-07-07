@@ -133,7 +133,9 @@ Route::get('/order-whatsapp', [\App\Http\Controllers\OrderWhatsAppController::cl
 Route::middleware(['auth'])->group(function () {
     Route::get('/admin/public-orders', [AdminPublicOrderController::class, 'index'])->name('admin.public-orders.index');
     Route::get('/admin/public-orders/filter', [AdminPublicOrderController::class, 'filter'])->name('admin.public-orders.filter');
-    Route::get('/admin/public-orders/{id}', [AdminPublicOrderController::class, 'show'])->name('admin.public-orders.show');
+     Route::get('/admin/public-orders/{id}', [AdminPublicOrderController::class, 'show'])->name('admin.public-orders.show');
+     Route::post('/admin/public-orders/mass-delete', [AdminPublicOrderController::class, 'massDelete'])->name('admin.public-orders.mass-delete');
+    Route::post('/admin/public-orders/bulk-delete', [AdminPublicOrderController::class, 'bulkDelete'])->name('admin.public-orders.bulk-delete');
 });
 
 // Route untuk invoice publik khusus pemesanan publik (PUBLIC, tanpa auth)
@@ -199,5 +201,8 @@ Route::post('/test-upload', function(\Illuminate\Http\Request $request) {
     }
     return 'Tidak ada file terupload!';
 });
+
+// Pembayaran bertahap untuk public order
+Route::post('/admin/public-orders/{order}/add-payment', [App\Http\Controllers\PublicOrderPaymentController::class, 'store'])->name('admin.public-orders.add-payment');
 
 require __DIR__.'/auth.php';
