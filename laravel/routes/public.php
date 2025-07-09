@@ -20,6 +20,7 @@ Route::post('/checkout', [PublicCheckoutController::class, 'process'])->name('pu
 // Cart routes (agar keranjang dan checkout konsisten di public)
 Route::get('/cart', [PublicCartController::class, 'index'])->name('public.cart.index');
 Route::post('/cart/add', [PublicCartController::class, 'add'])->name('public.cart.add');
+Route::post('/cart/update/{product_id}', [PublicCartController::class, 'update'])->name('public.cart.update');
 Route::post('/cart/remove/{product_id}', [PublicCartController::class, 'remove'])->name('public.cart.remove');
 Route::post('/cart/clear', [PublicCartController::class, 'clear'])->name('public.cart.clear');
 

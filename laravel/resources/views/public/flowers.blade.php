@@ -49,57 +49,32 @@
           </span>
         </p>
         <hr style="border: 0; border-top: 2px solid #ffffff; width: 10%; margin: 8px auto;">
-
-      
-    
-        
-        <div class="flex flex-col sm:flex-row items-center justify-center gap-3 mt-4 mb-8 w-full max-w-3xl mx-auto">
-            <div class="flex flex-col sm:flex-row gap-1 w-full max-w-xl mx-auto items-center justify-center">
-                <a href="{{ route('public.cart.index') }}" class="flex-1 min-w-[90px] max-w-[120px] bg-pink-500 hover:bg-pink-600 text-white font-bold px-2 py-1.5 rounded-md flex items-center justify-center text-xs shadow transition duration-200 focus:ring-2 focus:ring-pink-300 outline-none h-9">
-                    <i class="bi bi-cart3 mr-1 text-sm"></i>Keranjang
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-2 mt-4 mb-8 w-full max-w-2xl mx-auto">
+            <a href="{{ route('public.cart.index') }}"
+               class="min-w-[80px] max-w-[120px] bg-pink-500 hover:bg-pink-600 text-white font-bold px-2 py-1.5 rounded-md flex items-center justify-center text-xs shadow transition duration-200 focus:ring-2 focus:ring-pink-300 outline-none h-9 w-full sm:w-auto">
+                <i class="bi bi-cart3 mr-1 text-sm"></i>Keranjang
+            </a>
+            @if(session('last_public_order_code'))
+                <a href="{{ route('public.order.detail', ['public_code' => session('last_public_order_code')]) }}"
+                   class="min-w-[100px] max-w-[150px] bg-pink-500 hover:bg-pink-600 text-white font-bold px-2 py-1.5 rounded-md flex items-center justify-center text-xs shadow transition duration-200 focus:ring-2 focus:ring-pink-300 outline-none h-9 w-full sm:w-auto">
+                    <i class="bi bi-receipt mr-1 text-sm"></i>Lihat Pesanan
                 </a>
-                @if(session('last_public_order_code'))
-                    <a href="{{ route('public.order.detail', ['public_code' => session('last_public_order_code')]) }}" class="flex-1 min-w-[90px] max-w-[120px] bg-pink-500 hover:bg-pink-600 text-white font-bold px-2 py-1.5 rounded-md flex items-center justify-center text-xs shadow transition duration-200 focus:ring-2 focus:ring-pink-300 outline-none h-9">
-                        <i class="bi bi-receipt mr-1 text-sm"></i>Pemesanan
-                    </a>
-                @endif
-                {{-- <form method="GET" action="{{ route('public.order.track') }}" class="flex-1 min-w-[140px] max-w-[180px] flex flex-col items-stretch bg-pink-50 border border-pink-200 p-1.5 rounded-md shadow transition hover:shadow-lg h-auto">
-                    <div class="flex flex-row items-center gap-1">
-                        <label class="text-xs font-semibold text-pink-700 whitespace-nowrap flex items-center gap-1">
-                            <i class="bi bi-search"></i> Lacak:
-                        </label>
-                        <input type="text" name="wa_number" class="border border-pink-200 rounded px-2 py-1.5 text-xs flex-1 focus:ring-2 focus:ring-pink-300 focus:outline-none h-8" placeholder="08xxxxxxxxxx" required aria-label="Nomor WhatsApp">
-                        <button type="submit" class="bg-pink-500 hover:bg-pink-600 text-white font-bold px-2.5 py-1.5 rounded-md transition flex items-center gap-1 text-xs focus:ring-2 focus:ring-pink-300 outline-none h-8">
-                            <i class="bi bi-arrow-right-circle"></i> Lacak
-                        </button>
-                    </div>
-                    <span class="block w-full text-[7px] text-pink-700 mt-1 text-left leading-tight pb-1">Masukkan nomor WhatsApp yang digunakan saat memesan.</span>
-                </form> --}}
-                <form method="GET" action="{{ route('public.order.track') }}" 
-      class="w-full sm:max-w-xs bg-pink-50 border border-pink-200 p-3 rounded-xl shadow-sm hover:shadow-md transition-all space-y-2">
-    
-    <label for="wa_number" class="flex items-center text-sm font-semibold text-pink-700 gap-1">
-        <i class="bi bi-search text-base"></i> Lacak Pesanan:
-    </label>
-
-    <div class="flex gap-2">
-        <input type="text" name="wa_number" id="wa_number"
-            class="flex-1 rounded-md border border-pink-300 focus:ring-2 focus:ring-pink-300 focus:outline-none text-sm px-3 py-2"
-            placeholder="08xxxxxxxxxx" required aria-label="Nomor WhatsApp">
-        <button type="submit"
-            class="bg-pink-500 hover:bg-pink-600 text-white font-semibold px-4 py-2 rounded-md flex items-center gap-1 text-sm transition focus:ring-2 focus:ring-pink-300">
-            <i class="bi bi-arrow-right-circle"></i>
-            Lacak
-        </button>
-    </div>
-
-    <p class="text-[11px] text-pink-600 leading-snug">
-        Masukkan nomor WhatsApp yang digunakan saat memesan.
-    </p>
-</form>
-
-            </div>
+            @endif
+            <form method="GET" action="{{ route('public.order.track') }}"
+                  class="flex flex-row items-center gap-1 bg-pink-50 border border-pink-200 p-2 rounded-lg shadow-sm hover:shadow-md transition-all w-full max-w-xs sm:max-w-[340px]">
+                <label for="wa_number" class="text-xs font-semibold text-pink-700 flex items-center gap-1 mb-0">
+                    <i class="bi bi-search text-base"></i>
+                </label>
+                <input type="text" name="wa_number" id="wa_number"
+                       class="border border-pink-200 rounded px-3 py-1 text-xs w-full sm:w-[140px] focus:ring-2 focus:ring-pink-300 focus:outline-none"
+                       placeholder="08xxxx" required aria-label="Nomor WhatsApp">
+                <button type="submit"
+                        class="bg-pink-500 hover:bg-pink-600 text-white font-bold px-2 py-1 rounded-md flex items-center gap-1 text-xs focus:ring-2 focus:ring-pink-300 outline-none w-auto">
+                    <i class="bi bi-arrow-right-circle"></i>Lacak
+                </button>
+            </form>
         </div>
+        {{-- <span class="block w-full text-[10px] text-pink-700 mt-1 text-center leading-tight pb-1">Masukkan nomor WhatsApp yang digunakan saat memesan.</span> --}}
     </div>
 
 
@@ -115,12 +90,12 @@
 
         <div id="flowersGrid" class="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
             @forelse($flowers as $flower)
-            <div class="flower-card relative group flex flex-col" data-name="{{ strtolower($flower->name) }}" data-category="{{ $flower->category->name ?? 'lainnya' }}">
+            <div class="flower-card relative group flex flex-col h-full" data-name="{{ strtolower($flower->name) }}" data-category="{{ $flower->category->name ?? 'lainnya' }}">
                 <div class="absolute -inset-1 bg-white/60 rounded-sm blur-xl opacity-70 group-hover:opacity-90 transition-all duration-300 z-0"></div>
-                <div class="relative z-10 bg-white/80 backdrop-blur-lg border border-gray-100 rounded-sm shadow-xl hover:shadow-2xl ring-1 ring-gray-100 transition-all duration-300 p-3 sm:p-4 md:p-6 flex flex-col items-center min-h-[320px] sm:min-h-[360px] md:min-h-[420px] w-full">
+                <div class="relative z-10 bg-white/80 backdrop-blur-lg border border-gray-100 rounded-sm shadow-xl hover:shadow-2xl ring-1 ring-gray-100 transition-all duration-300 p-3 sm:p-4 md:p-6 flex flex-col h-full min-h-[340px] sm:min-h-[380px] md:min-h-[420px] w-full">
                     <div class="relative h-28 sm:h-32 md:h-36 lg:h-40 w-full overflow-hidden flex items-center justify-center bg-black rounded-sm mb-3">
                         @if($flower->image)
-                            <img src="{{ asset('storage/' . $flower->image) }}" alt="{{ $flower->name }}" class="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300 max-h-40">
+                            <img src="{{ asset('storage/' . $flower->image) }}" alt="{{ $flower->name }}" class="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300 max-h-40 aspect-square">
                         @else
                             <div class="flex items-center justify-center w-full h-full text-gray-400 text-2xl xs:text-3xl sm:text-4xl">
                                 <i class="bi bi-flower2"></i>
@@ -139,7 +114,7 @@
                         </div>
                         <div class="mb-2">
                             <span class="block text-[11px] text-gray-500"><i class="bi bi-card-text mr-1"></i>Deskripsi</span>
-                            <span class="block text-xs text-black line-clamp-2">{{ $flower->description ?: '-' }}</span>
+                            <span class="block text-xs text-black line-clamp-2 min-h-[32px]">{{ $flower->description ?: '-' }}</span>
                         </div>
                         <div class="mb-2">
                             <span class="block text-[11px] text-gray-500"><i class="bi bi-currency-dollar mr-1"></i>Harga per Tangkai</span>

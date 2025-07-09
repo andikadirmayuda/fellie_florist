@@ -9,7 +9,7 @@
 </head>
 <body class="bg-gray-100 min-h-screen">
     <div class="container mx-auto px-2 sm:px-4 py-4 sm:py-8 flex justify-center items-center min-h-screen text-[13px] sm:text-base">
-        <div class="bg-white rounded-2xl shadow-xl p-2 sm:p-8 w-full max-w-[95vw] sm:max-w-xl mx-auto">
+        <div class="bg-white rounded-2xl shadow-xl p-2 sm:p-10 w-full max-w-5xl mx-auto">
             <div class="text-center mb-8">
                 <h1 class="text-2xl sm:text-3xl font-extrabold text-pink-600 tracking-tight mb-1 flex items-center justify-center gap-2">
                     <i class="bi bi-flower1 text-pink-400 text-2xl"></i> Fellie Florist
@@ -84,15 +84,30 @@
                     @endif
                 @endforeach
             </div>
-            <!-- Info Pemesanan -->
+            <!-- Info Pemesanan (3 Columns) -->
             <div class="mb-8">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2 mb-2">
-                    <div><span class="text-gray-500">Nama</span><br><span class="font-semibold text-gray-800">{{ $order->customer_name }}</span></div>
-                    <div><span class="text-gray-500">No. WhatsApp</span><br><span class="font-semibold text-gray-800">{{ $order->wa_number }}</span></div>
-                    <div><span class="text-gray-500">Tanggal Ambil/Kirim</span><br><span class="font-semibold text-gray-800">{{ $order->pickup_date }}</span></div>
-                    <div><span class="text-gray-500">Waktu Ambil/Pengiriman</span><br><span class="font-semibold text-gray-800">{{ $order->pickup_time }}</span></div>
-                    <div><span class="text-gray-500">Metode Pengiriman</span><br><span class="font-semibold text-gray-800">{{ $order->delivery_method }}</span></div>
-                    <div><span class="text-gray-500">Tujuan Pengiriman</span><br><span class="font-semibold text-gray-800">{{ $order->destination }}</span></div>
+                <div class="flex flex-col sm:flex-row justify-center items-stretch gap-4 w-full mb-2">
+                    <!-- Kiri -->
+                    <div class="flex-1 min-w-[200px] max-w-xs bg-gray-50 rounded-xl p-4 flex flex-col justify-center items-start shadow-sm border border-gray-100">
+                        <div class="mb-2"><span class="text-gray-500">Nama</span><br><span class="font-bold text-gray-800">{{ $order->customer_name }}</span></div>
+                        <div class="mb-2"><span class="text-gray-500">Tanggal Ambil/Kirim</span><br><span class="font-bold text-gray-800">{{ $order->pickup_date }}</span></div>
+                        <div class="mb-2"><span class="text-gray-500">Metode Pengiriman</span><br><span class="font-bold text-gray-800">{{ $order->delivery_method }}</span></div>
+                    </div>
+                    <!-- Tengah -->
+                    <div class="flex-1 min-w-[200px] max-w-xs bg-gray-50 rounded-xl p-4 flex flex-col justify-center items-start shadow-sm border border-gray-100">
+                        <div class="mb-2"><span class="text-gray-500">No. WhatsApp</span><br><span class="font-bold text-gray-800">{{ $order->wa_number }}</span></div>
+                        <div class="mb-2"><span class="text-gray-500">Waktu Ambil/Pengiriman</span><br><span class="font-bold text-gray-800">{{ $order->pickup_time }}</span></div>
+                        <div class="mb-2"><span class="text-gray-500">Tujuan Pengiriman</span><br><span class="font-bold text-gray-800">{{ $order->destination }}</span></div>
+                    </div>
+                    <!-- Kanan: Informasi Penting -->
+                    <div class="flex-1 min-w-[200px] max-w-xs flex flex-col justify-center items-center">
+                        <div class="w-full h-full flex flex-col justify-center items-center border-2 border-gray-300 rounded-xl p-4 bg-white shadow-sm">
+                            <div class="text-center font-bold text-red-600 text-base mb-2">Informasi Penting !!!</div>
+                            <div class="text-xs text-gray-700 leading-relaxed text-center">
+                                {{ $order->info ?? 'Tidak ada informasi tambahan.' }}
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <h2 class="text-base sm:text-lg font-semibold mb-2 mt-2 flex items-center gap-2"><i class="bi bi-box-seam"></i> Produk Dipesan</h2>
@@ -100,12 +115,12 @@
                 <table class="w-full mb-6 text-xs sm:text-base table-fixed border rounded-lg overflow-hidden">
                     <thead>
                         <tr class="text-left bg-gray-50">
-                            <th class="py-2 px-2 sm:px-4 w-2/12 whitespace-normal font-semibold">Nama</th>
-                            <th class="py-2 px-2 sm:px-4 w-2/12 whitespace-normal font-semibold">Tipe</th>
-                            <th class="py-2 px-2 sm:px-4 w-2/12 text-right whitespace-normal font-semibold">Harga</th>
-                            <th class="py-2 px-2 sm:px-4 w-2/12 text-right whitespace-normal font-semibold">Satuan</th>
-                            <th class="py-2 px-2 sm:px-4 w-2/12 text-right whitespace-normal font-semibold">Jumlah</th>
-                            <th class="py-2 px-2 sm:px-4 w-2/12 text-right whitespace-normal font-semibold">Subtotal</th>
+                            <th class="py-1 px-2 w-[28%] whitespace-nowrap font-semibold">Nama</th>
+                            <th class="py-1 px-2 w-[14%] whitespace-nowrap font-semibold">Tipe</th>
+                            <th class="py-1 px-2 w-[14%] text-right whitespace-nowrap font-semibold">Harga</th>
+                            <th class="py-1 px-2 w-[14%] text-right whitespace-nowrap font-semibold">Satuan</th>
+                            <th class="py-1 px-2 w-[14%] text-right whitespace-nowrap font-semibold">Jumlah</th>
+                            <th class="py-1 px-2 w-[16%] text-right whitespace-nowrap font-semibold">Subtotal</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y">
@@ -113,32 +128,32 @@
                         @foreach($order->items as $item)
                         @php $subtotal = ($item->price ?? 0) * ($item->quantity ?? 0); $total += $subtotal; @endphp
                         <tr>
-                            <td class="py-2 px-2 sm:px-4 break-words whitespace-normal align-top">{{ $item->product_name }}</td>
-                            <td class="py-2 px-2 sm:px-4 break-words whitespace-normal align-top">{{ $item->price_type ?? '-' }}</td>
-                            <td class="py-2 px-2 sm:px-4 text-right align-top">Rp{{ number_format($item->price ?? 0, 0, ',', '.') }}</td>
-                            <td class="py-2 px-2 sm:px-4 text-right align-top">{{ $item->unit_equivalent ?? '-' }}</td>
-                            <td class="py-2 px-2 sm:px-4 text-right align-top">{{ $item->quantity }}</td>
-                            <td class="py-2 px-2 sm:px-4 text-right align-top">Rp{{ number_format($subtotal, 0, ',', '.') }}</td>
+                            <td class="py-1 px-2 break-words whitespace-normal align-top">{{ $item->product_name }}</td>
+                            <td class="py-1 px-2 break-words whitespace-normal align-top">{{ $item->price_type ?? '-' }}</td>
+                            <td class="py-1 px-2 text-right align-top whitespace-nowrap">Rp{{ number_format($item->price ?? 0, 0, ',', '.') }}</td>
+                            <td class="py-1 px-2 text-right align-top whitespace-nowrap">{{ $item->unit_equivalent ?? '-' }}</td>
+                            <td class="py-1 px-2 text-right align-top whitespace-nowrap">{{ $item->quantity }}</td>
+                            <td class="py-1 px-2 text-right align-top whitespace-nowrap">Rp{{ number_format($subtotal, 0, ',', '.') }}</td>
                         </tr>
                         @endforeach
                     </tbody>
                     <tfoot>
                         <tr>
-                            <th colspan="5" class="text-right px-2 py-2 sm:px-4 sm:py-2 font-semibold">Total</th>
-                            <th class="px-2 py-2 sm:px-4 sm:py-2 text-right font-semibold text-green-600 text-base">Rp{{ number_format($total, 0, ',', '.') }}</th>
+                            <th colspan="5" class="text-right px-2 py-1 font-semibold text-xs sm:text-sm">Total</th>
+                            <th class="px-2 py-1 text-right font-bold text-green-600 text-sm sm:text-base whitespace-nowrap">Rp{{ number_format($total, 0, ',', '.') }}</th>
                         </tr>
                         @php
                             $totalPaid = $order->payments ? $order->payments->sum('amount') : 0;
                             $sisa = max($total - $totalPaid, 0);
                         @endphp
                         <tr>
-                            <th colspan="5" class="text-right px-2 py-2 sm:px-4 sm:py-2 font-semibold">Total Sudah Dibayar</th>
-                            <th class="px-2 py-2 sm:px-4 sm:py-2 text-right font-semibold text-blue-600">Rp{{ number_format($totalPaid, 0, ',', '.') }}</th>
+                            <th colspan="5" class="text-right px-2 py-1 font-semibold text-xs sm:text-sm">Total Sudah Dibayar</th>
+                            <th class="px-2 py-1 text-right font-bold text-blue-600 text-sm sm:text-base whitespace-nowrap">Rp{{ number_format($totalPaid, 0, ',', '.') }}</th>
                         </tr>
                         @if($sisa > 0)
                         <tr>
-                            <th colspan="5" class="text-right px-2 py-2 sm:px-4 sm:py-2 font-semibold">Sisa Pembayaran</th>
-                            <th class="px-2 py-2 sm:px-4 sm:py-2 text-right font-semibold text-red-600">Rp{{ number_format($sisa, 0, ',', '.') }}</th>
+                            <th colspan="5" class="text-right px-2 py-1 font-semibold text-xs sm:text-sm">Sisa Pembayaran</th>
+                            <th class="px-2 py-1 text-right font-bold text-red-600 text-sm sm:text-base whitespace-nowrap">Rp{{ number_format($sisa, 0, ',', '.') }}</th>
                         </tr>
                         @endif
                     </tfoot>
