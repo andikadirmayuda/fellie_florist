@@ -46,8 +46,8 @@
                     <i class="bi bi-cash-coin"></i> {{ $paymentStatusMap[$order->payment_status] ?? ucfirst($order->payment_status) }}
                 </span>
             </div>
-            <!-- Stepper Status -->
-            <div class="flex w-full justify-between items-center mb-8">
+            <!-- Stepper Status Responsive Split for Mobile -->
+            <div class="w-full mb-8">
                 @php
                     $steps = [
                         'pending' => 'Pesanan Diterima',
@@ -72,38 +72,63 @@
                     $stepKeys = array_keys($steps);
                     $currentIndex = array_search($currentStatus, $stepKeys);
                 @endphp
-                @foreach($steps as $key => $label)
-                    <div class="flex-1 flex flex-col items-center min-w-[40px]">
-                        <div class="rounded-full w-8 h-8 flex items-center justify-center mb-1 text-base font-bold {{ $currentStatus === $key || $currentIndex > array_search($key, $stepKeys) ? 'bg-pink-600 text-white shadow-lg' : 'bg-gray-200 text-gray-400' }}">
-                            {{ $loop->iteration }}
+                <!-- Mobile: 2 rows, Desktop: 1 row -->
+                <div class="hidden sm:flex flex-nowrap justify-between items-center w-full gap-2 px-1">
+                    @foreach($steps as $key => $label)
+                        <div class="flex flex-col items-center min-w-[44px] max-w-[60px] flex-shrink-0">
+                            <div class="rounded-full w-8 h-8 flex items-center justify-center mb-1 text-[15px] font-bold {{ $currentStatus === $key || $currentIndex > array_search($key, $stepKeys) ? 'bg-pink-600 text-white shadow-lg' : 'bg-gray-200 text-gray-400' }}">
+                                {{ $loop->iteration }}
+                            </div>
+                            <div class="text-xs text-center font-medium leading-tight {{ $currentStatus === $key || $currentIndex > array_search($key, $stepKeys) ? 'text-pink-600' : 'text-gray-400' }}" style="word-break:break-word;">{{ $label }}</div>
                         </div>
-                        <div class="text-[11px] sm:text-xs text-center font-medium {{ $currentStatus === $key || $currentIndex > array_search($key, $stepKeys) ? 'text-pink-600' : 'text-gray-400' }}">{{ $label }}</div>
+                        @if(!$loop->last)
+                        <div class="h-1 w-5 bg-gray-200 mt-4 flex-shrink-0 {{ $currentIndex >= $loop->index ? 'bg-pink-500' : '' }}"></div>
+                        @endif
+                    @endforeach
+                </div>
+                <div class="flex flex-col gap-1 sm:hidden">
+                    <div class="grid grid-cols-3 w-full gap-0 px-1">
+                        @foreach(array_slice($stepKeys,0,3) as $i => $key)
+                            <div class="flex flex-col items-center">
+                                <div class="rounded-full w-6 h-6 flex items-center justify-center mb-0.5 text-[11px] font-bold {{ $currentStatus === $key || $currentIndex > array_search($key, $stepKeys) ? 'bg-pink-600 text-white shadow-lg' : 'bg-gray-200 text-gray-400' }}">
+                                    {{ $i+1 }}
+                                </div>
+                                <div class="text-[9px] text-center font-medium leading-tight {{ $currentStatus === $key || $currentIndex > array_search($key, $stepKeys) ? 'text-pink-600' : 'text-gray-400' }}" style="word-break:break-word;">{{ $steps[$key] }}</div>
+                            </div>
+                        @endforeach
                     </div>
-                    @if(!$loop->last)
-                    <div class="flex-1 h-1 bg-gray-200 mx-1 sm:mx-2 mt-3 {{ $currentIndex >= $loop->index ? 'bg-pink-500' : '' }}"></div>
-                    @endif
-                @endforeach
+                    <div class="grid grid-cols-3 w-full gap-0 px-1 mt-1">
+                        @foreach(array_slice($stepKeys,3,3) as $i => $key)
+                            <div class="flex flex-col items-center">
+                                <div class="rounded-full w-6 h-6 flex items-center justify-center mb-0.5 text-[11px] font-bold {{ $currentStatus === $key || $currentIndex > array_search($key, $stepKeys) ? 'bg-pink-600 text-white shadow-lg' : 'bg-gray-200 text-gray-400' }}">
+                                    {{ $i+4 }}
+                                </div>
+                                <div class="text-[9px] text-center font-medium leading-tight {{ $currentStatus === $key || $currentIndex > array_search($key, $stepKeys) ? 'text-pink-600' : 'text-gray-400' }}" style="word-break:break-word;">{{ $steps[$key] }}</div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
             </div>
             <!-- Info Pemesanan (3 Columns) -->
             <div class="mb-8">
-                <div class="flex flex-col sm:flex-row justify-center items-stretch gap-4 w-full mb-2">
+                <div class="flex flex-col sm:flex-row justify-center items-stretch gap-2 sm:gap-4 w-full mb-2">
                     <!-- Kiri -->
-                    <div class="flex-1 min-w-[200px] max-w-xs bg-gray-50 rounded-xl p-4 flex flex-col justify-center items-start shadow-sm border border-gray-100">
-                        <div class="mb-2"><span class="text-gray-500">Nama</span><br><span class="font-bold text-gray-800">{{ $order->customer_name }}</span></div>
-                        <div class="mb-2"><span class="text-gray-500">Tanggal Ambil/Kirim</span><br><span class="font-bold text-gray-800">{{ $order->pickup_date }}</span></div>
-                        <div class="mb-2"><span class="text-gray-500">Metode Pengiriman</span><br><span class="font-bold text-gray-800">{{ $order->delivery_method }}</span></div>
+                    <div class="flex-1 min-w-0 max-w-full bg-gray-50 rounded-xl p-3 sm:p-4 flex flex-col justify-center items-start shadow-sm border border-gray-100 text-xs sm:text-sm mb-2 sm:mb-0">
+                        <div class="mb-1 sm:mb-2"><span class="text-gray-500">Nama</span><br><span class="font-bold text-gray-800 break-words">{{ $order->customer_name }}</span></div>
+                        <div class="mb-1 sm:mb-2"><span class="text-gray-500">Tanggal Ambil/Kirim</span><br><span class="font-bold text-gray-800 break-words">{{ $order->pickup_date }}</span></div>
+                        <div class="mb-1 sm:mb-2"><span class="text-gray-500">Metode Pengiriman</span><br><span class="font-bold text-gray-800 break-words">{{ $order->delivery_method }}</span></div>
                     </div>
                     <!-- Tengah -->
-                    <div class="flex-1 min-w-[200px] max-w-xs bg-gray-50 rounded-xl p-4 flex flex-col justify-center items-start shadow-sm border border-gray-100">
-                        <div class="mb-2"><span class="text-gray-500">No. WhatsApp</span><br><span class="font-bold text-gray-800">{{ $order->wa_number }}</span></div>
-                        <div class="mb-2"><span class="text-gray-500">Waktu Ambil/Pengiriman</span><br><span class="font-bold text-gray-800">{{ $order->pickup_time }}</span></div>
-                        <div class="mb-2"><span class="text-gray-500">Tujuan Pengiriman</span><br><span class="font-bold text-gray-800">{{ $order->destination }}</span></div>
+                    <div class="flex-1 min-w-0 max-w-full bg-gray-50 rounded-xl p-3 sm:p-4 flex flex-col justify-center items-start shadow-sm border border-gray-100 text-xs sm:text-sm mb-2 sm:mb-0">
+                        <div class="mb-1 sm:mb-2"><span class="text-gray-500">No. WhatsApp</span><br><span class="font-bold text-gray-800 break-words">{{ $order->wa_number }}</span></div>
+                        <div class="mb-1 sm:mb-2"><span class="text-gray-500">Waktu Ambil/Pengiriman</span><br><span class="font-bold text-gray-800 break-words">{{ $order->pickup_time }}</span></div>
+                        <div class="mb-1 sm:mb-2"><span class="text-gray-500">Tujuan Pengiriman</span><br><span class="font-bold text-gray-800 break-words">{{ $order->destination }}</span></div>
                     </div>
                     <!-- Kanan: Informasi Penting -->
-                    <div class="flex-1 min-w-[200px] max-w-xs flex flex-col justify-center items-center">
-                        <div class="w-full h-full flex flex-col justify-center items-center border-2 border-gray-300 rounded-xl p-4 bg-white shadow-sm">
-                            <div class="text-center font-bold text-red-600 text-base mb-2">Informasi Penting !!!</div>
-                            <div class="text-xs text-gray-700 leading-relaxed text-center">
+                    <div class="flex-1 min-w-0 max-w-full flex flex-col justify-center items-center">
+                        <div class="w-full h-full flex flex-col justify-center items-center border-2 border-gray-300 rounded-xl p-3 sm:p-4 bg-white shadow-sm text-xs sm:text-sm">
+                            <div class="text-center font-bold text-red-600 text-xs sm:text-base mb-1 sm:mb-2">Informasi Penting !!!</div>
+                            <div class="text-xs sm:text-sm text-gray-700 leading-relaxed text-center break-words">
                                 {{ $order->info ?? 'Tidak ada informasi tambahan.' }}
                             </div>
                         </div>
@@ -137,23 +162,23 @@
                         </tr>
                         @endforeach
                     </tbody>
-                    <tfoot>
+                    <tfoot class="mt-4">
                         <tr>
-                            <th colspan="5" class="text-right px-2 py-1 font-semibold text-xs sm:text-sm">Total</th>
-                            <th class="px-2 py-1 text-right font-bold text-green-600 text-sm sm:text-base whitespace-nowrap">Rp{{ number_format($total, 0, ',', '.') }}</th>
+                            <th colspan="5" class="text-right px-2 py-1 font-semibold text-[9px] sm:text-sm">Total</th>
+                            <th class="pr-4 py-1 text-right font-bold text-green-600 text-[11px] sm:text-base whitespace-nowrap">Rp{{ number_format($total, 0, ',', '.') }}</th>
                         </tr>
                         @php
                             $totalPaid = $order->payments ? $order->payments->sum('amount') : 0;
                             $sisa = max($total - $totalPaid, 0);
                         @endphp
                         <tr>
-                            <th colspan="5" class="text-right px-2 py-1 font-semibold text-xs sm:text-sm">Total Sudah Dibayar</th>
-                            <th class="px-2 py-1 text-right font-bold text-blue-600 text-sm sm:text-base whitespace-nowrap">Rp{{ number_format($totalPaid, 0, ',', '.') }}</th>
+                            <th colspan="5" class="text-right px-2 py-1 font-semibold text-[9px] sm:text-sm">Total Sudah Dibayar</th>
+                            <th class="pr-4 py-1 text-right font-bold text-blue-600 text-[11px] sm:text-base whitespace-nowrap">Rp{{ number_format($totalPaid, 0, ',', '.') }}</th>
                         </tr>
                         @if($sisa > 0)
                         <tr>
-                            <th colspan="5" class="text-right px-2 py-1 font-semibold text-xs sm:text-sm">Sisa Pembayaran</th>
-                            <th class="px-2 py-1 text-right font-bold text-red-600 text-sm sm:text-base whitespace-nowrap">Rp{{ number_format($sisa, 0, ',', '.') }}</th>
+                            <th colspan="5" class="text-right px-2 py-1 font-semibold text-[9px] sm:text-sm">Sisa Pembayaran</th>
+                            <th class="pr-4 py-1 text-right font-bold text-red-600 text-[11px] sm:text-base whitespace-nowrap">Rp{{ number_format($sisa, 0, ',', '.') }}</th>
                         </tr>
                         @endif
                     </tfoot>
