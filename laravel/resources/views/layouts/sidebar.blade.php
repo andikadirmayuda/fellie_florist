@@ -55,12 +55,46 @@
                 </x-slot>
                 {{ __('Pesanan') }}
             </x-sidebar-link>
-            <x-sidebar-link :href="route('bouquet.orders.index')" :active="request()->routeIs('bouquet.orders.*')">
-                <x-slot name="icon">
-                    <i class="bi bi-bag-heart text-lg mr-1"></i>
-                </x-slot>
-                Pemesanan Buket
-            </x-sidebar-link>
+            <!-- Menu Group: Bouquet -->
+            <li x-data="{ open: false }" class="relative">
+                <button @click="open = !open" class="flex items-center w-full px-2 py-2 text-left hover:bg-gray-800 rounded transition">
+                    <i class="bi bi-flower1 text-lg mr-2"></i>
+                    <span class="flex-1">Bouquet</span>
+                    <svg :class="{'rotate-90': open}" class="w-4 h-4 ml-auto transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                </button>
+                <ul x-show="open" @click.away="open = false" class="ml-6 mt-1 space-y-1" style="display: none;">
+                    <li>
+                        <x-sidebar-link :href="route('bouquet.orders.create')" :active="request()->routeIs('bouquet.orders.create')">
+                            <x-slot name="icon"><i class="bi bi-cart-plus"></i></x-slot>
+                            Pemesanan
+                        </x-sidebar-link>
+                    </li>
+                    <li>
+                        <x-sidebar-link :href="route('bouquet-category.crud')" :active="request()->routeIs('bouquet-category.crud')">
+                            <x-slot name="icon"><i class="bi bi-tags"></i></x-slot>
+                            Kategori
+                        </x-sidebar-link>
+                    </li>
+                    <li>
+                        <x-sidebar-link :href="route('bouquet-size.crud')" :active="request()->routeIs('bouquet-size.crud')">
+                            <x-slot name="icon"><i class="bi bi-arrows-angle-expand"></i></x-slot>
+                            Ukuran
+                        </x-sidebar-link>
+                    </li>
+                    <li>
+                        <x-sidebar-link :href="route('bouquet.crud')" :active="request()->routeIs('bouquet.crud')">
+                            <x-slot name="icon"><i class="bi bi-flower2"></i></x-slot>
+                            Produk Bouquet
+                        </x-sidebar-link>
+                    </li>
+                    <li>
+                        <x-sidebar-link :href="route('bouquet-template-item.crud')" :active="request()->routeIs('bouquet-template-item.crud')">
+                            <x-slot name="icon"><i class="bi bi-list-ul"></i></x-slot>
+                            Template Item
+                        </x-sidebar-link>
+                    </li>
+                </ul>
+            </li>
             @endif
 
             {{-- Pesanan Publik: owner, admin --}}

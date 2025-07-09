@@ -17,7 +17,9 @@
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
         <!-- Scripts -->
+
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+        @livewireStyles
 
         <!-- Bootstrap Icons CDN -->
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -133,6 +135,7 @@
 
         <!-- SweetAlert2 -->
         <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        @livewireScripts
         <script>
             // SweetAlert delete confirmation
             document.addEventListener('DOMContentLoaded', function() {

@@ -1,3 +1,4 @@
+
 <?php
 
 use App\Http\Controllers\ProfileController;
@@ -19,6 +20,12 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\AdminPublicOrderController;
 use App\Http\Controllers\BouquetOrderController;
 use App\Http\Controllers\BouquetSaleController;
+
+// Livewire CRUD Master Data Bouquet
+use App\Livewire\BouquetCategoryCrud;
+use App\Livewire\BouquetSizeCrud;
+use App\Livewire\BouquetCrud;
+use App\Livewire\BouquetTemplateItemCrud;
 
 use Illuminate\Support\Facades\Route;
 
@@ -205,4 +212,10 @@ Route::post('/test-upload', function(\Illuminate\Http\Request $request) {
 // Pembayaran bertahap untuk public order
 Route::post('/admin/public-orders/{order}/add-payment', [App\Http\Controllers\PublicOrderPaymentController::class, 'store'])->name('admin.public-orders.add-payment');
 
+Route::middleware(['auth'])->group(function () {
+    Route::get('/bouquet-category', BouquetCategoryCrud::class)->name('bouquet-category.crud');
+    Route::get('/bouquet-size', BouquetSizeCrud::class)->name('bouquet-size.crud');
+    Route::get('/bouquet', BouquetCrud::class)->name('bouquet.crud');
+    Route::get('/bouquet-template-item', BouquetTemplateItemCrud::class)->name('bouquet-template-item.crud');
+});
 require __DIR__.'/auth.php';

@@ -26,7 +26,8 @@ class BouquetOrder extends Model
         'updated_at',
     ];
 
-    public function items() {
+    public function items()
+    {
         return $this->hasMany(BouquetOrderItem::class);
     }
 }
