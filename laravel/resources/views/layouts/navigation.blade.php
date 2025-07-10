@@ -32,6 +32,9 @@
                     <x-nav-link :href="route('bouquet.sales.index')" :active="request()->routeIs('bouquet.sales.*')">
                         <i class="bi bi-cash-coin mr-1"></i> <span class="text-white">Penjualan Buket</span>
                     </x-nav-link>
+                    <x-nav-link :href="route('bouquets.index')" :active="request()->routeIs('bouquets.*')">
+                        <i class="bi bi-flower1 mr-1"></i> <span class="text-white">Master Buket</span>
+                    </x-nav-link>
                 </div>
             </div>
 
@@ -97,6 +100,9 @@
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('bouquet.sales.index')" :active="request()->routeIs('bouquet.sales.*')">
                 Penjualan Buket
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('bouquets.index')" :active="request()->routeIs('bouquets.*')">
+                Master Buket
             </x-responsive-nav-link>
         </div>
 

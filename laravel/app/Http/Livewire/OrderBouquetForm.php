@@ -1,5 +1,10 @@
 <?php   
 
+// PENTING: Agar tidak error di Livewire v3,
+// 1. Pindahkan file ini ke folder: app/Livewire
+// 2. Pastikan namespace: App\Livewire;
+// 3. Hapus file ini dari app/Http/Livewire setelah dipindah.
+
 namespace App\Livewire;
 
 use Livewire\Component;

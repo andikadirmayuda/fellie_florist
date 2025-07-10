@@ -1,4 +1,3 @@
-
 <?php
 
 use App\Http\Controllers\ProfileController;
@@ -20,12 +19,8 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\AdminPublicOrderController;
 use App\Http\Controllers\BouquetOrderController;
 use App\Http\Controllers\BouquetSaleController;
-
-// Livewire CRUD Master Data Bouquet
-use App\Livewire\BouquetCategoryCrud;
-use App\Livewire\BouquetSizeCrud;
-use App\Livewire\BouquetCrud;
-use App\Livewire\BouquetTemplateItemCrud;
+use App\Http\Controllers\BouquetController;
+use App\Http\Controllers\OrderWhatsAppController;
 
 use Illuminate\Support\Facades\Route;
 
@@ -112,7 +107,7 @@ Route::get('/i/{token}', [PublicInvoiceController::class, 'show'])->name('public
 // Hapus route manual berikut karena sudah digantikan oleh resource CRUD di bawah:
 // use App\Http\Controllers\BouquetOrderController;
 // use App\Http\Controllers\BouquetSaleController;
-// Route::get('/bouquet/orders', [BouquetOrderController::class, 'create'])->name('bouquet.orders');
+Route::get('/bouquet/orders/create', [BouquetOrderController::class, 'create'])->name('bouquet.orders.create');
 // Route::post('/bouquet/orders', [BouquetOrderController::class, 'store'])->name('bouquet.orders.store');
 // Route::get('/bouquet/sales', [BouquetSaleController::class, 'create'])->name('bouquet.sales');
 // Route::post('/bouquet/sales', [BouquetSaleController::class, 'store'])->name('bouquet.sales.store');
@@ -163,31 +158,6 @@ Route::post('/cart/add', [App\Http\Controllers\PublicCartController::class, 'add
 Route::post('/cart/remove/{product_id}', [App\Http\Controllers\PublicCartController::class, 'remove'])->name('public.cart.remove');
 Route::post('/cart/clear', [App\Http\Controllers\PublicCartController::class, 'clear'])->name('public.cart.clear');
 
-// CRUD Pemesanan Buket
-Route::resource('bouquet/orders', BouquetOrderController::class, [
-    'names' => [
-        'index' => 'bouquet.orders.index',
-        'create' => 'bouquet.orders.create',
-        'store' => 'bouquet.orders.store',
-        'show' => 'bouquet.orders.show',
-        'edit' => 'bouquet.orders.edit',
-        'update' => 'bouquet.orders.update',
-        'destroy' => 'bouquet.orders.destroy',
-    ]
-]);
-// CRUD Penjualan Buket
-Route::resource('bouquet/sales', BouquetSaleController::class, [
-    'names' => [
-        'index' => 'bouquet.sales.index',
-        'create' => 'bouquet.sales.create',
-        'store' => 'bouquet.sales.store',
-        'show' => 'bouquet.sales.show',
-        'edit' => 'bouquet.sales.edit',
-        'update' => 'bouquet.sales.update',
-        'destroy' => 'bouquet.sales.destroy',
-    ]
-]);
-
 // Route test upload sederhana
 Route::get('/test-upload', function() {
     return '<form method="POST" action="/test-upload" enctype="multipart/form-data">'
@@ -208,14 +178,8 @@ Route::post('/test-upload', function(\Illuminate\Http\Request $request) {
     }
     return 'Tidak ada file terupload!';
 });
-
-// Pembayaran bertahap untuk public order
-Route::post('/admin/public-orders/{order}/add-payment', [App\Http\Controllers\PublicOrderPaymentController::class, 'store'])->name('admin.public-orders.add-payment');
-
-Route::middleware(['auth'])->group(function () {
-    Route::get('/bouquet-category', BouquetCategoryCrud::class)->name('bouquet-category.crud');
-    Route::get('/bouquet-size', BouquetSizeCrud::class)->name('bouquet-size.crud');
-    Route::get('/bouquet', BouquetCrud::class)->name('bouquet.crud');
-    Route::get('/bouquet-template-item', BouquetTemplateItemCrud::class)->name('bouquet-template-item.crud');
-});
+// Route resource untuk Pesanan & Penjualan Buket
+Route::resource('bouquet/orders', BouquetOrderController::class, ['as' => 'bouquet']);
+Route::resource('bouquet/sales', BouquetSaleController::class, ['as' => 'bouquet']);
+Route::resource('bouquets', BouquetController::class);
 require __DIR__.'/auth.php';

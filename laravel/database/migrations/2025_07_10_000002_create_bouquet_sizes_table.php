@@ -11,12 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('bouquet_sales', function (Blueprint $table) {
+        Schema::create('bouquet_sizes', function (Blueprint $table) {
             $table->id();
-            $table->string('customer_name');
-            $table->string('wa_number');
-            $table->text('notes')->nullable();
-            $table->decimal('total_price', 12, 2)->nullable();
+            $table->string('name');
             $table->timestamps();
         });
     }
@@ -26,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('bouquet_sales');
+        Schema::dropIfExists('bouquet_sizes');
     }
 };

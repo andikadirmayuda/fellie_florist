@@ -22,8 +22,8 @@ class Bouquet extends Model
         return $this->hasMany(BouquetPrice::class);
     }
 
-    public function templateItems()
+    public function components()
     {
-        return $this->hasMany(BouquetTemplateItem::class);
+        return $this->hasMany(BouquetComponent::class);
     }
 }

@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class BouquetCategory extends Model
 {
     use HasFactory;
-    protected $fillable = ['name'];
+    protected $fillable = ['code', 'name'];
 
     public function bouquets()
     {

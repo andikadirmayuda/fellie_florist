@@ -3,45 +3,51 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Product;
-use Illuminate\Support\Facades\DB;
 
 class BouquetSaleController extends Controller
 {
+    public function index()
+    {
+        // Tampilkan daftar penjualan buket
+        return view('bouquet.sales.index');
+    }
+
     public function create()
     {
-        $products = Product::where('stock', '>', 0)->get();
-        return view('bouquet.sales', compact('products'));
+        // Tampilkan form tambah penjualan buket
+        return view('bouquet.sales.create');
     }
 
     public function store(Request $request)
     {
-        $request->validate([
-            'flowers' => 'required|array',
-            'flowers.*.product_id' => 'required|exists:products,id',
-            'flowers.*.quantity' => 'required|integer|min:1',
-        ]);
+        // Simpan penjualan buket baru
+        // ...
+        return redirect()->route('bouquet.sales.index');
+    }
 
-        DB::beginTransaction();
-        try {
-            foreach ($request->flowers as $flower) {
-                $product = Product::find($flower['product_id']);
-                if ($product->stock < $flower['quantity']) {
-                    return back()->withErrors(['msg' => "Stok bunga {$product->name} tidak cukup!"])->withInput();
-                }
-            }
-            // Kurangi stok
-            foreach ($request->flowers as $flower) {
-                $product = Product::find($flower['product_id']);
-                $product->stock -= $flower['quantity'];
-                $product->save();
-            }
-            // Simpan data penjualan buket (bisa dikembangkan sesuai kebutuhan)
-            DB::commit();
-            return back()->with('success', 'Penjualan buket berhasil!');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return back()->withErrors(['msg' => 'Terjadi kesalahan.'])->withInput();
-        }
+    public function show($id)
+    {
+        // Tampilkan detail penjualan buket
+        return view('bouquet.sales.show', compact('id'));
+    }
+
+    public function edit($id)
+    {
+        // Tampilkan form edit penjualan buket
+        return view('bouquet.sales.edit', compact('id'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        // Update penjualan buket
+        // ...
+        return redirect()->route('bouquet.sales.index');
+    }
+
+    public function destroy($id)
+    {
+        // Hapus penjualan buket
+        // ...
+        return redirect()->route('bouquet.sales.index');
     }
 }
