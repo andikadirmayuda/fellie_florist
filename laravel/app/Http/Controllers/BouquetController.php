@@ -8,13 +8,25 @@ use App\Models\BouquetSize;
 use App\Models\BouquetPrice;
 use App\Models\BouquetComponent;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class BouquetController extends Controller
 {
+    public function index()
+    {
+        $bouquets = Bouquet::with(['category', 'sizes', 'components.product'])
+            ->orderBy('category_id')
+            ->paginate(10);
+
+        return view('bouquets.index', compact('bouquets'));
+    }
+
     public function create()
     {
-        $categories = BouquetCategory::all();
-        $sizes = BouquetSize::all();
+        $categories = BouquetCategory::orderBy('name')->get();
+        $sizes = BouquetSize::orderBy('name')->get();
         return view('bouquets.create', compact('categories', 'sizes'));
     }
 
@@ -24,82 +36,188 @@ class BouquetController extends Controller
             'name' => 'required|string|max:255',
             'category_id' => 'required|exists:bouquet_categories,id',
             'description' => 'nullable|string',
-            'image' => 'nullable|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'prices' => 'required|array',
-            'prices.*.size_id' => 'required|exists:bouquet_sizes,id',
-            'prices.*.price' => 'required|numeric',
-            'components' => 'required|array',
-            'components.*.product_id' => 'required|exists:products,id',
-            'components.*.quantity' => 'required|integer|min:1',
+            'prices.*' => 'required|numeric|min:0'
         ]);
 
-        $bouquet = Bouquet::create($validated);
+        DB::beginTransaction();
+        try {
+            // Handle image upload
+            if ($request->hasFile('image')) {
+                $imagePath = $request->file('image')->store('bouquets', 'public');
+                $validated['image'] = $imagePath;
+            }
 
-        foreach ($validated['prices'] as $price) {
-            $bouquet->prices()->create($price);
+            // Create bouquet
+            $bouquet = Bouquet::create([
+                'name' => $validated['name'],
+                'category_id' => $validated['category_id'],
+                'description' => $validated['description'],
+                'image' => $validated['image'] ?? null,
+            ]);
+
+            // Create prices for each size
+            foreach ($validated['prices'] as $sizeId => $price) {
+                if ($price > 0) {
+                    BouquetPrice::create([
+                        'bouquet_id' => $bouquet->id,
+                        'size_id' => $sizeId,
+                        'price' => $price
+                    ]);
+                }
+            }
+
+            DB::commit();
+            return redirect()->route('bouquets.index')
+                ->with('success', 'Template bouquet berhasil dibuat.');
+        } catch (\Exception $e) {
+            DB::rollback();
+            return back()->with('error', 'Terjadi kesalahan saat membuat template bouquet.');
         }
-
-        foreach ($validated['components'] as $component) {
-            $bouquet->components()->create($component);
-        }
-
-        return response()->json($bouquet->load(['category', 'prices', 'components']), 201);
     }
 
-    public function update(Request $request, $id)
+    public function show(Bouquet $bouquet)
     {
-        $bouquet = Bouquet::findOrFail($id);
+        $bouquet->load(['category', 'sizes', 'components.product']);
+        
+        // Group components by size
+        $componentsBySize = $bouquet->components
+            ->groupBy('size_id')
+            ->map(function ($components) {
+                return [
+                    'size' => $components->first()->size,
+                    'components' => $components,
+                    'total_cost' => $components->sum(function ($component) {
+                        return $component->quantity * $component->product->price;
+                    }),
+                    'price' => $components->first()->size->prices
+                        ->where('bouquet_id', $components->first()->bouquet_id)
+                        ->first()?->price ?? 0
+                ];
+            });
+
+        return view('bouquets.show', compact('bouquet', 'componentsBySize'));
+    }
+
+    public function edit(Bouquet $bouquet)
+    {
+        $categories = BouquetCategory::orderBy('name')->get();
+        $sizes = BouquetSize::orderBy('name')->get();
+        $bouquet->load(['prices']);
+        
+        return view('bouquets.edit', compact('bouquet', 'categories', 'sizes'));
+    }
+
+    public function update(Request $request, Bouquet $bouquet)
+    {
         $validated = $request->validate([
-            'name' => 'sometimes|required|string|max:255',
-            'category_id' => 'sometimes|required|exists:bouquet_categories,id',
+            'name' => 'required|string|max:255',
+            'category_id' => 'required|exists:bouquet_categories,id',
             'description' => 'nullable|string',
-            'image' => 'nullable|string',
-            'prices' => 'sometimes|array',
-            'prices.*.size_id' => 'required_with:prices|exists:bouquet_sizes,id',
-            'prices.*.price' => 'required_with:prices|numeric',
-            'components' => 'sometimes|array',
-            'components.*.product_id' => 'required_with:components|exists:products,id',
-            'components.*.quantity' => 'required_with:components|integer|min:1',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'sizes' => 'required|array',
+            'sizes.*' => 'exists:bouquet_sizes,id',
+            'prices' => 'required|array',
+            'prices.*' => 'required|numeric|min:0'
         ]);
 
-        $bouquet->update($validated);
+        DB::beginTransaction();
+        try {
+            // Handle image upload
+            if ($request->hasFile('image')) {
+                $imagePath = $request->file('image')->store('bouquets', 'public');
+                $validated['image'] = $imagePath;
+            }
 
-        if (isset($validated['prices'])) {
+            // Update bouquet
+            $bouquet->update([
+                'name' => $validated['name'],
+                'category_id' => $validated['category_id'],
+                'description' => $validated['description'],
+                'image' => $validated['image'] ?? $bouquet->image,
+            ]);
+
+            // Update prices
+            $bouquet->prices()->delete(); // Remove old prices
+            foreach ($validated['sizes'] as $index => $sizeId) {
+                BouquetPrice::create([
+                    'bouquet_id' => $bouquet->id,
+                    'size_id' => $sizeId,
+                    'price' => $validated['prices'][$index]
+                ]);
+            }
+
+            DB::commit();
+            return redirect()->route('bouquets.index')
+                ->with('success', 'Template bouquet berhasil diperbarui.');
+        } catch (\Exception $e) {
+            DB::rollback();
+            return back()->with('error', 'Terjadi kesalahan saat memperbarui template bouquet.');
+        }
+    }
+
+    public function destroy(Bouquet $bouquet)
+    {
+        try {
+            DB::beginTransaction();
+
+            // 1. Hapus semua harga (price) terkait
             $bouquet->prices()->delete();
-            foreach ($validated['prices'] as $price) {
-                $bouquet->prices()->create($price);
-            }
-        }
 
-        if (isset($validated['components'])) {
+            // 2. Hapus semua komponen terkait
             $bouquet->components()->delete();
-            foreach ($validated['components'] as $component) {
-                $bouquet->components()->create($component);
+
+            // 3. Hapus file gambar jika ada
+            if ($bouquet->image && Storage::disk('public')->exists($bouquet->image)) {
+                Storage::disk('public')->delete($bouquet->image);
             }
+
+            // 4. Hapus bouquet
+            $bouquet->delete();
+
+            DB::commit();
+
+            return redirect()->route('bouquets.index')
+                ->with('success', 'Buket berhasil dihapus.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error saat menghapus bouquet: ' . $e->getMessage());
+            
+            return back()
+                ->with('error', 'Terjadi kesalahan saat menghapus buket. ' . $e->getMessage());
         }
-
-        return response()->json($bouquet->load(['category', 'prices', 'components']));
     }
 
-    public function destroy($id)
+    // API method untuk mendapatkan detail bouquet
+    public function getDetails(Bouquet $bouquet)
     {
-        $bouquet = Bouquet::findOrFail($id);
-        $bouquet->prices()->delete();
-        $bouquet->components()->delete();
-        $bouquet->delete();
-        return response()->json(['message' => 'Bouquet deleted successfully']);
-    }
-    public function index()
-    {
-        $bouquets = Bouquet::with('category')->paginate(15);
-        return view('bouquets.index', compact('bouquets'));
-    }
-
-    public function show($id)
-    {
-        $bouquet = Bouquet::with(['category', 'prices', 'components.product'])->findOrFail($id);
+        $bouquet->load(['sizes.components.product', 'prices']);
         return response()->json($bouquet);
     }
 
-    // Tambahkan method create, store, update, destroy sesuai kebutuhan aplikasi Anda
+    // Method untuk cek ketersediaan komponen
+    public function checkAvailability(Bouquet $bouquet, BouquetSize $size)
+    {
+        $components = $bouquet->getComponentsForSize($size->id);
+        $availability = true;
+        $missingComponents = [];
+
+        foreach ($components as $component) {
+            if ($component->product->stock < $component->quantity) {
+                $availability = false;
+                $missingComponents[] = [
+                    'product' => $component->product->name,
+                    'required' => $component->quantity,
+                    'available' => $component->product->stock
+                ];
+            }
+        }
+
+        return response()->json([
+            'available' => $availability,
+            'missing_components' => $missingComponents
+        ]);
+    }
 }

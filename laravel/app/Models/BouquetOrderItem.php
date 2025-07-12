@@ -7,7 +7,11 @@ class BouquetOrderItem extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'bouquet_order_id', 'product_id', 'quantity', 'price'
+        'bouquet_order_id',
+        'bouquet_id',
+        'size_id',
+        'quantity',
+        'price'
     ];
 
     public function order()
@@ -15,8 +19,13 @@ class BouquetOrderItem extends Model
         return $this->belongsTo(BouquetOrder::class, 'bouquet_order_id');
     }
 
-    public function product()
+    public function bouquet()
     {
-        return $this->belongsTo(Product::class);
+        return $this->belongsTo(Bouquet::class);
+    }
+
+    public function size()
+    {
+        return $this->belongsTo(BouquetSize::class);
     }
 }

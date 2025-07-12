@@ -20,4 +20,12 @@ class BouquetSize extends Model
     {
         return $this->hasMany(BouquetComponent::class, 'size_id');
     }
+
+    public function bouquets()
+    {
+        return $this->belongsToMany(Bouquet::class, 'bouquet_prices')
+                    ->using(BouquetPrice::class)
+                    ->withPivot('price')
+                    ->withTimestamps();
+    }
 }

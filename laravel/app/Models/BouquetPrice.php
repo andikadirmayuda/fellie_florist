@@ -2,14 +2,16 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 
-class BouquetPrice extends Model
+class BouquetPrice extends Pivot
 {
-    use HasFactory;
+    protected $table = 'bouquet_prices';
+    
     protected $fillable = [
-        'bouquet_id', 'size_id', 'price'
+        'bouquet_id',
+        'size_id',
+        'price'
     ];
 
     public function bouquet()
@@ -19,6 +21,6 @@ class BouquetPrice extends Model
 
     public function size()
     {
-        return $this->belongsTo(BouquetSize::class, 'size_id');
+        return $this->belongsTo(BouquetSize::class);
     }
 }

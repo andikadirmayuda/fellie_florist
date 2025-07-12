@@ -55,7 +55,7 @@
                                 @endforelse
                             </tbody>
                         </table>
-                        <div class="mt-4 flex justify-center" id="pagination-links">
+                        <div class="mt-4 px-4 py-2">
                             {{ $bouquets->links() }}
                         </div>
                     </div>
