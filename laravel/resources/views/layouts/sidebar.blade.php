@@ -47,6 +47,16 @@
             </x-sidebar-link>
             @endif
 
+            {{-- Kategori Buket: owner, admin --}}
+            @if(auth()->user()->hasRole('owner') || auth()->user()->hasRole('admin'))
+            <x-sidebar-link :href="route('bouquet-categories.index')" :active="request()->routeIs('bouquet-categories.*')">
+                <x-slot name="icon">
+                    <i class="bi bi-bookmark-heart text-lg mr-1"></i>
+                </x-slot>
+                Kategori Buket
+            </x-sidebar-link>
+            @endif
+
             {{-- Inventaris: owner, admin, karyawan --}}
             @if(auth()->user()->hasRole('owner') || auth()->user()->hasRole('admin') || auth()->user()->hasRole('karyawan'))
             <x-sidebar-link :href="route('inventory.index')" :active="request()->routeIs('inventory.*')">

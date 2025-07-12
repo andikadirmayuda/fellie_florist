@@ -15,10 +15,7 @@ class BouquetController extends Controller
     {
         $categories = BouquetCategory::all();
         $sizes = BouquetSize::all();
-        return response()->json([
-            'categories' => $categories,
-            'sizes' => $sizes
-        ]);
+        return view('bouquets.create', compact('categories', 'sizes'));
     }
 
     public function store(Request $request)

@@ -1,0 +1,52 @@
+<x-app-layout>
+    <x-slot name="header">
+        <h1 class="text-2xl font-bold text-pink-700">Tambah Buket</h1>
+    </x-slot>
+    <div class="py-8">
+        <div class="max-w-2xl mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 bg-white border-b border-gray-200">
+                    <form action="{{ route('bouquets.store') }}" method="POST" enctype="multipart/form-data">
+                        @csrf
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700">Nama Buket</label>
+                            <input type="text" name="name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required value="{{ old('name') }}">
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700">Kategori</label>
+                            <select name="category_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>
+                                <option value="">Pilih Kategori</option>
+                                @foreach($categories as $cat)
+                                    <option value="{{ $cat->id }}" @selected(old('category_id') == $cat->id)>{{ $cat->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700">Deskripsi</label>
+                            <textarea name="description" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">{{ old('description') }}</textarea>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700">Gambar</label>
+                            <input type="file" name="image" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700">Harga Buket (per Ukuran)</label>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                @foreach($sizes as $size)
+                                <div>
+                                    <label class="block text-xs font-semibold mb-1">{{ $size->name }}</label>
+                                    <input type="number" name="prices[{{ $size->id }}]" class="block w-full rounded-md border-gray-300 shadow-sm" placeholder="Harga untuk ukuran {{ $size->name }}" min="0" value="{{ old('prices.'.$size->id) }}">
+                                </div>
+                                @endforeach
+                            </div>
+                        </div>
+                        <div class="flex justify-end">
+                            <a href="{{ route('bouquets.index') }}" class="bg-gray-200 hover:bg-gray-300 text-black font-bold py-2 px-4 rounded mr-2">Batal</a>
+                            <button type="submit" class="bg-pink-600 hover:bg-pink-700 text-white font-bold py-2 px-4 rounded">Simpan</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</x-app-layout>

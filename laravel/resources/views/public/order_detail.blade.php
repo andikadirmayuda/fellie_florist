@@ -59,6 +59,7 @@
                     ];
                     $statusMap = [
                         'pending' => 'pending',
+                        'processed' => 'processing',
                         'processing' => 'processing',
                         'packing' => 'packing',
                         'shipped' => 'shipped',

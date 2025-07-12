@@ -34,7 +34,7 @@
     
     <div class="max-w-4xl mx-auto text-center mb-10">
         <h2 class="text-2xl sm:text-3xl font-semibold text-pink">
-            🌸Daftar Stok Bunga Ready🌸
+            🌸Katalog & Stok Bunga🌸
         </h2>
         <h6 class="mt-2 text-sm sm:text-3xl font-semibold text-pink-600 bg-pink-200/50 backdrop-blur-sm px-4 py-1 inline-block rounded-md shadow-sm">
             ~ Fellie Florist ~

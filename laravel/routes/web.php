@@ -21,6 +21,7 @@ use App\Http\Controllers\BouquetOrderController;
 use App\Http\Controllers\BouquetSaleController;
 use App\Http\Controllers\BouquetController;
 use App\Http\Controllers\OrderWhatsAppController;
+use App\Http\Controllers\BouquetCategoryController;
 
 use Illuminate\Support\Facades\Route;
 
@@ -178,8 +179,13 @@ Route::post('/test-upload', function(\Illuminate\Http\Request $request) {
     }
     return 'Tidak ada file terupload!';
 });
+
+
+Route::post('/admin/public-orders/{id}/add-payment', [AdminPublicOrderController::class, 'addPayment'])->name('admin.public-orders.add-payment');
+
 // Route resource untuk Pesanan & Penjualan Buket
 Route::resource('bouquet/orders', BouquetOrderController::class, ['as' => 'bouquet']);
 Route::resource('bouquet/sales', BouquetSaleController::class, ['as' => 'bouquet']);
 Route::resource('bouquets', BouquetController::class);
+Route::resource('bouquet-categories', BouquetCategoryController::class);
 require __DIR__.'/auth.php';
