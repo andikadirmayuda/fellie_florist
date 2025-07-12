@@ -8,10 +8,16 @@ use Illuminate\Database\Eloquent\Model;
 class BouquetSize extends Model
 {
     use HasFactory;
+    
     protected $fillable = ['name'];
 
     public function prices()
     {
         return $this->hasMany(BouquetPrice::class, 'size_id');
+    }
+
+    public function components()
+    {
+        return $this->hasMany(BouquetComponent::class, 'size_id');
     }
 }

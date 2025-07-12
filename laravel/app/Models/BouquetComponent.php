@@ -11,6 +11,7 @@ class BouquetComponent extends Model
 
     protected $fillable = [
         'bouquet_id',
+        'size_id',
         'product_id',
         'quantity',
     ];
@@ -18,6 +19,11 @@ class BouquetComponent extends Model
     public function bouquet()
     {
         return $this->belongsTo(Bouquet::class);
+    }
+
+    public function size()
+    {
+        return $this->belongsTo(BouquetSize::class);
     }
 
     public function product()

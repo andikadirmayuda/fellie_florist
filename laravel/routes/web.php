@@ -22,6 +22,8 @@ use App\Http\Controllers\BouquetSaleController;
 use App\Http\Controllers\BouquetController;
 use App\Http\Controllers\OrderWhatsAppController;
 use App\Http\Controllers\BouquetCategoryController;
+use App\Http\Controllers\BouquetSizeController;
+use App\Http\Controllers\BouquetComponentController;
 
 use Illuminate\Support\Facades\Route;
 
@@ -188,4 +190,6 @@ Route::resource('bouquet/orders', BouquetOrderController::class, ['as' => 'bouqu
 Route::resource('bouquet/sales', BouquetSaleController::class, ['as' => 'bouquet']);
 Route::resource('bouquets', BouquetController::class);
 Route::resource('bouquet-categories', BouquetCategoryController::class);
+Route::resource('bouquet-sizes', BouquetSizeController::class);
+Route::resource('bouquet-components', BouquetComponentController::class);
 require __DIR__.'/auth.php';

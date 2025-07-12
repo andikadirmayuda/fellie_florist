@@ -55,6 +55,22 @@
                 </x-slot>
                 Kategori Buket
             </x-sidebar-link>
+
+            {{-- Ukuran Buket: owner, admin --}}
+            <x-sidebar-link :href="route('bouquet-sizes.index')" :active="request()->routeIs('bouquet-sizes.*')">
+                <x-slot name="icon">
+                    <i class="bi bi-rulers text-lg mr-1"></i>
+                </x-slot>
+                Ukuran Buket
+            </x-sidebar-link>
+
+            {{-- Komponen Buket: owner, admin --}}
+            <x-sidebar-link :href="route('bouquet-components.index')" :active="request()->routeIs('bouquet-components.*')">
+                <x-slot name="icon">
+                    <i class="bi bi-boxes text-lg mr-1"></i>
+                </x-slot>
+                Komponen Buket
+            </x-sidebar-link>
             @endif
 
             {{-- Inventaris: owner, admin, karyawan --}}
