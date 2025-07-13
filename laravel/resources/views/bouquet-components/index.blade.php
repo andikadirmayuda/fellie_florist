@@ -1,70 +1,327 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ __('Komponen Buket') }}
-            </h2>
-            <a href="{{ route('bouquet-components.create') }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+            <div>
+                <h2 class="font-bold text-3xl text-gray-800 leading-tight mb-2">
+                    {{ __('Komponen Bouquet') }}
+                </h2>
+                {{-- <Bo class="text-gray-600">Datfar Bouqet</Bo> --}}
+            </div>
+            <a href="{{ route('bouquet-components.create') }}" 
+               class="bg-pink-600 hover:bg-pink-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition-all duration-200 flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                </svg>
                 Tambah Komponen
             </a>
         </div>
     </x-slot>
 
-    <div class="py-12">
+    <div class="py-8">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg">
-                <div class="p-6">
-                    @if (session('success'))
-                        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
-                            <span class="block sm:inline">{{ session('success') }}</span>
+            <!-- Success Message -->
+            @if (session('success'))
+                <div class="bg-green-50 border-l-4 border-green-400 p-4 mb-6 rounded-r-lg">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
                         </div>
-                    @endif
-
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead>
-                                <tr>
-                                    <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Buket</th>
-                                    <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ukuran</th>
-                                    <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Produk</th>
-                                    <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jumlah</th>
-                                    <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                @foreach ($components as $component)
-                                    <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {{ $component->bouquet->name }}
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {{ $component->size->name }}
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {{ $component->product->name }}
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {{ $component->quantity }}
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                            <a href="{{ route('bouquet-components.edit', $component->id) }}" class="text-indigo-600 hover:text-indigo-900 mr-3">Edit</a>
-                                            <form action="{{ route('bouquet-components.destroy', $component->id) }}" method="POST" class="inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="text-red-600 hover:text-red-900" onclick="return confirm('Apakah Anda yakin ingin menghapus komponen ini?')">Hapus</button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <div class="mt-4">
-                        {{ $components->links() }}
+                        <div class="ml-3">
+                            <p class="text-green-700 font-medium">{{ session('success') }}</p>
+                        </div>
                     </div>
                 </div>
+            @endif
+
+            @php
+                // Group komponen by bouquet, lalu by size
+                $bouquetGroups = [];
+                $categories = [];
+                
+                foreach ($components as $component) {
+                    $bouquetId = $component->bouquet->id;
+                    $sizeId = $component->size->id;
+                    $categoryName = $component->bouquet->category->name ?? 'Uncategorized';
+                    
+                    $bouquetGroups[$bouquetId]['bouquet'] = $component->bouquet;
+                    $bouquetGroups[$bouquetId]['sizes'][$sizeId]['size'] = $component->size;
+                    $bouquetGroups[$bouquetId]['sizes'][$sizeId]['components'][] = $component;
+                    
+                    if (!in_array($categoryName, $categories)) {
+                        $categories[] = $categoryName;
+                    }
+                }
+                
+                // Sort categories
+                sort($categories);
+                array_unshift($categories, 'All');
+            @endphp
+
+            <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg">
+                <!-- Category Tabs -->
+                <div class="border-b border-gray-200">
+                    <nav class="flex space-x-8 px-6 py-4" aria-label="Tabs">
+                        @foreach($categories as $index => $category)
+                            <button onclick="showCategory('{{ $category }}')" 
+                                    class="category-tab {{ $index === 0 ? 'active' : '' }} whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm transition-colors duration-200"
+                                    data-category="{{ $category }}">
+                                {{ $category }}
+                            </button>
+                        @endforeach
+                    </nav>
+                    @foreach($categories as $category)
+                        <div class="category-content {{ $category !== 'All' ? 'hidden' : '' }}" data-category="{{ $category }}">
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                                @forelse($bouquetGroups as $group)
+                                    @php
+                                        $bouquetCategory = $group['bouquet']->category->name ?? 'Uncategorized';
+                                    @endphp
+                                    
+                                    @if($category === 'All' || $category === $bouquetCategory)
+                                        <div class="bg-white border border-gray-200 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden">
+                                            <div class="grid md:grid-cols-2 gap-0">
+                                                <!-- Image Section -->
+                                                <div class="relative bg-gradient-to-br from-pink-100 to-purple-100 h-64 md:h-full flex items-center justify-center">
+                                                    @if($group['bouquet']->image)
+                                                        <img src="{{ asset('storage/' . $group['bouquet']->image) }}" 
+                                                             alt="{{ $group['bouquet']->name }}" 
+                                                             class="w-full h-full object-cover">
+                                                    @else
+                                                        <div class="text-center">
+                                                            <svg class="w-16 h-16 text-pink-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a2 2 0 002-2V5z"/>
+                                                            </svg>
+                                                            <p class="text-pink-400 text-sm">{{ $group['bouquet']->name }}</p>
+                                                        </div>
+                                                    @endif
+                                                    
+                                                    <!-- Category Badge -->
+                                                    <div class="absolute top-4 left-4">
+                                                        <span class="bg-white/90 backdrop-blur-sm text-pink-700 px-3 py-1 rounded-full text-xs font-medium shadow-sm">
+                                                            {{ $bouquetCategory }}
+                                                        </span>
+                                                    </div>
+                                                    
+                                                    <!-- Favorite Button -->
+                                                    <button class="absolute top-4 right-4 bg-white/90 backdrop-blur-sm hover:bg-white p-2 rounded-full shadow-sm transition-colors">
+                                                        <svg class="w-4 h-4 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                                                        </svg>
+                                                    </button>
+                                                </div>
+
+                                                <!-- Content Section -->
+                                                <div class="p-6">
+                                                    <!-- Header -->
+                                                    <div class="mb-4">
+                                                        <h3 class="text-xl font-bold text-gray-900 mb-2">{{ $group['bouquet']->name }}</h3>
+                                                        <div class="flex items-center gap-2">
+                                                            <div class="flex items-center">
+                                                                @for($i = 1; $i <= 5; $i++)
+                                                                    <svg class="w-4 h-4 {{ $i <= 4 ? 'text-yellow-400 fill-current' : 'text-gray-300' }}" viewBox="0 0 20 20">
+                                                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                                                    </svg>
+                                                                @endfor
+                                                                <span class="text-sm font-medium ml-1 text-gray-600">4.8</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Size Tabs -->
+                                                    <div class="mb-4">
+                                                        <div class="flex flex-wrap gap-1 mb-3">
+                                                            @foreach($group['sizes'] as $sizeIndex => $sizeGroup)
+                                                                <button onclick="showSize('{{ $group['bouquet']->id }}', '{{ $sizeGroup['size']->id }}')"
+                                                                        class="size-tab size-tab-{{ $group['bouquet']->id }} {{ $sizeIndex === 0 ? 'active' : '' }} px-3 py-1 rounded-md text-xs font-medium transition-colors duration-200"
+                                                                        data-bouquet="{{ $group['bouquet']->id }}" 
+                                                                        data-size="{{ $sizeGroup['size']->id }}">
+                                                                    {{ $sizeGroup['size']->name }}
+                                                                </button>
+                                                            @endforeach
+                                                        </div>
+
+                                                        <!-- Size Content -->
+                                                        @foreach($group['sizes'] as $sizeIndex => $sizeGroup)
+                                                            <div class="size-content size-content-{{ $group['bouquet']->id }} {{ $sizeIndex !== 0 ? 'hidden' : '' }}" 
+                                                                 data-bouquet="{{ $group['bouquet']->id }}" 
+                                                                 data-size="{{ $sizeGroup['size']->id }}">
+                                                                
+                                                                <!-- Price -->
+                                                                @if(isset($sizeGroup['size']->price))
+                                                                    <div class="text-2xl font-bold text-pink-600 mb-3">
+                                                                        Rp {{ number_format($sizeGroup['size']->price, 0, ',', '.') }}
+                                                                    </div>
+                                                                @endif
+
+                                                                <!-- Components -->
+                                                                <div class="mb-4">
+                                                                    <h4 class="font-semibold text-sm text-gray-700 mb-2">Komponen Bunga:</h4>
+                                                                    <div class="space-y-2">
+                                                                        @foreach($sizeGroup['components'] as $comp)
+    <div class="flex justify-between items-center py-1 border-b border-gray-100 last:border-b-0">
+        <span class="text-sm text-gray-800">{{ $comp->product->name }}</span>
+        <div class="flex items-center gap-3">
+            <span class="text-sm text-gray-500">{{ $comp->quantity }} {{ $comp->product->base_unit ?? 'pcs' }}</span>
+            <div class="flex gap-1">
+                <a href="{{ route('bouquet-components.show', $comp->id) }}" title="Lihat Detail"
+                   class="p-1 rounded hover:bg-blue-100 text-blue-600 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0zm6 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </a>
+                <a href="{{ route('bouquet-components.edit', $comp->id) }}" title="Edit"
+                   class="p-1 rounded hover:bg-indigo-100 text-indigo-600 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5h2m-1 0v14m-7-7h14" />
+                    </svg>
+                </a>
+                <form action="{{ route('bouquet-components.destroy', $comp->id) }}" method="POST" class="inline">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" title="Hapus" 
+                            class="p-1 rounded hover:bg-red-100 text-red-600 transition-colors" 
+                            onclick="return confirm('Hapus komponen ini?')">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </form>
             </div>
         </div>
     </div>
+                                                                        @endforeach
+                                                                    </div>
+                                                                </div>
+
+                                                                <!-- Action Button -->
+                                                                <a href="{{ route('bouquet-components.manage', ['bouquet' => $group['bouquet']->id, 'size' => $sizeGroup['size']->id]) }}"
+                                                                   class="w-full bg-pink-600 hover:bg-pink-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2">
+                                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.5 6M7 13l-1.5-6m0 0L4 5M7 13h10m0 0v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6z"/>
+                                                                    </svg>
+                                                                    Kelola Komponen
+                                                                </a>
+                                                            </div>
+                                                        @endforeach
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endif
+                                @empty
+                                    <div class="col-span-2 text-center py-12">
+                                        <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2M4 13h2m13-8l-4 4m0 0l-4-4m4 4V3"/>
+                                        </svg>
+                                        <p class="text-gray-500 text-lg">Tidak ada komponen bouquet ditemukan.</p>
+                                        <p class="text-gray-400 text-sm mt-1">Mulai dengan menambahkan komponen bouquet pertama Anda.</p>
+                                    </div>
+                                @endforelse
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+
+                <!-- Pagination -->
+                @if($components->hasPages())
+                    <div class="px-6 py-4 border-t border-gray-200">
+                        {{ $components->links() }}
+                    </div>
+                @endif
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript for Tabs -->
+    <script>
+        // Category Tab Functionality
+        function showCategory(category) {
+            // Hide all category contents
+            document.querySelectorAll('.category-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            
+            // Show selected category content
+            document.querySelectorAll(`[data-category="${category}"]`).forEach(content => {
+                if (content.classList.contains('category-content')) {
+                    content.classList.remove('hidden');
+                }
+            });
+            
+            // Update tab styles
+            document.querySelectorAll('.category-tab').forEach(tab => {
+                tab.classList.remove('active', 'border-pink-500', 'text-pink-600');
+                tab.classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+            });
+            
+            document.querySelector(`[data-category="${category}"].category-tab`).classList.add('active', 'border-pink-500', 'text-pink-600');
+            document.querySelector(`[data-category="${category}"].category-tab`).classList.remove('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+        }
+
+        // Size Tab Functionality
+        function showSize(bouquetId, sizeId) {
+            // Hide all size contents for this bouquet
+            document.querySelectorAll(`.size-content-${bouquetId}`).forEach(content => {
+                content.classList.add('hidden');
+            });
+            
+            // Show selected size content
+            document.querySelector(`[data-bouquet="${bouquetId}"][data-size="${sizeId}"].size-content`).classList.remove('hidden');
+            
+            // Update size tab styles
+            document.querySelectorAll(`.size-tab-${bouquetId}`).forEach(tab => {
+                tab.classList.remove('active', 'bg-pink-600', 'text-white');
+                tab.classList.add('bg-gray-100', 'text-gray-700', 'hover:bg-gray-200');
+            });
+            
+            document.querySelector(`[data-bouquet="${bouquetId}"][data-size="${sizeId}"].size-tab`).classList.add('active', 'bg-pink-600', 'text-white');
+            document.querySelector(`[data-bouquet="${bouquetId}"][data-size="${sizeId}"].size-tab`).classList.remove('bg-gray-100', 'text-gray-700', 'hover:bg-gray-200');
+        }
+
+        // Initialize tabs on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set initial category tab style
+            document.querySelector('.category-tab.active').classList.add('border-pink-500', 'text-pink-600');
+            document.querySelector('.category-tab.active').classList.remove('border-transparent', 'text-gray-500');
+            
+            // Set initial size tab styles
+            document.querySelectorAll('.size-tab.active').forEach(tab => {
+                tab.classList.add('bg-pink-600', 'text-white');
+                tab.classList.remove('bg-gray-100', 'text-gray-700');
+            });
+            
+            // Set non-active size tab styles
+            document.querySelectorAll('.size-tab:not(.active)').forEach(tab => {
+                tab.classList.add('bg-gray-100', 'text-gray-700', 'hover:bg-gray-200');
+            });
+            
+            // Set non-active category tab styles
+            document.querySelectorAll('.category-tab:not(.active)').forEach(tab => {
+                tab.classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+            });
+        });
+    </script>
+
+    <style>
+        .category-tab.active {
+            border-color: #ec4899;
+            color: #ec4899;
+        }
+        
+        .size-tab.active {
+            background-color: #ec4899;
+            color: white;
+        }
+        
+        .size-tab:not(.active) {
+            background-color: #f3f4f6;
+            color: #374151;
+        }
+        
+        .size-tab:not(.active):hover {
+            background-color: #e5e7eb;
+        }
+    </style>
 </x-app-layout>

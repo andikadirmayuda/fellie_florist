@@ -11,6 +11,18 @@ use Illuminate\Validation\Rule;
 
 class BouquetComponentController extends Controller
 {
+    // Mass edit/manage komponen untuk bouquet dan size tertentu
+    public function manage($bouquetId, $sizeId)
+    {
+        $bouquet = Bouquet::findOrFail($bouquetId);
+        $size = BouquetSize::findOrFail($sizeId);
+        $components = BouquetComponent::where('bouquet_id', $bouquetId)
+            ->where('size_id', $sizeId)
+            ->with('product')
+            ->get();
+        $products = Product::orderBy('name')->get();
+        return view('bouquet-components.manage', compact('bouquet', 'size', 'components', 'products'));
+    }
     public function index()
     {
         $components = BouquetComponent::with(['bouquet', 'size', 'product'])

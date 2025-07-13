@@ -191,5 +191,6 @@ Route::resource('bouquet/sales', BouquetSaleController::class, ['as' => 'bouquet
 Route::resource('bouquets', BouquetController::class);
 Route::resource('bouquet-categories', BouquetCategoryController::class);
 Route::resource('bouquet-sizes', BouquetSizeController::class);
+Route::get('bouquet-components/manage/{bouquet}/{size}', [App\Http\Controllers\BouquetComponentController::class, 'manage'])->name('bouquet-components.manage');
 Route::resource('bouquet-components', BouquetComponentController::class);
 require __DIR__.'/auth.php';
