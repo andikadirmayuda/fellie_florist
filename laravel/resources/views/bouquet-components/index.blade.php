@@ -73,7 +73,7 @@
                     </nav>
                     @foreach($categories as $category)
                         <div class="category-content {{ $category !== 'All' ? 'hidden' : '' }}" data-category="{{ $category }}">
-                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 px-4 pb-8">
                                 @forelse($bouquetGroups as $group)
                                     @php
                                         $bouquetCategory = $group['bouquet']->category->name ?? 'Uncategorized';
