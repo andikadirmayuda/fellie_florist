@@ -132,7 +132,7 @@
                                                     <!-- Size Tabs -->
                                                     <div class="mb-4">
                                                         <div class="flex flex-wrap gap-1 mb-3">
-                                                            @foreach($group['sizes'] as $sizeIndex => $sizeGroup)
+                                                            @foreach(array_values($group['sizes']) as $sizeIndex => $sizeGroup)
                                                                 <button onclick="showSize('{{ $group['bouquet']->id }}', '{{ $sizeGroup['size']->id }}')"
                                                                         class="size-tab size-tab-{{ $group['bouquet']->id }} {{ $sizeIndex === 0 ? 'active' : '' }} px-3 py-1 rounded-md text-xs font-medium transition-colors duration-200"
                                                                         data-bouquet="{{ $group['bouquet']->id }}" 
@@ -143,7 +143,7 @@
                                                         </div>
 
                                                         <!-- Size Content -->
-                                                        @foreach($group['sizes'] as $sizeIndex => $sizeGroup)
+                                                        @foreach(array_values($group['sizes']) as $sizeIndex => $sizeGroup)
                                                             <div class="size-content size-content-{{ $group['bouquet']->id }} {{ $sizeIndex !== 0 ? 'hidden' : '' }}" 
                                                                  data-bouquet="{{ $group['bouquet']->id }}" 
                                                                  data-size="{{ $sizeGroup['size']->id }}">
@@ -242,42 +242,65 @@
             document.querySelectorAll('.category-content').forEach(content => {
                 content.classList.add('hidden');
             });
-            
             // Show selected category content
             document.querySelectorAll(`[data-category="${category}"]`).forEach(content => {
                 if (content.classList.contains('category-content')) {
                     content.classList.remove('hidden');
+                    // Untuk setiap bouquet yang tampil, aktifkan size tab & content pertama
+                    content.querySelectorAll('.size-tab-').forEach(tab => {
+                        // Reset semua size tab
+                        tab.classList.remove('active', 'bg-pink-600', 'text-white');
+                        tab.classList.add('bg-gray-100', 'text-gray-700', 'hover:bg-gray-200');
+                    });
+                    content.querySelectorAll('.size-content-').forEach(sc => {
+                        sc.classList.add('hidden');
+                    });
+                    // Untuk setiap bouquet, aktifkan size tab & content pertama
+                    content.querySelectorAll('[class*="size-tab-"]').forEach(function(tabGroup) {
+                        var bouquetId = tabGroup.getAttribute('data-bouquet');
+                        var firstTab = content.querySelector('.size-tab-' + bouquetId);
+                        var firstContent = content.querySelector('.size-content-' + bouquetId);
+                        if(firstTab) {
+                            firstTab.classList.add('active', 'bg-pink-600', 'text-white');
+                            firstTab.classList.remove('bg-gray-100', 'text-gray-700', 'hover:bg-gray-200');
+                        }
+                        if(firstContent) {
+                            firstContent.classList.remove('hidden');
+                        }
+                    });
                 }
             });
-            
             // Update tab styles
             document.querySelectorAll('.category-tab').forEach(tab => {
                 tab.classList.remove('active', 'border-pink-500', 'text-pink-600');
                 tab.classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
             });
-            
             document.querySelector(`[data-category="${category}"].category-tab`).classList.add('active', 'border-pink-500', 'text-pink-600');
             document.querySelector(`[data-category="${category}"].category-tab`).classList.remove('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
         }
 
         // Size Tab Functionality
         function showSize(bouquetId, sizeId) {
-            // Hide all size contents for this bouquet
-            document.querySelectorAll(`.size-content-${bouquetId}`).forEach(content => {
+            // Cari kategori yang sedang aktif (tidak hidden)
+            var activeCategory = document.querySelector('.category-content:not(.hidden)');
+            if (!activeCategory) return;
+            // Hide all size contents for this bouquet in active category
+            activeCategory.querySelectorAll(`.size-content-${bouquetId}`).forEach(content => {
                 content.classList.add('hidden');
             });
-            
-            // Show selected size content
-            document.querySelector(`[data-bouquet="${bouquetId}"][data-size="${sizeId}"].size-content`).classList.remove('hidden');
-            
-            // Update size tab styles
-            document.querySelectorAll(`.size-tab-${bouquetId}`).forEach(tab => {
+            // Show selected size content in active category
+            var showContent = activeCategory.querySelector(`[data-bouquet="${bouquetId}"][data-size="${sizeId}"].size-content`);
+            if (showContent) showContent.classList.remove('hidden');
+            // Update size tab styles in active category
+            activeCategory.querySelectorAll(`.size-tab-${bouquetId}`).forEach(tab => {
                 tab.classList.remove('active', 'bg-pink-600', 'text-white');
                 tab.classList.add('bg-gray-100', 'text-gray-700', 'hover:bg-gray-200');
             });
-            
-            document.querySelector(`[data-bouquet="${bouquetId}"][data-size="${sizeId}"].size-tab`).classList.add('active', 'bg-pink-600', 'text-white');
-            document.querySelector(`[data-bouquet="${bouquetId}"][data-size="${sizeId}"].size-tab`).classList.remove('bg-gray-100', 'text-gray-700', 'hover:bg-gray-200');
+            var showTab = activeCategory.querySelector(`[data-bouquet="${bouquetId}"][data-size="${sizeId}"].size-tab`);
+            if (showTab) {
+                showTab.classList.add('active', 'bg-pink-600', 'text-white');
+                showTab.classList.remove('bg-gray-100', 'text-gray-700', 'hover:bg-gray-200');
+            }
         }
 
         // Initialize tabs on page load
