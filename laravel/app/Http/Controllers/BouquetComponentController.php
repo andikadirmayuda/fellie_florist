@@ -12,6 +12,12 @@ use Illuminate\Validation\Rule;
 class BouquetComponentController extends Controller
 {
     // Mass edit/manage komponen untuk bouquet dan size tertentu
+    // API: Ambil produk berdasarkan kategori
+    public function getProductsByCategory($categoryId)
+    {
+        $products = \App\Models\Product::where('category_id', $categoryId)->orderBy('name')->get();
+        return response()->json($products);
+    }
     public function manage($bouquetId, $sizeId)
     {
         $bouquet = Bouquet::findOrFail($bouquetId);
@@ -38,12 +44,17 @@ class BouquetComponentController extends Controller
         $bouquets = Bouquet::orderBy('name')->get();
         $sizes = BouquetSize::orderBy('name')->get();
         $products = Product::orderBy('name')->get();
-        
-        return view('bouquet-components.create', compact('bouquets', 'sizes', 'products'));
+        $categories = \App\Models\Category::orderBy('name')->get();
+        return view('bouquet-components.create', compact('bouquets', 'sizes', 'products', 'categories'));
     }
 
     public function store(Request $request)
     {
+        // Jika komponen dikirim sebagai string JSON, ubah ke array
+        if (is_string($request->components)) {
+            $request->merge(['components' => json_decode($request->components, true)]);
+        }
+
         $validated = $request->validate([
             'bouquet_id' => 'required|exists:bouquets,id',
             'size_id' => 'required|exists:bouquet_sizes,id',
