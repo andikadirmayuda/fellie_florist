@@ -84,13 +84,13 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 @foreach($sizes as $size)
                                     <div class="border rounded-md p-4">
+                                        <input type="hidden" name="sizes[]" value="{{ $size->id }}">
                                         <label class="block text-sm font-medium text-gray-700">{{ $size->name }}</label>
-                                        <input type="number" 
-                                            name="prices[{{ $size->id }}]" 
-                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" 
+                                        <input type="text" 
+                                            name="prices[]" 
+                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 autonumeric" 
                                             placeholder="Harga untuk ukuran {{ $size->name }}" 
-                                            value="{{ old('prices.' . $size->id, $bouquet->prices->where('size_id', $size->id)->first()?->price) }}" 
-                                            min="0">
+                                            value="{{ old('prices.' . $loop->index, $bouquet->prices->where('size_id', $size->id)->first()?->price) }}">
                                     </div>
                                 @endforeach
                             </div>
@@ -112,4 +112,15 @@
             </div>
         </div>
     </div>
+<script src="https://cdn.jsdelivr.net/npm/autonumeric@4.6.0/dist/autoNumeric.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        AutoNumeric.multiple('.autonumeric', {
+            digitGroupSeparator: '.',
+            decimalCharacter: ',',
+            decimalPlaces: 0,
+            unformatOnSubmit: true
+        });
+    });
+</script>
 </x-app-layout>

@@ -20,7 +20,9 @@ class BouquetController extends Controller
             ->orderBy('category_id')
             ->paginate(10);
 
-        return view('bouquets.index', compact('bouquets'));
+        $categories = \App\Models\BouquetCategory::orderBy('name')->get();
+
+        return view('bouquets.index', compact('bouquets', 'categories'));
     }
 
     public function create()
