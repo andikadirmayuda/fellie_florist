@@ -12,15 +12,10 @@ use App\Http\Controllers\PublicInvoiceController;
 use App\Http\Controllers\OrderHistoryController;
 use App\Http\Controllers\ArchiveSettingController;
 use App\Http\Controllers\HistorySettingController;
-use App\Http\Controllers\SaleController;
-use App\Http\Controllers\SaleReceiptController;
 use App\Http\Controllers\PublicSaleController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\AdminPublicOrderController;
-use App\Http\Controllers\BouquetOrderController;
-use App\Http\Controllers\BouquetSaleController;
 use App\Http\Controllers\BouquetController;
-use App\Http\Controllers\OrderWhatsAppController;
 use App\Http\Controllers\BouquetCategoryController;
 use App\Http\Controllers\BouquetSizeController;
 use App\Http\Controllers\BouquetComponentController;
@@ -106,14 +101,6 @@ Route::middleware('auth')->group(function () {
 // Public Invoice Route (No Auth Required)
 Route::get('/i/{token}', [PublicInvoiceController::class, 'show'])->name('public.invoice');
 
-// Pemesanan & Penjualan Buket (khusus)
-// Hapus route manual berikut karena sudah digantikan oleh resource CRUD di bawah:
-// use App\Http\Controllers\BouquetOrderController;
-// use App\Http\Controllers\BouquetSaleController;
-Route::get('/bouquet/orders/create', [BouquetOrderController::class, 'create'])->name('bouquet.orders.create');
-// Route::post('/bouquet/orders', [BouquetOrderController::class, 'store'])->name('bouquet.orders.store');
-// Route::get('/bouquet/sales', [BouquetSaleController::class, 'create'])->name('bouquet.sales');
-// Route::post('/bouquet/sales', [BouquetSaleController::class, 'store'])->name('bouquet.sales.store');
 Route::get('/public/receipt/{public_code}', [PublicSaleController::class, 'show'])->name('sales.public_receipt');
 
 // Report Routes - Tanpa middleware, dapat diakses publik
@@ -186,8 +173,6 @@ Route::post('/test-upload', function(\Illuminate\Http\Request $request) {
 Route::post('/admin/public-orders/{id}/add-payment', [AdminPublicOrderController::class, 'addPayment'])->name('admin.public-orders.add-payment');
 
 // Route resource untuk Pesanan & Penjualan Buket
-Route::resource('bouquet/orders', BouquetOrderController::class, ['as' => 'bouquet']);
-Route::resource('bouquet/sales', BouquetSaleController::class, ['as' => 'bouquet']);
 Route::resource('bouquets', BouquetController::class);
 Route::resource('bouquet-categories', BouquetCategoryController::class);
 Route::resource('bouquet-sizes', BouquetSizeController::class);
