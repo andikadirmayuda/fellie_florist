@@ -5,8 +5,10 @@ use App\Http\Controllers\PublicFlowerController;
 use App\Http\Controllers\PublicOrderController;
 use App\Http\Controllers\PublicCheckoutController;
 use App\Http\Controllers\PublicCartController;
+use App\Http\Controllers\PublicBouquetController;
 
-Route::get('/bunga-ready', [PublicFlowerController::class, 'index'])->name('public.flowers');
+Route::get('/product-fellie', [PublicFlowerController::class, 'index'])->name('public.flowers');
+Route::get('/bouquet/{id}', [PublicBouquetController::class, 'detail'])->name('public.bouquet.detail');
 Route::post('/public-order', [PublicOrderController::class, 'store'])->name('public.order.store');
 
 // Edit public order (form & update)

@@ -3,19 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>🌸 Daftar Bunga Ready Stock Fellie Florist</title>
+    <title>🌸 Product Fellie Florist</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
-
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-
     <!-- Figtree Font -->
-    <link href="https://fonts.bunny.net/css?family=figtree:400,600,700" rel="stylesheet" />
-
-    <!-- Tailwind CSS CDN (pastikan sudah di-include) -->
+    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700" rel="stylesheet" />
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'sans': ['Figtree', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
     <style>
         body, .font-sans {
             font-family: 'Figtree', sans-serif;
@@ -26,300 +32,412 @@
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
+        .gradient-bg {
+            background: linear-gradient(135deg, #fdf2f8 0%, #ffffff 50%, #f0fdf4 100%);
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .card-hover:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+        }
     </style>
 </head>
-<body class="min-h-screen bg-dark text-black flex flex-col items-center py-10 px-2 font-sans">
 
-    
-    
-    <div class="max-w-4xl mx-auto text-center mb-10">
-        <h2 class="text-2xl sm:text-3xl font-semibold text-pink">
-            🌸Katalog & Stok Bunga🌸
-        </h2>
-        <h6 class="mt-2 text-sm sm:text-3xl font-semibold text-pink-600 bg-pink-200/50 backdrop-blur-sm px-4 py-1 inline-block rounded-md shadow-sm">
-            ~ Fellie Florist ~
-        </h6>
-        <br>             
-        <hr style="border: 0; border-top: 2px solid #fffffff6; width: 7%; margin: 8px auto;">
-        <p class="mt-1 text-sm text-gray-500 flex items-center justify-center gap-1">
-          <i class="bi bi-clock-history text-gray-400"></i>
-          Terakhir diperbarui: 
-          <span class="text-gray-800 font-medium">
-            {{ $lastUpdated ? \Carbon\Carbon::parse($lastUpdated)->translatedFormat('d F Y H:i') : '-' }}
-          </span>
-        </p>
-        <hr style="border: 0; border-top: 2px solid #ffffff; width: 10%; margin: 8px auto;">
-        <div class="flex flex-col sm:flex-row items-center justify-center gap-2 mt-4 mb-8 w-full max-w-2xl mx-auto">
-            <a href="{{ route('public.cart.index') }}"
-               class="min-w-[80px] max-w-[120px] bg-pink-500 hover:bg-pink-600 text-white font-bold px-2 py-1.5 rounded-md flex items-center justify-center text-xs shadow transition duration-200 focus:ring-2 focus:ring-pink-300 outline-none h-9 w-full sm:w-auto">
-                <i class="bi bi-cart3 mr-1 text-sm"></i>Keranjang
-            </a>
-            @if(session('last_public_order_code'))
-                <a href="{{ route('public.order.detail', ['public_code' => session('last_public_order_code')]) }}"
-                   class="min-w-[100px] max-w-[150px] bg-pink-500 hover:bg-pink-600 text-white font-bold px-2 py-1.5 rounded-md flex items-center justify-center text-xs shadow transition duration-200 focus:ring-2 focus:ring-pink-300 outline-none h-9 w-full sm:w-auto">
-                    <i class="bi bi-receipt mr-1 text-sm"></i>Lihat Pesanan
-                </a>
+<body class="min-h-screen gradient-bg text-black flex flex-col font-sans">
+    <!-- Header -->
+    <header class="w-full glass-effect border-b border-gray-100 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4">
+            <!-- Top Bar -->
+            <div class="flex items-center justify-between h-16">
+                <!-- Brand Section -->
+                <div class="flex items-center space-x-3">
+                    <a href="{{ route('public.flowers') }}" class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-rose-500 rounded-full flex items-center justify-center">
+                            <span class="text-white font-bold text-xl">F</span>
+                        </div>
+                        <div>
+                            <h1 class="text-lg font-bold text-gray-800">Fellie Florist</h1>
+                            <p class="text-xs text-gray-500">Premium Flower Shop</p>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Search Bar -->
+                <div class="flex-1 max-w-md mx-8">
+                    <div class="relative">
+                        <input type="text" placeholder="Cari bunga impian Anda..." 
+                            class="w-full h-10 pl-4 pr-10 text-sm bg-gray-50 border border-gray-200 rounded-full focus:outline-none focus:border-rose-300 focus:ring-1 focus:ring-rose-300">
+                        <button class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-rose-500">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex items-center space-x-4">
+                    <button class="text-gray-600 hover:text-rose-600 p-2 rounded-full hover:bg-rose-50 transition-all duration-200">
+                        <i class="bi bi-search text-xl"></i>
+                    </button>
+                    <a href="{{ route('public.cart.index') }}"
+                        class="text-gray-600 hover:text-rose-600 relative p-2 rounded-full hover:bg-rose-50 transition-all duration-200">
+                        <i class="bi bi-bag text-xl"></i>
+                        <span
+                            class="absolute -top-1 -right-1 w-5 h-5 bg-rose-500 text-white text-xs rounded-full flex items-center justify-center">3</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <div class="bg-white">
+        <div class="max-w-4xl mx-auto px-4 py-8 text-center">
+            <h2 class="text-3xl font-bold text-gray-800 mb-2">Koleksi Bunga Premium</h2>
+            <p class="text-gray-600 mb-2">Temukan bunga segar berkualitas tinggi untuk setiap momen spesial</p>
+            <p class="text-sm text-gray-500 flex items-center justify-center gap-2">
+                <i class="bi bi-clock text-rose-400"></i>
+                Terakhir diperbarui: {{ $lastUpdated ? \Carbon\Carbon::parse($lastUpdated)->translatedFormat('d F Y H:i') : '-' }}
+            </p>
+        </div>
+    </div>
+    <!-- Main Navigation -->
+    <nav class="flex justify-center space-x-8 py-4">
+        <a href="?tab=flowers"
+            class="relative px-4 py-2 text-sm font-semibold transition-all duration-200 {{ $activeTab === 'flowers' ? 'text-rose-600' : 'text-gray-500 hover:text-gray-700' }}">
+            🌸 Bunga
+            @if($activeTab === 'flowers')
+                <div class="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-rose-400 to-pink-500 rounded-full">
+                </div>
             @endif
-            <form method="GET" action="{{ route('public.order.track') }}"
-                  class="flex flex-row items-center gap-1 bg-pink-50 border border-pink-200 p-2 rounded-lg shadow-sm hover:shadow-md transition-all w-full max-w-xs sm:max-w-[340px]">
-                <label for="wa_number" class="text-xs font-semibold text-pink-700 flex items-center gap-1 mb-0">
-                    <i class="bi bi-search text-base"></i>
-                </label>
-                <input type="text" name="wa_number" id="wa_number"
-                       class="border border-pink-200 rounded px-3 py-1 text-xs w-full sm:w-[140px] focus:ring-2 focus:ring-pink-300 focus:outline-none"
-                       placeholder="08xxxx" required aria-label="Nomor WhatsApp">
-                <button type="submit"
-                        class="bg-pink-500 hover:bg-pink-600 text-white font-bold px-2 py-1 rounded-md flex items-center gap-1 text-xs focus:ring-2 focus:ring-pink-300 outline-none w-auto">
-                    <i class="bi bi-arrow-right-circle"></i>Lacak
-                </button>
-            </form>
+        </a>
+        <a href="?tab=bouquets"
+            class="relative px-4 py-2 text-sm font-semibold transition-all duration-200 {{ $activeTab === 'bouquets' ? 'text-rose-600' : 'text-gray-500 hover:text-gray-700' }}">
+            💐 Bouquet
+            @if($activeTab === 'bouquets')
+                <div class="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-rose-400 to-pink-500 rounded-full">
+                </div>
+            @endif
+        </a>
+    </nav>
         </div>
-        {{-- <span class="block w-full text-[10px] text-pink-700 mt-1 text-center leading-tight pb-1">Masukkan nomor WhatsApp yang digunakan saat memesan.</span> --}}
-    </div>
+    </header>
 
+    <!-- Main Content -->
+    <div class="w-full max-w-6xl mx-auto px-4 py-6">
+        <!-- Tab Navigation (Duplicate removed, using header navigation) -->
 
+        <!-- Search and Filters -->
+        <div class="mb-8 flex flex-col items-center">
+            <!-- Enhanced Search Bar -->
+            <div class="w-full max-w-2xl mb-4">
+                <div class="relative">
+                    <i class="bi bi-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg"></i>
+                    <input type="text" id="searchInput"
+                        placeholder="{{ $activeTab === 'flowers' ? 'Cari bunga impian Anda...' : 'Cari bouquet impian Anda...' }}"
+                        class="w-full pl-12 pr-4 py-4 text-lg border-2 border-rose-200 rounded-2xl focus:ring-2 focus:ring-rose-400 focus:border-rose-400 focus:outline-none shadow-lg transition-all duration-200 bg-white/90"
+                        oninput="filterItems()">
+                </div>
+            </div>
 
-
-    <!-- Filter & Search Bar (centered under last updated) -->
-    <div class="w-full max-w-6xl mx-auto mb-6 flex flex-col items-center">
-        <div class="flex flex-col sm:flex-row sm:items-center gap-3 mb-4 w-full max-w-md">
-            <input id="flowerSearch" type="text" placeholder="Cari bunga..." class="w-full border border-gray-200 rounded-sm px-4 py-2 text-sm focus:ring-2 focus:ring-pink-400 focus:outline-none shadow-sm transition" oninput="filterFlowers()">
+            <!-- Enhanced Filter Chips -->
+            @if($activeTab === 'flowers')
+                <div class="flex flex-wrap gap-3 justify-center">
+                    <button type="button"
+                        class="chip-btn px-6 py-3 rounded-full border-2 border-rose-200 bg-white text-gray-700 text-sm font-semibold shadow-md hover:shadow-lg hover:bg-rose-50 transition-all duration-200 active"
+                        data-category="" onclick="selectCategory(this)">
+                        <span class="mr-2">🌺</span>Semua
+                    </button>
+                    <button type="button"
+                        class="chip-btn px-6 py-3 rounded-full border-2 border-rose-200 bg-white text-gray-700 text-sm font-semibold shadow-md hover:shadow-lg hover:bg-rose-50 transition-all duration-200"
+                        data-category="Fresh Flowers" onclick="selectCategory(this)">
+                        <span class="mr-2">🌿</span>Fresh Flowers
+                    </button>
+                    <button type="button"
+                        class="chip-btn px-6 py-3 rounded-full border-2 border-rose-200 bg-white text-gray-700 text-sm font-semibold shadow-md hover:shadow-lg hover:bg-rose-50 transition-all duration-200"
+                        data-category="Daun" onclick="selectCategory(this)">
+                        <span class="mr-2">🍃</span>Daun
+                    </button>
+                </div>
+            @else
+                <div class="flex flex-wrap gap-3 justify-center">
+                    @foreach($bouquetSizes as $size)
+                        <button type="button"
+                            class="chip-btn px-6 py-3 rounded-full border-2 border-rose-200 bg-white text-gray-700 text-sm font-semibold shadow-md hover:shadow-lg hover:bg-rose-50 transition-all duration-200"
+                            data-size="{{ $size->id }}" onclick="selectSize(this)">
+                            <span class="mr-2">📏</span>{{ $size->name }}
+                        </button>
+                    @endforeach
+                </div>
+            @endif
         </div>
-        <div id="categoryChips" class="flex flex-wrap gap-2 justify-center mb-2"></div>
-    </div>
 
-        <div id="flowersGrid" class="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
-            @forelse($flowers as $flower)
-            <div class="flower-card relative group flex flex-col h-full" data-name="{{ strtolower($flower->name) }}" data-category="{{ $flower->category->name ?? 'lainnya' }}">
-                <div class="absolute -inset-1 bg-white/60 rounded-sm blur-xl opacity-70 group-hover:opacity-90 transition-all duration-300 z-0"></div>
-                <div class="relative z-10 bg-white/80 backdrop-blur-lg border border-gray-100 rounded-sm shadow-xl hover:shadow-2xl ring-1 ring-gray-100 transition-all duration-300 p-3 sm:p-4 md:p-6 flex flex-col h-full min-h-[340px] sm:min-h-[380px] md:min-h-[420px] w-full">
-                    <div class="relative h-28 sm:h-32 md:h-36 lg:h-40 w-full overflow-hidden flex items-center justify-center bg-black rounded-sm mb-3">
-                        @if($flower->image)
-                            <img src="{{ asset('storage/' . $flower->image) }}" alt="{{ $flower->name }}" class="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300 max-h-40 aspect-square">
-                        @else
-                            <div class="flex items-center justify-center w-full h-full text-gray-400 text-2xl xs:text-3xl sm:text-4xl">
-                                <i class="bi bi-flower2"></i>
+        <!-- Content Grid -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
+            @if($activeTab === 'flowers')
+                @forelse($flowers as $flower)
+                    <div class="flower-card group" data-category="{{ $flower->category->name ?? 'lainnya' }}"
+                        data-name="{{ strtolower($flower->name) }}">
+                        <div class="card-hover glass-effect rounded-2xl shadow-lg p-4 h-full flex flex-col overflow-hidden">
+                            <!-- Image -->
+                            <div class="relative h-40 mb-4 rounded-xl overflow-hidden">
+                                @if($flower->image)
+                                    <img src="{{ asset('storage/' . $flower->image) }}" alt="{{ $flower->name }}"
+                                        class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                                @else
+                                    <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-rose-100 to-pink-100 rounded-xl">
+                                        <i class="bi bi-flower1 text-3xl text-rose-400"></i>
+                                    </div>
+                                @endif
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                <!-- Wishlist Button -->
+                                <button class="absolute top-3 right-3 w-8 h-8 bg-white/90 hover:bg-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
+                                    <i class="bi bi-heart text-rose-500 text-sm"></i>
+                                </button>
                             </div>
-                        @endif
-                        <div class="absolute bottom-0 left-0 w-full bg-black bg-opacity-60 px-2 py-1 rounded-b-xl">
-                            <span class="text-white font-semibold text-xs sm:text-sm truncate block">
-                                <i class="bi bi-tag mr-1"></i>{{ $flower->name }}
-                            </span>
+
+                            <!-- Details -->
+                            <div class="flex-1 flex flex-col">
+                                <div class="flex items-start justify-between mb-2">
+                                    <h3 class="font-bold text-sm text-gray-800 line-clamp-2 flex-1">{{ $flower->name }}</h3>
+                                    <span class="ml-2 px-2 py-1 bg-rose-100 text-rose-700 rounded-full text-xs font-medium whitespace-nowrap">
+                                        {{ $flower->category->name ?? 'Umum' }}
+                                    </span>
+                                </div>
+
+                                <p class="text-xs text-gray-600 mb-3 line-clamp-2">{{ $flower->description }}</p>
+
+                                <!-- Price -->
+                                <div class="mb-3">
+                                    @php
+        $stemPrice = $flower->prices->firstWhere('type', 'per_tangkai');
+                                    @endphp
+                                    <div class="text-lg font-bold text-rose-600">
+                                        Rp {{ number_format($stemPrice->price ?? 0, 0, ',', '.') }}
+                                    </div>
+                                    <div class="text-xs text-gray-500">per tangkai</div>
+                                </div>
+
+                                <!-- Stock -->
+                                <div class="mb-4">
+                                    <div class="flex items-center justify-between text-xs mb-1">
+                                        <span class="text-gray-500">Stok:</span>
+                                        <span class="font-semibold {{ $flower->current_stock > 10 ? 'text-green-600' : ($flower->current_stock > 0 ? 'text-yellow-600' : 'text-red-600') }}">
+                                            {{ $flower->current_stock }} tangkai
+                                        </span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-1.5">
+                                        <div class="bg-gradient-to-r from-rose-400 to-pink-500 h-1.5 rounded-full transition-all duration-300" 
+                                             style="width: {{ min(($flower->current_stock / 50) * 100, 100) }}%"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Action Button -->
+                                <button onclick="openCartModal({{ $flower->id }})"
+                                    class="mt-auto w-full bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white text-xs font-semibold py-2.5 px-3 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-md hover:shadow-lg">
+                                    <i class="bi bi-cart-plus mr-1"></i>Tambah ke Keranjang
+                                </button>
+                            </div>
                         </div>
                     </div>
-                    <div class="flex-1 flex flex-col justify-between w-full mt-2">
-                        <div class="mb-2">
-                            <span class="block text-[11px] text-gray-500"><i class="bi bi-bookmark mr-1"></i>Kategori</span>
-                            <span class="block text-xs font-medium text-black">{{ $flower->category->name ?? '-' }}</span>
+                @empty
+                    <div class="col-span-full text-center py-12">
+                        <div class="w-20 h-20 bg-rose-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                            <i class="bi bi-flower1 text-2xl text-rose-400"></i>
                         </div>
-                        <div class="mb-2">
-                            <span class="block text-[11px] text-gray-500"><i class="bi bi-card-text mr-1"></i>Deskripsi</span>
-                            <span class="block text-xs text-black line-clamp-2 min-h-[32px]">{{ $flower->description ?: '-' }}</span>
-                        </div>
-                        <div class="mb-2">
-                            <span class="block text-[11px] text-gray-500"><i class="bi bi-currency-dollar mr-1"></i>Harga per Tangkai</span>
-                            <span class="block text-xs font-semibold text-green-700">
-                                @php
-                                    $stemPrice = $flower->prices->firstWhere('type', 'per_tangkai');
-                                @endphp
-                                @if($stemPrice)
-                                    Rp{{ number_format($stemPrice->price,0,',','.') }}
-                                @else
-                                    -
-                                @endif
-                            </span>
-                        </div>
-                        <div class="mb-2">
-                            <span class="block text-[11px] text-gray-500"><i class="bi bi-currency-exchange mr-1"></i>Harga per Ikat</span>
-                            <span class="block text-xs font-semibold text-blue-700">
-                                @php
-                                    $bundlePrice = $flower->prices->firstWhere('type', 'ikat_20')
-                                        ?? $flower->prices->firstWhere('type', 'ikat_10')
-                                        ?? $flower->prices->firstWhere('type', 'ikat_5');
-                                @endphp
-                                @if($bundlePrice)
-                                    Rp{{ number_format($bundlePrice->price,0,',','.') }}
-                                @else
-                                    -
-                                @endif
-                            </span>
-                        </div>
-                        <div class="flex items-center justify-between mt-auto">
-                            <span class="text-[11px] text-gray-500"><i class="bi bi-box2-heart mr-1"></i>Stok Tersedia</span>
-                            <span class="text-xs sm:text-sm font-bold text-black">{{ $flower->current_stock }} <span class="font-normal">Tangkai</span></span>
-                        </div>
-                        <button  class="mt-3 w-full bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 rounded transition"
-                        onclick="openCartModal({{ $flower->id }})">
-                        <i class="bi bi-cart-plus mr-1"></i>Tambah ke Keranjang</button>                
+                        <h3 class="text-lg font-semibold text-gray-600 mb-2">Tidak ada bunga yang tersedia saat ini</h3>
+                        <p class="text-gray-500 text-sm">Silakan coba lagi nanti atau hubungi kami untuk informasi lebih lanjut.</p>
                     </div>
-                </div>
-            </div>
-            @empty
-            <div class="col-span-full text-center text-gray-500 py-8">Tidak ada bunga ready stock.</div>
-            @endforelse
-        </div>
+                @endforelse
+            @else
+                @forelse($bouquets as $bouquet)
+                    <div class="bouquet-card group" data-name="{{ strtolower($bouquet->name) }}"
+                        data-sizes="{{ $bouquet->sizes->pluck('id')->join(',') }}">
+                        <div class="card-hover glass-effect rounded-2xl shadow-lg p-4 h-full flex flex-col overflow-hidden">
+                            <!-- Image -->
+                            <div class="relative h-40 mb-4 rounded-xl overflow-hidden">
+                                @if($bouquet->image)
+                                    <img src="{{ asset('storage/' . $bouquet->image) }}" alt="{{ $bouquet->name }}"
+                                        class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                                @else
+                                    <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-rose-100 to-pink-100 rounded-xl">
+                                        <i class="bi bi-flower3 text-3xl text-rose-400"></i>
+                                    </div>
+                                @endif
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                <!-- Wishlist Button -->
+                                <button class="absolute top-3 right-3 w-8 h-8 bg-white/90 hover:bg-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
+                                    <i class="bi bi-heart text-rose-500 text-sm"></i>
+                                </button>
+                            </div>
 
-    <!-- Modal Tahap 1: Data Pelanggan -->
-    <div id="orderModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
-        <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative">
-            <button onclick="closeOrderModal()" class="absolute top-2 right-2 text-gray-400 hover:text-black"><i class="bi bi-x-lg"></i></button>
-            <h2 class="text-lg font-bold mb-4">Form Pemesanan</h2>
-            <form id="orderStep1" onsubmit="return goToStep2(event)">
-                <input type="hidden" id="selectedFlowerId" name="flower_id">
-                <div class="mb-3">
-                    <label class="block text-xs font-semibold mb-1">Nama Pelanggan</label>
-                    <input type="text" name="customer_name" class="w-full border rounded px-3 py-2 text-sm" required>
-                </div>
-                <div class="mb-3">
-                    <label class="block text-xs font-semibold mb-1">No. WhatsApp</label>
-                    <input type="text" name="wa_number" class="w-full border rounded px-3 py-2 text-sm" placeholder="08xxxxxxxxxx" required>
-                </div>
-                <div class="mb-3">
-                    <label class="block text-xs font-semibold mb-1">Tanggal Diambil/Dikirim</label>
-                    <input type="date" name="pickup_date" class="w-full border rounded px-3 py-2 text-sm" required>
-                </div>
-                <div class="mb-3">
-                    <label class="block text-xs font-semibold mb-1">Waktu Ambil/Pengiriman</label>
-                    <input type="time" name="pickup_time" class="w-full border rounded px-3 py-2 text-sm" required>
-                </div>
-                <div class="mb-3">
-                    <label class="block text-xs font-semibold mb-1">Metode Pengiriman</label>
-                    <select name="delivery_method" class="w-full border rounded px-3 py-2 text-sm" required>
-                        <option value="Ambil Langsung">Ambil Langsung</option>
-                        <option value="GoSend">GoSend</option>
-                        <option value="Kurir Toko">Kurir Toko</option>
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label class="block text-xs font-semibold mb-1">Tujuan Pengiriman</label>
-                    <textarea name="destination" rows="3" class="w-full border rounded px-3 py-2 text-sm resize-y" placeholder="Alamat atau tujuan pengiriman" required></textarea>
-                </div>
-                <button type="submit" class="w-full bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 rounded mt-2">Lanjut Pilih Produk</button>
-            </form>
+                            <!-- Details -->
+                            <div class="flex-1 flex flex-col">
+                                <div class="flex items-start justify-between mb-2">
+                                    <h3 class="font-bold text-sm text-gray-800 line-clamp-2 flex-1">{{ $bouquet->name }}</h3>
+                                    <span class="ml-2 px-2 py-1 bg-rose-100 text-rose-700 rounded-full text-xs font-medium whitespace-nowrap">
+                                        {{ $bouquet->category->name ?? 'Bouquet' }}
+                                    </span>
+                                </div>
 
-            <!-- Step 2: Pilih Produk & Jumlah -->
-            <form id="orderStep2" class="hidden" onsubmit="return submitOrder(event)">
-                <h3 class="text-base font-semibold mb-2">Pilih Produk & Jumlah</h3>
-                <div id="orderItemsContainer"></div>
-                <button type="button" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 rounded mb-2" onclick="addOrderItemRow()">
-                    <i class="bi bi-plus-circle mr-1"></i>Tambah Produk
-                </button>
-                <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 rounded mt-2">Kirim Pesanan</button>
-            </form>
+                                <p class="text-xs text-gray-600 mb-3 line-clamp-2">{{ $bouquet->description }}</p>
+
+                                <!-- Sizes -->
+                                <div class="mb-3">
+                                    <span class="text-xs text-gray-500 block mb-1">Ukuran Tersedia:</span>
+                                    <div class="flex flex-wrap gap-1">
+                                        @foreach($bouquet->sizes as $size)
+                                            <span class="inline-block px-2 py-0.5 bg-gradient-to-r from-rose-100 to-pink-100 text-rose-700 rounded-full text-[10px] font-medium">
+                                                {{ $size->name }}
+                                            </span>
+                                        @endforeach
+                                    </div>
+                                </div>
+
+                                <!-- Price Range -->
+                                <div class="mb-4">
+                                    @php
+        $minPrice = $bouquet->prices->min('price');
+        $maxPrice = $bouquet->prices->max('price');
+                                    @endphp
+                                    <div class="text-lg font-bold text-rose-600">
+                                        @if($minPrice === $maxPrice)
+                                            Rp {{ number_format($minPrice, 0, ',', '.') }}
+                                        @else
+                                            Rp {{ number_format($minPrice, 0, ',', '.') }} - {{ number_format($maxPrice, 0, ',', '.') }}
+                                        @endif
+                                    </div>
+                                    <div class="text-xs text-gray-500">rentang harga</div>
+                                </div>
+
+                                <!-- Action Button -->
+                                <a href="{{ route('public.bouquet.detail', $bouquet->id) }}"
+                                    class="mt-auto w-full bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white text-xs font-semibold py-2.5 px-3 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-md hover:shadow-lg text-center block">
+                                    <i class="bi bi-eye mr-1"></i>Lihat Detail
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <div class="col-span-full text-center py-12">
+                        <div class="w-20 h-20 bg-rose-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                            <i class="bi bi-flower3 text-2xl text-rose-400"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-600 mb-2">Tidak ada bouquet yang tersedia saat ini</h3>
+                        <p class="text-gray-500 text-sm">Silakan coba lagi nanti atau hubungi kami untuk informasi lebih lanjut.</p>
+                    </div>
+                @endforelse
+            @endif
         </div>
     </div>
 
-
-<!-- Modal Tambah ke Keranjang -->
-<div id="cartModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
-    <div class="bg-white rounded-lg shadow-lg w-full max-w-xs p-6 relative">
-        <button onclick="closeCartModal()" class="absolute top-2 right-2 text-gray-400 hover:text-black"><i class="bi bi-x-lg"></i></button>
-        <h2 class="text-lg font-bold mb-4">Tambah ke Keranjang</h2>
-        <form id="cartAddForm" method="POST" action="{{ route('public.cart.add') }}">
-            @csrf
-            <input type="hidden" name="product_id" id="cartProductId">
-            <div class="mb-3">
-                <label class="block text-xs font-semibold mb-1">Tipe Harga</label>
-                <select name="price_type" id="cartPriceType" class="w-full border rounded px-3 py-2 text-sm" required></select>
+    <!-- Enhanced Footer -->
+    <footer class="bg-gradient-to-r from-rose-600 to-pink-600 text-white py-12 mt-16">
+        <div class="max-w-6xl mx-auto px-4 text-center">
+            <div class="w-16 h-16 bg-white/20 rounded-full mx-auto mb-4 flex items-center justify-center">
+                <span class="text-white font-bold text-2xl">F</span>
             </div>
-            <div class="mb-3">
-                <label class="block text-xs font-semibold mb-1">Jumlah</label>
-                <input type="number" name="quantity" id="cartQuantity" class="w-full border rounded px-3 py-2 text-sm" min="1" value="1" required>
+            <h3 class="text-2xl font-bold mb-2">Fellie Florist</h3>
+            <p class="text-rose-100 mb-4 max-w-2xl mx-auto">
+                Menghadirkan keindahan bunga segar berkualitas premium untuk setiap momen berharga dalam hidup Anda
+            </p>
+            <div class="flex justify-center space-x-6 mb-6">
+                <a href="#" class="text-rose-200 hover:text-white transition-colors">
+                    <i class="bi bi-instagram text-xl"></i>
+                </a>
+                <a href="#" class="text-rose-200 hover:text-white transition-colors">
+                    <i class="bi bi-facebook text-xl"></i>
+                </a>
+                <a href="#" class="text-rose-200 hover:text-white transition-colors">
+                    <i class="bi bi-whatsapp text-xl"></i>
+                </a>
             </div>
-            <div class="mb-3">
-                <label class="block text-xs font-semibold mb-1">Harga Satuan</label>
-                <input type="text" id="cartUnitPrice" class="w-full border rounded px-3 py-2 text-sm bg-gray-100" readonly>
-            </div>
-            <div class="mb-3">
-                <label class="block text-xs font-semibold mb-1">Total Harga</label>
-                <input type="text" id="cartTotalPrice" class="w-full border rounded px-3 py-2 text-sm bg-gray-100" readonly>
-            </div>
-            <button type="submit" class="w-full bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 rounded mt-2">Tambah ke Keranjang</button>
-        </form>
-    </div>
-</div>
+            <p class="text-rose-200 text-sm">© 2025 Fellie Florist. All rights reserved.</p>
+        </div>
+    </footer>
 
-<script>
-    // Data produk dari backend (untuk dropdown & filter)
-    const allFlowers = @json($flowers);
-    let selectedFlower = null;
+    <!-- Cart Modal -->
+    @include('public.partials.cart-modal')
 
-    // --- FILTER & SEARCH ---
-    // Ambil semua kategori unik
-    const categories = Array.from(new Set(allFlowers.map(f => f.category?.name || 'Lainnya')));
-    const categoryChips = document.getElementById('categoryChips');
-    let selectedCategory = '';
+    <script>
+        let selectedCategory = '';
+        let selectedSize = '';
 
-    function renderCategoryChips() {
-        let html = `<button type="button" class="chip-btn px-4 py-1 rounded-full border border-gray-300 bg-white text-gray-700 text-xs font-semibold shadow-sm hover:bg-pink-100 focus:bg-pink-200 focus:text-pink-700 transition" onclick="selectCategory('')">Semua</button>`;
-        categories.forEach(cat => {
-            html += `<button type="button" class="chip-btn px-4 py-1 rounded-full border border-gray-300 bg-white text-gray-700 text-xs font-semibold shadow-sm hover:bg-pink-100 focus:bg-pink-200 focus:text-pink-700 transition" onclick="selectCategory('${cat.replace(/'/g, '\'')}')">${cat}</button>`;
-        });
-        categoryChips.innerHTML = html;
-    }
-
-    function selectCategory(cat) {
-        selectedCategory = cat;
-        // Highlight chip
-        document.querySelectorAll('.chip-btn').forEach(btn => {
-            btn.classList.remove('bg-pink-500', 'text-white');
-            btn.classList.add('bg-white', 'text-gray-700');
-            if (btn.textContent === cat || (cat === '' && btn.textContent === 'Semua')) {
-                btn.classList.add('bg-pink-500', 'text-white');
-                btn.classList.remove('bg-white', 'text-gray-700');
+        function filterItems() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const activeTab = '{{ $activeTab }}';
+            
+            if (activeTab === 'flowers') {
+                document.querySelectorAll('.flower-card').forEach(card => {
+                    const name = card.getAttribute('data-name');
+                    const category = card.getAttribute('data-category');
+                    const matchSearch = name.includes(search);
+                    const matchCategory = !selectedCategory || category === selectedCategory;
+                    card.style.display = (matchSearch && matchCategory) ? '' : 'none';
+                });
+            } else {
+                document.querySelectorAll('.bouquet-card').forEach(card => {
+                    const name = card.getAttribute('data-name');
+                    const sizes = card.getAttribute('data-sizes').split(',');
+                    const matchSearch = name.includes(search);
+                    const matchSize = !selectedSize || sizes.includes(selectedSize);
+                    card.style.display = (matchSearch && matchSize) ? '' : 'none';
+                    
+                });
             }
-        });
-        filterFlowers();
-    }
+        }
 
-    function filterFlowers() {
-        const search = document.getElementById('flowerSearch').value.toLowerCase();
-        document.querySelectorAll('.flower-card').forEach(card => {
-            const name = card.getAttribute('data-name');
-            const category = card.getAttribute('data-category');
-            const matchSearch = name.includes(search);
-            const matchCategory = !selectedCategory || category === selectedCategory;
-            card.style.display = (matchSearch && matchCategory) ? '' : 'none';
-        });
-    }
+        function selectCategory(btn) {
+            selectedCategory = btn.getAttribute('data-category');
+            document.querySelectorAll('.chip-btn').forEach(button => {
+                button.classList.remove('bg-rose-500', 'text-white', 'border-rose-500');
+                button.classList.add('bg-white', 'text-gray-700', 'border-rose-200');
+            });
+            btn.classList.add('bg-rose-500', 'text-white', 'border-rose-500');
+            btn.classList.remove('bg-white', 'text-gray-700', 'border-rose-200');
+            filterItems();
+        }
 
-    // Render chips & set default
-    renderCategoryChips();
-    selectCategory('');
+        function selectSize(btn) {
+            selectedSize = btn.getAttribute('data-size');
+            document.querySelectorAll('.chip-btn').forEach(button => {
+                button.classList.remove('bg-rose-500', 'text-white', 'border-rose-500');
+                button.classList.add('bg-white', 'text-gray-700', 'border-rose-200');
+            });
+            btn.classList.add('bg-rose-500', 'text-white', 'border-rose-500');
+            btn.classList.remove('bg-white', 'text-gray-700', 'border-rose-200');
+            filterItems();
+        }
 
-    // --- CART MODAL ---
-    function openCartModal(flowerId) {
-        selectedFlower = allFlowers.find(f => f.id === flowerId);
-        if (!selectedFlower) return;
-        document.getElementById('cartModal').classList.remove('hidden');
-        document.getElementById('cartProductId').value = selectedFlower.id;
-        // Populate price type
-        const priceTypeSelect = document.getElementById('cartPriceType');
-        priceTypeSelect.innerHTML = '';
-        (selectedFlower.prices || []).forEach(p => {
-            const opt = document.createElement('option');
-            opt.value = p.type;
-            opt.textContent = `${p.type.replace('_',' ')} - Rp${Number(p.price).toLocaleString('id-ID')}`;
-            opt.setAttribute('data-price', p.price);
-            priceTypeSelect.appendChild(opt);
+        // Initialize the first category button as active
+        document.addEventListener('DOMContentLoaded', function () {
+            const firstCategoryBtn = document.querySelector('.chip-btn');
+            if (firstCategoryBtn) {
+                selectCategory(firstCategoryBtn);
+            }
+
+            // Enhanced interactions
+            const images = document.querySelectorAll('img');
+            images.forEach(img => {
+                img.addEventListener('load', function() {
+                    this.style.opacity = '1';
+                });
+            });
+
+            // Debounced search
+            let searchTimeout;
+            const searchInput = document.getElementById('searchInput');
+            searchInput.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(filterItems, 300);
+            });
         });
-        priceTypeSelect.selectedIndex = 0;
-        document.getElementById('cartQuantity').value = 1;
-        updateCartModalPrice();
-    }
-    function closeCartModal() {
-        document.getElementById('cartModal').classList.add('hidden');
-    }
-    document.getElementById('cartPriceType').addEventListener('change', updateCartModalPrice);
-    document.getElementById('cartQuantity').addEventListener('input', updateCartModalPrice);
-    function updateCartModalPrice() {
-        const priceTypeSelect = document.getElementById('cartPriceType');
-        const selectedOption = priceTypeSelect.options[priceTypeSelect.selectedIndex];
-        const unitPrice = selectedOption ? Number(selectedOption.getAttribute('data-price')) : 0;
-        const qty = Number(document.getElementById('cartQuantity').value) || 1;
-        document.getElementById('cartUnitPrice').value = unitPrice ? 'Rp' + unitPrice.toLocaleString('id-ID') : '-';
-        document.getElementById('cartTotalPrice').value = unitPrice ? 'Rp' + (unitPrice * qty).toLocaleString('id-ID') : '-';
-    }
-    // ...existing code modal order...
-</script>
+    </script>
+</body>
 </html>
