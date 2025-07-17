@@ -31,12 +31,45 @@ class BouquetComponentController extends Controller
     }
     public function index()
     {
-        $components = BouquetComponent::with(['bouquet', 'size', 'product'])
-            ->orderBy('bouquet_id')
-            ->orderBy('size_id')
-            ->paginate(10);
+        // Ambil unique bouquets terlebih dahulu
+        $bouquets = Bouquet::with(['category'])->get();
+        $bouquetGroups = [];
+        $categories = [];
 
-        return view('bouquet-components.index', compact('components'));
+        foreach ($bouquets as $bouquet) {
+            $categoryName = $bouquet->category->name ?? 'Uncategorized';
+            
+            // Simpan kategori unik
+            if (!in_array($categoryName, $categories)) {
+                $categories[] = $categoryName;
+            }
+
+            // Ambil semua komponen dan size untuk bouquet ini
+            $components = BouquetComponent::where('bouquet_id', $bouquet->id)
+                ->with(['size', 'product'])
+                ->get()
+                ->groupBy('size_id');
+
+            $sizes = [];
+            foreach ($components as $sizeId => $sizeComponents) {
+                $sizes[$sizeId] = [
+                    'size' => $sizeComponents->first()->size,
+                    'components' => $sizeComponents
+                ];
+            }
+
+            // Simpan ke group
+            $bouquetGroups[$bouquet->id] = [
+                'bouquet' => $bouquet,
+                'sizes' => $sizes
+            ];
+        }
+
+        // Sort categories dan tambah 'All'
+        sort($categories);
+        array_unshift($categories, 'All');
+
+        return view('bouquet-components.index', compact('bouquetGroups', 'categories'));
     }
 
     public function create()

@@ -30,34 +30,12 @@
                             title: 'Berhasil',
                             text: @json(session('success')),
                             confirmButtonColor: '#d946ef',
-                            });
-                        });
+                                                        });
+                                                    });
                 </script>
             @endif
 
-            @php
-                // Group komponen by bouquet, lalu by size
-                $bouquetGroups = [];
-                $categories = [];
-
-                foreach ($components as $component) {
-                    $bouquetId = $component->bouquet->id;
-                    $sizeId = $component->size->id;
-                    $categoryName = $component->bouquet->category->name ?? 'Uncategorized';
-
-                    $bouquetGroups[$bouquetId]['bouquet'] = $component->bouquet;
-                    $bouquetGroups[$bouquetId]['sizes'][$sizeId]['size'] = $component->size;
-                    $bouquetGroups[$bouquetId]['sizes'][$sizeId]['components'][] = $component;
-
-                    if (!in_array($categoryName, $categories)) {
-                        $categories[] = $categoryName;
-                    }
-                }
-
-                // Sort categories
-                sort($categories);
-                array_unshift($categories, 'All');
-            @endphp
+            {{-- Data sudah diproses di controller --}}
 
             <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg">
                 <!-- Category Tabs -->
@@ -72,22 +50,21 @@
                         @endforeach
                     </nav>
                     @foreach($categories as $category)
-                        <div class="category-content {{ $category !== 'All' ? 'hidden' : '' }}"
-                            data-category="{{ $category }}">
+                        <div class="category-content" data-category="{{ $category }}">
                             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 px-4 pb-8">
-                                @forelse($bouquetGroups as $group)
+                                @forelse($bouquetGroups as $bouquetId => $group)
                                     @php
-                                        $bouquetCategory = $group['bouquet']->category->name ?? 'Uncategorized';
+                                        $bouquet = $group['bouquet'];
+                                        $bouquetCategory = $bouquet->category->name ?? 'Uncategorized';
                                     @endphp
-
                                     @if($category === 'All' || $category === $bouquetCategory)
                                         <div
                                             class="group bg-white border border-gray-200 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden">
                                             <div class="grid md:grid-cols-2 gap-0">
                                                 <!-- Image Section -->
 
-            <div
-                class="relative bg-gradient-to-br from-pink-100 to-purple-100 flex items-center justify-center aspect-[4/5] w-full max-h-80 min-h-[320px] overflow-hidden">
+                                                <div
+                                                    class="relative bg-gradient-to-br from-pink-100 to-purple-100 flex items-center justify-center aspect-[4/5] w-full max-h-80 min-h-[320px] overflow-hidden">
                                                     @if($group['bouquet']->image)
                                                         <img src="{{ asset('storage/' . $group['bouquet']->image) }}"
                                                             alt="{{ $group['bouquet']->name }}"
@@ -103,6 +80,7 @@
                                                             <p class="text-pink-400 text-sm">{{ $group['bouquet']->name }}</p>
                                                         </div>
                                                     @endif
+
 
                                                     <!-- Category Badge -->
                                                     <div class="absolute top-4 left-4">
@@ -128,7 +106,8 @@
                                                     <!-- Header -->
                                                     <div class="mb-4">
                                                         <h3 class="text-xl font-bold text-gray-900 mb-2">
-                                                            {{ $group['bouquet']->name }}</h3>
+                                                            {{ $group['bouquet']->name }}
+                                                        </h3>
                                                         <div class="flex items-center gap-2">
                                                             <div class="flex items-center">
                                                                 @for($i = 1; $i <= 5; $i++)
@@ -268,105 +247,100 @@
                     @endforeach
                 </div>
 
-                <!-- Pagination -->
-                @if($components->hasPages())
-                    <div class="px-6 py-4 border-t border-gray-200">
-                        {{ $components->links() }}
-                    </div>
-                @endif
+                <!-- Pagination removed: all components are now displayed on one page. -->
             </div>
         </div>
     </div>
 
     <!-- JavaScript for Tabs -->
     <script>
-                                // Category Tab Functionality
-                                function showCategory(category) {
-                                    // Hide all category contents
-                                    document.querySelectorAll('.category-content').forEach(content => {
-                                        content.classList.add('hidden');
-                                    });
-                                // Show selected category content
-                                document.querySelectorAll(`[data-category="${category}"]`).forEach(content => {
+                            // Category Tab Functionality
+                            function showCategory(category) {
+                                // Hide all category contents
+                                document.querySelectorAll('.category-content').forEach(content => {
+                                    content.classList.add('hidden');
+                                });
+                            // Show selected category content
+                            document.querySelectorAll(`[data-category="${category}"]`).forEach(content => {
                 if (content.classList.contains('category-content')) {
-                                    content.classList.remove('hidden');
+                                content.classList.remove('hidden');
                     // Untuk setiap bouquet yang tampil, aktifkan size tab & content pertama
                     content.querySelectorAll('.size-tab-').forEach(tab => {
-                                    // Reset semua size tab
-                                    tab.classList.remove('active', 'bg-pink-600', 'text-white');
-                                tab.classList.add('bg-gray-100', 'text-gray-700', 'hover:bg-gray-200');
+                                // Reset semua size tab
+                                tab.classList.remove('active', 'bg-pink-600', 'text-white');
+                            tab.classList.add('bg-gray-100', 'text-gray-700', 'hover:bg-gray-200');
                     });
                     content.querySelectorAll('.size-content-').forEach(sc => {
-                                    sc.classList.add('hidden');
+                                sc.classList.add('hidden');
                     });
-                                // Untuk setiap bouquet, aktifkan size tab & content pertama
-                                content.querySelectorAll('[class*="size-tab-"]').forEach(function(tabGroup) {
+                            // Untuk setiap bouquet, aktifkan size tab & content pertama
+                            content.querySelectorAll('[class*="size-tab-"]').forEach(function(tabGroup) {
                         var bouquetId = tabGroup.getAttribute('data-bouquet');
-                                var firstTab = content.querySelector('.size-tab-' + bouquetId);
-                                var firstContent = content.querySelector('.size-content-' + bouquetId);
-                                if(firstTab) {
-                                    firstTab.classList.add('active', 'bg-pink-600', 'text-white');
-                                firstTab.classList.remove('bg-gray-100', 'text-gray-700', 'hover:bg-gray-200');
+                            var firstTab = content.querySelector('.size-tab-' + bouquetId);
+                            var firstContent = content.querySelector('.size-content-' + bouquetId);
+                            if(firstTab) {
+                                firstTab.classList.add('active', 'bg-pink-600', 'text-white');
+                            firstTab.classList.remove('bg-gray-100', 'text-gray-700', 'hover:bg-gray-200');
                         }
-                                if(firstContent) {
-                                    firstContent.classList.remove('hidden');
+                            if(firstContent) {
+                                firstContent.classList.remove('hidden');
                         }
                     });
                 }
             });
             // Update tab styles
             document.querySelectorAll('.category-tab').forEach(tab => {
-                                    tab.classList.remove('active', 'border-pink-500', 'text-pink-600');
-                                tab.classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+                                tab.classList.remove('active', 'border-pink-500', 'text-pink-600');
+                            tab.classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
             });
-                                document.querySelector(`[data-category="${category}"].category-tab`).classList.add('active', 'border-pink-500', 'text-pink-600');
-                                document.querySelector(`[data-category="${category}"].category-tab`).classList.remove('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+                            document.querySelector(`[data-category="${category}"].category-tab`).classList.add('active', 'border-pink-500', 'text-pink-600');
+                            document.querySelector(`[data-category="${category}"].category-tab`).classList.remove('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
         }
 
-                                // Size Tab Functionality
-                                function showSize(bouquetId, sizeId) {
+                            // Size Tab Functionality
+                            function showSize(bouquetId, sizeId) {
             // Cari kategori yang sedang aktif (tidak hidden)
             var activeCategory = document.querySelector('.category-content:not(.hidden)');
-                                if (!activeCategory) return;
-                                // Hide all size contents for this bouquet in active category
-                                activeCategory.querySelectorAll(`.size-content-${bouquetId}`).forEach(content => {
-                                    content.classList.add('hidden');
+                            if (!activeCategory) return;
+                            // Hide all size contents for this bouquet in active category
+                            activeCategory.querySelectorAll(`.size-content-${bouquetId}`).forEach(content => {
+                                content.classList.add('hidden');
             });
-                                // Show selected size content in active category
-                                var showContent = activeCategory.querySelector(`[data-bouquet="${bouquetId}"][data-size="${sizeId}"].size-content`);
-                                if (showContent) showContent.classList.remove('hidden');
-                                // Update size tab styles in active category
-                                activeCategory.querySelectorAll(`.size-tab-${bouquetId}`).forEach(tab => {
-                                    tab.classList.remove('active', 'bg-pink-600', 'text-white');
-                                tab.classList.add('bg-gray-100', 'text-gray-700', 'hover:bg-gray-200');
+                            // Show selected size content in active category
+                            var showContent = activeCategory.querySelector(`[data-bouquet="${bouquetId}"][data-size="${sizeId}"].size-content`);
+                            if (showContent) showContent.classList.remove('hidden');
+                            // Update size tab styles in active category
+                            activeCategory.querySelectorAll(`.size-tab-${bouquetId}`).forEach(tab => {
+                                tab.classList.remove('active', 'bg-pink-600', 'text-white');
+                            tab.classList.add('bg-gray-100', 'text-gray-700', 'hover:bg-gray-200');
             });
-                                var showTab = activeCategory.querySelector(`[data-bouquet="${bouquetId}"][data-size="${sizeId}"].size-tab`);
-                                if (showTab) {
-                                    showTab.classList.add('active', 'bg-pink-600', 'text-white');
-                                showTab.classList.remove('bg-gray-100', 'text-gray-700', 'hover:bg-gray-200');
+                            var showTab = activeCategory.querySelector(`[data-bouquet="${bouquetId}"][data-size="${sizeId}"].size-tab`);
+                            if (showTab) {
+                                showTab.classList.add('active', 'bg-pink-600', 'text-white');
+                            showTab.classList.remove('bg-gray-100', 'text-gray-700', 'hover:bg-gray-200');
             }
         }
 
-                                // Initialize tabs on page load
-                                document.addEventListener('DOMContentLoaded', function() {
-                                    // Set initial category tab style
-                                    document.querySelector('.category-tab.active').classList.add('border-pink-500', 'text-pink-600');
-                                document.querySelector('.category-tab.active').classList.remove('border-transparent', 'text-gray-500');
+                            // Initialize tabs on page load
+                            document.addEventListener('DOMContentLoaded', function() {
+                                // Set initial category tab style
+                                document.querySelector('.category-tab.active').classList.add('border-pink-500', 'text-pink-600');
+                            document.querySelector('.category-tab.active').classList.remove('border-transparent', 'text-gray-500');
 
             // Set initial size tab styles
             document.querySelectorAll('.size-tab.active').forEach(tab => {
-                                    tab.classList.add('bg-pink-600', 'text-white');
-                                tab.classList.remove('bg-gray-100', 'text-gray-700');
+                                tab.classList.add('bg-pink-600', 'text-white');
+                            tab.classList.remove('bg-gray-100', 'text-gray-700');
             });
 
             // Set non-active size tab styles
             document.querySelectorAll('.size-tab:not(.active)').forEach(tab => {
-                                    tab.classList.add('bg-gray-100', 'text-gray-700', 'hover:bg-gray-200');
+                                tab.classList.add('bg-gray-100', 'text-gray-700', 'hover:bg-gray-200');
             });
 
             // Set non-active category tab styles
             document.querySelectorAll('.category-tab:not(.active)').forEach(tab => {
-                                    tab.classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+                                tab.classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
             });
         });
     </script>
