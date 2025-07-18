@@ -82,6 +82,11 @@
 
                 <!-- Action Buttons -->
                 <div class="flex items-center space-x-4">
+                    <a href="{{ route('public.order.track') }}"
+                        class="text-gray-600 hover:text-rose-600 p-2 rounded-full hover:bg-rose-50 transition-all duration-200"
+                        title="Lacak Pesanan">
+                        <i class="bi bi-truck text-xl"></i>
+                    </a>
                     @if(session('last_public_order_code'))
                         <a href="{{ route('public.order.detail', ['public_code' => session('last_public_order_code')]) }}"
                             class="text-gray-600 hover:text-rose-600 p-2 rounded-full hover:bg-rose-50 transition-all duration-200"
@@ -92,8 +97,8 @@
                     <a href="{{ route('public.cart.index') }}"
                         class="text-gray-600 hover:text-rose-600 relative p-2 rounded-full hover:bg-rose-50 transition-all duration-200">
                         <i class="bi bi-bag text-xl"></i>
-                        <span
-                            class="absolute -top-1 -right-1 w-5 h-5 bg-rose-500 text-white text-xs rounded-full flex items-center justify-center">3</span>
+                        {{-- <span --}}
+                            {{-- class="absolute -top-1 -right-1 w-5 h-5 bg-rose-500 text-white text-xs rounded-full flex items-center justify-center"></span> --}}
                     </a>
                 </div>
             </div>
