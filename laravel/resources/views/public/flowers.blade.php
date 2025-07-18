@@ -82,9 +82,13 @@
 
                 <!-- Action Buttons -->
                 <div class="flex items-center space-x-4">
-                    <button class="text-gray-600 hover:text-rose-600 p-2 rounded-full hover:bg-rose-50 transition-all duration-200">
-                        <i class="bi bi-search text-xl"></i>
-                    </button>
+                    @if(session('last_public_order_code'))
+                        <a href="{{ route('public.order.detail', ['public_code' => session('last_public_order_code')]) }}"
+                            class="text-gray-600 hover:text-rose-600 p-2 rounded-full hover:bg-rose-50 transition-all duration-200"
+                            title="Lihat Detail Pesanan">
+                            <i class="bi bi-receipt text-xl"></i>
+                        </a>
+                    @endif
                     <a href="{{ route('public.cart.index') }}"
                         class="text-gray-600 hover:text-rose-600 relative p-2 rounded-full hover:bg-rose-50 transition-all duration-200">
                         <i class="bi bi-bag text-xl"></i>
