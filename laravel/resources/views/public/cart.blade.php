@@ -226,8 +226,7 @@
                 <!-- Tombol Aksi -->
                 <div class="w-full flex flex-col md:flex-row gap-4 mt-8 justify-center items-center">
                     <a href="/product-fellie"
-                        class="w-full md:w-auto bg-white hover:bg-pink-50 text-pink-600 font-semibold py-3 px-6 rounded shadow border border-pink-200 transition text-center">Kembali
-                        Ready Stock</a>
+                        class="w-full md:w-auto bg-white hover:bg-pink-50 text-pink-600 font-semibold py-3 px-6 rounded shadow border border-pink-200 transition text-center">Kembali</a>
                     <form method="POST" action="{{ route('public.cart.clear') }}" class="w-full md:w-auto">
                         @csrf
                         <button type="submit"
@@ -236,8 +235,7 @@
                     </form>
                     <form method="GET" action="{{ route('public.checkout') }}" class="w-full md:w-auto">
                         <button type="submit"
-                            class="w-full md:w-auto bg-pink-600 hover:bg-pink-700 text-white font-semibold py-3 px-6 rounded shadow border border-pink-700 transition">Selesaikan
-                            Pembayaran</button>
+                            class="w-full md:w-auto bg-pink-600 hover:bg-pink-700 text-white font-semibold py-3 px-6 rounded shadow border border-pink-700 transition">Checkout</button>
                     </form>
                 </div>
             </div>

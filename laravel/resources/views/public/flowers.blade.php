@@ -60,7 +60,8 @@
                 <div class="flex items-center space-x-3">
                     <a href="{{ route('public.flowers') }}" class="flex items-center space-x-3">
                         <div class="w-10 h-10 bg-rose-500 rounded-full flex items-center justify-center">
-                            <span class="text-white font-bold text-xl">F</span>
+                            {{-- <span class="text-white font-bold text-xl">F</span> --}}
+                            <img src="{{ asset('logo-fellie-02.png') }}" alt="Logo" class="brand-logo rounded-full w-12 h-12">
                         </div>
                         <div>
                             <h1 class="text-lg font-bold text-gray-800">Fellie Florist</h1>
@@ -350,20 +351,23 @@
     <footer class="bg-gradient-to-r from-rose-600 to-pink-600 text-white py-12 mt-16">
         <div class="max-w-6xl mx-auto px-4 text-center">
             <div class="w-16 h-16 bg-white/20 rounded-full mx-auto mb-4 flex items-center justify-center">
-                <span class="text-white font-bold text-2xl">F</span>
+                {{-- <span class="text-white font-bold text-2xl">F</span> --}}
+                <img src="{{ asset('logo-fellie-02.png') }}" alt="Logo" class="brand-logo rounded-full w-12 h-12">
             </div>
             <h3 class="text-2xl font-bold mb-2">Fellie Florist</h3>
             <p class="text-rose-100 mb-4 max-w-2xl mx-auto">
                 Menghadirkan keindahan bunga segar berkualitas premium untuk setiap momen berharga dalam hidup Anda
             </p>
             <div class="flex justify-center space-x-6 mb-6">
-                <a href="#" class="text-rose-200 hover:text-white transition-colors">
+                <a href="https://www.instagram.com/fellieflorist/" class="text-rose-200 hover:text-white transition-colors">
                     <i class="bi bi-instagram text-xl"></i>
                 </a>
-                <a href="#" class="text-rose-200 hover:text-white transition-colors">
-                    <i class="bi bi-facebook text-xl"></i>
+                <a href="https://www.tiktok.com/@fellieflorist" class="text-rose-200 hover:text-white transition-colors" target="_blank"
+                    rel="noopener noreferrer">
+                    <i class="bi bi-tiktok text-xl"></i>
                 </a>
-                <a href="#" class="text-rose-200 hover:text-white transition-colors">
+                <a href="https://wa.me/6282177929879?text=Halo%20Fellie%20!" class="text-rose-200 hover:text-white transition-colors"
+                    target="_blank" rel="noopener noreferrer">
                     <i class="bi bi-whatsapp text-xl"></i>
                 </a>
             </div>
