@@ -8,6 +8,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\CartController;
 use App\Http\Controllers\PublicInvoiceController;
 use App\Http\Controllers\OrderHistoryController;
 use App\Http\Controllers\ArchiveSettingController;
@@ -23,7 +24,15 @@ use App\Http\Controllers\BouquetComponentController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return redirect()->route('login');
+    return redirect()->route('public.flowers');
+});
+
+// Cart Routes
+Route::prefix('cart')->group(function () {
+    Route::post('/add/{id}', [CartController::class, 'add'])->name('cart.add');
+    Route::get('/items', [CartController::class, 'getItems'])->name('cart.items');
+    Route::post('/update/{id}', [CartController::class, 'updateQuantity'])->name('cart.update');
+    Route::post('/remove/{id}', [CartController::class, 'remove'])->name('cart.remove');
 });
 
 Route::get('/dashboard', [DashboardController::class, 'index'])

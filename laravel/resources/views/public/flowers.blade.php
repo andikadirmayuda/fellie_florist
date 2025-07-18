@@ -50,9 +50,41 @@
     </style>
 </head>
 
-<body class="min-h-screen gradient-bg text-black flex flex-col font-sans">
+<body class="min-h-screen gradient-bg text-black flex flex-col font-sans overflow-x-hidden">
+    <!-- Side Cart Panel -->
+    <div id="sideCart" class="fixed right-0 top-0 h-full w-80 bg-white shadow-2xl transform translate-x-full transition-transform duration-300 z-50">
+        <div class="h-full flex flex-col">
+            <!-- Cart Header -->
+            <div class="p-4 border-b border-gray-200 flex items-center justify-between bg-gradient-to-r from-rose-50 to-pink-50">
+                <h3 class="text-lg font-bold text-gray-800 flex items-center">
+                    <i class="bi bi-bag mr-2"></i> Keranjang Belanja
+                </h3>
+                <button onclick="toggleCart()" class="text-gray-500 hover:text-gray-700">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            
+            <!-- Cart Items -->
+            <div class="flex-1 overflow-y-auto p-4" id="cartItems">
+                <!-- Cart items will be dynamically loaded here -->
+            </div>
+            
+            <!-- Cart Footer -->
+            <div class="border-t border-gray-200 p-4 bg-white">
+                <div class="flex justify-between mb-4">
+                    <span class="font-semibold">Total:</span>
+                    <span class="font-bold text-rose-600" id="cartTotal">Rp 0</span>
+                </div>
+                <a href="{{ route('public.cart.index') }}" 
+                   class="block w-full bg-gradient-to-r from-rose-500 to-pink-500 text-white text-center py-3 rounded-xl font-semibold hover:from-rose-600 hover:to-pink-600 transition-all duration-200">
+                    Lanjut ke Checkout
+                </a>
+            </div>
+        </div>
+    </div>
+
     <!-- Header -->
-    <header class="w-full glass-effect border-b border-gray-100 sticky top-0 z-50">
+    <header class="w-full glass-effect border-b border-gray-100 sticky top-0 z-40">
         <div class="max-w-7xl mx-auto px-4">
             <!-- Top Bar -->
             <div class="flex items-center justify-between h-16">
@@ -65,13 +97,13 @@
                         </div>
                         <div>
                             <h1 class="text-lg font-bold text-gray-800">Fellie Florist</h1>
-                            <p class="text-xs text-gray-500">Premium Flower Shop</p>
+                            <p class="text-xs text-gray-500">Supplier Bunga</p>
                         </div>
                     </a>
                 </div>
 
                 <!-- Search Bar -->
-                <div class="flex-1 max-w-md mx-8">
+                {{-- <div class="flex-1 max-w-md mx-8">
                     <div class="relative">
                         <input type="text" placeholder="Cari bunga impian Anda..." 
                             class="w-full h-10 pl-4 pr-10 text-sm bg-gray-50 border border-gray-200 rounded-full focus:outline-none focus:border-rose-300 focus:ring-1 focus:ring-rose-300">
@@ -79,7 +111,7 @@
                             <i class="bi bi-search"></i>
                         </button>
                     </div>
-                </div>
+                </div> --}}
 
                 <!-- Action Buttons -->
                 <div class="flex items-center space-x-4">
@@ -95,12 +127,13 @@
                             <i class="bi bi-receipt text-xl"></i>
                         </a>
                     @endif
-                    <a href="{{ route('public.cart.index') }}"
-                        class="text-gray-600 hover:text-rose-600 relative p-2 rounded-full hover:bg-rose-50 transition-all duration-200">
+                    <button onclick="toggleCart()"
+                        class="text-gray-600 hover:text-rose-600 relative p-2 rounded-full hover:bg-rose-50 transition-all duration-200"
+                        title="Keranjang Belanja">
                         <i class="bi bi-bag text-xl"></i>
-                        {{-- <span --}}
-                            {{-- class="absolute -top-1 -right-1 w-5 h-5 bg-rose-500 text-white text-xs rounded-full flex items-center justify-center"></span> --}}
-                    </a>
+                        <span id="cartBadge"
+                            class="absolute -top-1 -right-1 w-5 h-5 bg-rose-500 text-white text-xs rounded-full flex items-center justify-center hidden">0</span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -249,7 +282,7 @@
                                 </div>
 
                                 <!-- Action Button -->
-                                <button onclick="openCartModal({{ $flower->id }})"
+                                <button onclick="addToCart({{ $flower->id }})"
                                     class="mt-auto w-full bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white text-xs font-semibold py-2.5 px-3 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-md hover:shadow-lg">
                                     <i class="bi bi-cart-plus mr-1"></i>Tambah ke Keranjang
                                 </button>
@@ -381,6 +414,127 @@
     <script>
         let selectedCategory = '';
         let selectedSize = '';
+
+        function toggleCart() {
+            const cart = document.getElementById('sideCart');
+            cart.classList.toggle('translate-x-full');
+            
+            // Add overlay when cart is open
+            let overlay = document.getElementById('cartOverlay');
+            if (!overlay) {
+                overlay = document.createElement('div');
+                overlay.id = 'cartOverlay';
+                overlay.className = 'fixed inset-0 bg-black bg-opacity-50 z-40 transition-opacity duration-300';
+                overlay.onclick = toggleCart;
+                document.body.appendChild(overlay);
+            }
+            
+            if (cart.classList.contains('translate-x-full')) {
+                overlay.classList.add('opacity-0');
+                setTimeout(() => overlay.remove(), 300);
+            } else {
+                overlay.classList.remove('opacity-0');
+            }
+        }
+
+        function addToCart(flowerId) {
+            // Call your backend API to add item to cart
+            fetch(`/cart/add/${flowerId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateCart();
+                    toggleCart(); // Show the cart after adding item
+                }
+            });
+        }
+
+        function updateCart() {
+            fetch('/cart/items')
+            .then(response => response.json())
+            .then(data => {
+                const cartItemsContainer = document.getElementById('cartItems');
+                const cartBadge = document.getElementById('cartBadge');
+                const cartTotal = document.getElementById('cartTotal');
+                
+                if (data.items.length === 0) {
+                    cartItemsContainer.innerHTML = `
+                        <div class="flex flex-col items-center justify-center h-full text-gray-500">
+                            <i class="bi bi-bag-x text-5xl mb-2"></i>
+                            <p>Keranjang belanja kosong</p>
+                        </div>
+                    `;
+                    cartBadge.classList.add('hidden');
+                    cartTotal.textContent = 'Rp 0';
+                    return;
+                }
+
+                // Update cart badge
+                cartBadge.classList.remove('hidden');
+                cartBadge.textContent = data.items.length;
+
+                // Render cart items
+                cartItemsContainer.innerHTML = data.items.map(item => `
+                    <div class="flex items-start space-x-4 mb-4 pb-4 border-b border-gray-100">
+                        <img src="${item.image}" alt="${item.name}" class="w-20 h-20 object-cover rounded-lg">
+                        <div class="flex-1">
+                            <h4 class="font-semibold text-gray-800">${item.name}</h4>
+                            <p class="text-sm text-gray-500">${item.quantity} x Rp ${item.price.toLocaleString()}</p>
+                            <div class="flex items-center space-x-2 mt-2">
+                                <button onclick="updateQuantity(${item.id}, -1)" class="text-gray-500 hover:text-rose-600">-</button>
+                                <span class="text-sm font-medium">${item.quantity}</span>
+                                <button onclick="updateQuantity(${item.id}, 1)" class="text-gray-500 hover:text-rose-600">+</button>
+                            </div>
+                        </div>
+                        <button onclick="removeFromCart(${item.id})" class="text-gray-400 hover:text-red-500">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                `).join('');
+
+                // Update total
+                cartTotal.textContent = `Rp ${data.total.toLocaleString()}`;
+            });
+        }
+
+        function updateQuantity(itemId, change) {
+            fetch(`/cart/update/${itemId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify({ quantity_change: change })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateCart();
+                }
+            });
+        }
+
+        function removeFromCart(itemId) {
+            fetch(`/cart/remove/${itemId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateCart();
+                }
+            });
+        }
 
         function filterItems() {
             const search = document.getElementById('searchInput').value.toLowerCase();
