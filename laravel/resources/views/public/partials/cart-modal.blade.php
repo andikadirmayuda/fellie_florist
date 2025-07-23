@@ -1,90 +1,53 @@
-<!-- Cart Modal -->
-<div id="cartModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
-    <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-        <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-semibold text-gray-900">Tambah ke Keranjang</h3>
-            <button onclick="closeCartModal()" class="text-gray-400 hover:text-gray-500">
-                <i class="bi bi-x-lg"></i>
-            </button>
+<!-- Modal Pilih Harga Produk -->
+<div id="cartPriceModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
+    <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 relative">
+        <button onclick="closeCartPriceModal()" class="absolute top-3 right-3 text-gray-400 hover:text-rose-500">
+            <i class="bi bi-x-lg"></i>
+        </button>
+        <h3 class="text-lg font-bold mb-4 text-gray-800 flex items-center">
+            <i class="bi bi-tag mr-2"></i> Pilih Harga Produk
+        </h3>
+        <div id="modalPriceOptions">
+            <!-- Daftar harga akan diisi via JS -->
         </div>
-
-        <form id="addToCartForm" action="{{ route('public.cart.add') }}" method="POST" class="space-y-4">
-            @csrf
-            <input type="hidden" name="product_id" id="cartProductId">
-
-            <!-- Quantity Input -->
-            <div>
-                <label for="quantity" class="block text-sm font-medium text-gray-700 mb-1">Jumlah (Tangkai)</label>
-                <div class="flex items-center gap-2">
-                    <button type="button" onclick="updateQuantity(-1)"
-                        class="p-2 bg-gray-100 rounded-lg hover:bg-gray-200">
-                        <i class="bi bi-dash"></i>
-                    </button>
-                    <input type="number" id="quantity" name="quantity" value="1" min="1"
-                        class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-pink-500 focus:border-pink-500 sm:text-sm"
-                        onchange="validateQuantity(this)">
-                    <button type="button" onclick="updateQuantity(1)"
-                        class="p-2 bg-gray-100 rounded-lg hover:bg-gray-200">
-                        <i class="bi bi-plus"></i>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Note Input -->
-            <div>
-                <label for="note" class="block text-sm font-medium text-gray-700 mb-1">Catatan (Opsional)</label>
-                <textarea id="note" name="note" rows="2"
-                    class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-pink-500 focus:border-pink-500 sm:text-sm"
-                    placeholder="Tambahkan catatan khusus..."></textarea>
-            </div>
-
-            <!-- Submit Button -->
-            <div class="flex justify-end gap-2">
-                <button type="button" onclick="closeCartModal()"
-                    class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md">
-                    Batal
-                </button>
-                <button type="submit"
-                    class="px-4 py-2 text-sm font-medium text-white bg-pink-600 hover:bg-pink-700 rounded-md">
-                    Tambah ke Keranjang
-                </button>
-            </div>
-        </form>
+        <div class="mt-6 flex justify-end gap-2">
+            <button onclick="closeCartPriceModal()"
+                class="px-4 py-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200">Batal</button>
+            <button id="modalAddToCartBtn"
+                class="px-4 py-2 rounded-lg bg-gradient-to-r from-rose-500 to-pink-500 text-white font-semibold hover:from-rose-600 hover:to-pink-600"
+                disabled>Tambah ke Keranjang</button>
+        </div>
     </div>
 </div>
-
 <script>
-    let selectedFlower = null;
-
-    function openCartModal(flowerId) {
-        document.getElementById('cartProductId').value = flowerId;
-        document.getElementById('cartModal').classList.remove('hidden');
+    let selectedPriceId = null;
+    function openCartPriceModal(flowerId, prices) {
+        const modal = document.getElementById('cartPriceModal');
+        const optionsDiv = document.getElementById('modalPriceOptions');
+        const addBtn = document.getElementById('modalAddToCartBtn');
+        selectedPriceId = null;
+        addBtn.disabled = true;
+        // Render price options
+        optionsDiv.innerHTML = prices.map(price => `
+            <label class="flex items-center gap-3 mb-2 cursor-pointer">
+                <input type="radio" name="priceOption" value="${price.type}" onchange="selectPriceOption('${price.type}')">
+                <span class="font-semibold text-gray-700">${price.label}</span>
+                <span class="ml-auto text-rose-600 font-bold">Rp ${price.price.toLocaleString()}</span>
+            </label>
+        `).join('');
+        // Show modal
+        modal.classList.remove('hidden');
+        // Set add to cart action
+        addBtn.onclick = function () {
+            if (selectedPriceId) addToCartWithPrice(flowerId, selectedPriceId);
+        };
     }
-
-    function closeCartModal() {
-        document.getElementById('cartModal').classList.add('hidden');
-        document.getElementById('quantity').value = 1;
-        document.getElementById('note').value = '';
+    function closeCartPriceModal() {
+        document.getElementById('cartPriceModal').classList.add('hidden');
     }
-
-    function updateQuantity(change) {
-        const input = document.getElementById('quantity');
-        const newValue = parseInt(input.value) + change;
-        if (newValue >= 1) {
-            input.value = newValue;
-        }
+    function selectPriceOption(priceId) {
+        selectedPriceId = priceId;
+        document.getElementById('modalAddToCartBtn').disabled = false;
     }
-
-    function validateQuantity(input) {
-        if (input.value < 1) {
-            input.value = 1;
-        }
-    }
-
-    // Close modal when clicking outside
-    document.getElementById('cartModal').addEventListener('click', function (e) {
-        if (e.target === this) {
-            closeCartModal();
-        }
-    });
+    // Tidak perlu fungsi addToCartWithPrice lokal, gunakan yang global dari flowers.blade.php
 </script>

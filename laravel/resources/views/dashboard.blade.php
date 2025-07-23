@@ -32,16 +32,17 @@
                     <span class="text-3xl font-bold text-black">{{ $totalProducts ?? 0 }}</span>
                     <span class="text-gray-500 mt-2">Produk</span>
                 </div>
-                <div
-                    class="bg-white shadow-lg rounded-sm p-8 flex flex-col items-center min-h-[140px] border border-gray-100 transition hover:shadow-xl">
+                <div class="bg-white shadow-lg rounded-sm p-8 flex flex-col items-center min-h-[140px] border border-gray-100
+                transition hover:shadow-xl">
                     <span class="mb-2"><i class="bi bi-cart text-4xl text-black/60"></i></span>
                     <span class="text-3xl font-bold text-black">{{ $totalOrders ?? 0 }}</span>
-                    <span class="text-gray-500 mt-2">Pesanan</span>
+                    <span class="text-gray-500 mt-2">Pesanan Online</span>
                 </div>
                 <div
                     class="bg-white shadow-lg rounded-sm p-8 flex flex-col items-center min-h-[140px] border border-gray-100 transition hover:shadow-xl">
                     <span class="mb-2"><i class="bi bi-cash-stack text-4xl text-black/60"></i></span>
-                    <span class="text-3xl font-bold text-black">{{ number_format($totalSales ?? 0, 0, ',', '.') }}</span>
+                    <span
+                        class="text-3xl font-bold text-black">{{ number_format($totalSales ?? 0, 0, ',', '.') }}</span>
                     <span class="text-gray-500 mt-2">Penjualan</span>
                 </div>
             </div>
@@ -55,7 +56,7 @@
                 </div>
                 <div class="bg-white rounded-sm shadow-lg flex flex-col p-8 border border-gray-100">
                     <h3 class="font-semibold text-lg text-black mb-6 flex items-center"><i
-                            class="bi bi-pie-chart mr-2 text-black/60"></i> Popular Categories</h3>
+                            class="bi bi-pie-chart mr-2 text-black/60"></i> Order Performance</h3>
                     <canvas id="ordersChart" class="w-full h-40"></canvas>
                 </div>
             </div>
@@ -70,16 +71,19 @@
                             @if(is_object($product))
                                 <li class="text-red-600 flex items-center"><i
                                         class="bi bi-exclamation-triangle mr-2 text-black/60"></i>Stok menipis:
-                                    {{ data_get($product, 'name', '-') }} ({{ data_get($product, 'stock', 0) }})</li>
+                                    {{ data_get($product, 'name', '-') }} ({{ data_get($product, 'stock', 0) }})
+                                </li>
                             @endif
                         @empty
                             <li class="text-gray-500 flex items-center"><i
-                                    class="bi bi-info-circle mr-2 text-black/60"></i>Tidak ada notifikasi stok menipis.</li>
+                                    class="bi bi-info-circle mr-2 text-black/60"></i>Tidak
+                                ada notifikasi stok menipis.</li>
                         @endforelse
                         @forelse($recentOrders ?? [] as $order)
                             @if(is_object($order))
                                 <li class="text-blue-700 flex items-center"><i
-                                        class="bi bi-cart-plus mr-2 text-black/60"></i>Pesanan baru:
+                                        class="bi bi-cart-plus mr-2 text-black/60"></i>Pesanan
+                                    baru:
                                     #{{ data_get($order, 'id', '-') }} oleh {{ data_get($order, 'customer.name', '-') }}</li>
                             @endif
                         @empty
@@ -93,9 +97,9 @@
                         <a href="{{ route('products.create') }}"
                             class="bg-black text-white font-semibold px-4 py-2 rounded-full hover:bg-gray-100 transition flex items-center justify-center"><i
                                 class="bi bi-plus mr-2"></i>Tambah Produk</a>
-                        <a href="{{ route('orders.create') }}"
+                        {{-- <a href="{{ route('orders.create') }}"
                             class="bg-black text-white font-semibold px-4 py-2 rounded-full hover:bg-gray-100 transition flex items-center justify-center"><i
-                                class="bi bi-plus mr-2"></i>Buat Pesanan</a>
+                                class="bi bi-plus mr-2"></i>Buat Pesanan</a> --}}
                     </div>
                 </div>
             </div>
@@ -167,15 +171,18 @@
                 }
             }
         });
-        // Donut Chart (Orders)
+        // Bar Chart (Orders)
         new Chart(ordersCtx, {
-            type: 'doughnut',
+            type: 'bar',
             data: @json($ordersChartData ?? ['labels' => [], 'datasets' => []]),
             options: {
                 responsive: true,
-                cutout: '70%',
                 plugins: {
-                    legend: { position: 'bottom', labels: { color: '#222', font: { size: 14 } } },
+                    legend: { display: false },
+                },
+                scales: {
+                    x: { ticks: { color: '#888' } },
+                    y: { ticks: { color: '#888' } }
                 }
             }
         });

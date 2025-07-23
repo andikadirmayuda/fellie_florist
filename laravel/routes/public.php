@@ -25,6 +25,7 @@ Route::post('/cart/add', [PublicCartController::class, 'add'])->name('public.car
 Route::post('/cart/update/{product_id}', [PublicCartController::class, 'update'])->name('public.cart.update');
 Route::post('/cart/remove/{product_id}', [PublicCartController::class, 'remove'])->name('public.cart.remove');
 Route::post('/cart/clear', [PublicCartController::class, 'clear'])->name('public.cart.clear');
+Route::get('/cart/items', [PublicCartController::class, 'getCart']);
 
 // Invoice publik (detail pesanan publik)
 Route::get('/invoice/{public_code}', [PublicOrderController::class, 'publicInvoice'])

@@ -70,14 +70,6 @@
                     Pesanan Publik
                 </x-sidebar-link>
             @endif
-            @if(auth()->user()->hasRole('owner') || auth()->user()->hasRole('admin') || auth()->user()->hasRole('kasir') || auth()->user()->hasRole('karyawan') || auth()->user()->hasRole('customers service'))
-                <x-sidebar-link :href="route('order-histories.index')" :active="request()->routeIs('order-histories.*')">
-                    <x-slot name="icon">
-                        <i class="bi bi-clock-history text-lg mr-1"></i>
-                    </x-slot>
-                    {{ __('Riwayat Pesanan') }}
-                </x-sidebar-link>
-            @endif
             @if(auth()->user()->hasRole('owner') || auth()->user()->hasRole('admin') || auth()->user()->hasRole('kasir'))
                 <x-sidebar-link :href="route('sales.index')" :active="request()->routeIs('sales.*')">
                     <x-slot name="icon">
@@ -162,24 +154,6 @@
                         <i class="bi bi-cash-stack text-lg mr-1"></i>
                     </x-slot>
                     Laporan Pendapatan
-                </x-sidebar-link>
-            @endif
-
-            <!-- PENGATURAN -->
-            <li class="mt-4 mb-1 text-xs font-bold uppercase tracking-wider text-pink-400 flex items-center gap-2"><i
-                    class="bi bi-gear"></i> Pengaturan</li>
-            @if(auth()->user()->hasRole('owner') || auth()->user()->hasRole('admin'))
-                <x-sidebar-link :href="route('settings.archive')" :active="request()->routeIs('settings.archive')">
-                    <x-slot name="icon">
-                        <i class="bi bi-archive-fill text-lg mr-1"></i>
-                    </x-slot>
-                    {{ __('Pengaturan Arsip') }}
-                </x-sidebar-link>
-                <x-sidebar-link :href="route('settings.history')" :active="request()->routeIs('settings.history')">
-                    <x-slot name="icon">
-                        <i class="bi bi-clock-history text-lg mr-1"></i>
-                    </x-slot>
-                    {{ __('Pengaturan Riwayat') }}
                 </x-sidebar-link>
             @endif
         </ul>

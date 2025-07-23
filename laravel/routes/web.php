@@ -1,3 +1,4 @@
+
 <?php
 
 use App\Http\Controllers\ProfileController;
@@ -20,6 +21,7 @@ use App\Http\Controllers\BouquetController;
 use App\Http\Controllers\BouquetCategoryController;
 use App\Http\Controllers\BouquetSizeController;
 use App\Http\Controllers\BouquetComponentController;
+use App\Http\Controllers\PublicCartController;
 
 use Illuminate\Support\Facades\Route;
 
@@ -27,13 +29,6 @@ Route::get('/', function () {
     return redirect()->route('public.flowers');
 });
 
-// Cart Routes
-Route::prefix('cart')->group(function () {
-    Route::post('/add/{id}', [CartController::class, 'add'])->name('cart.add');
-    Route::get('/items', [CartController::class, 'getItems'])->name('cart.items');
-    Route::post('/update/{id}', [CartController::class, 'updateQuantity'])->name('cart.update');
-    Route::post('/remove/{id}', [CartController::class, 'remove'])->name('cart.remove');
-});
 
 Route::get('/dashboard', [DashboardController::class, 'index'])
 ->middleware(['auth', 'verified'])
@@ -76,15 +71,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/api/categories/{category}/products', [App\Http\Controllers\ProductController::class, 'apiByCategory']);
     Route::get('/api/products/{product}/stock', [App\Http\Controllers\ProductController::class, 'apiStock']);
     
-    // Order Management Routes
-    Route::resource('orders', OrderController::class);
-    Route::get('/orders/{order}/invoice', [OrderController::class, 'invoice'])->name('orders.invoice');
-    Route::get('/orders/{order}/share-whatsapp', [OrderController::class, 'shareWhatsApp'])->name('orders.share-whatsapp');
-    
-    // Order History Routes
-    Route::get('order-histories', [OrderHistoryController::class, 'index'])->name('order-histories.index');
-    Route::get('order-histories/{history}', [OrderHistoryController::class, 'show'])->name('order-histories.show');
-    
     // Sales Routes
     Route::resource('sales', App\Http\Controllers\SaleController::class)->names([
         'index' => 'sales.index',
@@ -99,10 +85,7 @@ Route::middleware('auth')->group(function () {
         // Archive Settings
         Route::get('/archive', [ArchiveSettingController::class, 'index'])->name('archive');
         Route::post('/archive', [ArchiveSettingController::class, 'update'])->name('archive.update');
-        
-        // History Settings
-        Route::get('/history', [HistorySettingController::class, 'index'])->name('history');
-        Route::put('/history', [HistorySettingController::class, 'update'])->name('history.update');
+
     });
     Route::get('customers/{id}/history', [CustomerController::class, 'orderHistory'])->name('customers.history');
 });
@@ -150,12 +133,19 @@ Route::post('/admin/public-orders/{id}/update-status', [App\Http\Controllers\Adm
 Route::post('/admin/public-orders/{id}/update-payment-status', [App\Http\Controllers\AdminPublicOrderController::class, 'updatePaymentStatus'])->name('admin.public-orders.update-payment-status');
 
 // =====================
-// Keranjang belanja publik (tanpa login)
+// Keranjang belanja publik (tanpa login) - API only, no separate cart page
 // =====================
-Route::get('/cart', [App\Http\Controllers\PublicCartController::class, 'index'])->name('public.cart.index');
 Route::post('/cart/add', [App\Http\Controllers\PublicCartController::class, 'add'])->name('public.cart.add');
-Route::post('/cart/remove/{product_id}', [App\Http\Controllers\PublicCartController::class, 'remove'])->name('public.cart.remove');
+Route::get('/cart/get', [App\Http\Controllers\PublicCartController::class, 'get'])->name('public.cart.get');
+Route::post('/cart/update/{productId}', [App\Http\Controllers\PublicCartController::class, 'updateQuantity'])->name('public.cart.updateQuantity');
+Route::post('/cart/remove/{productId}', [App\Http\Controllers\PublicCartController::class, 'remove'])->name('public.cart.remove');
 Route::post('/cart/clear', [App\Http\Controllers\PublicCartController::class, 'clear'])->name('public.cart.clear');
+
+// =====================
+// Checkout publik (tanpa login)
+// =====================
+Route::get('/checkout', [App\Http\Controllers\PublicCheckoutController::class, 'show'])->name('public.checkout.show');
+Route::post('/checkout', [App\Http\Controllers\PublicCheckoutController::class, 'process'])->name('public.checkout.process');
 
 // Route test upload sederhana
 Route::get('/test-upload', function() {
@@ -179,6 +169,9 @@ Route::post('/test-upload', function(\Illuminate\Http\Request $request) {
 });
 
 
+// Endpoint untuk mengambil isi cart dalam format JSON
+Route::get('/cart/json', [PublicCartController::class, 'getCart'])->name('public.cart.json');
+
 Route::post('/admin/public-orders/{id}/add-payment', [AdminPublicOrderController::class, 'addPayment'])->name('admin.public-orders.add-payment');
 
 // Route resource untuk Pesanan & Penjualan Buket
@@ -187,4 +180,5 @@ Route::resource('bouquet-categories', BouquetCategoryController::class);
 Route::resource('bouquet-sizes', BouquetSizeController::class);
 Route::get('bouquet-components/manage/{bouquet}/{size}', [App\Http\Controllers\BouquetComponentController::class, 'manage'])->name('bouquet-components.manage');
 Route::resource('bouquet-components', BouquetComponentController::class);
+
 require __DIR__.'/auth.php';

@@ -34,7 +34,7 @@ class PublicCheckoutController extends Controller
             'destination' => 'required|string',
         ]);
 
-        \DB::beginTransaction();
+        DB::beginTransaction();
         try {
             $publicCode = bin2hex(random_bytes(8));
             $order = \App\Models\PublicOrder::create([
@@ -59,14 +59,14 @@ class PublicCheckoutController extends Controller
                 ]);
             }
 
-            \DB::commit();
+            DB::commit();
             session()->forget('public_cart');
             // Simpan kode pesanan terakhir ke session untuk tombol "Lihat Detail Pemesanan"
             session(['last_public_order_code' => $publicCode]);
             // Redirect ke halaman detail pemesanan publik (tracking)
             return redirect()->route('public.order.detail', ['public_code' => $publicCode])->with('success', 'Pesanan berhasil dikirim!');
         } catch (\Exception $e) {
-            \DB::rollBack();
+            DB::rollBack();
             return redirect()->route('public.cart.index')->with('error', 'Gagal menyimpan pesanan: ' . $e->getMessage());
         }
     }

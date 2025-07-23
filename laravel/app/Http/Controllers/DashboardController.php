@@ -10,6 +10,7 @@ use App\Models\Order;
 use App\Models\Sale;
 use App\Models\Role;
 use App\Models\User;
+use App\Models\PublicOrder;
 
 class DashboardController extends Controller
 {
@@ -47,15 +48,18 @@ class DashboardController extends Controller
         ];
 
         // Data grafik pesanan (7 hari terakhir)
-        $orders = Order::selectRaw('DATE(created_at) as date, COUNT(*) as total')
+        $orders = PublicOrder::selectRaw('DATE(created_at) as date, COUNT(*) as total')
             ->where('created_at', '>=', now()->subDays(6))
+            ->whereIn('status', ['completed', 'done'])
+            ->where('payment_status', 'paid')
             ->groupBy('date')
             ->orderBy('date')
             ->get();
+
         $ordersChartData = [
             'labels' => $orders->pluck('date')->map(fn($d) => date('d M', strtotime($d)))->toArray(),
             'datasets' => [[
-                'label' => 'Pesanan',
+                'label' => 'Pesanan Selesai & Lunas',
                 'data' => $orders->pluck('total')->toArray(),
                 'backgroundColor' => '#6B7280',
             ]],

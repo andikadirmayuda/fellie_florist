@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,6 +12,46 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
+        // Fungsi untuk menambah ke keranjang dengan pilihan harga (global)
+        function addToCartWithPrice(flowerId, priceType) {
+            fetch('/cart/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify({ product_id: flowerId, price_type: priceType })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Gagal menambah ke keranjang. Status: ' + response.status);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    closeCartPriceModal();
+                    updateCart();
+                    toggleCart();
+                }
+            })
+            .catch(error => {
+                alert('Terjadi masalah: ' + error.message);
+            });
+        }
+        // Handler untuk tombol tambah ke keranjang dengan modal harga (hanya satu kali di bawah)
+        function handleAddToCart(flowerId) {
+            const prices = window.flowerPrices[flowerId] || [];
+        if (prices.length === 1) {
+            // Jika hanya 1 harga, langsung tambahkan
+            addToCartWithPrice(flowerId, prices[0].type);
+            } else if (prices.length > 1) {
+                // Jika ada beberapa harga, tampilkan modal
+                openCartPriceModal(flowerId, prices);
+            } else {
+                alert('Harga produk tidak tersedia.');
+            }
+        }
         tailwind.config = {
             theme: {
                 extend: {
@@ -23,26 +63,32 @@
         }
     </script>
     <style>
-        body, .font-sans {
+        body,
+        .font-sans {
             font-family: 'Figtree', sans-serif;
         }
+
         .line-clamp-2 {
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
+
         .gradient-bg {
             background: linear-gradient(135deg, #fdf2f8 0%, #ffffff 50%, #f0fdf4 100%);
         }
+
         .glass-effect {
             background: rgba(255, 255, 255, 0.85);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
+
         .card-hover {
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
+
         .card-hover:hover {
             transform: translateY(-8px);
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
@@ -51,37 +97,8 @@
 </head>
 
 <body class="min-h-screen gradient-bg text-black flex flex-col font-sans overflow-x-hidden">
-    <!-- Side Cart Panel -->
-    <div id="sideCart" class="fixed right-0 top-0 h-full w-80 bg-white shadow-2xl transform translate-x-full transition-transform duration-300 z-50">
-        <div class="h-full flex flex-col">
-            <!-- Cart Header -->
-            <div class="p-4 border-b border-gray-200 flex items-center justify-between bg-gradient-to-r from-rose-50 to-pink-50">
-                <h3 class="text-lg font-bold text-gray-800 flex items-center">
-                    <i class="bi bi-bag mr-2"></i> Keranjang Belanja
-                </h3>
-                <button onclick="toggleCart()" class="text-gray-500 hover:text-gray-700">
-                    <i class="bi bi-x-lg"></i>
-                </button>
-            </div>
-            
-            <!-- Cart Items -->
-            <div class="flex-1 overflow-y-auto p-4" id="cartItems">
-                <!-- Cart items will be dynamically loaded here -->
-            </div>
-            
-            <!-- Cart Footer -->
-            <div class="border-t border-gray-200 p-4 bg-white">
-                <div class="flex justify-between mb-4">
-                    <span class="font-semibold">Total:</span>
-                    <span class="font-bold text-rose-600" id="cartTotal">Rp 0</span>
-                </div>
-                <a href="{{ route('public.cart.index') }}" 
-                   class="block w-full bg-gradient-to-r from-rose-500 to-pink-500 text-white text-center py-3 rounded-xl font-semibold hover:from-rose-600 hover:to-pink-600 transition-all duration-200">
-                    Lanjut ke Checkout
-                </a>
-            </div>
-        </div>
-    </div>
+    @include('public.partials.cart-modal')
+    @include('public.partials.cart-panel')
 
     <!-- Header -->
     <header class="w-full glass-effect border-b border-gray-100 sticky top-0 z-40">
@@ -134,6 +151,11 @@
                         <span id="cartBadge"
                             class="absolute -top-1 -right-1 w-5 h-5 bg-rose-500 text-white text-xs rounded-full flex items-center justify-center hidden">0</span>
                     </button>
+                    <a href="{{ route('login') }}"
+                        class="text-gray-600 hover:text-rose-600 p-2 rounded-full hover:bg-rose-50 transition-all duration-200"
+                        title="Login">
+                            <i class="bi bi-box-arrow-in-right text-xl"></i>
+                    </a>
                 </div>
             </div>
         </div>
@@ -226,7 +248,8 @@
             @if($activeTab === 'flowers')
                 @forelse($flowers as $flower)
                     <div class="flower-card group" data-category="{{ $flower->category->name ?? 'lainnya' }}"
-                        data-name="{{ strtolower($flower->name) }}">
+                        data-name="{{ strtolower($flower->name) }}"
+                        data-flower-id="{{ $flower->id }}">
                         <div class="card-hover glass-effect rounded-2xl shadow-lg p-4 h-full flex flex-col overflow-hidden">
                             <!-- Image -->
                             <div class="relative h-40 mb-4 rounded-xl overflow-hidden">
@@ -259,12 +282,30 @@
                                 <!-- Price -->
                                 <div class="mb-3">
                                     @php
-        $stemPrice = $flower->prices->firstWhere('type', 'per_tangkai');
+        // Siapkan array harga untuk JS
+        $jsPrices = $flower->prices->map(function ($price) {
+            return [
+                'id' => $price->id,
+                'type' => $price->type,
+                'label' => __(ucwords(str_replace('_', ' ', $price->type))),
+                'price' => $price->price
+            ];
+        });
                                     @endphp
                                     <div class="text-lg font-bold text-rose-600">
-                                        Rp {{ number_format($stemPrice->price ?? 0, 0, ',', '.') }}
+                                        @if($jsPrices->count() === 1)
+                                            Rp {{ number_format($jsPrices[0]['price'], 0, ',', '.') }}
+                                        @else
+                                            Pilih harga
+                                        @endif
                                     </div>
-                                    <div class="text-xs text-gray-500">per tangkai</div>
+                                    <div class="text-xs text-gray-500">
+                                        @if($jsPrices->count() === 1)
+                                            {{ $jsPrices[0]['label'] }}
+                                        @else
+                                            Beberapa pilihan harga
+                                        @endif
+                                    </div>
                                 </div>
 
                                 <!-- Stock -->
@@ -282,10 +323,14 @@
                                 </div>
 
                                 <!-- Action Button -->
-                                <button onclick="addToCart({{ $flower->id }})"
+                                <button onclick="handleAddToCart({{ $flower->id }})"
                                     class="mt-auto w-full bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white text-xs font-semibold py-2.5 px-3 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-md hover:shadow-lg">
                                     <i class="bi bi-cart-plus mr-1"></i>Tambah ke Keranjang
                                 </button>
+                                <script>
+                                    window.flowerPrices = window.flowerPrices || {};
+                                    window.flowerPrices[{{ $flower->id }}] = @json($jsPrices);
+                                </script>
                             </div>
                         </div>
                     </div>
@@ -411,135 +456,13 @@
     <!-- Cart Modal -->
     @include('public.partials.cart-modal')
 
+    <script src="{{ asset('js/cart.js') }}"></script>
     <script>
         let selectedCategory = '';
         let selectedSize = '';
-
-        function toggleCart() {
-            const cart = document.getElementById('sideCart');
-            cart.classList.toggle('translate-x-full');
-            
-            // Add overlay when cart is open
-            let overlay = document.getElementById('cartOverlay');
-            if (!overlay) {
-                overlay = document.createElement('div');
-                overlay.id = 'cartOverlay';
-                overlay.className = 'fixed inset-0 bg-black bg-opacity-50 z-40 transition-opacity duration-300';
-                overlay.onclick = toggleCart;
-                document.body.appendChild(overlay);
-            }
-            
-            if (cart.classList.contains('translate-x-full')) {
-                overlay.classList.add('opacity-0');
-                setTimeout(() => overlay.remove(), 300);
-            } else {
-                overlay.classList.remove('opacity-0');
-            }
-        }
-
-        function addToCart(flowerId) {
-            // Call your backend API to add item to cart
-            fetch(`/cart/add/${flowerId}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    updateCart();
-                    toggleCart(); // Show the cart after adding item
-                }
-            });
-        }
-
-        function updateCart() {
-            fetch('/cart/items')
-            .then(response => response.json())
-            .then(data => {
-                const cartItemsContainer = document.getElementById('cartItems');
-                const cartBadge = document.getElementById('cartBadge');
-                const cartTotal = document.getElementById('cartTotal');
-                
-                if (data.items.length === 0) {
-                    cartItemsContainer.innerHTML = `
-                        <div class="flex flex-col items-center justify-center h-full text-gray-500">
-                            <i class="bi bi-bag-x text-5xl mb-2"></i>
-                            <p>Keranjang belanja kosong</p>
-                        </div>
-                    `;
-                    cartBadge.classList.add('hidden');
-                    cartTotal.textContent = 'Rp 0';
-                    return;
-                }
-
-                // Update cart badge
-                cartBadge.classList.remove('hidden');
-                cartBadge.textContent = data.items.length;
-
-                // Render cart items
-                cartItemsContainer.innerHTML = data.items.map(item => `
-                    <div class="flex items-start space-x-4 mb-4 pb-4 border-b border-gray-100">
-                        <img src="${item.image}" alt="${item.name}" class="w-20 h-20 object-cover rounded-lg">
-                        <div class="flex-1">
-                            <h4 class="font-semibold text-gray-800">${item.name}</h4>
-                            <p class="text-sm text-gray-500">${item.quantity} x Rp ${item.price.toLocaleString()}</p>
-                            <div class="flex items-center space-x-2 mt-2">
-                                <button onclick="updateQuantity(${item.id}, -1)" class="text-gray-500 hover:text-rose-600">-</button>
-                                <span class="text-sm font-medium">${item.quantity}</span>
-                                <button onclick="updateQuantity(${item.id}, 1)" class="text-gray-500 hover:text-rose-600">+</button>
-                            </div>
-                        </div>
-                        <button onclick="removeFromCart(${item.id})" class="text-gray-400 hover:text-red-500">
-                            <i class="bi bi-trash"></i>
-                        </button>
-                    </div>
-                `).join('');
-
-                // Update total
-                cartTotal.textContent = `Rp ${data.total.toLocaleString()}`;
-            });
-        }
-
-        function updateQuantity(itemId, change) {
-            fetch(`/cart/update/${itemId}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                },
-                body: JSON.stringify({ quantity_change: change })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    updateCart();
-                }
-            });
-        }
-
-        function removeFromCart(itemId) {
-            fetch(`/cart/remove/${itemId}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    updateCart();
-                }
-            });
-        }
-
         function filterItems() {
             const search = document.getElementById('searchInput').value.toLowerCase();
             const activeTab = '{{ $activeTab }}';
-            
             if (activeTab === 'flowers') {
                 document.querySelectorAll('.flower-card').forEach(card => {
                     const name = card.getAttribute('data-name');
@@ -555,11 +478,9 @@
                     const matchSearch = name.includes(search);
                     const matchSize = !selectedSize || sizes.includes(selectedSize);
                     card.style.display = (matchSearch && matchSize) ? '' : 'none';
-                    
                 });
             }
         }
-
         function selectCategory(btn) {
             selectedCategory = btn.getAttribute('data-category');
             document.querySelectorAll('.chip-btn').forEach(button => {
@@ -570,7 +491,6 @@
             btn.classList.remove('bg-white', 'text-gray-700', 'border-rose-200');
             filterItems();
         }
-
         function selectSize(btn) {
             selectedSize = btn.getAttribute('data-size');
             document.querySelectorAll('.chip-btn').forEach(button => {
@@ -581,23 +501,17 @@
             btn.classList.remove('bg-white', 'text-gray-700', 'border-rose-200');
             filterItems();
         }
-
-        // Initialize the first category button as active
         document.addEventListener('DOMContentLoaded', function () {
             const firstCategoryBtn = document.querySelector('.chip-btn');
             if (firstCategoryBtn) {
                 selectCategory(firstCategoryBtn);
             }
-
-            // Enhanced interactions
             const images = document.querySelectorAll('img');
             images.forEach(img => {
                 img.addEventListener('load', function() {
                     this.style.opacity = '1';
                 });
             });
-
-            // Debounced search
             let searchTimeout;
             const searchInput = document.getElementById('searchInput');
             searchInput.addEventListener('input', function() {
