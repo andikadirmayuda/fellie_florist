@@ -27,11 +27,19 @@
 </head>
 
 <body class="font-sans antialiased">
-    <div class="min-h-screen bg-black" x-data="{ 
-                isSidebarOpen: localStorage.getItem('sidebarOpen') === 'true',
+    <div class="min-h-screen bg-black" x-data="{
+                isSidebarOpen: false,
+                init() {
+                    // Inisialisasi state sidebar dari localStorage
+                    const savedState = localStorage.getItem('sidebarOpen');
+                    this.isSidebarOpen = savedState === 'true';
+                    console.log('Sidebar initialized with state:', this.isSidebarOpen);
+                },
                 toggleSidebar() {
+                    console.log('Toggle sidebar clicked, current state:', this.isSidebarOpen);
                     this.isSidebarOpen = !this.isSidebarOpen;
-                    localStorage.setItem('sidebarOpen', this.isSidebarOpen);
+                    localStorage.setItem('sidebarOpen', this.isSidebarOpen.toString());
+                    console.log('New sidebar state:', this.isSidebarOpen);
                 }
             }">
         <!-- Sidebar -->
@@ -56,8 +64,9 @@
             <!-- Top Navigation -->
             <div class="bg-black dark:bg-white-800 shadow">
                 <div class="flex items-center h-16 px-4">
-                    <button @click="toggleSidebar"
-                        class="text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300 focus:outline-none">
+                    <button @click="toggleSidebar()"
+                        class="text-white hover:text-gray-300 dark:text-gray-400 dark:hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 rounded p-1"
+                        title="Toggle Sidebar" type="button">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M4 6h16M4 12h16M4 18h16" />
@@ -176,6 +185,13 @@
                 @endif
             });
         </script>
+
+        <!-- Debug script untuk sidebar -->
+        <script src="{{ asset('js/sidebar-debug.js') }}"></script>
+
+        <!-- Fallback script untuk sidebar -->
+        <script src="{{ asset('js/sidebar-fallback.js') }}"></script>
+
         @stack('scripts')
 </body>
 

@@ -77,6 +77,7 @@ Route::middleware('auth')->group(function () {
         'create' => 'sales.create',
         'store' => 'sales.store',
         'show' => 'sales.show',
+        'destroy' => 'sales.destroy',
     ]);
     Route::get('/sales/{sale}/download-pdf', [App\Http\Controllers\SaleController::class, 'downloadPdf'])->name('sales.download_pdf');
     
@@ -107,10 +108,10 @@ Route::prefix('reports')->name('reports.')->group(function () {
     // Route::get('/sales/excel', [ReportController::class, 'salesExcel'])->name('sales.excel');
 });
 
-// Order WhatsApp Form (tanpa login)
-Route::post('/order-whatsapp', [\App\Http\Controllers\OrderWhatsAppController::class, 'store'])->name('order.whatsapp.store');
-// Form order WhatsApp publik (GET) dengan produk ready stock
-Route::get('/order-whatsapp', [\App\Http\Controllers\OrderWhatsAppController::class, 'form'])->name('order.whatsapp.form');
+// Order WhatsApp Form (tanpa login) - COMMENTED OUT DUE TO MISSING CONTROLLER
+// Route::post('/order-whatsapp', [\App\Http\Controllers\OrderWhatsAppController::class, 'store'])->name('order.whatsapp.store');
+// Form order WhatsApp publik (GET) dengan produk ready stock  
+// Route::get('/order-whatsapp', [\App\Http\Controllers\OrderWhatsAppController::class, 'form'])->name('order.whatsapp.form');
 
 
 // Admin Public Order Routes - Bisa diakses semua user yang login

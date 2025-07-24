@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
             <div class="flex items-center">
-                <div class="flex items-center justify-center w-10 h-10 bg-pink-100 rounded-lg mr-3">
+                <div class="flex items-center justify-center w-10 h-10 bg-pink-100 rounded-lg mr        -3">
                     <i class="bi bi-cash-coin text-pink-600 text-lg"></i>
                 </div>
                 <div>

@@ -14,7 +14,7 @@ class SaleController extends Controller
 {
     public function index()
     {
-        $sales = Sale::latest()->paginate(20);
+        $sales = Sale::active()->latest()->paginate(20);
         return view('sales.index', compact('sales'));
     }
 
@@ -127,5 +127,51 @@ class SaleController extends Controller
         $pdf = Pdf::loadView('sales.receipt', compact('sale'));
         $filename = 'Struk-Penjualan-' . $sale->order_number . '.pdf';
         return $pdf->download($filename);
+    }
+
+    public function destroy(Request $request, Sale $sale)
+    {
+        // Validasi: hanya transaksi hari ini yang bisa dihapus
+        $today = now()->format('Y-m-d');
+        $saleDate = \Carbon\Carbon::parse($sale->order_time)->format('Y-m-d');
+        
+        if ($saleDate !== $today) {
+            return back()->withErrors(['error' => 'Hanya transaksi hari ini yang dapat dihapus!']);
+        }
+
+        // Validasi alasan wajib
+        $request->validate([
+            'deletion_reason' => 'required|string|min:5|max:255',
+        ], [
+            'deletion_reason.required' => 'Alasan penghapusan wajib diisi',
+            'deletion_reason.min' => 'Alasan penghapusan minimal 5 karakter',
+            'deletion_reason.max' => 'Alasan penghapusan maksimal 255 karakter',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            // Kembalikan stok produk
+            foreach ($sale->items as $item) {
+                $product = Product::find($item->product_id);
+                if ($product) {
+                    $product->increment('stock', $item->quantity);
+                }
+            }
+
+            // Soft delete sale
+            $sale->update([
+                'deleted_at' => now(),
+                'deleted_by' => auth()->id(),
+                'deletion_reason' => $request->input('deletion_reason'),
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('sales.index')->with('success', 'Transaksi berhasil dibatalkan dan stok telah dikembalikan.');
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            return back()->withErrors(['error' => 'Gagal membatalkan transaksi: ' . $e->getMessage()]);
+        }
     }
 }
