@@ -21,6 +21,11 @@
 </div>
 <script>
     let selectedPriceId = null;
+
+    function formatPrice(price) {
+        return Math.round(price).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+
     function openCartPriceModal(flowerId, prices) {
         const modal = document.getElementById('cartPriceModal');
         const optionsDiv = document.getElementById('modalPriceOptions');
@@ -32,7 +37,7 @@
             <label class="flex items-center gap-3 mb-2 cursor-pointer">
                 <input type="radio" name="priceOption" value="${price.type}" onchange="selectPriceOption('${price.type}')">
                 <span class="font-semibold text-gray-700">${price.label}</span>
-                <span class="ml-auto text-rose-600 font-bold">Rp ${price.price.toLocaleString()}</span>
+                <span class="ml-auto text-rose-600 font-bold">Rp ${formatPrice(price.price)}</span>
             </label>
         `).join('');
         // Show modal

@@ -1,4 +1,8 @@
 // Script khusus untuk cart (keranjang belanja)
+function formatPrice(price) {
+    return Math.round(price).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
 function toggleCart() {
     const cart = document.getElementById('sideCart');
     cart.classList.toggle('translate-x-full');
@@ -50,7 +54,7 @@ function updateCart() {
                 </div>
                 <div class="flex-1">
                     <h4 class="font-semibold text-gray-800">${item.name}</h4>
-                    <p class="text-sm text-gray-500">${item.quantity} x Rp ${item.price.toLocaleString()}</p>
+                    <p class="text-sm text-gray-500">${item.quantity} x Rp ${formatPrice(item.price)}</p>
                     <div class="flex items-center space-x-2 mt-2">
                         <button onclick="updateQuantity('${item.id}', -1)" class="text-gray-500 hover:text-rose-600">-</button>
                         <span class="text-sm font-medium">${item.quantity}</span>
@@ -62,7 +66,7 @@ function updateCart() {
                 </button>
             </div>
         `).join('');
-        cartTotal.textContent = `Rp ${data.total.toLocaleString()}`;
+        cartTotal.textContent = `Rp ${formatPrice(data.total)}`;
     });
 }
 

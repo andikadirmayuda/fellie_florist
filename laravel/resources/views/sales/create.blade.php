@@ -375,6 +375,10 @@
         </div>
     </div>
     <script>
+        function formatPrice(price) {
+            return Math.round(price).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
+
         let items = [];
         const products = @json($products);
 
@@ -404,7 +408,7 @@
 
             if (productPrices[productId]) {
                 productPrices[productId].forEach(price => {
-                    priceTypeSelect.innerHTML += `<option value="${price.type}" data-price="${price.price}">${price.type.replaceAll('_', ' ').toUpperCase()} (Rp ${parseFloat(price.price).toLocaleString('id-ID')})</option>`;
+                    priceTypeSelect.innerHTML += `<option value="${price.type}" data-price="${price.price}">${price.type.replaceAll('_', ' ').toUpperCase()} (Rp ${formatPrice(parseFloat(price.price))})</option>`;
                 });
             }
         };
@@ -475,9 +479,9 @@
                     <tr class="hover:bg-gray-50 transition-colors">
                         <td class="px-6 py-4 text-gray-900">${item.product_name}</td>
                         <td class="px-6 py-4 text-gray-600">${item.price_type.replaceAll('_', ' ').toUpperCase()}</td>
-                        <td class="px-6 py-4 text-right text-gray-900">Rp ${item.price.toLocaleString('id-ID')}</td>
+                        <td class="px-6 py-4 text-right text-gray-900">Rp ${formatPrice(item.price)}</td>
                         <td class="px-6 py-4 text-center text-gray-900">${item.quantity}</td>
-                        <td class="px-6 py-4 text-right font-semibold text-gray-900">Rp ${(item.price * item.quantity).toLocaleString('id-ID')}</td>
+                        <td class="px-6 py-4 text-right font-semibold text-gray-900">Rp ${formatPrice(item.price * item.quantity)}</td>
                         <td class="px-6 py-4 text-center">
                             <button type="button" 
                                 class="inline-flex items-center px-3 py-1.5 bg-red-50 text-red-700 hover:bg-red-100 rounded-md transition-colors duration-150"
