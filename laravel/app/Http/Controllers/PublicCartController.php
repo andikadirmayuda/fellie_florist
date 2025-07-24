@@ -20,14 +20,30 @@ class PublicCartController extends Controller
         $cart = session()->get('cart', []);
         $total = 0;
         $items = [];
-        foreach ($cart as $item) {
+        foreach ($cart as $cartKey => $item) {
             $total += $item['price'] * $item['qty'];
+            
+            // Format image URL dengan benar
+            $imageUrl = null;
+            if (isset($item['image']) && $item['image']) {
+                $imageUrl = asset('storage/' . $item['image']);
+            }
+            
+            // Format nama produk dengan price_type
+            $productName = $item['name'];
+            if (isset($item['price_type']) && $item['price_type']) {
+                $priceTypeLabel = $this->getPriceTypeLabel($item['price_type']);
+                $productName .= ' (' . $priceTypeLabel . ')';
+            }
+            
             $items[] = [
-                'id' => $item['id'],
-                'name' => $item['name'],
+                'id' => $cartKey, // Gunakan cartKey sebagai ID unik
+                'product_id' => $item['id'], // ID produk asli
+                'name' => $productName,
                 'price' => $item['price'],
                 'quantity' => $item['qty'],
-                'image' => isset($item['image']) ? $item['image'] : null
+                'price_type' => $item['price_type'] ?? null,
+                'image' => $imageUrl
             ];
         }
         return response()->json([
@@ -35,6 +51,18 @@ class PublicCartController extends Controller
             'total' => $total,
             'success' => true
         ]);
+    }
+
+    private function getPriceTypeLabel($priceType)
+    {
+        $labels = [
+            'tangkai' => 'Per Tangkai',
+            'ikat5' => 'Ikat 5',
+            'reseller' => 'Reseller', 
+            'promo' => 'Promo'
+        ];
+        
+        return $labels[$priceType] ?? ucfirst($priceType);
     }
     public function add(Request $request)
     {
@@ -68,14 +96,18 @@ class PublicCartController extends Controller
             'price' => $price,
             'qty' => $qty,
             'price_type' => $selectedPriceType,
+            'image' => $productModel->image ?? null,
         ];
 
         $cart = session()->get('cart', []);
 
-        if (isset($cart[$product['id']])) {
-            $cart[$product['id']]['qty'] += $product['qty'];
+        // Gunakan kombinasi product_id dan price_type sebagai key unik
+        $cartKey = $product['id'] . '_' . ($selectedPriceType ?? 'default');
+
+        if (isset($cart[$cartKey])) {
+            $cart[$cartKey]['qty'] += $product['qty'];
         } else {
-            $cart[$product['id']] = $product;
+            $cart[$cartKey] = $product;
         }
 
         session(['cart' => $cart]);
@@ -84,6 +116,65 @@ class PublicCartController extends Controller
             'success' => true,
             'message' => 'Produk berhasil ditambahkan ke keranjang.',
             'cart' => $cart
+        ]);
+    }
+
+    public function updateQuantity(Request $request, $cartKey)
+    {
+        $cart = session()->get('cart', []);
+        $quantityChange = $request->input('quantity_change', 0);
+
+        if (isset($cart[$cartKey])) {
+            $cart[$cartKey]['qty'] += $quantityChange;
+            
+            // Hapus item jika quantity <= 0
+            if ($cart[$cartKey]['qty'] <= 0) {
+                unset($cart[$cartKey]);
+            }
+            
+            session(['cart' => $cart]);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Keranjang berhasil diperbarui.',
+                'cart' => $cart
+            ]);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Produk tidak ditemukan di keranjang.'
+        ], 404);
+    }
+
+    public function remove(Request $request, $cartKey)
+    {
+        $cart = session()->get('cart', []);
+
+        if (isset($cart[$cartKey])) {
+            unset($cart[$cartKey]);
+            session(['cart' => $cart]);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Produk berhasil dihapus dari keranjang.',
+                'cart' => $cart
+            ]);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Produk tidak ditemukan di keranjang.'
+        ], 404);
+    }
+
+    public function clear(Request $request)
+    {
+        session()->forget('cart');
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Keranjang berhasil dikosongkan.'
         ]);
     }
 }

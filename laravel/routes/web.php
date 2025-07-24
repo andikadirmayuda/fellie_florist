@@ -138,8 +138,8 @@ Route::post('/admin/public-orders/{id}/update-payment-status', [App\Http\Control
 // =====================
 Route::post('/cart/add', [App\Http\Controllers\PublicCartController::class, 'add'])->name('public.cart.add');
 Route::get('/cart/get', [App\Http\Controllers\PublicCartController::class, 'get'])->name('public.cart.get');
-Route::post('/cart/update/{productId}', [App\Http\Controllers\PublicCartController::class, 'updateQuantity'])->name('public.cart.updateQuantity');
-Route::post('/cart/remove/{productId}', [App\Http\Controllers\PublicCartController::class, 'remove'])->name('public.cart.remove');
+Route::post('/cart/update/{cartKey}', [App\Http\Controllers\PublicCartController::class, 'updateQuantity'])->name('public.cart.updateQuantity');
+Route::post('/cart/remove/{cartKey}', [App\Http\Controllers\PublicCartController::class, 'remove'])->name('public.cart.remove');
 Route::post('/cart/clear', [App\Http\Controllers\PublicCartController::class, 'clear'])->name('public.cart.clear');
 
 // =====================
