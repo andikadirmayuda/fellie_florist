@@ -29,6 +29,8 @@ function updateCart() {
         const cartItemsContainer = document.getElementById('cartItems');
         const cartBadge = document.getElementById('cartBadge');
         const cartTotal = document.getElementById('cartTotal');
+        const checkoutButton = document.querySelector('#sideCart a[href*="checkout"]');
+        
         if (data.items.length === 0) {
             cartItemsContainer.innerHTML = `
                 <div class="flex flex-col items-center justify-center h-full text-gray-500">
@@ -38,10 +40,13 @@ function updateCart() {
             `;
             cartBadge.classList.add('hidden');
             cartTotal.textContent = 'Rp 0';
+            if (checkoutButton) checkoutButton.style.display = 'none';
             return;
         }
+        
         cartBadge.classList.remove('hidden');
         cartBadge.textContent = data.items.length;
+        if (checkoutButton) checkoutButton.style.display = 'block';
         cartItemsContainer.innerHTML = data.items.map(item => `
             <div class="flex items-start space-x-4 mb-4 pb-4 border-b border-gray-100">
                 <div class="w-20 h-20 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">

@@ -11,19 +11,31 @@ class PublicCheckoutController extends Controller
     // Tampilkan form checkout
     public function show(Request $request)
     {
-        $cart = session('public_cart', []);
+        $cart = session('cart', []);
         if (empty($cart)) {
             return redirect()->back()->with('error', 'Keranjang belanja kosong.');
         }
-        return view('public.checkout', compact('cart'));
+        
+        // Format cart data untuk view
+        $cartData = [];
+        foreach ($cart as $cartKey => $item) {
+            $cartData[] = [
+                'product_name' => $item['name'],
+                'quantity' => $item['qty'],
+                'price' => $item['price'],
+                'price_type' => $item['price_type'] ?? 'default'
+            ];
+        }
+        
+        return view('public.checkout', compact('cartData'));
     }
 
     // Proses checkout
     public function process(Request $request)
     {
-        $cart = session('public_cart', []);
+        $cart = session('cart', []);
         if (empty($cart)) {
-            return redirect()->route('public.cart.index')->with('error', 'Keranjang kosong.');
+            return redirect()->route('public.flowers')->with('error', 'Keranjang kosong.');
         }
         $validated = $request->validate([
             'customer_name' => 'required|string|max:100',
@@ -48,26 +60,25 @@ class PublicCheckoutController extends Controller
                 'status' => 'pending',
             ]);
 
-            foreach ($cart as $item) {
+            foreach ($cart as $cartKey => $item) {
                 $order->items()->create([
-                    'product_id' => $item['product_id'],
-                    'product_name' => $item['product_name'],
-                    'price_type' => $item['price_type'] ?? '-',
-                    'unit_equivalent' => $item['unit_equivalent'] ?? 1,
-                    'quantity' => $item['quantity'],
+                    'product_id' => $item['id'],
+                    'product_name' => $item['name'],
+                    'price_type' => $item['price_type'] ?? 'default',
+                    'unit_equivalent' => 1,
+                    'quantity' => $item['qty'],
                     'price' => $item['price'] ?? 0,
                 ]);
             }
 
             DB::commit();
-            session()->forget('public_cart');
-            // Simpan kode pesanan terakhir ke session untuk tombol "Lihat Detail Pemesanan"
-            session(['last_public_order_code' => $publicCode]);
-            // Redirect ke halaman detail pemesanan publik (tracking)
-            return redirect()->route('public.order.detail', ['public_code' => $publicCode])->with('success', 'Pesanan berhasil dikirim!');
+            session()->forget('cart'); // Clear the cart
+            
+            // Redirect ke halaman sukses atau detail pesanan
+            return redirect()->route('public.flowers')->with('success', 'Pesanan berhasil dikirim! Kode pesanan: ' . $publicCode);
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->route('public.cart.index')->with('error', 'Gagal menyimpan pesanan: ' . $e->getMessage());
+            return redirect()->route('public.flowers')->with('error', 'Gagal menyimpan pesanan: ' . $e->getMessage());
         }
     }
 }

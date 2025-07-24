@@ -143,11 +143,6 @@ Route::post('/cart/remove/{cartKey}', [App\Http\Controllers\PublicCartController
 Route::post('/cart/clear', [App\Http\Controllers\PublicCartController::class, 'clear'])->name('public.cart.clear');
 
 // =====================
-// Checkout publik (tanpa login)
-// =====================
-Route::get('/checkout', [App\Http\Controllers\PublicCheckoutController::class, 'show'])->name('public.checkout.show');
-Route::post('/checkout', [App\Http\Controllers\PublicCheckoutController::class, 'process'])->name('public.checkout.process');
-
 // Route test upload sederhana
 Route::get('/test-upload', function() {
     return '<form method="POST" action="/test-upload" enctype="multipart/form-data">'

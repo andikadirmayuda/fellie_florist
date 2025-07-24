@@ -14,7 +14,7 @@
         @if(session('error'))
             <div class="bg-red-100 text-red-700 p-2 rounded mb-4">{{ session('error') }}</div>
         @endif
-        @if(empty($cart))
+        @if(empty($cartData))
             <div class="bg-yellow-100 text-yellow-700 p-4 rounded mb-4">
                 Keranjang belanja kosong. <a href="{{ route('public.flowers') }}" class="underline">Kembali berbelanja</a>
             </div>
@@ -55,16 +55,33 @@
                         <thead>
                             <tr>
                                 <th class="px-2 py-1 border">Produk</th>
+                                <th class="px-2 py-1 border">Harga</th>
                                 <th class="px-2 py-1 border">Jumlah</th>
+                                <th class="px-2 py-1 border">Subtotal</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($cart as $item)
+                            @php $total = 0; @endphp
+                            @foreach($cartData as $item)
+                                @php 
+                                    $subtotal = $item['price'] * $item['quantity'];
+                                    $total += $subtotal;
+                                @endphp
                                 <tr>
-                                    <td class="px-2 py-1 border">{{ $item['product_name'] }}</td>
+                                    <td class="px-2 py-1 border">{{ $item['product_name'] }} 
+                                        @if($item['price_type'] !== 'default')
+                                            <span class="text-xs text-gray-500">({{ ucfirst($item['price_type']) }})</span>
+                                        @endif
+                                    </td>
+                                    <td class="px-2 py-1 border text-right">Rp {{ number_format($item['price'], 0, ',', '.') }}</td>
                                     <td class="px-2 py-1 border text-center">{{ $item['quantity'] }}</td>
+                                    <td class="px-2 py-1 border text-right">Rp {{ number_format($subtotal, 0, ',', '.') }}</td>
                                 </tr>
                             @endforeach
+                            <tr class="font-bold bg-gray-50">
+                                <td colspan="3" class="px-2 py-1 border text-right">Total:</td>
+                                <td class="px-2 py-1 border text-right">Rp {{ number_format($total, 0, ',', '.') }}</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
