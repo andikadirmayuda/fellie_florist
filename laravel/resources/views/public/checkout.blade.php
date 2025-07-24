@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Checkout - Fellie Florist</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 
 <body class="bg-gray-100 min-h-screen">
@@ -21,6 +22,11 @@
         @else
             <form method="POST" action="{{ route('public.checkout.process') }}" class="bg-white p-6 rounded shadow">
                 @csrf
+                @if(session('debug'))
+                    <div class="bg-yellow-100 text-yellow-700 p-2 rounded mb-4">
+                        Debug: {{ json_encode(session('debug')) }}
+                    </div>
+                @endif
                 <div class="mb-4">
                     <label class="block text-sm font-bold mb-1">Nama Lengkap</label>
                     <input type="text" name="customer_name" class="w-full border rounded px-3 py-2" required>
@@ -85,8 +91,13 @@
                         </tbody>
                     </table>
                 </div>
-                <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 rounded">Kirim
-                    Pesanan</button>
+                <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700">
+                    <i class="bi bi-info-circle mr-1"></i>
+                    Setelah mengirim pesanan, Anda akan diarahkan ke halaman detail pesanan untuk memantau status dan proses pembayaran.
+                </div>
+                <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition-colors">
+                    <i class="bi bi-send mr-2"></i>Kirim Pesanan & Lihat Detail
+                </button>
             </form>
         @endif
     </div>

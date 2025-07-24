@@ -49,6 +49,7 @@ class PublicCheckoutController extends Controller
         DB::beginTransaction();
         try {
             $publicCode = bin2hex(random_bytes(8));
+            
             $order = \App\Models\PublicOrder::create([
                 'public_code' => $publicCode,
                 'customer_name' => $validated['customer_name'],
@@ -58,6 +59,8 @@ class PublicCheckoutController extends Controller
                 'destination' => $validated['destination'],
                 'wa_number' => $validated['wa_number'],
                 'status' => 'pending',
+                'payment_status' => 'waiting_confirmation',
+                'info' => 'Pesanan sedang menunggu konfirmasi stok dari admin. Anda akan dihubungi melalui WhatsApp untuk konfirmasi dan proses pembayaran.',
             ]);
 
             foreach ($cart as $cartKey => $item) {
@@ -74,8 +77,12 @@ class PublicCheckoutController extends Controller
             DB::commit();
             session()->forget('cart'); // Clear the cart
             
-            // Redirect ke halaman sukses atau detail pesanan
-            return redirect()->route('public.flowers')->with('success', 'Pesanan berhasil dikirim! Kode pesanan: ' . $publicCode);
+            // Simpan kode pesanan ke session untuk menampilkan icon di top bar
+            session(['last_public_order_code' => $publicCode]);
+            
+            // Redirect ke halaman detail pesanan
+            return redirect()->route('public.order.detail', ['public_code' => $publicCode])
+                ->with('success', 'Pesanan berhasil dikirim! Anda dapat memantau status pesanan di halaman ini.');
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->route('public.flowers')->with('error', 'Gagal menyimpan pesanan: ' . $e->getMessage());

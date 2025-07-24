@@ -13,12 +13,26 @@
     <div
         class="container mx-auto px-2 sm:px-4 py-4 sm:py-8 flex justify-center items-center min-h-screen text-[13px] sm:text-base">
         <div class="bg-white rounded-2xl shadow-xl p-2 sm:p-10 w-full max-w-5xl mx-auto">
+            <!-- Success Message -->
+            @if(session('success'))
+                <div class="mb-6 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg relative">
+                    <div class="flex items-center">
+                        <i class="bi bi-check-circle-fill mr-2"></i>
+                        <span class="block sm:inline">{{ session('success') }}</span>
+                    </div>
+                </div>
+            @endif
+            
             <div class="text-center mb-8">
                 <h1
                     class="text-2xl sm:text-3xl font-extrabold text-pink-600 tracking-tight mb-1 flex items-center justify-center gap-2">
                     <i class="bi bi-flower1 text-pink-400 text-2xl"></i> Fellie Florist
                 </h1>
                 <p class="text-gray-500 text-xs sm:text-base font-medium">Detail Pemesanan Via - Website</p>
+                <div class="mt-2 mb-4">
+                    <span class="text-sm text-gray-600">Kode Pesanan:</span>
+                    <span class="font-mono font-bold text-lg text-pink-600 bg-pink-50 px-3 py-1 rounded-lg border">{{ $order->public_code }}</span>
+                </div>
             </div>
             <!-- Status Badge -->
             <div class="flex flex-col sm:flex-row gap-2 justify-center items-center mb-6">
@@ -298,8 +312,11 @@
             @endif
             @if(!empty($order->packing_photo))
                 <div class="my-8 text-center">
-                    <h3 class="font-semibold text-base mb-2 flex items-center gap-2 justify-center"><i
-                            class="bi bi-image"></i> Foto Barang Saat Dikemas</h3>
+                    <h3 class="font-semibold text-base mb-2 flex items-center gap-2 justify-center">
+                        <i class="bi bi-camera text-pink-500"></i> 
+                        <i class="bi bi-box-seam text-blue-500"></i>
+                        Foto Barang Saat Dikemas
+                    </h3>
                     <img src="{{ asset('storage/' . $order->packing_photo) }}" alt="Foto Barang Dikemas"
                         class="mx-auto rounded shadow max-h-64 border" onerror="this.style.display='none';" />
                 </div>

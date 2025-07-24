@@ -93,6 +93,38 @@
             transform: translateY(-8px);
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
         }
+
+        /* Animation untuk order detail icon */
+        .order-detail-pulse {
+            animation: orderPulse 2s infinite;
+        }
+
+        @keyframes orderPulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+            }
+        }
+
+        .notification-badge {
+            animation: bounce 1s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-3px);
+            }
+            60% {
+                transform: translateY(-1px);
+            }
+        }
     </style>
 </head>
 
@@ -132,18 +164,26 @@
 
                 <!-- Action Buttons -->
                 <div class="flex items-center space-x-4">
+                    <!-- Track Order -->
                     <a href="{{ route('public.order.track') }}"
                         class="text-gray-600 hover:text-rose-600 p-2 rounded-full hover:bg-rose-50 transition-all duration-200"
                         title="Lacak Pesanan">
                         <i class="bi bi-truck text-xl"></i>
                     </a>
+                    
+                    <!-- Order Detail - Muncul setelah checkout -->
                     @if(session('last_public_order_code'))
                         <a href="{{ route('public.order.detail', ['public_code' => session('last_public_order_code')]) }}"
-                            class="text-gray-600 hover:text-rose-600 p-2 rounded-full hover:bg-rose-50 transition-all duration-200"
-                            title="Lihat Detail Pesanan">
-                            <i class="bi bi-receipt text-xl"></i>
+                            class="relative text-white bg-rose-500 hover:bg-rose-600 p-2 rounded-full hover:shadow-lg transition-all duration-200 order-detail-pulse"
+                            title="Lihat Detail Pesanan Terbaru - Kode: {{ session('last_public_order_code') }}">
+                            <i class="bi bi-receipt-cutoff text-xl"></i>
+                            <span class="absolute -top-1 -right-1 bg-green-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold notification-badge">
+                                ✓
+                            </span>
                         </a>
                     @endif
+                    
+                    <!-- Cart -->
                     <button onclick="toggleCart()"
                         class="text-gray-600 hover:text-rose-600 relative p-2 rounded-full hover:bg-rose-50 transition-all duration-200"
                         title="Keranjang Belanja">
