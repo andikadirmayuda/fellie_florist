@@ -36,7 +36,8 @@
 <script>
     let selectedBouquetData = {};
 
-    function showBouquetPriceModal(bouquetId, bouquetName, prices) {
+    // Function yang dipanggil dari halaman bouquet
+    function showBouquetPriceModalComponent(bouquetId, bouquetName, prices) {
         selectedBouquetData = { id: bouquetId, name: bouquetName, prices: prices };
 
         // Update modal title
@@ -54,8 +55,8 @@
             option.innerHTML = `
                 <div class="flex items-center justify-between">
                     <div class="flex-1">
-                        <div class="font-semibold text-gray-800">${price.size.name}</div>
-                        <div class="text-sm text-gray-600">Ukuran ${price.size.name.toLowerCase()}</div>
+                        <div class="font-semibold text-gray-800">${price.size ? price.size.name : 'Standard'}</div>
+                        <div class="text-sm text-gray-600">Ukuran ${price.size ? price.size.name.toLowerCase() : 'standard'}</div>
                     </div>
                     <div class="text-right">
                         <div class="font-bold text-rose-600">Rp ${new Intl.NumberFormat('id-ID').format(price.price)}</div>
@@ -83,7 +84,10 @@
         }, 10);
     }
 
-    function selectBouquetPrice(selectedPrice) {
+    // Legacy function name untuk backward compatibility
+    function showBouquetPriceModal(bouquetId, bouquetName, prices) {
+        showBouquetPriceModalComponent(bouquetId, bouquetName, prices);
+    } function selectBouquetPrice(selectedPrice) {
         // Add to cart with selected bouquet price
         fetch('/cart/add-bouquet', {
             method: 'POST',

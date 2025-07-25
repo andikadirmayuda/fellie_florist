@@ -12,6 +12,41 @@
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700" rel="stylesheet" />
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .card-hover:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Modal animations */
+        .modal-enter {
+            opacity: 0;
+            transform: scale(0.9);
+        }
+
+        .modal-enter-active {
+            opacity: 1;
+            transform: scale(1);
+            transition: all 0.3s ease-out;
+        }
+    </style>
     <script>
         // Fungsi untuk menambah ke keranjang dengan pilihan harga (global)
         function addToCartWithPrice(flowerId, priceType) {
@@ -273,7 +308,9 @@
                                 @else
                                     <button
                                         onclick="showBouquetPriceModal('{{ $bouquet->id }}', '{{ $bouquet->name }}', {{ json_encode($bouquet->prices) }})"
-                                        class="w-full bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white font-semibold py-2 px-4 rounded-xl transition-all duration-200 shadow-md hover:shadow-lg text-sm">
+                                        class="w-full bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white font-semibold py-2 px-4 rounded-xl transition-all duration-200 shadow-md hover:shadow-lg text-sm"
+                                        data-bouquet-id="{{ $bouquet->id }}" data-bouquet-name="{{ $bouquet->name }}"
+                                        data-bouquet-prices="{{ htmlspecialchars(json_encode($bouquet->prices), ENT_QUOTES, 'UTF-8') }}">
                                         <i class="bi bi-cart-plus mr-2"></i>Pilih Ukuran
                                     </button>
                                 @endif
@@ -385,8 +422,42 @@
 
         // Show bouquet price modal  
         function showBouquetPriceModal(bouquetId, bouquetName, prices) {
-            // Implementation for price modal
-            console.log('Show price modal for bouquet:', bouquetId, bouquetName, prices);
+            // Debug logging
+            console.log('showBouquetPriceModal called with:');
+            console.log('- bouquetId:', bouquetId);
+            console.log('- bouquetName:', bouquetName);
+            console.log('- prices (raw):', prices);
+
+            // Parse prices if it's a string
+            if (typeof prices === 'string') {
+                try {
+                    prices = JSON.parse(prices);
+                    console.log('- prices (parsed):', prices);
+                } catch (e) {
+                    console.error('Error parsing prices:', e);
+                    alert('Error: Data harga tidak valid');
+                    return;
+                }
+            }
+
+            // Pastikan modal element tersedia
+            const modal = document.getElementById('bouquetPriceModal');
+            if (!modal) {
+                console.error('Bouquet price modal not found');
+                alert('Modal tidak ditemukan. Silakan refresh halaman.');
+                return;
+            }
+
+            // Check if prices array is valid
+            if (!Array.isArray(prices) || prices.length === 0) {
+                console.error('Invalid prices data:', prices);
+                alert('Data harga tidak tersedia untuk bouquet ini.');
+                return;
+            }
+
+            // Call the modal function
+            console.log('Calling showBouquetPriceModalComponent...');
+            showBouquetPriceModalComponent(bouquetId, bouquetName, prices);
         }
     </script>
 

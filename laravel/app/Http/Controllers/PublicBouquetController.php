@@ -12,7 +12,7 @@ class PublicBouquetController extends Controller
     public function index()
     {
         // Ambil semua bouquet yang aktif beserta komponennya
-        $bouquets = Bouquet::with(['category', 'components.product', 'sizes', 'prices'])
+        $bouquets = Bouquet::with(['category', 'components.product', 'sizes', 'prices.size'])
             ->orderBy('name')
             ->get();
 
@@ -36,7 +36,7 @@ class PublicBouquetController extends Controller
     public function getBouquetData()
     {
         // Method untuk mendapatkan data bouquet yang bisa dipanggil dari controller lain
-        $bouquets = Bouquet::with(['category', 'components.product', 'sizes', 'prices'])
+        $bouquets = Bouquet::with(['category', 'components.product', 'sizes', 'prices.size'])
             ->orderBy('name')
             ->get();
 
