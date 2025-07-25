@@ -27,6 +27,13 @@
                     </x-slot>
                     {{ __('Pelanggan') }}
                 </x-sidebar-link>
+
+                <x-sidebar-link :href="route('online-customers.index')" :active="request()->routeIs('online-customers.*')">
+                    <x-slot name="icon">
+                        <i class="bi bi-phone text-lg mr-1"></i>
+                    </x-slot>
+                    {{ __('Pelanggan Online') }}
+                </x-sidebar-link>
             @endif
 
 

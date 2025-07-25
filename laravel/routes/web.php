@@ -5,6 +5,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\OnlineCustomerController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\InventoryController;
@@ -46,6 +47,13 @@ Route::middleware('auth')->group(function () {
     
     // Customer Management Routes
     Route::resource('customers', CustomerController::class);
+    
+    // Online Customer Management Routes
+    Route::resource('online-customers', OnlineCustomerController::class)->parameters([
+        'online-customers' => 'wa_number'
+    ]);
+    Route::post('online-customers/{wa_number}/set-reseller', [OnlineCustomerController::class, 'setAsReseller'])->name('online-customers.set-reseller');
+    Route::post('online-customers/{wa_number}/set-promo', [OnlineCustomerController::class, 'setPromoDiscount'])->name('online-customers.set-promo');
     
     // Customer Trash Routes
     Route::get('customers/trashed', [CustomerController::class, 'trashed'])->name('customers.trashed');

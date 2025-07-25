@@ -17,10 +17,17 @@ class Customer extends Model
         'type',
         'address',
         'city',
+        'is_reseller',
+        'reseller_discount',
+        'promo_discount',
+        'notes',
     ];
 
     protected $casts = [
         'type' => 'string',
+        'is_reseller' => 'boolean',
+        'reseller_discount' => 'decimal:2',
+        'promo_discount' => 'decimal:2',
     ];
 
     /**
