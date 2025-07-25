@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 class SaleController extends Controller
 {
@@ -115,6 +117,19 @@ class SaleController extends Controller
     public function show($id)
     {
         $sale = Sale::with('items.product')->findOrFail($id);
+        
+        // Log any missing product references for maintenance
+        $missingProducts = $sale->items->filter(function($item) {
+            return $item->product === null;
+        });
+        
+        if ($missingProducts->count() > 0) {
+            Log::warning("Sale {$sale->id} has {$missingProducts->count()} items with deleted products", [
+                'sale_id' => $sale->id,
+                'missing_product_ids' => $missingProducts->pluck('product_id')->toArray()
+            ]);
+        }
+        
         if (request('print') == 1) {
             return view('sales.receipt', compact('sale'));
         }
@@ -124,6 +139,19 @@ class SaleController extends Controller
     public function downloadPdf($id)
     {
         $sale = \App\Models\Sale::with('items.product')->findOrFail($id);
+        
+        // Log any missing product references for maintenance
+        $missingProducts = $sale->items->filter(function($item) {
+            return $item->product === null;
+        });
+        
+        if ($missingProducts->count() > 0) {
+            Log::warning("PDF generation for sale {$sale->id} has {$missingProducts->count()} items with deleted products", [
+                'sale_id' => $sale->id,
+                'missing_product_ids' => $missingProducts->pluck('product_id')->toArray()
+            ]);
+        }
+        
         $pdf = Pdf::loadView('sales.receipt', compact('sale'));
         $filename = 'Struk-Penjualan-' . $sale->order_number . '.pdf';
         return $pdf->download($filename);
@@ -161,7 +189,7 @@ class SaleController extends Controller
             // Soft delete sale
             $sale->update([
                 'deleted_at' => now(),
-                'deleted_by' => auth()->id(),
+                'deleted_by' => Auth::id(),
                 'deletion_reason' => $request->input('deletion_reason'),
             ]);
 

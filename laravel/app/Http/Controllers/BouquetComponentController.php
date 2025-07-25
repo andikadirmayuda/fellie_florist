@@ -25,7 +25,10 @@ class BouquetComponentController extends Controller
         $components = BouquetComponent::where('bouquet_id', $bouquetId)
             ->where('size_id', $sizeId)
             ->with('product')
-            ->get();
+            ->get()
+            ->filter(function($component) {
+                return $component->product !== null; // Filter out components with deleted products
+            });
         $products = Product::orderBy('name')->get();
         return view('bouquet-components.manage', compact('bouquet', 'size', 'components', 'products'));
     }
@@ -44,18 +47,23 @@ class BouquetComponentController extends Controller
                 $categories[] = $categoryName;
             }
 
-            // Ambil semua komponen dan size untuk bouquet ini
+            // Ambil semua komponen dan size untuk bouquet ini, filter out komponen dengan produk yang sudah dihapus
             $components = BouquetComponent::where('bouquet_id', $bouquet->id)
                 ->with(['size', 'product'])
                 ->get()
+                ->filter(function($component) {
+                    return $component->product !== null; // Filter out components with deleted products
+                })
                 ->groupBy('size_id');
 
             $sizes = [];
             foreach ($components as $sizeId => $sizeComponents) {
-                $sizes[$sizeId] = [
-                    'size' => $sizeComponents->first()->size,
-                    'components' => $sizeComponents
-                ];
+                if ($sizeComponents->isNotEmpty()) {
+                    $sizes[$sizeId] = [
+                        'size' => $sizeComponents->first()->size,
+                        'components' => $sizeComponents
+                    ];
+                }
             }
 
             // Simpan ke group

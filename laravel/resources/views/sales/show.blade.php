@@ -187,8 +187,14 @@
                                     <tr class="hover:bg-gray-50 transition-colors">
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ $i + 1 }}</td>
                                         <td class="px-6 py-4">
-                                            <div class="text-sm font-medium text-gray-900">{{ $item->product->name }}</div>
-                                            <div class="text-xs text-gray-500">{{ $item->product->code ?? '' }}</div>
+                                            @if($item->product)
+                                                <div class="text-sm font-medium text-gray-900">{{ $item->product->name }}</div>
+                                                <div class="text-xs text-gray-500">{{ $item->product->code ?? '' }}</div>
+                                            @else
+                                                <div class="text-sm font-medium text-gray-900 italic text-red-600">Produk
+                                                    Dihapus</div>
+                                                <div class="text-xs text-gray-500">ID: {{ $item->product_id }}</div>
+                                            @endif
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <span
@@ -223,7 +229,11 @@
                                                 class="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center text-xs font-medium text-gray-600 mr-2">
                                                 {{ $i + 1 }}
                                             </span>
-                                            <h4 class="text-sm font-medium text-gray-900">{{ $item->product->name }}</h4>
+                                            @if($item->product)
+                                                <h4 class="text-sm font-medium text-gray-900">{{ $item->product->name }}</h4>
+                                            @else
+                                                <h4 class="text-sm font-medium text-red-600 italic">Produk Dihapus</h4>
+                                            @endif
                                         </div>
                                         <div class="flex items-center space-x-2 mb-2">
                                             <span
@@ -266,86 +276,86 @@
     </div>
 
     @if($sale->wa_number)
-            <script>
-                function shareToWhatsApp() {
-                    // Ubah tampilan button sementara
-                    const shareBtn = document.getElementById('shareBtn');
-                    const originalContent = shareBtn.innerHTML;
-                    shareBtn.innerHTML = '<i class="bi bi-hourglass-split mr-2 animate-spin"></i><span class="hidden sm:inline">Membuka WhatsApp...</span><span class="sm:hidden">Loading...</span>';
-                    shareBtn.disabled = true;
+        <script>
+            function shareToWhatsApp() {
+                // Ubah tampilan button sementara
+                const shareBtn = document.getElementById('shareBtn');
+                const originalContent = shareBtn.innerHTML;
+                shareBtn.innerHTML = '<i class="bi bi-hourglass-split mr-2 animate-spin"></i><span class="hidden sm:inline">Membuka WhatsApp...</span><span class="sm:hidden">Loading...</span>';
+                shareBtn.disabled = true;
 
-                    // Data transaksi
-                    const orderNumber = '{{ $sale->order_number }}';
-                    const total = 'Rp {{ number_format($sale->total, 0, ",", ".") }}';
-                    const orderDate = '{{ \Carbon\Carbon::parse($sale->order_time)->format("d/m/Y H:i") }}';
-                    const waNumber = '{{ $sale->wa_number }}';
+                // Data transaksi
+                const orderNumber = '{{ $sale->order_number }}';
+                const total = 'Rp {{ number_format($sale->total, 0, ",", ".") }}';
+                const orderDate = '{{ \Carbon\Carbon::parse($sale->order_time)->format("d/m/Y H:i") }}';
+                const waNumber = '{{ $sale->wa_number }}';
 
-                    // Link public receipt menggunakan public_code
-                    const publicReceiptUrl = '{{ route("sales.public_receipt", $sale->public_code) }}';
+                // Link public receipt menggunakan public_code
+                const publicReceiptUrl = '{{ route("sales.public_receipt", $sale->public_code) }}';
 
-                    // Pesan WhatsApp
-                    const message = `Halo! Berikut adalah struk pembelian Anda:
+                // Pesan WhatsApp
+                const message = `Halo! Berikut adalah struk pembelian Anda:
 
-        📋 *No. Transaksi:* ${orderNumber}
-        📅 *Tanggal:* ${orderDate}
-        💰 *Total:* ${total}
+            📋 *No. Transaksi:* ${orderNumber}
+            📅 *Tanggal:* ${orderDate}
+            💰 *Total:* ${total}
 
-        🔗 *Link Struk Digital:*
-        ${publicReceiptUrl}
+            🔗 *Link Struk Digital:*
+            ${publicReceiptUrl}
 
-        Klik link di atas untuk melihat detail struk pembelian Anda.
+            Klik link di atas untuk melihat detail struk pembelian Anda.
 
-        Terima kasih telah berbelanja di Fellie Florist! 🌸`;
+            Terima kasih telah berbelanja di Fellie Florist! 🌸`;
 
-                    // Format nomor WhatsApp (hilangkan +, spasi, dan awalan 0)
-                    let cleanWaNumber = waNumber.replace(/[\s\+\-\(\)]/g, '');
-                    if (cleanWaNumber.startsWith('0')) {
-                        cleanWaNumber = '62' + cleanWaNumber.substring(1);
-                    }
-
-                    // Buka WhatsApp dengan pesan
-                    const whatsappUrl = `https://wa.me/${cleanWaNumber}?text=${encodeURIComponent(message)}`;
-
-                    // Buka di tab baru
-                    window.open(whatsappUrl, '_blank');
-
-                    // Kembalikan button ke kondisi normal setelah 2 detik
-                    setTimeout(() => {
-                        shareBtn.innerHTML = originalContent;
-                        shareBtn.disabled = false;
-                    }, 2000);
-
-                    // Tampilkan notifikasi sukses
-                    showNotification('Link struk berhasil dibagikan ke WhatsApp!', 'success');
+                // Format nomor WhatsApp (hilangkan +, spasi, dan awalan 0)
+                let cleanWaNumber = waNumber.replace(/[\s\+\-\(\)]/g, '');
+                if (cleanWaNumber.startsWith('0')) {
+                    cleanWaNumber = '62' + cleanWaNumber.substring(1);
                 }
 
-                // Fungsi untuk menampilkan notifikasi
-                function showNotification(message, type = 'success') {
-                    const notification = document.createElement('div');
-                    notification.className = `fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg transform transition-all duration-300 ${type === 'success' ? 'bg-green-100 text-green-800 border border-green-200' : 'bg-red-100 text-red-800 border border-red-200'
-                        }`;
-                    notification.innerHTML = `
-                        <div class="flex items-center">
-                            <i class="bi bi-check-circle-fill mr-2"></i>
-                            <span class="text-sm font-medium">${message}</span>
-                        </div>
-                    `;
+                // Buka WhatsApp dengan pesan
+                const whatsappUrl = `https://wa.me/${cleanWaNumber}?text=${encodeURIComponent(message)}`;
 
-                    document.body.appendChild(notification);
+                // Buka di tab baru
+                window.open(whatsappUrl, '_blank');
 
-                    // Animasi masuk
+                // Kembalikan button ke kondisi normal setelah 2 detik
+                setTimeout(() => {
+                    shareBtn.innerHTML = originalContent;
+                    shareBtn.disabled = false;
+                }, 2000);
+
+                // Tampilkan notifikasi sukses
+                showNotification('Link struk berhasil dibagikan ke WhatsApp!', 'success');
+            }
+
+            // Fungsi untuk menampilkan notifikasi
+            function showNotification(message, type = 'success') {
+                const notification = document.createElement('div');
+                notification.className = `fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg transform transition-all duration-300 ${type === 'success' ? 'bg-green-100 text-green-800 border border-green-200' : 'bg-red-100 text-red-800 border border-red-200'
+                    }`;
+                notification.innerHTML = `
+                            <div class="flex items-center">
+                                <i class="bi bi-check-circle-fill mr-2"></i>
+                                <span class="text-sm font-medium">${message}</span>
+                            </div>
+                        `;
+
+                document.body.appendChild(notification);
+
+                // Animasi masuk
+                setTimeout(() => {
+                    notification.style.transform = 'translateX(0)';
+                }, 100);
+
+                // Hapus notifikasi setelah 3 detik
+                setTimeout(() => {
+                    notification.style.transform = 'translateX(100%)';
                     setTimeout(() => {
-                        notification.style.transform = 'translateX(0)';
-                    }, 100);
-
-                    // Hapus notifikasi setelah 3 detik
-                    setTimeout(() => {
-                        notification.style.transform = 'translateX(100%)';
-                        setTimeout(() => {
-                            document.body.removeChild(notification);
-                        }, 300);
-                    }, 3000);
-                }
-            </script>
+                        document.body.removeChild(notification);
+                    }, 300);
+                }, 3000);
+            }
+        </script>
     @endif
 </x-app-layout>

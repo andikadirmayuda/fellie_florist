@@ -50,4 +50,16 @@ class Bouquet extends Model
     {
         return !$this->orderItems()->exists();
     }
+
+    // Helper method untuk membersihkan komponen yang produknya sudah dihapus
+    public function cleanupInvalidComponents()
+    {
+        $this->components()->whereDoesntHave('product')->delete();
+    }
+
+    // Helper method untuk mendapatkan komponen yang valid saja
+    public function validComponents()
+    {
+        return $this->components()->whereHas('product');
+    }
 }

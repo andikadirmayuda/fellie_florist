@@ -30,8 +30,8 @@
                             title: 'Berhasil',
                             text: @json(session('success')),
                             confirmButtonColor: '#d946ef',
+                                                            });
                                                         });
-                                                    });
                 </script>
             @endif
 
@@ -155,59 +155,62 @@
                                                                     </h4>
                                                                     <div class="space-y-2">
                                                                         @foreach($sizeGroup['components'] as $comp)
-                                                                            <div
-                                                                                class="flex justify-between items-center py-1 border-b border-gray-100 last:border-b-0">
-                                                                                <span
-                                                                                    class="text-sm text-gray-800">{{ $comp->product->name }}</span>
-                                                                                <div class="flex items-center gap-3">
+                                                                            @if($comp->product) {{-- Only show components with valid
+                                                                                products --}}
+                                                                                <div
+                                                                                    class="flex justify-between items-center py-1 border-b border-gray-100 last:border-b-0">
                                                                                     <span
-                                                                                        class="text-sm text-gray-500">{{ $comp->quantity }}
-                                                                                        {{ $comp->product->base_unit ?? 'pcs' }}</span>
-                                                                                    <div class="flex gap-1">
-                                                                                        <a href="{{ route('bouquet-components.show', $comp->id) }}"
-                                                                                            title="Lihat Detail"
-                                                                                            class="p-1 rounded hover:bg-blue-100 text-blue-600 transition-colors">
-                                                                                            <svg xmlns="http://www.w3.org/2000/svg"
-                                                                                                class="h-4 w-4" fill="none"
-                                                                                                viewBox="0 0 24 24" stroke="currentColor">
-                                                                                                <path stroke-linecap="round"
-                                                                                                    stroke-linejoin="round" stroke-width="2"
-                                                                                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0zm6 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                                                            </svg>
-                                                                                        </a>
-                                                                                        <a href="{{ route('bouquet-components.edit', $comp->id) }}"
-                                                                                            title="Edit"
-                                                                                            class="p-1 rounded hover:bg-indigo-100 text-indigo-600 transition-colors">
-                                                                                            <svg xmlns="http://www.w3.org/2000/svg"
-                                                                                                class="h-4 w-4" fill="none"
-                                                                                                viewBox="0 0 24 24" stroke="currentColor">
-                                                                                                <path stroke-linecap="round"
-                                                                                                    stroke-linejoin="round" stroke-width="2"
-                                                                                                    d="M11 5h2m-1 0v14m-7-7h14" />
-                                                                                            </svg>
-                                                                                        </a>
-                                                                                        <form
-                                                                                            action="{{ route('bouquet-components.destroy', $comp->id) }}"
-                                                                                            method="POST" class="inline">
-                                                                                            @csrf
-                                                                                            @method('DELETE')
-                                                                                            <button type="submit" title="Hapus"
-                                                                                                class="p-1 rounded hover:bg-red-100 text-red-600 transition-colors"
-                                                                                                onclick="return confirm('Hapus komponen ini?')">
+                                                                                        class="text-sm text-gray-800">{{ $comp->product->name }}</span>
+                                                                                    <div class="flex items-center gap-3">
+                                                                                        <span
+                                                                                            class="text-sm text-gray-500">{{ $comp->quantity }}
+                                                                                            {{ $comp->product->base_unit ?? 'pcs' }}</span>
+                                                                                        <div class="flex gap-1">
+                                                                                            <a href="{{ route('bouquet-components.show', $comp->id) }}"
+                                                                                                title="Lihat Detail"
+                                                                                                class="p-1 rounded hover:bg-blue-100 text-blue-600 transition-colors">
                                                                                                 <svg xmlns="http://www.w3.org/2000/svg"
                                                                                                     class="h-4 w-4" fill="none"
-                                                                                                    viewBox="0 0 24 24"
-                                                                                                    stroke="currentColor">
+                                                                                                    viewBox="0 0 24 24" stroke="currentColor">
                                                                                                     <path stroke-linecap="round"
-                                                                                                        stroke-linejoin="round"
-                                                                                                        stroke-width="2"
-                                                                                                        d="M6 18L18 6M6 6l12 12" />
+                                                                                                        stroke-linejoin="round" stroke-width="2"
+                                                                                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0zm6 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                                                                 </svg>
-                                                                                            </button>
-                                                                                        </form>
+                                                                                            </a>
+                                                                                            <a href="{{ route('bouquet-components.edit', $comp->id) }}"
+                                                                                                title="Edit"
+                                                                                                class="p-1 rounded hover:bg-indigo-100 text-indigo-600 transition-colors">
+                                                                                                <svg xmlns="http://www.w3.org/2000/svg"
+                                                                                                    class="h-4 w-4" fill="none"
+                                                                                                    viewBox="0 0 24 24" stroke="currentColor">
+                                                                                                    <path stroke-linecap="round"
+                                                                                                        stroke-linejoin="round" stroke-width="2"
+                                                                                                        d="M11 5h2m-1 0v14m-7-7h14" />
+                                                                                                </svg>
+                                                                                            </a>
+                                                                                            <form
+                                                                                                action="{{ route('bouquet-components.destroy', $comp->id) }}"
+                                                                                                method="POST" class="inline">
+                                                                                                @csrf
+                                                                                                @method('DELETE')
+                                                                                                <button type="submit" title="Hapus"
+                                                                                                    class="p-1 rounded hover:bg-red-100 text-red-600 transition-colors"
+                                                                                                    onclick="return confirm('Hapus komponen ini?')">
+                                                                                                    <svg xmlns="http://www.w3.org/2000/svg"
+                                                                                                        class="h-4 w-4" fill="none"
+                                                                                                        viewBox="0 0 24 24"
+                                                                                                        stroke="currentColor">
+                                                                                                        <path stroke-linecap="round"
+                                                                                                            stroke-linejoin="round"
+                                                                                                            stroke-width="2"
+                                                                                                            d="M6 18L18 6M6 6l12 12" />
+                                                                                                    </svg>
+                                                                                                </button>
+                                                                                            </form>
+                                                                                        </div>
                                                                                     </div>
                                                                                 </div>
-                                                                            </div>
+                                                                            @endif {{-- End product check --}}
                                                                         @endforeach
                                                                     </div>
                                                                 </div>

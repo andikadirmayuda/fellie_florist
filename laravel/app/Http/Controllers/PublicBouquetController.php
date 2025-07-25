@@ -62,9 +62,41 @@ class PublicBouquetController extends Controller
 
     public function detailJson($id)
     {
-        $bouquet = Bouquet::with(['category', 'components.product', 'sizes', 'prices.size'])
-            ->findOrFail($id);
+        $bouquet = Bouquet::with([
+            'category', 
+            'components.product', 
+            'components.size',
+            'sizes', 
+            'prices.size'
+        ])->findOrFail($id);
 
-        return response()->json($bouquet);
+        // Bersihkan komponen yang tidak valid (produk sudah dihapus)
+        $bouquet->cleanupInvalidComponents();
+
+        // Ambil ulang data bouquet dengan komponen yang valid saja
+        $bouquet = Bouquet::with([
+            'category', 
+            'validComponents.product', 
+            'validComponents.size',
+            'sizes', 
+            'prices.size'
+        ])->findOrFail($id);
+
+        // Kelompokkan komponen berdasarkan ukuran
+        $componentsBySize = $bouquet->validComponents->groupBy('size_id');
+        
+        // Format data untuk response
+        $bouquetData = $bouquet->toArray();
+        
+        // Override components dengan validComponents
+        $bouquetData['components'] = $bouquet->validComponents->toArray();
+        $bouquetData['components_by_size'] = [];
+        
+        foreach ($componentsBySize as $sizeId => $components) {
+            // Pastikan sizeId dikonversi ke string untuk konsistensi dengan JavaScript
+            $bouquetData['components_by_size'][(string)$sizeId] = $components->toArray();
+        }
+
+        return response()->json($bouquetData);
     }
 }

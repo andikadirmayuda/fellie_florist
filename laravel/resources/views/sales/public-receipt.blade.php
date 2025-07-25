@@ -218,9 +218,15 @@
                                         {{ $i + 1 }}
                                     </td>
                                     <td class="px-6 py-4">
-                                        <div class="text-sm font-medium text-gray-900">{{ $item->product->name }}</div>
-                                        @if($item->product->code)
-                                            <div class="text-xs text-gray-500 mt-1">{{ $item->product->code }}</div>
+                                        @if($item->product)
+                                            <div class="text-sm font-medium text-gray-900">{{ $item->product->name }}</div>
+                                            @if($item->product->code)
+                                                <div class="text-xs text-gray-500 mt-1">{{ $item->product->code }}</div>
+                                            @endif
+                                        @else
+                                            <div class="text-sm font-medium text-gray-900 italic text-red-600">Produk Dihapus
+                                            </div>
+                                            <div class="text-xs text-gray-500 mt-1">ID: {{ $item->product_id }}</div>
                                         @endif
                                     </td>
                                     <td class="px-4 py-4 text-center">
@@ -259,10 +265,16 @@
                                     </span>
                                     <div>
                                         <h4 class="text-sm font-semibold text-gray-900">
-                                            {{ $item->product->name }}
-                                            @if($item->product->code)
-                                                <span class="text-xs text-gray-500 font-normal"> |
-                                                    {{ $item->product->code }}</span>
+                                            @if($item->product)
+                                                {{ $item->product->name }}
+                                                @if($item->product->code)
+                                                    <span class="text-xs text-gray-500 font-normal"> |
+                                                        {{ $item->product->code }}</span>
+                                                @endif
+                                            @else
+                                                <span class="italic text-red-600">Produk Dihapus</span>
+                                                <span class="text-xs text-gray-500 font-normal"> | ID:
+                                                    {{ $item->product_id }}</span>
                                             @endif
                                         </h4>
                                     </div>
