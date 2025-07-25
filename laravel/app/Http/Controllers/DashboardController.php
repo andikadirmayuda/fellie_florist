@@ -21,14 +21,14 @@ class DashboardController extends Controller
         // Statistik utama
         $totalCustomers = Customer::count();
         $totalProducts = Product::count();
-        $totalOrders = Order::count();
+        $totalOrders = PublicOrder::count(); // Ubah ke PublicOrder untuk pesanan online
         $totalSales = Sale::count();
 
         // Produk stok menipis
         $lowStockProducts = Product::whereColumn('current_stock', '<=', 'min_stock')->get();
 
         // Pesanan terbaru
-        $recentOrders = Order::with('customer')->latest()->take(5)->get();
+        $recentOrders = PublicOrder::latest()->take(5)->get();
 
         // Data grafik penjualan (7 hari terakhir)
         $sales = Sale::selectRaw('DATE(created_at) as date, SUM(total) as total')
@@ -36,11 +36,25 @@ class DashboardController extends Controller
             ->groupBy('date')
             ->orderBy('date')
             ->get();
+            
+        // Buat array 7 hari terakhir untuk memastikan semua tanggal tampil
+        $last7DaysSales = collect();
+        for ($i = 6; $i >= 0; $i--) {
+            $date = now()->subDays($i)->format('Y-m-d');
+            $dateFormatted = now()->subDays($i)->format('d M');
+            $total = $sales->where('date', $date)->first()->total ?? 0;
+            
+            $last7DaysSales->push([
+                'date' => $dateFormatted,
+                'total' => $total
+            ]);
+        }
+        
         $salesChartData = [
-            'labels' => $sales->pluck('date')->map(fn($d) => date('d M', strtotime($d)))->toArray(),
+            'labels' => $last7DaysSales->pluck('date')->toArray(),
             'datasets' => [[
                 'label' => 'Penjualan',
-                'data' => $sales->pluck('total')->toArray(),
+                'data' => $last7DaysSales->pluck('total')->toArray(),
                 'backgroundColor' => '#111827',
                 'borderColor' => '#111827',
                 'fill' => false,
@@ -48,19 +62,31 @@ class DashboardController extends Controller
         ];
 
         // Data grafik pesanan (7 hari terakhir)
+        // Ambil semua pesanan publik dalam 7 hari terakhir untuk menampilkan performa
         $orders = PublicOrder::selectRaw('DATE(created_at) as date, COUNT(*) as total')
             ->where('created_at', '>=', now()->subDays(6))
-            ->whereIn('status', ['completed', 'done'])
-            ->where('payment_status', 'paid')
             ->groupBy('date')
             ->orderBy('date')
             ->get();
 
+        // Buat array 7 hari terakhir untuk memastikan semua tanggal tampil
+        $last7Days = collect();
+        for ($i = 6; $i >= 0; $i--) {
+            $date = now()->subDays($i)->format('Y-m-d');
+            $dateFormatted = now()->subDays($i)->format('d M');
+            $count = $orders->where('date', $date)->first()->total ?? 0;
+            
+            $last7Days->push([
+                'date' => $dateFormatted,
+                'total' => $count
+            ]);
+        }
+
         $ordersChartData = [
-            'labels' => $orders->pluck('date')->map(fn($d) => date('d M', strtotime($d)))->toArray(),
+            'labels' => $last7Days->pluck('date')->toArray(),
             'datasets' => [[
-                'label' => 'Pesanan Selesai & Lunas',
-                'data' => $orders->pluck('total')->toArray(),
+                'label' => 'Pesanan Publik',
+                'data' => $last7Days->pluck('total')->toArray(),
                 'backgroundColor' => '#6B7280',
             ]],
         ];
