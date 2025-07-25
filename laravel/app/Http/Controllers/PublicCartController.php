@@ -7,6 +7,11 @@ use App\Models\Product;
 
 class PublicCartController extends Controller
 {
+    public function index()
+    {
+        return view('public.cart');
+    }
+    
     // Tambahkan method sesuai kebutuhan, contoh:
     public function addToCart(Request $request)
     {

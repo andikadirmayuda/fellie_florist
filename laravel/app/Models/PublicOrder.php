@@ -19,7 +19,6 @@ class PublicOrder extends Model
         'payment_proof',
         'wa_number',
         'packing_photo',
-        'info',
     ];
 
     public function items()

@@ -60,7 +60,6 @@ class PublicCheckoutController extends Controller
                 'wa_number' => $validated['wa_number'],
                 'status' => 'pending',
                 'payment_status' => 'waiting_confirmation',
-                'info' => 'Pesanan sedang menunggu konfirmasi stok dari admin. Anda akan dihubungi melalui WhatsApp untuk konfirmasi dan proses pembayaran.',
             ]);
 
             foreach ($cart as $cartKey => $item) {

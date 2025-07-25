@@ -178,12 +178,12 @@
                         let tbody = '';
                         productsData.forEach((p, i) => {
                             tbody += `<tr>
-                                                            <td>${p.bouquet_name || '-'}</td>
-                                                            <td>${p.size_name || '-'}</td>
-                                                            <td>${p.name}</td>
-                                                            <td>${p.quantity}</td>
-                                                            <td><a href="#" class="text-pink-600 font-bold remove-product" data-idx="${i}">Hapus</a></td>
-                                                        </tr>`;
+                                                                <td>${p.bouquet_name || '-'}</td>
+                                                                <td>${p.size_name || '-'}</td>
+                                                                <td>${p.name}</td>
+                                                                <td>${p.quantity}</td>
+                                                                <td><a href="#" class="text-pink-600 font-bold remove-product" data-idx="${i}">Hapus</a></td>
+                                                            </tr>`;
                         });
                         $('#productTable tbody').html(tbody);
                         $('#productsInput').val(JSON.stringify(productsData));

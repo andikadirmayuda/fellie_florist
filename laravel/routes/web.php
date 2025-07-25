@@ -134,15 +134,6 @@ Route::post('/admin/public-orders/{id}/update-status', [App\Http\Controllers\Adm
 Route::post('/admin/public-orders/{id}/update-payment-status', [App\Http\Controllers\AdminPublicOrderController::class, 'updatePaymentStatus'])->name('admin.public-orders.update-payment-status');
 
 // =====================
-// Keranjang belanja publik (tanpa login) - API only, no separate cart page
-// =====================
-Route::post('/cart/add', [App\Http\Controllers\PublicCartController::class, 'add'])->name('public.cart.add');
-Route::get('/cart/get', [App\Http\Controllers\PublicCartController::class, 'get'])->name('public.cart.get');
-Route::post('/cart/update/{cartKey}', [App\Http\Controllers\PublicCartController::class, 'updateQuantity'])->name('public.cart.updateQuantity');
-Route::post('/cart/remove/{cartKey}', [App\Http\Controllers\PublicCartController::class, 'remove'])->name('public.cart.remove');
-Route::post('/cart/clear', [App\Http\Controllers\PublicCartController::class, 'clear'])->name('public.cart.clear');
-
-// =====================
 // Route test upload sederhana
 Route::get('/test-upload', function() {
     return '<form method="POST" action="/test-upload" enctype="multipart/form-data">'

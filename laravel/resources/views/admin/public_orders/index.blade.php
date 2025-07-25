@@ -7,83 +7,112 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 bg-white border-b border-gray-200">
                     @php $user = auth()->user(); @endphp
-                    @if($user && $user->hasRole(['owner','admin']))
+                    @if($user && $user->hasRole(['owner', 'admin']))
                         <div class="mb-4">
-                            <button type="button" id="toggle-mass-delete" class="bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded shadow">
+                            <button type="button" id="toggle-mass-delete"
+                                class="bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded shadow">
                                 Aktifkan Mode Hapus Massal
                             </button>
                         </div>
                         <div id="mass-delete-panel" style="display:none;">
-                            <form id="bulk-delete-form" method="POST" action="{{ route('admin.public-orders.bulk-delete') }}" onsubmit="return confirm('Yakin ingin menghapus pesanan publik dengan status yang dipilih? Data yang dihapus tidak dapat dikembalikan!')" class="flex flex-col md:flex-row md:items-center gap-2">
+                            <form id="bulk-delete-form" method="POST"
+                                action="{{ route('admin.public-orders.bulk-delete') }}"
+                                onsubmit="return confirm('Yakin ingin menghapus pesanan publik dengan status yang dipilih? Data yang dihapus tidak dapat dikembalikan!')"
+                                class="flex flex-col md:flex-row md:items-center gap-2">
                                 @csrf
                                 <div class="flex flex-col md:flex-row gap-4 w-full">
                                     <div class="border rounded-lg p-3 flex-1 min-w-[220px] bg-blue-50">
                                         <div class="font-semibold text-blue-700 mb-2 text-sm">Status Pesanan</div>
                                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-2 gap-y-1">
-                                            <label class="inline-flex items-center"><input type="checkbox" name="statuses[]" value="pending" class="mr-1"> Menunggu Diproses</label>
-                                            <label class="inline-flex items-center"><input type="checkbox" name="statuses[]" value="processed" class="mr-1"> Diproses</label>
-                                            <label class="inline-flex items-center"><input type="checkbox" name="statuses[]" value="packing" class="mr-1"> Dikemas</label>
-                                            <label class="inline-flex items-center"><input type="checkbox" name="statuses[]" value="shipped" class="mr-1"> Dikirim</label>
-                                            <label class="inline-flex items-center"><input type="checkbox" name="statuses[]" value="completed" class="mr-1"> Selesai (completed)</label>
-                                            <label class="inline-flex items-center"><input type="checkbox" name="statuses[]" value="done" class="mr-1"> Selesai (done)</label>
-                                            <label class="inline-flex items-center"><input type="checkbox" name="statuses[]" value="cancelled" class="mr-1"> Dibatalkan</label>
+                                            <label class="inline-flex items-center"><input type="checkbox" name="statuses[]"
+                                                    value="pending" class="mr-1"> Menunggu Diproses</label>
+                                            <label class="inline-flex items-center"><input type="checkbox" name="statuses[]"
+                                                    value="processed" class="mr-1"> Diproses</label>
+                                            <label class="inline-flex items-center"><input type="checkbox" name="statuses[]"
+                                                    value="packing" class="mr-1"> Dikemas</label>
+                                            <label class="inline-flex items-center"><input type="checkbox" name="statuses[]"
+                                                    value="shipped" class="mr-1"> Dikirim</label>
+                                            <label class="inline-flex items-center"><input type="checkbox" name="statuses[]"
+                                                    value="completed" class="mr-1"> Selesai (completed)</label>
+                                            <label class="inline-flex items-center"><input type="checkbox" name="statuses[]"
+                                                    value="done" class="mr-1"> Selesai (done)</label>
+                                            <label class="inline-flex items-center"><input type="checkbox" name="statuses[]"
+                                                    value="cancelled" class="mr-1"> Dibatalkan</label>
                                         </div>
                                     </div>
                                     <div class="border rounded-lg p-3 flex-1 min-w-[220px] bg-green-50">
                                         <div class="font-semibold text-green-700 mb-2 text-sm">Status Pembayaran</div>
                                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-2 gap-y-1">
-                                            <label class="inline-flex items-center"><input type="checkbox" name="statuses[]" value="waiting_confirmation" class="mr-1"> Menunggu Konfirmasi</label>
-                                            <label class="inline-flex items-center"><input type="checkbox" name="statuses[]" value="ready_to_pay" class="mr-1"> Siap Dibayar</label>
-                                            <label class="inline-flex items-center"><input type="checkbox" name="statuses[]" value="waiting_payment" class="mr-1"> Menunggu Pembayaran</label>
-                                            <label class="inline-flex items-center"><input type="checkbox" name="statuses[]" value="waiting_verification" class="mr-1"> Menunggu Verifikasi</label>
-                                            <label class="inline-flex items-center"><input type="checkbox" name="statuses[]" value="dp_paid" class="mr-1"> DP</label>
-                                            <label class="inline-flex items-center"><input type="checkbox" name="statuses[]" value="partial_paid" class="mr-1"> Sebagian Bayar</label>
-                                            <label class="inline-flex items-center"><input type="checkbox" name="statuses[]" value="paid" class="mr-1"> Lunas</label>
-                                            <label class="inline-flex items-center"><input type="checkbox" name="statuses[]" value="rejected" class="mr-1"> Ditolak</label>
-                                            <label class="inline-flex items-center"><input type="checkbox" name="statuses[]" value="cancelled" class="mr-1"> Dibatalkan (bayar)</label>
+                                            <label class="inline-flex items-center"><input type="checkbox" name="statuses[]"
+                                                    value="waiting_confirmation" class="mr-1"> Menunggu Konfirmasi</label>
+                                            <label class="inline-flex items-center"><input type="checkbox" name="statuses[]"
+                                                    value="ready_to_pay" class="mr-1"> Siap Dibayar</label>
+                                            <label class="inline-flex items-center"><input type="checkbox" name="statuses[]"
+                                                    value="waiting_payment" class="mr-1"> Menunggu Pembayaran</label>
+                                            <label class="inline-flex items-center"><input type="checkbox" name="statuses[]"
+                                                    value="waiting_verification" class="mr-1"> Menunggu Verifikasi</label>
+                                            <label class="inline-flex items-center"><input type="checkbox" name="statuses[]"
+                                                    value="dp_paid" class="mr-1"> DP</label>
+                                            <label class="inline-flex items-center"><input type="checkbox" name="statuses[]"
+                                                    value="partial_paid" class="mr-1"> Sebagian Bayar</label>
+                                            <label class="inline-flex items-center"><input type="checkbox" name="statuses[]"
+                                                    value="paid" class="mr-1"> Lunas</label>
+                                            <label class="inline-flex items-center"><input type="checkbox" name="statuses[]"
+                                                    value="rejected" class="mr-1"> Ditolak</label>
+                                            <label class="inline-flex items-center"><input type="checkbox" name="statuses[]"
+                                                    value="cancelled" class="mr-1"> Dibatalkan (bayar)</label>
                                         </div>
                                     </div>
                                 </div>
-                                <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded shadow">
+                                <button type="submit"
+                                    class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded shadow">
                                     Hapus Semua Pesanan (Status Dipilih)
                                 </button>
                             </form>
                         </div>
                         <script>
-                        document.addEventListener('DOMContentLoaded', function() {
-                            const toggleBtn = document.getElementById('toggle-mass-delete');
-                            const panel = document.getElementById('mass-delete-panel');
-                            let massMode = false;
-                            toggleBtn.addEventListener('click', function() {
-                                massMode = !massMode;
-                                panel.style.display = massMode ? '' : 'none';
-                                toggleBtn.textContent = massMode ? 'Nonaktifkan Mode Hapus Massal' : 'Aktifkan Mode Hapus Massal';
+                            document.addEventListener('DOMContentLoaded', function () {
+                                const toggleBtn = document.getElementById('toggle-mass-delete');
+                                const panel = document.getElementById('mass-delete-panel');
+                                let massMode = false;
+                                toggleBtn.addEventListener('click', function () {
+                                    massMode = !massMode;
+                                    panel.style.display = massMode ? '' : 'none';
+                                    toggleBtn.textContent = massMode ? 'Nonaktifkan Mode Hapus Massal' : 'Aktifkan Mode Hapus Massal';
+                                });
                             });
-                        });
                         </script>
                     @endif
                     <!-- Filter Bar Responsive -->
                     <div class="mb-6">
                         <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
                             <div>
-                                <label for="filter-nama" class="block text-xs font-semibold text-gray-600 mb-1">Nama Pelanggan</label>
-                                <input type="text" id="filter-nama" placeholder="Cari nama..." class="w-full border border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 rounded-lg px-3 py-2 text-sm transition" />
+                                <label for="filter-nama" class="block text-xs font-semibold text-gray-600 mb-1">Nama
+                                    Pelanggan</label>
+                                <input type="text" id="filter-nama" placeholder="Cari nama..."
+                                    class="w-full border border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 rounded-lg px-3 py-2 text-sm transition" />
                             </div>
                             <div>
-                                <label for="filter-tanggal" class="block text-xs font-semibold text-gray-600 mb-1">Tanggal Kirim/Ambil</label>
-                                <input type="date" id="filter-tanggal" class="w-full border border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 rounded-lg px-3 py-2 text-sm transition" />
+                                <label for="filter-tanggal"
+                                    class="block text-xs font-semibold text-gray-600 mb-1">Tanggal Kirim/Ambil</label>
+                                <input type="date" id="filter-tanggal"
+                                    class="w-full border border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 rounded-lg px-3 py-2 text-sm transition" />
                             </div>
                             <div>
-                                <label for="filter-metode" class="block text-xs font-semibold text-gray-600 mb-1">Metode Pengiriman</label>
-                                <select id="filter-metode" class="w-full border border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 rounded-lg px-3 py-2 text-sm transition">
+                                <label for="filter-metode" class="block text-xs font-semibold text-gray-600 mb-1">Metode
+                                    Pengiriman</label>
+                                <select id="filter-metode"
+                                    class="w-full border border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 rounded-lg px-3 py-2 text-sm transition">
                                     <option value="">Semua</option>
                                     <option value="delivery">Delivery</option>
                                     <option value="pickup">Pickup</option>
                                 </select>
                             </div>
                             <div>
-                                <label for="filter-status" class="block text-xs font-semibold text-gray-600 mb-1">Status Pesanan</label>
-                                <select id="filter-status" class="w-full border border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 rounded-lg px-3 py-2 text-sm transition">
+                                <label for="filter-status" class="block text-xs font-semibold text-gray-600 mb-1">Status
+                                    Pesanan</label>
+                                <select id="filter-status"
+                                    class="w-full border border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 rounded-lg px-3 py-2 text-sm transition">
                                     <option value="">Semua</option>
                                     <option value="pending">Menunggu Diproses</option>
                                     <option value="processed">Diproses</option>
@@ -95,8 +124,10 @@
                                 </select>
                             </div>
                             <div>
-                                <label for="filter-bayar" class="block text-xs font-semibold text-gray-600 mb-1">Status Pembayaran</label>
-                                <select id="filter-bayar" class="w-full border border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 rounded-lg px-3 py-2 text-sm transition">
+                                <label for="filter-bayar" class="block text-xs font-semibold text-gray-600 mb-1">Status
+                                    Pembayaran</label>
+                                <select id="filter-bayar"
+                                    class="w-full border border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 rounded-lg px-3 py-2 text-sm transition">
                                     <option value="">Semua</option>
                                     <option value="waiting_confirmation">Menunggu Konfirmasi</option>
                                     <option value="ready_to_pay">Siap Dibayar</option>
@@ -128,9 +159,10 @@
                                 {{-- Data rows will be loaded here via AJAX --}}
                                 @foreach($orders as $order)
                                     <tr>
-                                        @if($user && $user->hasRole(['owner','admin']))
+                                        @if($user && $user->hasRole(['owner', 'admin']))
                                             <td class="border px-2 py-2 mass-delete-checkbox" style="display:none;">
-                                                <input type="checkbox" form="mass-delete-form" name="ids[]" value="{{ $order->id }}">
+                                                <input type="checkbox" form="mass-delete-form" name="ids[]"
+                                                    value="{{ $order->id }}">
                                             </td>
                                         @endif
                                         @include('admin.public_orders._order_row', ['order' => $order])
@@ -153,7 +185,7 @@
         // Debounce util
         function debounce(func, wait) {
             let timeout;
-            return function(...args) {
+            return function (...args) {
                 clearTimeout(timeout);
                 timeout = setTimeout(() => func.apply(this, args), wait);
             };
