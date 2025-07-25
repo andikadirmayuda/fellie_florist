@@ -29,6 +29,7 @@ Route::post('/cart/update/{cartKey}', [PublicCartController::class, 'updateQuant
 Route::post('/cart/remove/{cartKey}', [PublicCartController::class, 'remove'])->name('public.cart.remove');
 Route::post('/cart/clear', [PublicCartController::class, 'clear'])->name('public.cart.clear');
 Route::get('/cart/get', [PublicCartController::class, 'getCart']);
+Route::get('/cart/items', [PublicCartController::class, 'getCart']); // Alias for backward compatibility
 
 // Invoice publik (detail pesanan publik)
 Route::get('/invoice/{public_code}', [PublicOrderController::class, 'publicInvoice'])

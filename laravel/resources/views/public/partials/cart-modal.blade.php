@@ -220,7 +220,8 @@
         }
 
         try {
-            const response = await fetch('/online-customers/validate-reseller-code', {
+            console.log('Validating reseller code:', code, 'for WA:', waNumber);
+            const response = await fetch('/api/validate-reseller-code', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -234,7 +235,14 @@
                 })
             });
 
+            console.log('Response status:', response.status);
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
             const data = await response.json();
+            console.log('Response data:', data);
 
             if (!data.valid) {
                 // Code is no longer valid, clear session and refresh UI
@@ -246,7 +254,8 @@
                 showResellerNotification('Kode reseller Anda sudah tidak valid atau telah dibatalkan.', 'warning');
             }
         } catch (error) {
-            console.log('Could not validate reseller status:', error);
+            console.error('Error validating reseller status:', error);
+            showResellerNotification('Terjadi kesalahan saat memvalidasi kode reseller. Silakan coba lagi.', 'error');
         }
     }
 
@@ -322,7 +331,7 @@
         showResellerStatus('info', 'Memvalidasi kode reseller...');
 
         // Send AJAX request
-        fetch('/online-customers/validate-reseller-code', {
+        fetch('/api/validate-reseller-code', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -335,8 +344,15 @@
                 wa_number: waNumber
             })
         })
-            .then(response => response.json())
+            .then(response => {
+                console.log('Validation response status:', response.status);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
             .then(data => {
+                console.log('Validation response data:', data);
                 if (data.valid) {
                     // Save to session
                     sessionStorage.setItem('resellerActive', 'true');

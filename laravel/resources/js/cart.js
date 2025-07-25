@@ -23,13 +23,23 @@ function toggleCart() {
 }
 
 function updateCart() {
-    fetch('/cart/items')
-    .then(response => response.json())
+    fetch('/cart/get')
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
     .then(data => {
         const cartItemsContainer = document.getElementById('cartItems');
         const cartBadge = document.getElementById('cartBadge');
         const cartTotal = document.getElementById('cartTotal');
         const checkoutButton = document.querySelector('#sideCart a[href*="checkout"]');
+        
+        if (!data.success) {
+            console.error('Cart update failed:', data.message);
+            return;
+        }
         
         if (data.items.length === 0) {
             cartItemsContainer.innerHTML = `
@@ -72,6 +82,9 @@ function updateCart() {
             </div>
         `).join('');
         cartTotal.textContent = `Rp ${formatPrice(data.total)}`;
+    })
+    .catch(error => {
+        console.error('Error updating cart:', error);
     });
 }
 
@@ -84,11 +97,21 @@ function updateQuantity(cartKey, change) {
         },
         body: JSON.stringify({ quantity_change: change })
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
     .then(data => {
         if (data.success) {
             updateCart();
+        } else {
+            console.error('Update quantity failed:', data.message);
         }
+    })
+    .catch(error => {
+        console.error('Error updating quantity:', error);
     });
 }
 
@@ -100,10 +123,20 @@ function removeFromCart(cartKey) {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
         }
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
     .then(data => {
         if (data.success) {
             updateCart();
+        } else {
+            console.error('Remove from cart failed:', data.message);
         }
+    })
+    .catch(error => {
+        console.error('Error removing from cart:', error);
     });
 }

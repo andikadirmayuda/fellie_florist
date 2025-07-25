@@ -7,6 +7,7 @@ use App\Models\PublicOrder;
 use App\Models\Customer;
 use App\Models\ResellerCode;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
 class OnlineCustomerController extends Controller
@@ -358,16 +359,24 @@ class OnlineCustomerController extends Controller
      */
     public function validateResellerCode(Request $request)
     {
-        $request->validate([
-            'code' => 'required|string',
-            'wa_number' => 'required|string'
-        ]);
+        try {
+            Log::info('Validating reseller code', [
+                'code' => $request->code,
+                'wa_number' => $request->wa_number
+            ]);
 
-        $validation = ResellerCode::validateCode($request->code, $request->wa_number);
-        
-        if ($validation['valid']) {
-            // Cek apakah customer adalah reseller
-            $customer = Customer::where('phone', $request->wa_number)->first();
+            $request->validate([
+                'code' => 'required|string',
+                'wa_number' => 'required|string'
+            ]);
+
+            $validation = ResellerCode::validateCode($request->code, $request->wa_number);
+            
+            Log::info('Reseller code validation result', $validation);
+            
+            if ($validation['valid']) {
+                // Cek apakah customer adalah reseller
+                $customer = Customer::where('phone', $request->wa_number)->first();
             $isReseller = $customer && $customer->is_reseller;
 
             if (!$isReseller) {
@@ -388,6 +397,18 @@ class OnlineCustomerController extends Controller
             'valid' => false,
             'message' => $validation['message']
         ], 400);
+        
+        } catch (\Exception $e) {
+            Log::error('Error validating reseller code', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return response()->json([
+                'valid' => false,
+                'message' => 'Terjadi kesalahan sistem'
+            ], 500);
+        }
     }
 
     /**

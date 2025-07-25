@@ -12,6 +12,12 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
+        // Helper function untuk format harga yang aman
+        function safeFormatPrice(price) {
+            const numPrice = parseInt(price) || 0;
+            return numPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
+        
         // Fungsi untuk menambah ke keranjang dengan pilihan harga (global)
         function addToCartWithPrice(flowerId, priceType) {
             fetch('/cart/add', {
@@ -328,7 +334,7 @@
                 'id' => $price->id,
                 'type' => $price->type,
                 'label' => __(ucwords(str_replace('_', ' ', $price->type))),
-                'price' => $price->price
+                'price' => (int) $price->price // Pastikan price adalah integer
             ];
         });
                                     @endphp
@@ -369,7 +375,20 @@
                                 </button>
                                 <script>
                                     window.flowerPrices = window.flowerPrices || {};
-                                    window.flowerPrices[{{ $flower->id }}] = @json($jsPrices);
+                                    try {
+                                        const pricesData = @json($jsPrices);
+                                        // Validasi dan sanitasi data harga
+                                        const sanitizedPrices = pricesData.map(price => ({
+                                            id: parseInt(price.id) || 0,
+                                            type: price.type || '',
+                                            label: price.label || '',
+                                            price: parseInt(price.price) || 0
+                                        }));
+                                        window.flowerPrices[{{ $flower->id }}] = sanitizedPrices;
+                                    } catch (error) {
+                                        console.error('Error parsing flower prices:', error);
+                                        window.flowerPrices[{{ $flower->id }}] = [];
+                                    }
                                 </script>
                             </div>
                         </div>
@@ -518,6 +537,9 @@
             <p class="text-rose-200 text-sm">© 2025 Fellie Florist. All rights reserved.</p>
         </div>
     </footer>
+
+    <!-- Cart Modal -->
+    @include('public.partials.cart-modal')
 
     <script src="{{ asset('js/cart.js') }}"></script>
     <script>

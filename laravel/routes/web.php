@@ -32,7 +32,6 @@ Route::get('/', function () {
 
 // Public API Routes untuk validasi kode reseller
 Route::post('/api/validate-reseller-code', [OnlineCustomerController::class, 'validateResellerCode'])->name('api.validate-reseller-code');
-Route::post('/online-customers/validate-reseller-code', [OnlineCustomerController::class, 'validateResellerCode'])->name('validate-reseller-code');
 Route::post('/api/mark-reseller-code-used', [OnlineCustomerController::class, 'markResellerCodeUsed'])->name('api.mark-reseller-code-used');
 
 Route::get('/dashboard', [DashboardController::class, 'index'])
@@ -174,6 +173,8 @@ Route::post('/test-upload', function(\Illuminate\Http\Request $request) {
 
 // Endpoint untuk mengambil isi cart dalam format JSON
 Route::get('/cart/json', [PublicCartController::class, 'getCart'])->name('public.cart.json');
+Route::get('/cart/get', [PublicCartController::class, 'getCart']); // Alias
+Route::get('/cart/items', [PublicCartController::class, 'getCart']); // Alias for backward compatibility
 
 Route::post('/admin/public-orders/{id}/add-payment', [AdminPublicOrderController::class, 'addPayment'])->name('admin.public-orders.add-payment');
 
