@@ -30,6 +30,9 @@ Route::get('/', function () {
     return redirect()->route('public.flowers');
 });
 
+// Public API Routes untuk validasi kode reseller
+Route::post('/api/validate-reseller-code', [OnlineCustomerController::class, 'validateResellerCode'])->name('api.validate-reseller-code');
+Route::post('/api/mark-reseller-code-used', [OnlineCustomerController::class, 'markResellerCodeUsed'])->name('api.mark-reseller-code-used');
 
 Route::get('/dashboard', [DashboardController::class, 'index'])
 ->middleware(['auth', 'verified'])
@@ -54,6 +57,10 @@ Route::middleware('auth')->group(function () {
     ]);
     Route::post('online-customers/{wa_number}/set-reseller', [OnlineCustomerController::class, 'setAsReseller'])->name('online-customers.set-reseller');
     Route::post('online-customers/{wa_number}/set-promo', [OnlineCustomerController::class, 'setPromoDiscount'])->name('online-customers.set-promo');
+    
+    // Reseller Code Management Routes
+    Route::post('online-customers/{wa_number}/generate-code', [OnlineCustomerController::class, 'generateResellerCode'])->name('online-customers.generate-code');
+    Route::delete('online-customers/{wa_number}/revoke-code/{codeId}', [OnlineCustomerController::class, 'revokeResellerCode'])->name('online-customers.revoke-code');
     
     // Customer Trash Routes
     Route::get('customers/trashed', [CustomerController::class, 'trashed'])->name('customers.trashed');

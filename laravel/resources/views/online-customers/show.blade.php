@@ -159,6 +159,140 @@
         </div>
     </div>
 
+    <!-- Reseller Code Management -->
+    @if($customerData->customer && $customerData->customer->is_reseller)
+    <div class="bg-gray-50 rounded-lg p-6 mb-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">
+            <i class="bi bi-key text-purple-500 mr-2"></i>
+            Kelola Kode Reseller
+            <span class="text-sm text-gray-500 ml-2">({{ isset($activeResellerCodes) ? $activeResellerCodes->count() : 0 }} aktif)</span>
+        </h3>
+        
+        <!-- Generate New Code Form -->
+        <div class="bg-white border border-gray-200 rounded-lg p-4 mb-4">
+            <h4 class="font-medium text-gray-800 mb-3">Generate Kode Baru</h4>
+            
+            @if ($errors->any())
+                <div class="mb-3 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+                    <ul class="text-sm">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+            
+            <form action="{{ route('online-customers.generate-code', $customerData->wa_number) }}" method="POST" class="flex gap-3 items-end">
+                @csrf
+                <div class="flex-1">
+                    <label class="block text-sm text-gray-600 mb-1">Masa Berlaku (Jam)</label>
+                    <input type="number" 
+                           name="expiry_hours" 
+                           value="24"
+                           min="1" 
+                           max="168"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500 text-sm"
+                           required>
+                </div>
+                <div class="flex-2">
+                    <label class="block text-sm text-gray-600 mb-1">Catatan (Opsional)</label>
+                    <input type="text" 
+                           name="notes" 
+                           placeholder="Catatan untuk kode ini..."
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500 text-sm">
+                </div>
+                <button type="submit" class="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition text-sm">
+                    <i class="bi bi-plus-circle mr-1"></i>
+                    Generate
+                </button>
+            </form>
+        </div>
+
+        <!-- Active Codes -->
+        @if(isset($activeResellerCodes) && $activeResellerCodes->count() > 0)
+        <div class="bg-white border border-gray-200 rounded-lg p-4 mb-4">
+            <h4 class="font-medium text-gray-800 mb-3 flex items-center">
+                <i class="bi bi-check-circle text-green-500 mr-2"></i>
+                Kode Aktif
+            </h4>
+            
+            <div class="space-y-3">
+                @foreach($activeResellerCodes as $code)
+                <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                    <div>
+                        <div class="font-mono text-lg font-bold text-green-700">{{ $code->code }}</div>
+                        <div class="text-sm text-gray-600">
+                            Berlaku hingga: {{ $code->expires_at->format('d M Y H:i') }}
+                            ({{ $code->expires_at->diffForHumans() }})
+                        </div>
+                        @if($code->notes)
+                        <div class="text-xs text-gray-500 mt-1">{{ $code->notes }}</div>
+                        @endif
+                    </div>
+                    <form action="{{ route('online-customers.revoke-code', [$customerData->wa_number, $code->id]) }}" 
+                          method="POST" 
+                          onsubmit="return confirm('Yakin ingin membatalkan kode ini?')">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="px-3 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600 transition">
+                            <i class="bi bi-x-circle mr-1"></i>
+                            Batalkan
+                        </button>
+                    </form>
+                </div>
+                @endforeach
+            </div>
+        </div>
+        @endif
+
+        <!-- Code History -->
+        @if(isset($resellerCodeHistory) && $resellerCodeHistory->count() > 0)
+        <div class="bg-white border border-gray-200 rounded-lg p-4">
+            <h4 class="font-medium text-gray-800 mb-3 flex items-center">
+                <i class="bi bi-clock-history text-gray-500 mr-2"></i>
+                Riwayat Kode
+            </h4>
+            
+            <div class="space-y-2 max-h-64 overflow-y-auto">
+                @foreach($resellerCodeHistory as $code)
+                <div class="flex items-center justify-between p-2 border-b border-gray-100 last:border-b-0">
+                    <div>
+                        <div class="font-mono text-sm {{ $code->is_used ? 'text-gray-500' : ($code->isValid() ? 'text-green-600' : 'text-red-500') }}">
+                            {{ $code->code }}
+                        </div>
+                        <div class="text-xs text-gray-500">
+                            Dibuat: {{ $code->created_at->format('d M Y H:i') }}
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        @if($code->is_used)
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-600">
+                                <i class="bi bi-check-circle mr-1"></i>
+                                Digunakan
+                            </span>
+                            @if($code->used_at)
+                            <div class="text-xs text-gray-400 mt-1">{{ $code->used_at->format('d M Y H:i') }}</div>
+                            @endif
+                        @elseif($code->isValid())
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs bg-green-100 text-green-600">
+                                <i class="bi bi-circle mr-1"></i>
+                                Aktif
+                            </span>
+                        @else
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs bg-red-100 text-red-600">
+                                <i class="bi bi-x-circle mr-1"></i>
+                                Expired
+                            </span>
+                        @endif
+                    </div>
+                </div>
+                @endforeach
+            </div>
+        </div>
+        @endif
+    </div>
+    @endif
+
     <!-- Order History -->
     <div class="bg-gray-50 rounded-lg p-6">
         <h3 class="text-lg font-semibold text-gray-800 mb-4">
@@ -251,6 +385,30 @@
     <div class="fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50">
         <i class="bi bi-check-circle mr-2"></i>
         {{ session('success') }}
+    </div>
+    <script>
+        setTimeout(() => {
+            document.querySelector('.fixed.bottom-4').remove();
+        }, 5000);
+    </script>
+    @endif
+
+    @if(session('error'))
+    <div class="fixed bottom-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50">
+        <i class="bi bi-exclamation-triangle mr-2"></i>
+        {{ session('error') }}
+    </div>
+    <script>
+        setTimeout(() => {
+            document.querySelectorAll('.fixed.bottom-4').forEach(el => el.remove());
+        }, 5000);
+    </script>
+    @endif
+
+    @if(session('error'))
+    <div class="fixed bottom-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50">
+        <i class="bi bi-exclamation-triangle mr-2"></i>
+        {{ session('error') }}
     </div>
     <script>
         setTimeout(() => {
