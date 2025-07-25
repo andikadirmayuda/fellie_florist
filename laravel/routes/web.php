@@ -32,6 +32,7 @@ Route::get('/', function () {
 
 // Public API Routes untuk validasi kode reseller
 Route::post('/api/validate-reseller-code', [OnlineCustomerController::class, 'validateResellerCode'])->name('api.validate-reseller-code');
+Route::post('/online-customers/validate-reseller-code', [OnlineCustomerController::class, 'validateResellerCode'])->name('validate-reseller-code');
 Route::post('/api/mark-reseller-code-used', [OnlineCustomerController::class, 'markResellerCodeUsed'])->name('api.mark-reseller-code-used');
 
 Route::get('/dashboard', [DashboardController::class, 'index'])
@@ -48,8 +49,8 @@ Route::middleware('auth')->group(function () {
         Route::resource('users', UserController::class);
     });
     
-    // Customer Management Routes
-    Route::resource('customers', CustomerController::class);
+    // Customer Management Routes (DEPRECATED - Gunakan online-customers)
+    // Route::resource('customers', CustomerController::class);
     
     // Online Customer Management Routes
     Route::resource('online-customers', OnlineCustomerController::class)->parameters([
@@ -62,10 +63,10 @@ Route::middleware('auth')->group(function () {
     Route::post('online-customers/{wa_number}/generate-code', [OnlineCustomerController::class, 'generateResellerCode'])->name('online-customers.generate-code');
     Route::delete('online-customers/{wa_number}/revoke-code/{codeId}', [OnlineCustomerController::class, 'revokeResellerCode'])->name('online-customers.revoke-code');
     
-    // Customer Trash Routes
-    Route::get('customers/trashed', [CustomerController::class, 'trashed'])->name('customers.trashed');
-    Route::patch('customers/{id}/restore', [CustomerController::class, 'restore'])->name('customers.restore');
-    Route::delete('customers/{id}/force-delete', [CustomerController::class, 'forceDelete'])->name('customers.force-delete');
+    // Customer Trash Routes (DEPRECATED)
+    // Route::get('customers/trashed', [CustomerController::class, 'trashed'])->name('customers.trashed');
+    // Route::patch('customers/{id}/restore', [CustomerController::class, 'restore'])->name('customers.restore');
+    // Route::delete('customers/{id}/force-delete', [CustomerController::class, 'forceDelete'])->name('customers.force-delete');
     
     // Product Management Routes
     Route::resource('categories', CategoryController::class);

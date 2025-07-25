@@ -21,18 +21,11 @@
             <li class="mt-4 mb-1 text-xs font-bold uppercase tracking-wider text-pink-400 flex items-center gap-2"><i
                     class="bi bi-people"></i> Manajemen Pengguna</li>
             @if(auth()->user()->hasRole('owner') || auth()->user()->hasRole('admin') || auth()->user()->hasRole('customers service'))
-                <x-sidebar-link :href="route('customers.index')" :active="request()->routeIs('customers.*')">
+                <x-sidebar-link :href="route('online-customers.index')" :active="request()->routeIs('online-customers.*')">
                     <x-slot name="icon">
                         <i class="bi bi-people-fill text-lg mr-1"></i>
                     </x-slot>
                     {{ __('Pelanggan') }}
-                </x-sidebar-link>
-
-                <x-sidebar-link :href="route('online-customers.index')" :active="request()->routeIs('online-customers.*')">
-                    <x-slot name="icon">
-                        <i class="bi bi-phone text-lg mr-1"></i>
-                    </x-slot>
-                    {{ __('Pelanggan Online') }}
                 </x-sidebar-link>
             @endif
 

@@ -13,15 +13,15 @@ return new class extends Migration
     {
         Schema::create('reseller_codes', function (Blueprint $table) {
             $table->id();
-            $table->string('wa_number'); // Nomor WhatsApp customer
-            $table->string('code', 20)->unique(); // Kode unik reseller
-            $table->boolean('is_used')->default(false); // Status apakah sudah digunakan
-            $table->timestamp('expires_at'); // Waktu kadaluarsa
-            $table->timestamp('used_at')->nullable(); // Waktu digunakan
-            $table->unsignedBigInteger('used_for_order_id')->nullable(); // ID pesanan yang menggunakan kode ini
+            $table->string('wa_number', 20)->index(); // Nomor WhatsApp customer
+            $table->string('code', 20)->unique(); // Kode reseller unik
+            $table->boolean('is_used')->default(false); // Apakah sudah digunakan
+            $table->timestamp('expires_at'); // Kapan kode expired
+            $table->timestamp('used_at')->nullable(); // Kapan digunakan
+            $table->unsignedBigInteger('used_for_order_id')->nullable(); // ID order yang menggunakan kode ini
             $table->text('notes')->nullable(); // Catatan tambahan
             $table->timestamps();
-            
+
             // Index untuk performa
             $table->index(['wa_number', 'is_used']);
             $table->index(['code', 'expires_at']);

@@ -2,123 +2,84 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Customer;
 use Illuminate\Http\Request;
 
+/**
+ * DEPRECATED CONTROLLER
+ * CustomerController ini sudah tidak digunakan lagi.
+ * Gunakan OnlineCustomerController untuk semua manajemen pelanggan.
+ * 
+ * Semua fitur pelanggan sekarang menggunakan sistem online customer
+ * yang terintegrasi dengan WhatsApp dan Public Orders.
+ */
 class CustomerController extends Controller
 {
-    public function index(Request $request)
+    /**
+     * Redirect semua akses ke online customers
+     */
+    public function index()
     {
-        $query = Customer::query();
-
-        // Filter by type if specified
-        if ($request->has('type')) {
-            $query->ofType($request->type);
-        }
-
-        // Search by name, email, or phone
-        if ($request->has('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%")
-                  ->orWhere('phone', 'like', "%{$search}%");
-            });
-        }
-
-        $customers = $query->latest()->paginate(10);
-        $customerTypes = ['walk-in', 'reseller', 'regular'];
-
-        return view('customers.index', compact('customers', 'customerTypes'));
+        return redirect()->route('online-customers.index')
+            ->with('info', 'Fitur pelanggan telah dipindahkan ke menu Pelanggan Online');
     }
 
     public function create()
     {
-        $customerTypes = ['walk-in', 'reseller', 'regular'];
-        return view('customers.create', compact('customerTypes'));
+        return redirect()->route('online-customers.index')
+            ->with('info', 'Fitur pelanggan telah dipindahkan ke menu Pelanggan Online');
     }
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:100',
-            'email' => 'nullable|email|unique:customers',
-            'phone' => 'required|string|max:20|unique:customers',
-            'type' => 'required|in:walk-in,reseller,regular',
-            'address' => 'nullable|string',
-            'city' => 'nullable|string|max:50',
-        ]);
-
-        $customer = Customer::create($validated);
-
-        return redirect()->route('customers.index')
-            ->with('success', 'Customer berhasil ditambahkan.');
+        return redirect()->route('online-customers.index')
+            ->with('info', 'Fitur pelanggan telah dipindahkan ke menu Pelanggan Online');
     }
 
-    public function show(Customer $customer)
+    public function show($id)
     {
-        return view('customers.show', compact('customer'));
+        return redirect()->route('online-customers.index')
+            ->with('info', 'Fitur pelanggan telah dipindahkan ke menu Pelanggan Online');
     }
 
-    public function edit(Customer $customer)
+    public function edit($id)
     {
-        $customerTypes = ['walk-in', 'reseller', 'regular'];
-        return view('customers.edit', compact('customer', 'customerTypes'));
+        return redirect()->route('online-customers.index')
+            ->with('info', 'Fitur pelanggan telah dipindahkan ke menu Pelanggan Online');
     }
 
-    public function update(Request $request, Customer $customer)
+    public function update(Request $request, $id)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:100',
-            'email' => 'nullable|email|unique:customers,email,' . $customer->id,
-            'phone' => 'required|string|max:20|unique:customers,phone,' . $customer->id,
-            'type' => 'required|in:walk-in,reseller,regular',
-            'address' => 'nullable|string',
-            'city' => 'nullable|string|max:50',
-        ]);
-
-        $customer->update($validated);
-
-        return redirect()->route('customers.index')
-            ->with('success', 'Customer berhasil diperbarui.');
+        return redirect()->route('online-customers.index')
+            ->with('info', 'Fitur pelanggan telah dipindahkan ke menu Pelanggan Online');
     }
 
-    public function destroy(Customer $customer)
+    public function destroy($id)
     {
-        $customer->delete();
-
-        return redirect()->route('customers.index')
-            ->with('success', 'Customer berhasil dihapus.');
+        return redirect()->route('online-customers.index')
+            ->with('info', 'Fitur pelanggan telah dipindahkan ke menu Pelanggan Online');
     }
 
     public function restore($id)
     {
-        $customer = Customer::withTrashed()->findOrFail($id);
-        $customer->restore();
-
-        return redirect()->route('customers.index')
-            ->with('success', 'Customer berhasil dipulihkan.');
+        return redirect()->route('online-customers.index')
+            ->with('info', 'Fitur pelanggan telah dipindahkan ke menu Pelanggan Online');
     }
 
     public function forceDelete($id)
     {
-        $customer = Customer::withTrashed()->findOrFail($id);
-        $customer->forceDelete();
-
-        return redirect()->route('customers.index')
-            ->with('success', 'Customer berhasil dihapus permanen.');
+        return redirect()->route('online-customers.index')
+            ->with('info', 'Fitur pelanggan telah dipindahkan ke menu Pelanggan Online');
     }
 
     public function trashed()
     {
-        $customers = Customer::onlyTrashed()->latest()->paginate(10);
-        return view('customers.trashed', compact('customers'));
+        return redirect()->route('online-customers.index')
+            ->with('info', 'Fitur pelanggan telah dipindahkan ke menu Pelanggan Online');
     }
 
     public function orderHistory($id)
     {
-        $customer = Customer::findOrFail($id);
-        $orders = $customer->orders()->latest()->get();
-        return view('customers.history', compact('customer', 'orders'));
+        return redirect()->route('online-customers.index')
+            ->with('info', 'Fitur pelanggan telah dipindahkan ke menu Pelanggan Online');
     }
 }

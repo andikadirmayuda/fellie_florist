@@ -519,9 +519,6 @@
         </div>
     </footer>
 
-    <!-- Cart Modal -->
-    @include('public.partials.cart-modal')
-
     <script src="{{ asset('js/cart.js') }}"></script>
     <script>
         let selectedCategory = '';
