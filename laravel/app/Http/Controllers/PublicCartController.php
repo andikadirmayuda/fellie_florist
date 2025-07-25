@@ -182,4 +182,62 @@ class PublicCartController extends Controller
             'message' => 'Keranjang berhasil dikosongkan.'
         ]);
     }
+
+    public function addBouquet(Request $request)
+    {
+        $bouquetId = $request->input('bouquet_id');
+        $sizeId = $request->input('size_id');
+        $qty = $request->input('quantity', 1);
+
+        // Ambil data bouquet
+        $bouquet = \App\Models\Bouquet::with(['prices.size', 'sizes'])->find($bouquetId);
+        if (!$bouquet) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Bouquet tidak ditemukan.'
+            ], 404);
+        }
+
+        // Ambil harga berdasarkan size
+        $bouquetPrice = $bouquet->prices()->where('size_id', $sizeId)->first();
+        if (!$bouquetPrice) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Ukuran bouquet tidak tersedia.'
+            ], 404);
+        }
+
+        $size = $bouquetPrice->size;
+        $price = $bouquetPrice->price;
+
+        $product = [
+            'id' => 'bouquet_' . $bouquet->id,
+            'name' => $bouquet->name,
+            'price' => $price,
+            'qty' => $qty,
+            'price_type' => $size->name,
+            'size_id' => $size->id,
+            'image' => $bouquet->image,
+            'type' => 'bouquet'
+        ];
+
+        $cart = session()->get('cart', []);
+
+        // Gunakan kombinasi bouquet_id dan size_id sebagai key unik
+        $cartKey = 'bouquet_' . $bouquet->id . '_' . $size->id;
+
+        if (isset($cart[$cartKey])) {
+            $cart[$cartKey]['qty'] += $product['qty'];
+        } else {
+            $cart[$cartKey] = $product;
+        }
+
+        session(['cart' => $cart]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Bouquet berhasil ditambahkan ke keranjang.',
+            'cart' => $cart
+        ]);
+    }
 }

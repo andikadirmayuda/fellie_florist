@@ -10,6 +10,7 @@ use App\Http\Controllers\PublicBouquetController;
 Route::get('/product-fellie', [PublicFlowerController::class, 'index'])->name('public.flowers');
 Route::get('/bouquet-fellie', [PublicBouquetController::class, 'index'])->name('public.bouquets');
 Route::get('/bouquet/{id}', [PublicBouquetController::class, 'detail'])->name('public.bouquet.detail');
+Route::get('/bouquet/{id}/detail-json', [PublicBouquetController::class, 'detailJson'])->name('public.bouquet.detail.json');
 Route::post('/public-order', [PublicOrderController::class, 'store'])->name('public.order.store');
 
 // Edit public order (form & update)
@@ -23,6 +24,7 @@ Route::post('/checkout', [PublicCheckoutController::class, 'process'])->name('pu
 // Cart routes (agar keranjang dan checkout konsisten di public)
 Route::get('/cart', [PublicCartController::class, 'index'])->name('public.cart.index');
 Route::post('/cart/add', [PublicCartController::class, 'add'])->name('public.cart.add');
+Route::post('/cart/add-bouquet', [PublicCartController::class, 'addBouquet'])->name('public.cart.add-bouquet');
 Route::post('/cart/update/{cartKey}', [PublicCartController::class, 'updateQuantity'])->name('public.cart.update');
 Route::post('/cart/remove/{cartKey}', [PublicCartController::class, 'remove'])->name('public.cart.remove');
 Route::post('/cart/clear', [PublicCartController::class, 'clear'])->name('public.cart.clear');

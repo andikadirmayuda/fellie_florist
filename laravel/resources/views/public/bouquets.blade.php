@@ -315,10 +315,10 @@
                                     </button>
                                 @endif
 
-                                <a href="{{ route('public.bouquet.detail', $bouquet->id) }}"
+                                <button onclick="showBouquetDetailPanel({{ $bouquet->id }})"
                                     class="block w-full text-center border-2 border-rose-200 text-rose-600 hover:bg-rose-50 font-semibold py-2 px-4 rounded-xl transition-all duration-200 text-sm">
                                     <i class="bi bi-eye mr-2"></i>Lihat Detail
-                                </a>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -367,6 +367,7 @@
     <!-- Include Cart Components -->
     @include('public.partials.cart-modal')
     @include('components.bouquet-price-modal')
+    @include('components.bouquet-detail-panel')
 
     <script src="{{ asset('js/cart.js') }}"></script>
     <script>

@@ -52,11 +52,19 @@ class PublicBouquetController extends Controller
 
     public function detail($id)
     {
-        $bouquet = Bouquet::with(['category', 'components.product', 'sizes', 'prices'])
+        $bouquet = Bouquet::with(['category', 'components.product', 'sizes', 'prices.size'])
             ->findOrFail($id);
 
         return view('public.bouquet.detail', [
             'bouquet' => $bouquet
         ]);
+    }
+
+    public function detailJson($id)
+    {
+        $bouquet = Bouquet::with(['category', 'components.product', 'sizes', 'prices.size'])
+            ->findOrFail($id);
+
+        return response()->json($bouquet);
     }
 }
