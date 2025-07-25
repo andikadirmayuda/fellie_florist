@@ -214,7 +214,7 @@
     </div>
     <!-- Main Navigation -->
     <nav class="flex justify-center space-x-8 py-4">
-        <a href="?tab=flowers"
+        <a href="{{ route('public.flowers') }}"
             class="relative px-4 py-2 text-sm font-semibold transition-all duration-200 {{ $activeTab === 'flowers' ? 'text-rose-600' : 'text-gray-500 hover:text-gray-700' }}">
             🌸 Bunga
             @if($activeTab === 'flowers')
@@ -222,7 +222,7 @@
                 </div>
             @endif
         </a>
-        <a href="?tab=bouquets"
+        <a href="{{ route('public.bouquets') }}"
             class="relative px-4 py-2 text-sm font-semibold transition-all duration-200 {{ $activeTab === 'bouquets' ? 'text-rose-600' : 'text-gray-500 hover:text-gray-700' }}">
             💐 Bouquet
             @if($activeTab === 'bouquets')
@@ -272,11 +272,11 @@
                 </div>
             @else
                 <div class="flex flex-wrap gap-3 justify-center">
-                    @foreach($bouquetSizes as $size)
+                    @foreach($bouquetCategories as $category)
                         <button type="button"
                             class="chip-btn px-6 py-3 rounded-full border-2 border-rose-200 bg-white text-gray-700 text-sm font-semibold shadow-md hover:shadow-lg hover:bg-rose-50 transition-all duration-200"
-                            data-size="{{ $size->id }}" onclick="selectSize(this)">
-                            <span class="mr-2">📏</span>{{ $size->name }}
+                            data-category="{{ $category->id }}" onclick="selectBouquetCategory(this)">
+                            <span class="mr-2">�</span>{{ $category->name }}
                         </button>
                     @endforeach
                 </div>
@@ -386,7 +386,7 @@
             @else
                 @forelse($bouquets as $bouquet)
                     <div class="bouquet-card group" data-name="{{ strtolower($bouquet->name) }}"
-                        data-sizes="{{ $bouquet->sizes->pluck('id')->join(',') }}">
+                        data-bouquet-category="{{ $bouquet->category_id ?? '' }}">
                         <div class="card-hover glass-effect rounded-2xl shadow-lg p-4 h-full flex flex-col overflow-hidden">
                             <!-- Image -->
                             <div class="relative h-40 mb-4 rounded-xl overflow-hidden">
@@ -463,6 +463,32 @@
                 @endforelse
             @endif
         </div>
+
+        <!-- Call to Action untuk Bouquet (hanya tampil di tab flowers) -->
+        @if($activeTab === 'flowers')
+        <div class="mt-16 text-center">
+            <div class="bg-gradient-to-br from-rose-100 via-pink-50 to-orange-50 rounded-3xl p-8 shadow-lg border border-rose-200">
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-rose-500 to-pink-600 rounded-full mb-6 shadow-lg">
+                    <i class="bi bi-flower3 text-2xl text-white"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-4">Lihat Koleksi Bouquet Kami</h3>
+                <p class="text-gray-600 mb-6 max-w-2xl mx-auto">
+                    Rangkaian bunga cantik yang dirancang khusus untuk momen spesial Anda. 
+                    Berbagai ukuran dan kategori tersedia untuk setiap kebutuhan.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                    <a href="{{ route('public.bouquets') }}" 
+                        class="inline-flex items-center px-8 py-3 bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white font-semibold rounded-xl transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105">
+                        <i class="bi bi-flower3 mr-2"></i>
+                        Lihat Semua Bouquet
+                    </a>
+                    <span class="text-sm text-gray-500">
+                        atau klik tab "💐 Bouquet" di atas
+                    </span>
+                </div>
+            </div>
+        </div>
+        @endif
     </div>
 
     <!-- Enhanced Footer -->
@@ -499,7 +525,7 @@
     <script src="{{ asset('js/cart.js') }}"></script>
     <script>
         let selectedCategory = '';
-        let selectedSize = '';
+        let selectedBouquetCategory = '';
         function filterItems() {
             const search = document.getElementById('searchInput').value.toLowerCase();
             const activeTab = '{{ $activeTab }}';
@@ -514,10 +540,10 @@
             } else {
                 document.querySelectorAll('.bouquet-card').forEach(card => {
                     const name = card.getAttribute('data-name');
-                    const sizes = card.getAttribute('data-sizes').split(',');
+                    const category = card.getAttribute('data-bouquet-category');
                     const matchSearch = name.includes(search);
-                    const matchSize = !selectedSize || sizes.includes(selectedSize);
-                    card.style.display = (matchSearch && matchSize) ? '' : 'none';
+                    const matchCategory = !selectedBouquetCategory || category === selectedBouquetCategory;
+                    card.style.display = (matchSearch && matchCategory) ? '' : 'none';
                 });
             }
         }
@@ -531,8 +557,9 @@
             btn.classList.remove('bg-white', 'text-gray-700', 'border-rose-200');
             filterItems();
         }
-        function selectSize(btn) {
-            selectedSize = btn.getAttribute('data-size');
+        function selectBouquetCategory(btn) {
+            selectedBouquetCategory = btn.getAttribute('data-category');
+            console.log('Selected bouquet category:', selectedBouquetCategory);
             document.querySelectorAll('.chip-btn').forEach(button => {
                 button.classList.remove('bg-rose-500', 'text-white', 'border-rose-500');
                 button.classList.add('bg-white', 'text-gray-700', 'border-rose-200');
@@ -542,9 +569,14 @@
             filterItems();
         }
         document.addEventListener('DOMContentLoaded', function () {
+            const activeTab = '{{ $activeTab }}';
             const firstCategoryBtn = document.querySelector('.chip-btn');
             if (firstCategoryBtn) {
-                selectCategory(firstCategoryBtn);
+                if (activeTab === 'flowers') {
+                    selectCategory(firstCategoryBtn);
+                } else {
+                    selectBouquetCategory(firstCategoryBtn);
+                }
             }
             const images = document.querySelectorAll('img');
             images.forEach(img => {

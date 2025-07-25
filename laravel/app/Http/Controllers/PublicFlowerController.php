@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use App\Models\Bouquet;
 use App\Models\BouquetSize;
+use App\Models\BouquetCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 
@@ -18,25 +19,36 @@ class PublicFlowerController extends Controller
             ->orderBy('name')
             ->get();
 
-        // Ambil semua bouquet yang aktif beserta komponennya
-        $bouquets = Bouquet::with(['category', 'components.product', 'sizes', 'prices'])
+        $lastUpdated = Product::max('updated_at') ?? now();
+
+        $activeTab = request()->query('tab', 'flowers');
+
+        // Jika tab adalah bouquets, ambil data bouquet juga (untuk backward compatibility)
+        $bouquetData = [];
+        if ($activeTab === 'bouquets') {
+            $bouquetController = new PublicBouquetController();
+            $bouquetData = $bouquetController->getBouquetData();
+            // Update last updated untuk include bouquet data
+            $lastUpdated = max($lastUpdated, Bouquet::max('updated_at') ?? now());
+        }
+
+        return view('public.flowers', array_merge([
+            'flowers' => $flowers,
+            'lastUpdated' => $lastUpdated,
+            'activeTab' => $activeTab
+        ], $bouquetData));
+    }
+
+    public function getFlowerData()
+    {
+        // Method untuk mendapatkan data flowers yang bisa dipanggil dari controller lain
+        $flowers = Product::with(['category', 'prices'])
+            ->where('current_stock', '>', 0)
             ->orderBy('name')
             ->get();
 
-        // Ambil ukuran bouquet untuk filter
-        $bouquetSizes = BouquetSize::orderBy('name')->get();
-
-        $lastUpdated = max(
-            Product::max('updated_at') ?? now(),
-            Bouquet::max('updated_at') ?? now()
-        );
-
-        return view('public.flowers', [
+        return [
             'flowers' => $flowers,
-            'bouquets' => $bouquets,
-            'bouquetSizes' => $bouquetSizes,
-            'lastUpdated' => $lastUpdated,
-            'activeTab' => request()->query('tab', 'flowers') // Default ke tab flowers
-        ]);
+        ];
     }
 }

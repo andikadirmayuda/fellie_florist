@@ -8,6 +8,7 @@ use App\Http\Controllers\PublicCartController;
 use App\Http\Controllers\PublicBouquetController;
 
 Route::get('/product-fellie', [PublicFlowerController::class, 'index'])->name('public.flowers');
+Route::get('/bouquet-fellie', [PublicBouquetController::class, 'index'])->name('public.bouquets');
 Route::get('/bouquet/{id}', [PublicBouquetController::class, 'detail'])->name('public.bouquet.detail');
 Route::post('/public-order', [PublicOrderController::class, 'store'])->name('public.order.store');
 
