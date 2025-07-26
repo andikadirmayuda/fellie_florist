@@ -59,7 +59,7 @@
                         <div class="text-sm text-gray-600">Ukuran ${price.size ? price.size.name.toLowerCase() : 'standard'}</div>
                     </div>
                     <div class="text-right">
-                        <div class="font-bold text-rose-600">Rp ${new Intl.NumberFormat('id-ID').format(price.price)}</div>
+                        <div class="font-bold text-rose-600">Rp ${new Intl.NumberFormat('id-ID').format(parseFloat(String(price.price).replace(/[,.]/g, '')) || 0)}</div>
                         <div class="text-xs text-gray-500">per bouquet</div>
                     </div>
                 </div>

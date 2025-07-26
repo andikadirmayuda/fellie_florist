@@ -133,7 +133,7 @@
                     <a href="{{ route('login') }}"
                         class="text-gray-600 hover:text-rose-600 p-2 rounded-full hover:bg-rose-50 transition-all duration-200"
                         title="Login">
-                        <i class="bi bi-box-arrow-in-right text-xl"></i>
+                        <i class="bi bi-person-circle text-xl"></i>
                     </a>
                 </div>
             </div>

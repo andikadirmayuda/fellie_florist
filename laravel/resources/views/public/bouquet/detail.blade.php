@@ -84,7 +84,7 @@
                                         <p class="text-sm text-gray-600">Rp{{ number_format($price->price, 0, ',', '.') }}</p>
                                     </div>
                                     <button
-                                        onclick="orderBouquet({{ $bouquet->id }}, {{ $price->size_id }}, {{ $price->price }})"
+                                        onclick="orderBouquet('{{ $bouquet->id }}', '{{ $price->size_id }}', '{{ $price->price }}')"
                                         class="px-4 py-2 bg-pink-600 text-white text-sm font-medium rounded-md hover:bg-pink-700">
                                         Pesan
                                     </button>

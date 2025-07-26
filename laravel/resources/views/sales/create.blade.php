@@ -376,7 +376,9 @@
     </div>
     <script>
         function formatPrice(price) {
-            return Math.round(price).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            // Ensure price is a number, remove any existing separators
+            const numPrice = parseFloat(String(price).replace(/[,.]/g, '')) || 0;
+            return Math.round(numPrice).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
         }
 
         let items = [];

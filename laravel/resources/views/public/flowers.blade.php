@@ -14,7 +14,8 @@
     <script>
         // Helper function untuk format harga yang aman
         function safeFormatPrice(price) {
-            const numPrice = parseInt(price) || 0;
+            // Ensure price is a number, remove any existing separators
+            const numPrice = parseFloat(String(price).replace(/[,.]/g, '')) || 0;
             return numPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
         }
         
@@ -200,7 +201,7 @@
                     <a href="{{ route('login') }}"
                         class="text-gray-600 hover:text-rose-600 p-2 rounded-full hover:bg-rose-50 transition-all duration-200"
                         title="Login">
-                            <i class="bi bi-box-arrow-in-right text-xl"></i>
+                            <i class="bi bi-person-circle text-xl"></i>
                     </a>
                 </div>
             </div>
@@ -281,7 +282,7 @@
                     @foreach($bouquetCategories as $category)
                         <button type="button"
                             class="chip-btn px-6 py-3 rounded-full border-2 border-rose-200 bg-white text-gray-700 text-sm font-semibold shadow-md hover:shadow-lg hover:bg-rose-50 transition-all duration-200"
-                            data-category="{{ $category->id }}" onclick="selectBouquetCategory(this)">
+                            data-category="{{ (int) $category->id }}" onclick="selectBouquetCategory(this)">
                             <span class="mr-2">�</span>{{ $category->name }}
                         </button>
                     @endforeach
@@ -295,7 +296,7 @@
                 @forelse($flowers as $flower)
                     <div class="flower-card group" data-category="{{ $flower->category->name ?? 'lainnya' }}"
                         data-name="{{ strtolower($flower->name) }}"
-                        data-flower-id="{{ $flower->id }}">
+                        data-flower-id="{{ (int) $flower->id }}">
                         <div class="card-hover glass-effect rounded-2xl shadow-lg p-4 h-full flex flex-col overflow-hidden">
                             <!-- Image -->
                             <div class="relative h-40 mb-4 rounded-xl overflow-hidden">
@@ -369,7 +370,7 @@
                                 </div>
 
                                 <!-- Action Button -->
-                                <button onclick="handleAddToCart({{ $flower->id }})"
+                                <button onclick="handleAddToCart({{ (int) $flower->id }})"
                                     class="mt-auto w-full bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white text-xs font-semibold py-2.5 px-3 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-md hover:shadow-lg">
                                     <i class="bi bi-cart-plus mr-1"></i>Tambah ke Keranjang
                                 </button>
@@ -382,12 +383,12 @@
                                             id: parseInt(price.id) || 0,
                                             type: price.type || '',
                                             label: price.label || '',
-                                            price: parseInt(price.price) || 0
+                                            price: parseFloat(String(price.price).replace(/[,.]/g, '')) || 0
                                         }));
-                                        window.flowerPrices[{{ $flower->id }}] = sanitizedPrices;
+                                        window.flowerPrices[{{ (int) $flower->id }}] = sanitizedPrices;
                                     } catch (error) {
                                         console.error('Error parsing flower prices:', error);
-                                        window.flowerPrices[{{ $flower->id }}] = [];
+                                        window.flowerPrices[{{ (int) $flower->id }}] = [];
                                     }
                                 </script>
                             </div>
@@ -405,7 +406,7 @@
             @else
                 @forelse($bouquets as $bouquet)
                     <div class="bouquet-card group" data-name="{{ strtolower($bouquet->name) }}"
-                        data-bouquet-category="{{ $bouquet->category_id ?? '' }}">
+                        data-bouquet-category="{{ $bouquet->category_id ? (int) $bouquet->category_id : '' }}">
                         <div class="card-hover glass-effect rounded-2xl shadow-lg p-4 h-full flex flex-col overflow-hidden">
                             <!-- Image -->
                             <div class="relative h-40 mb-4 rounded-xl overflow-hidden">
@@ -537,9 +538,6 @@
             <p class="text-rose-200 text-sm">© 2025 Fellie Florist. All rights reserved.</p>
         </div>
     </footer>
-
-    <!-- Cart Modal -->
-    @include('public.partials.cart-modal')
 
     <script src="{{ asset('js/cart.js') }}"></script>
     <script>
