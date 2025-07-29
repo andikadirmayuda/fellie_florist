@@ -149,7 +149,7 @@
                         <div class="mb-1 sm:mb-2"><span class="text-gray-500">Nama</span><br><span
                                 class="font-bold text-gray-800 break-words">{{ $order->customer_name }}</span></div>
                         <div class="mb-1 sm:mb-2"><span class="text-gray-500">Tanggal Ambil/Kirim</span><br><span
-                                class="font-bold text-gray-800 break-words">{{ $order->pickup_date }}</span></div>
+                                class="font-bold text-gray-800 break-words">{{ \Carbon\Carbon::parse($order->pickup_date)->format('d-m-Y') }}</span></div>
                         <div class="mb-1 sm:mb-2"><span class="text-gray-500">Metode Pengiriman</span><br><span
                                 class="font-bold text-gray-800 break-words">{{ $order->delivery_method }}</span></div>
                     </div>
@@ -170,7 +170,7 @@
                             <div class="text-center font-bold text-red-600 text-xs sm:text-base mb-1 sm:mb-2">Informasi
                                 Penting !!!</div>
                             <div class="text-xs sm:text-sm text-gray-700 leading-relaxed text-center break-words">
-                                {{ $order->info ?? 'Tidak ada informasi tambahan.' }}
+                                {{ $order->info ?? 'Harap Dibaca seluruh informasinya, Jika ada pertanyaan silahkan hubungi kami' }}
                             </div>
                         </div>
                     </div>
@@ -239,6 +239,129 @@
                     </tfoot>
                 </table>
             </div>
+
+            <!-- Debug Info (remove in production) -->
+            {{-- @if($sisa > 0)
+                <div class="my-4 p-2 bg-gray-100 rounded text-xs">
+                    <strong>Debug Info:</strong> Sisa: Rp{{ number_format($sisa, 0, ',', '.') }}, 
+                    Payment Status: {{ $order->payment_status }}, 
+                    Show Payment: {{ in_array($order->payment_status, ['waiting_confirmation', 'ready_to_pay', 'waiting_payment', 'waiting_verification']) ? 'Yes' : 'No' }}
+                </div>
+            @endif --}}
+
+            <!-- Informasi Pembayaran Section -->
+            @if($sisa > 0)
+                <div "my-8">
+                    <div class="bg-gradient-to-r from-orange-50 to-yellow-50 border-2 border-orange-200 rounded-2xl p-4 sm:p-6">
+                        <div class="flex items-center justify-center mb-4">
+                            <div class="bg-orange-500 rounded-full p-2 mr-3">
+                                <i class="bi bi-credit-card-2-front text-white text-lg"></i>
+                            </div>
+                            <h3 class="text-lg sm:text-xl font-bold text-orange-800">Informasi Pembayaran</h3>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <!-- Transfer Bank BCA -->
+                            <div class="bg-white rounded-xl border-2 border-blue-200 p-4 shadow-sm">
+                                <div class="flex items-center mb-3">
+                                    <div class="bg-blue-600 rounded-lg p-2 mr-3">
+                                        <i class="bi bi-bank text-white"></i>
+                                    </div>
+                                    <h4 class="font-bold text-blue-800 text-sm sm:text-base">Transfer Bank BCA</h4>
+                                </div>
+                                
+                                <div class="space-y-2 text-xs sm:text-sm">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">No. Rekening:</span>
+                                        <span class="font-bold text-blue-800">0213341089</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Atas Nama:</span>
+                                        <span class="font-bold text-blue-800">Tia Hanifah</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Bank:</span>
+                                        <span class="font-bold text-blue-800">BCA (Bank Central Asia)</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-4 bg-green-50 border border-green-200 rounded-lg p-3">
+                                    <div class="text-center">
+                                        <span class="text-xs text-gray-600">Jumlah Transfer:</span>
+                                        <div class="text-lg sm:text-xl font-bold text-green-600">
+                                            Rp{{ number_format($sisa, 0, ',', '.') }}
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-3 text-center">
+                                    <button onclick="copyToClipboard('0213341089')" 
+                                            class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-3 py-1 rounded-lg transition duration-200">
+                                        <i class="bi bi-clipboard"></i> Salin No. Rekening
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Petunjuk Pembayaran -->
+                            <div class="bg-white rounded-xl border-2 border-green-200 p-4 shadow-sm">
+                                <div class="flex items-center mb-3">
+                                    <div class="bg-green-600 rounded-lg p-2 mr-3">
+                                        <i class="bi bi-list-check text-white"></i>
+                                    </div>
+                                    <h4 class="font-bold text-green-800 text-sm sm:text-base">Petunjuk Pembayaran:</h4>
+                                </div>
+                                
+                                <ol class="text-xs sm:text-sm space-y-2 text-gray-700">
+                                    <li class="flex items-start">
+                                        <span class="bg-green-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs mr-2 mt-0.5 flex-shrink-0">1</span>
+                                        <span>Transfer sesuai jumlah yang bertanda</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="bg-green-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs mr-2 mt-0.5 flex-shrink-0">2</span>
+                                        <span>Foto bukti transfer</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="bg-green-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs mr-2 mt-0.5 flex-shrink-0">3</span>
+                                        <span>Kirim bukti transfer via WhatsApp</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="bg-green-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs mr-2 mt-0.5 flex-shrink-0">4</span>
+                                        <span>Tunggu konfirmasi dari admin</span>
+                                    </li>
+                                </ol>
+                                
+                                <div class="mt-4 text-center">
+                                    @php
+                                        $waMessage = "🌸 *Halo, Fellie Florist*\n";
+                                        $waMessage .= "══════════\n\n";
+                                        $waMessage .= "Saya ingin mengirim bukti pembayaran untuk:\n\n";
+                                        $waMessage .= "📋 *Pesanan :* {$order->public_code}\n";
+                                        $waMessage .= "🔗 *Link :* " . url("/order/{$order->public_code}") . "\n\n";
+                                        $waMessage .= "👤 *Nama :* {$order->customer_name}\n";
+                                        $waMessage .= "📱 *WhatsApp :* {$order->wa_number}\n";
+                                        $waMessage .= "📅 *Tanggal :* " . \Carbon\Carbon::parse($order->pickup_date)->format('d-m-Y') . "\n";
+                                        $waMessage .= "⏰ *Waktu :* {$order->pickup_time}\n";
+                                        $waMessage .= "🚚 *Pengiriman :* {$order->delivery_method}\n";
+                                        $waMessage .= "📍 *Tujuan :* {$order->destination}\n\n";
+                                        $waMessage .= "💰 *Total Pesanan :* Rp " . number_format($total, 0, ',', '.') . "\n\n";
+                                        $waMessage .= "═══════════\n";
+                                        $waMessage .= "Mohon konfirmasi pembayaran 🙏\n";
+                                        $waMessage .= "Terima kasih 😊";
+                                        $encodedMessage = urlencode($waMessage);
+                                    @endphp
+                                    <a href="https://wa.me/6282177929879?text={{ $encodedMessage }}" 
+                                       target="_blank"
+                                       class="bg-green-500 hover:bg-green-600 text-white text-xs px-4 py-2 rounded-lg transition duration-200 inline-flex items-center gap-2 shadow-md hover:shadow-lg">
+                                        <i class="bi bi-whatsapp text-lg"></i> 
+                                        <span class="font-medium">Kirim Bukti Transfer</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
             @if(!empty($order->payment_proof))
                 <div class="my-8 text-center">
                     <h3 class="font-semibold text-base mb-2 flex items-center gap-2 justify-center"><i
@@ -334,6 +457,55 @@
             <i class="bi bi-arrow-left-circle"></i> Kembali ke Daftar Bunga
         </a>
     </div>
+    
+    <script>
+        function copyToClipboard(text) {
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(function() {
+                    showCopySuccess();
+                }, function(err) {
+                    fallbackCopyTextToClipboard(text);
+                });
+            } else {
+                fallbackCopyTextToClipboard(text);
+            }
+        }
+
+        function fallbackCopyTextToClipboard(text) {
+            var textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.top = "0";
+            textArea.style.left = "0";
+            textArea.style.position = "fixed";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                var successful = document.execCommand('copy');
+                if (successful) {
+                    showCopySuccess();
+                }
+            } catch (err) {
+                console.error('Fallback: Could not copy text: ', err);
+            }
+            document.body.removeChild(textArea);
+        }
+
+        function showCopySuccess() {
+            // Create notification element
+            var notification = document.createElement('div');
+            notification.innerHTML = '<i class="bi bi-check-circle-fill"></i> Nomor rekening berhasil disalin!';
+            notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 flex items-center gap-2';
+            notification.style.fontSize = '14px';
+            
+            document.body.appendChild(notification);
+            
+            // Remove notification after 3 seconds
+            setTimeout(function() {
+                document.body.removeChild(notification);
+            }, 3000);
+        }
+    </script>
 </body>
 
 </html>
