@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use App\Models\Product;
 
 class PublicCartController extends Controller
@@ -48,6 +49,7 @@ class PublicCartController extends Controller
                 'price' => $item['price'],
                 'quantity' => $item['qty'],
                 'price_type' => $item['price_type'] ?? null,
+                'type' => $item['type'] ?? 'product', // Tambahkan type identifier  
                 'image' => $imageUrl
             ];
         }
@@ -101,6 +103,7 @@ class PublicCartController extends Controller
             'price' => $price,
             'qty' => $qty,
             'price_type' => $selectedPriceType,
+            'type' => 'product', // Identifikasi sebagai produk biasa
             'image' => $productModel->image ?? null,
         ];
 
@@ -188,6 +191,15 @@ class PublicCartController extends Controller
         $bouquetId = $request->input('bouquet_id');
         $sizeId = $request->input('size_id');
         $qty = $request->input('quantity', 1);
+        $greetingCard = $request->input('greeting_card', ''); // New: greeting card input
+
+        // Log incoming request for debugging
+        Log::info('AddBouquet Request:', [
+            'bouquet_id' => $bouquetId,
+            'size_id' => $sizeId,
+            'quantity' => $qty,
+            'greeting_card' => $greetingCard
+        ]);
 
         // Ambil data bouquet
         $bouquet = \App\Models\Bouquet::with(['prices.size', 'sizes'])->find($bouquetId);
@@ -201,6 +213,11 @@ class PublicCartController extends Controller
         // Ambil harga berdasarkan size
         $bouquetPrice = $bouquet->prices()->where('size_id', $sizeId)->first();
         if (!$bouquetPrice) {
+            Log::error('Bouquet price not found:', [
+                'bouquet_id' => $bouquetId,
+                'size_id' => $sizeId,
+                'available_prices' => $bouquet->prices()->get()->toArray()
+            ]);
             return response()->json([
                 'success' => false,
                 'message' => 'Ukuran bouquet tidak tersedia.'
@@ -218,21 +235,41 @@ class PublicCartController extends Controller
             'price_type' => $size->name,
             'size_id' => $size->id,
             'image' => $bouquet->image,
-            'type' => 'bouquet'
+            'type' => 'bouquet',
+            'greeting_card' => trim($greetingCard) // Store greeting card message
         ];
 
         $cart = session()->get('cart', []);
 
         // Gunakan kombinasi bouquet_id dan size_id sebagai key unik
+        // Jika ada greeting card berbeda, buat entry terpisah
         $cartKey = 'bouquet_' . $bouquet->id . '_' . $size->id;
-
+        
+        // Jika sudah ada item yang sama dan greeting card berbeda, buat key baru
         if (isset($cart[$cartKey])) {
-            $cart[$cartKey]['qty'] += $product['qty'];
-        } else {
-            $cart[$cartKey] = $product;
+            $existingGreeting = $cart[$cartKey]['greeting_card'] ?? '';
+            if ($existingGreeting !== trim($greetingCard)) {
+                // Create unique key dengan timestamp untuk diferensiasi
+                $cartKey .= '_' . time();
+            } else {
+                // Same item, same greeting - just add quantity
+                $cart[$cartKey]['qty'] += $product['qty'];
+                session(['cart' => $cart]);
+                
+                Log::info('Updated existing cart item:', ['cart_key' => $cartKey, 'new_qty' => $cart[$cartKey]['qty']]);
+                
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Bouquet berhasil ditambahkan ke keranjang.',
+                    'cart' => $cart
+                ]);
+            }
         }
 
+        $cart[$cartKey] = $product;
         session(['cart' => $cart]);
+
+        Log::info('Added new cart item:', ['cart_key' => $cartKey, 'product' => $product]);
 
         return response()->json([
             'success' => true,

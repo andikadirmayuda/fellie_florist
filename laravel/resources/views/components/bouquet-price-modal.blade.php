@@ -88,39 +88,17 @@
     function showBouquetPriceModal(bouquetId, bouquetName, prices) {
         showBouquetPriceModalComponent(bouquetId, bouquetName, prices);
     } function selectBouquetPrice(selectedPrice) {
-        // Add to cart with selected bouquet price
-        fetch('/cart/add-bouquet', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-            },
-            body: JSON.stringify({
-                bouquet_id: selectedBouquetData.id,
-                price_id: selectedPrice.id,
-                quantity: 1
-            })
-        })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Gagal menambah ke keranjang. Status: ' + response.status);
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    closeBouquetPriceModal();
-                    updateCart();
-                    toggleCart();
+        // Close the price selection modal first
+        closeBouquetPriceModal();
 
-                    // Show success message
-                    showSuccessMessage(`${selectedBouquetData.name} (${selectedPrice.size.name}) berhasil ditambahkan ke keranjang!`);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Terjadi kesalahan saat menambah ke keranjang: ' + error.message);
-            });
+        // Show greeting card modal with selected price data
+        showGreetingCardModal(
+            selectedBouquetData.id,
+            selectedBouquetData.name,
+            selectedPrice.size_id || selectedPrice.size?.id,
+            selectedPrice.size?.name || 'Standard',
+            selectedPrice.price
+        );
     }
 
     function closeBouquetPriceModal() {

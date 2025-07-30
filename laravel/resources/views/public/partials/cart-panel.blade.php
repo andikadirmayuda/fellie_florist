@@ -14,6 +14,8 @@
         </div>
         <!-- Cart Items -->
         <div class="flex-1 overflow-y-auto p-4" id="cartItems">
+            <!-- Cart Information Panel -->
+            @include('public.partials.unified-cart-info')
             <!-- Cart items will be dynamically loaded here -->
         </div>
         <!-- Cart Footer -->

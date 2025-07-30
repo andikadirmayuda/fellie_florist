@@ -462,6 +462,9 @@
         }
     </script>
 
+    <!-- Include Greeting Card Modal -->
+    @include('components.greeting-card-modal')
+
 </body>
 
 </html>

@@ -74,9 +74,26 @@
                                     $total += $subtotal;
                                 @endphp
                                 <tr>
-                                    <td class="px-2 py-1 border">{{ $item['product_name'] }} 
+                                    <td class="px-2 py-1 border">
+                                        <div class="flex items-center gap-2">
+                                            @if(isset($item['type']) && $item['type'] === 'bouquet')
+                                                <span class="inline-block bg-gradient-to-r from-rose-500 to-pink-500 text-white text-xs px-1.5 py-0.5 rounded-full">Bouquet</span>
+                                            @else
+                                                <span class="inline-block bg-gradient-to-r from-green-500 to-teal-500 text-white text-xs px-1.5 py-0.5 rounded-full">Bunga</span>
+                                            @endif
+                                            <span>{{ $item['product_name'] }}</span>
+                                        </div>
                                         @if($item['price_type'] !== 'default')
-                                            <span class="text-xs text-gray-500">({{ ucfirst($item['price_type']) }})</span>
+                                            <div class="text-xs text-gray-500 mt-1">({{ ucfirst($item['price_type']) }})</div>
+                                        @endif
+                                        @if(isset($item['greeting_card']) && !empty($item['greeting_card']))
+                                            <div class="mt-1 p-1.5 bg-pink-50 border border-pink-200 rounded text-xs">
+                                                <div class="flex items-center text-pink-700 mb-1">
+                                                    <i class="bi bi-card-text mr-1"></i>
+                                                    <span class="font-medium">Kartu Ucapan:</span>
+                                                </div>
+                                                <div class="text-pink-800 italic">"{{ Str::limit($item['greeting_card'], 40) }}"</div>
+                                            </div>
                                         @endif
                                     </td>
                                     <td class="px-2 py-1 border text-right">Rp {{ number_format($item['price'], 0, ',', '.') }}</td>

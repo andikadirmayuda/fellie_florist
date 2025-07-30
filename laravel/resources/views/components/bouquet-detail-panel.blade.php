@@ -261,17 +261,17 @@
         const addToCartText = document.getElementById('addToCartText');
 
         if (bouquet.prices && bouquet.prices.length === 1) {
-            addToCartText.textContent = 'Tambah ke Keranjang';
+            addToCartText.textContent = 'Tambah ke Keranjang + Kartu Ucapan';
             addToCartBtn.onclick = () => {
-                // Auto-select the single size
+                // Auto-select the single size and show greeting card modal
                 const singlePrice = bouquet.prices[0];
-                selectedBouquetSize = {
-                    priceId: singlePrice.id,
-                    sizeId: singlePrice.size_id,
-                    sizeName: singlePrice.size?.name || 'Standard',
-                    price: singlePrice.price
-                };
-                addCurrentBouquetToCart();
+                showGreetingCardModal(
+                    bouquet.id,
+                    bouquet.name,
+                    singlePrice.size_id,
+                    singlePrice.size?.name || 'Standard',
+                    singlePrice.price
+                );
             };
         } else if (bouquet.prices && bouquet.prices.length > 1) {
             addToCartText.textContent = 'Pilih Ukuran Terlebih Dahulu';
@@ -295,9 +295,9 @@
     function selectBouquetSize(priceId, sizeId, sizeName, price) {
         selectedBouquetSize = { priceId, sizeId, sizeName, price };
 
-        // Update footer button
+        // Update footer button to show greeting card modal
         const addToCartText = document.getElementById('addToCartText');
-        addToCartText.textContent = `Tambah ${sizeName} - Rp ${new Intl.NumberFormat('id-ID').format(price)}`;
+        addToCartText.textContent = `Tambah ${sizeName} + Kartu Ucapan - Rp ${new Intl.NumberFormat('id-ID').format(price)}`;
 
         // Update all size cards to show selection
         document.querySelectorAll('[id^="size-card-"]').forEach(card => {
@@ -310,9 +310,17 @@
         selectedCard.classList.remove('border-gray-200');
         selectedCard.classList.add('border-rose-500', 'bg-rose-50');
 
-        // Update button to show enabled state
+        // Update button to show greeting card modal
         const addToCartBtn = document.getElementById('addBouquetToCart');
-        addToCartBtn.onclick = () => addCurrentBouquetToCart();
+        addToCartBtn.onclick = () => {
+            showGreetingCardModal(
+                currentBouquetDetail.id,
+                currentBouquetDetail.name,
+                sizeId,
+                sizeName,
+                price
+            );
+        };
     }
 
     function toggleComponents(priceId, sizeId, sizeName) {

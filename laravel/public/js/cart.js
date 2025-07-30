@@ -68,6 +68,26 @@ function updateCart() {
         
         if (data.items.length === 0) {
             cartItemsContainer.innerHTML = `
+                <!-- Cart Information Panel -->
+                <div class="bg-gradient-to-r from-rose-50 to-pink-50 border border-rose-200 rounded-lg p-3 mb-4">
+                    <div class="flex items-center mb-2">
+                        <i class="bi bi-info-circle text-rose-600 mr-2"></i>
+                        <h4 class="font-semibold text-rose-800 text-sm">Keranjang Terpadu</h4>
+                    </div>
+                    <div class="text-xs text-rose-700 space-y-1">
+                        <div class="flex items-center">
+                            <span class="inline-block bg-gradient-to-r from-green-500 to-teal-500 text-white text-xs px-2 py-0.5 rounded-full mr-2">Bunga</span>
+                            <span>Produk bunga satuan dengan berbagai pilihan harga</span>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="inline-block bg-gradient-to-r from-rose-500 to-pink-500 text-white text-xs px-2 py-0.5 rounded-full mr-2">Bouquet</span>
+                            <span>Rangkaian bunga siap jadi dengan berbagai ukuran</span>
+                        </div>
+                        <p class="text-rose-600 mt-2 text-xs italic">
+                            💡 Anda dapat menambahkan bunga dan bouquet dalam satu keranjang yang sama!
+                        </p>
+                    </div>
+                </div>
                 <div class="flex flex-col items-center justify-center h-full text-gray-500">
                     <i class="bi bi-bag-x text-5xl mb-2"></i>
                     <p>Keranjang belanja kosong</p>
@@ -86,7 +106,28 @@ function updateCart() {
         if (checkoutButton) checkoutButton.style.display = 'block';
         
         if (cartItemsContainer) {
-            cartItemsContainer.innerHTML = data.items.map(item => `
+            cartItemsContainer.innerHTML = `
+                <!-- Cart Information Panel -->
+                <div class="bg-gradient-to-r from-rose-50 to-pink-50 border border-rose-200 rounded-lg p-3 mb-4">
+                    <div class="flex items-center mb-2">
+                        <i class="bi bi-info-circle text-rose-600 mr-2"></i>
+                        <h4 class="font-semibold text-rose-800 text-sm">Keranjang Terpadu</h4>
+                    </div>
+                    <div class="text-xs text-rose-700 space-y-1">
+                        <div class="flex items-center">
+                            <span class="inline-block bg-gradient-to-r from-green-500 to-teal-500 text-white text-xs px-2 py-0.5 rounded-full mr-2">Bunga</span>
+                            <span>Produk bunga satuan dengan berbagai pilihan harga</span>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="inline-block bg-gradient-to-r from-rose-500 to-pink-500 text-white text-xs px-2 py-0.5 rounded-full mr-2">Bouquet</span>
+                            <span>Rangkaian bunga siap jadi dengan berbagai ukuran</span>
+                        </div>
+                        <p class="text-rose-600 mt-2 text-xs italic">
+                            💡 Anda dapat menambahkan bunga dan bouquet dalam satu keranjang yang sama!
+                        </p>
+                    </div>
+                </div>
+                ${data.items.map(item => `
                 <div class="flex items-start space-x-4 mb-4 pb-4 border-b border-gray-100">
                     <div class="w-20 h-20 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
                         ${item.image ? 
@@ -98,7 +139,30 @@ function updateCart() {
                     </div>
                     <div class="flex-1">
                         <h4 class="font-semibold text-gray-800 text-sm">${item.name}</h4>
+                        ${item.type === 'bouquet' ? 
+                            `<span class="inline-block bg-gradient-to-r from-rose-500 to-pink-500 text-white text-xs px-2 py-1 rounded-full mb-1">Bouquet</span>` : 
+                            `<span class="inline-block bg-gradient-to-r from-green-500 to-teal-500 text-white text-xs px-2 py-1 rounded-full mb-1">Bunga</span>`
+                        }
                         <p class="text-sm text-gray-500">${item.quantity} x Rp ${formatPrice(item.price)}</p>
+                        ${item.price_type ? `<p class="text-xs text-gray-400">${item.price_type}</p>` : ''}
+                        ${item.greeting_card ? 
+                            `<div class="mt-1 p-1.5 bg-pink-50 border border-pink-200 rounded text-xs">
+                                <div class="flex items-center text-pink-700 mb-1">
+                                    <i class="bi bi-card-text mr-1"></i>
+                                    <span class="font-medium">Kartu Ucapan:</span>
+                                </div>
+                                <div class="text-pink-800 italic">"${item.greeting_card.length > 40 ? item.greeting_card.substring(0, 40) + '...' : item.greeting_card}"</div>
+                            </div>` : ''
+                        }
+                        ${item.greeting_card && item.greeting_card.trim() ? 
+                            `<div class="mt-2 p-2 bg-pink-50 border border-pink-200 rounded-lg">
+                                <div class="flex items-center mb-1">
+                                    <i class="bi bi-card-text text-pink-600 mr-1"></i>
+                                    <span class="text-xs font-medium text-pink-700">Kartu Ucapan:</span>
+                                </div>
+                                <p class="text-xs text-pink-800 italic">"${item.greeting_card.length > 50 ? item.greeting_card.substring(0, 50) + '...' : item.greeting_card}"</p>
+                            </div>` : ''
+                        }
                         <div class="flex items-center space-x-2 mt-2">
                             <button onclick="updateQuantity('${item.id}', -1)" class="w-6 h-6 bg-gray-100 hover:bg-rose-100 text-gray-600 hover:text-rose-600 rounded-full flex items-center justify-center transition-colors duration-200">-</button>
                             <span class="text-sm font-medium min-w-[20px] text-center">${item.quantity}</span>
@@ -109,7 +173,8 @@ function updateCart() {
                         <i class="bi bi-trash text-lg"></i>
                     </button>
                 </div>
-            `).join('');
+            `).join('')}
+            `;
         }
         
         if (cartTotal) {
