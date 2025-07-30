@@ -7,6 +7,8 @@
     <title>Detail Pemesanan - Fellie Florist</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Notification Styles -->
+    <link rel="stylesheet" href="{{ asset('css/notifications.css') }}">
 </head>
 
 <body class="bg-gray-100 min-h-screen">
@@ -492,20 +494,18 @@
         }
 
         function showCopySuccess() {
-            // Create notification element
-            var notification = document.createElement('div');
-            notification.innerHTML = '<i class="bi bi-check-circle-fill"></i> Nomor rekening berhasil disalin!';
-            notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 flex items-center gap-2';
-            notification.style.fontSize = '14px';
-            
-            document.body.appendChild(notification);
-            
-            // Remove notification after 3 seconds
-            setTimeout(function() {
-                document.body.removeChild(notification);
-            }, 3000);
+            // Use global toast notification system if available
+            if (typeof showToast === 'function') {
+                showToast('Nomor rekening berhasil disalin!', 'success');
+            } else {
+                // Fallback to simple alert
+                alert('Nomor rekening berhasil disalin!');
+            }
         }
     </script>
+    
+    <!-- Include cart.js for toast notifications -->
+    <script src="{{ asset('js/cart.js') }}"></script>
 </body>
 
 </html>

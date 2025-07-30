@@ -183,26 +183,12 @@
                         message += ` Dengan kartu ucapan: "${greetingMessage.substring(0, 30)}${greetingMessage.length > 30 ? '...' : ''}"`;
                     }
 
-                    // Use existing success notification or create simple alert
-                    if (typeof showSuccessNotification === 'function') {
-                        showSuccessNotification(message);
+                    // Use existing toast notification system
+                    if (typeof showToast === 'function') {
+                        showToast(message, 'success');
                     } else {
-                        // Create simple success notification
-                        const notification = document.createElement('div');
-                        notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform duration-300';
-                        notification.innerHTML = `
-                        <div class="flex items-center">
-                            <i class="bi bi-check-circle mr-2"></i>
-                            ${message}
-                        </div>
-                    `;
-                        document.body.appendChild(notification);
-
-                        setTimeout(() => notification.classList.remove('translate-x-full'), 100);
-                        setTimeout(() => {
-                            notification.classList.add('translate-x-full');
-                            setTimeout(() => document.body.removeChild(notification), 300);
-                        }, 3000);
+                        // Fallback to simple alert if showToast is not available
+                        alert(message);
                     }
 
                     // Update cart badge
@@ -213,12 +199,22 @@
                     // Close modal
                     closeGreetingCardModal();
                 } else {
-                    alert('Gagal menambahkan ke keranjang: ' + (data.message || 'Unknown error'));
+                    // Use toast for error message
+                    if (typeof showToast === 'function') {
+                        showToast('Gagal menambahkan ke keranjang: ' + (data.message || 'Unknown error'), 'error');
+                    } else {
+                        alert('Gagal menambahkan ke keranjang: ' + (data.message || 'Unknown error'));
+                    }
                 }
             })
             .catch(error => {
                 console.error('Error adding to cart:', error);
-                alert('Terjadi kesalahan saat menambahkan ke keranjang');
+                // Use toast for error message
+                if (typeof showToast === 'function') {
+                    showToast('Terjadi kesalahan saat menambahkan ke keranjang', 'error');
+                } else {
+                    alert('Terjadi kesalahan saat menambahkan ke keranjang');
+                }
             });
     }
 

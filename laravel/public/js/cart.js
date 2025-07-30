@@ -341,55 +341,155 @@ function confirmRemoveFromCart(cartKey) {
 }
 
 function showToast(message, type = 'info') {
-    // Remove existing toast
+    // Remove existing toast and overlay
     const existingToast = document.getElementById('cartToast');
-    if (existingToast) {
-        existingToast.remove();
-    }
+    const existingOverlay = document.getElementById('toastOverlay');
+    if (existingToast) existingToast.remove();
+    if (existingOverlay) existingOverlay.remove();
+    
+    // Define close function first
+    const closeToast = function() {
+        const toast = document.getElementById('cartToast');
+        const overlay = document.getElementById('toastOverlay');
+        
+        if (toast && toast.parentNode) {
+            // Add exit animation
+            toast.classList.add('notification-exit');
+            toast.classList.remove('opacity-100', 'scale-100');
+            toast.classList.add('opacity-0', 'scale-95');
+            
+            if (overlay) {
+                overlay.classList.add('opacity-0');
+            }
+            
+            setTimeout(() => {
+                if (toast && toast.parentNode) toast.remove();
+                if (overlay && overlay.parentNode) overlay.remove();
+            }, 300);
+        }
+    };
+    
+    // Make closeToast globally available
+    window.closeToast = closeToast;
     
     const toast = document.createElement('div');
     toast.id = 'cartToast';
-    toast.className = 'fixed top-4 right-4 z-[110] transform translate-x-full transition-transform duration-300';
+    // Center positioning dengan responsive design
+    toast.className = 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[110] opacity-0 scale-95 transition-all duration-300 ease-out';
     
     const bgColors = {
-        success: 'bg-gradient-to-r from-green-500 to-green-600',
-        error: 'bg-gradient-to-r from-red-500 to-red-600',
-        loading: 'bg-gradient-to-r from-blue-500 to-blue-600',
-        info: 'bg-gradient-to-r from-gray-500 to-gray-600'
+        success: 'bg-gradient-to-r from-green-500 to-emerald-600',
+        error: 'bg-gradient-to-r from-red-500 to-rose-600',
+        loading: 'bg-gradient-to-r from-blue-500 to-indigo-600',
+        info: 'bg-gradient-to-r from-gray-500 to-slate-600'
     };
     
     const icons = {
-        success: '<i class="bi bi-check-circle-fill"></i>',
-        error: '<i class="bi bi-x-circle-fill"></i>',
-        loading: '<i class="bi bi-arrow-repeat animate-spin"></i>',
-        info: '<i class="bi bi-info-circle-fill"></i>'
+        success: '<i class="bi bi-check-circle-fill text-2xl"></i>',
+        error: '<i class="bi bi-x-circle-fill text-2xl"></i>',
+        loading: '<i class="bi bi-arrow-repeat animate-spin text-2xl"></i>',
+        info: '<i class="bi bi-info-circle-fill text-2xl"></i>'
+    };
+
+    const borderColors = {
+        success: 'border-green-300',
+        error: 'border-red-300',
+        loading: 'border-blue-300',
+        info: 'border-gray-300'
+    };
+
+    const statusText = {
+        success: '✨ Berhasil!',
+        error: '⚠️ Terjadi kesalahan',
+        loading: '⏳ Memproses...',
+        info: 'ℹ️ Informasi'
     };
     
     toast.innerHTML = `
-        <div class="${bgColors[type]} text-white px-6 py-4 rounded-xl shadow-2xl flex items-center space-x-3 min-w-[300px]">
-            <span class="text-lg">${icons[type]}</span>
-            <span class="font-medium">${message}</span>
+        <div class="notification-container ${bgColors[type]} text-white p-6 rounded-2xl shadow-2xl border-2 ${borderColors[type]} backdrop-blur-sm mx-4 relative overflow-hidden">
+            <!-- Background decoration -->
+            <div class="absolute top-0 left-0 w-full h-1 bg-white bg-opacity-30"></div>
+            <div class="absolute -top-2 -right-2 w-8 h-8 bg-white bg-opacity-10 rounded-full"></div>
+            <div class="absolute -bottom-1 -left-1 w-6 h-6 bg-white bg-opacity-10 rounded-full"></div>
+            
+            <!-- Content -->
+            <div class="flex items-center space-x-4 relative z-10">
+                <div class="flex-shrink-0 w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center ${type === 'loading' ? 'pulse-loading' : ''}">
+                    ${icons[type]}
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="font-semibold text-lg leading-tight break-words">${message}</p>
+                    <div class="mt-1 text-sm text-white text-opacity-90">
+                        ${statusText[type]}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Progress bar untuk loading -->
+            ${type === 'loading' ? `
+                <div class="mt-4 relative">
+                    <div class="w-full bg-white bg-opacity-30 rounded-full h-2">
+                        <div class="bg-white h-2 rounded-full progress-bar" style="width: 0%;"></div>
+                    </div>
+                </div>
+            ` : ''}
+            
+            <!-- Close button untuk non-loading -->
+            ${type !== 'loading' ? `
+                <button onclick="window.closeToast()" 
+                        class="absolute top-2 right-2 w-6 h-6 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-full flex items-center justify-center transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-50"
+                        aria-label="Tutup notifikasi">
+                    <i class="bi bi-x text-sm"></i>
+                </button>
+            ` : ''}
         </div>
     `;
     
     document.body.appendChild(toast);
     
-    // Animate toast appearance
+    // Create overlay untuk better focus (hanya untuk non-loading)
+    if (type !== 'loading') {
+        const overlay = document.createElement('div');
+        overlay.id = 'toastOverlay';
+        overlay.className = 'fixed inset-0 bg-black bg-opacity-20 z-[109] opacity-0 transition-opacity duration-300';
+        overlay.setAttribute('aria-hidden', 'true');
+        document.body.appendChild(overlay);
+        
+        // Remove overlay on click untuk manual close
+        overlay.addEventListener('click', closeToast);
+        
+        // Show overlay
+        requestAnimationFrame(() => {
+            overlay.classList.remove('opacity-0');
+        });
+    }
+    
+    // Animate toast appearance dengan staging
     requestAnimationFrame(() => {
-        toast.classList.remove('translate-x-full');
+        // Add entrance animation class
+        toast.classList.add('notification-enter');
+        
+        // Show toast
+        setTimeout(() => {
+            toast.classList.remove('opacity-0', 'scale-95');
+            toast.classList.add('opacity-100', 'scale-100');
+        }, 100);
     });
     
     // Auto remove toast (except for loading)
     if (type !== 'loading') {
         setTimeout(() => {
-            if (toast && toast.parentNode) {
-                toast.classList.add('translate-x-full');
-                setTimeout(() => {
-                    if (toast && toast.parentNode) {
-                        toast.remove();
-                    }
-                }, 300);
-            }
-        }, 3000);
+            closeToast();
+        }, 4500); // Increased duration untuk better UX
     }
+    
+    // Keyboard accessibility
+    const handleEscape = function(e) {
+        if (e.key === 'Escape' && document.getElementById('cartToast')) {
+            closeToast();
+            document.removeEventListener('keydown', handleEscape);
+        }
+    };
+    
+    document.addEventListener('keydown', handleEscape);
 }

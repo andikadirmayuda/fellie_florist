@@ -9,6 +9,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <!-- Figtree Font -->
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700" rel="stylesheet" />
+    <!-- Notification Styles -->
+    <link rel="stylesheet" href="{{ asset('css/notifications.css') }}">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -275,6 +277,11 @@
                         class="chip-btn px-6 py-3 rounded-full border-2 border-rose-200 bg-white text-gray-700 text-sm font-semibold shadow-md hover:shadow-lg hover:bg-rose-50 transition-all duration-200"
                         data-category="Daun" onclick="selectCategory(this)">
                         <span class="mr-2">🍃</span>Daun
+                    </button>
+                    <button type="button"
+                        class="chip-btn px-6 py-3 rounded-full border-2 border-rose-200 bg-white text-gray-700 text-sm font-semibold shadow-md hover:shadow-lg hover:bg-rose-50 transition-all duration-200"
+                        data-category="Produk Lainya" onclick="selectCategory(this)">
+                        <span class="mr-2">📦</span>Produk Lainya
                     </button>
                 </div>
             @else
