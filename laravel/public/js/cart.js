@@ -105,8 +105,8 @@ function updateCart() {
                             <button onclick="updateQuantity('${item.id}', 1)" class="w-6 h-6 bg-gray-100 hover:bg-rose-100 text-gray-600 hover:text-rose-600 rounded-full flex items-center justify-center transition-colors duration-200">+</button>
                         </div>
                     </div>
-                    <button onclick="removeFromCart('${item.id}')" class="text-gray-400 hover:text-red-500 p-1">
-                        <i class="bi bi-trash"></i>
+                    <button onclick="removeFromCart('${item.id}', '${item.name.replace(/'/g, "\\\'")}')" class="text-gray-400 hover:text-red-500 p-1 transition-colors duration-200 hover:bg-red-50 rounded-lg">
+                        <i class="bi bi-trash text-lg"></i>
                     </button>
                 </div>
             `).join('');
@@ -167,10 +167,81 @@ function updateQuantity(cartKey, change) {
     });
 }
 
-function removeFromCart(cartKey) {
-    if (!confirm('Apakah Anda yakin ingin menghapus produk ini dari keranjang?')) {
-        return;
+function removeFromCart(cartKey, itemName = 'produk ini') {
+    // Create custom confirmation modal
+    const modal = document.createElement('div');
+    modal.id = 'deleteConfirmModal';
+    modal.className = 'fixed inset-0 bg-black bg-opacity-50 z-[100] flex items-center justify-center p-4';
+    modal.style.opacity = '0';
+    modal.style.transition = 'opacity 0.3s ease';
+    
+    modal.innerHTML = `
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full transform scale-95 transition-transform duration-300" id="modalContent">
+            <div class="p-6 text-center">
+                <!-- Icon -->
+                <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4">
+                    <svg class="h-8 w-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
+                </div>
+                
+                <!-- Title -->
+                <h3 class="text-xl font-bold text-gray-900 mb-2">Hapus dari Keranjang?</h3>
+                
+                <!-- Message -->
+                <p class="text-gray-500 mb-6">Apakah Anda yakin ingin menghapus <span class="font-semibold text-gray-700">${itemName}</span> dari keranjang belanja?</p>
+                
+                <!-- Buttons -->
+                <div class="flex space-x-3">
+                    <button type="button" 
+                            class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-3 px-4 rounded-xl transition-colors duration-200" 
+                            onclick="closeDeleteModal()">
+                        <i class="bi bi-x-circle mr-2"></i>Batal
+                    </button>
+                    <button type="button" 
+                            class="flex-1 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-medium py-3 px-4 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl" 
+                            onclick="confirmRemoveFromCart('${cartKey}')">
+                        <i class="bi bi-trash3 mr-2"></i>Ya, Hapus
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Animate modal appearance
+    requestAnimationFrame(() => {
+        modal.style.opacity = '1';
+        document.getElementById('modalContent').style.transform = 'scale(1)';
+    });
+    
+    // Close modal when clicking outside
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            closeDeleteModal();
+        }
+    });
+    
+    return;
+}
+
+function closeDeleteModal() {
+    const modal = document.getElementById('deleteConfirmModal');
+    if (modal) {
+        modal.style.opacity = '0';
+        document.getElementById('modalContent').style.transform = 'scale(0.95)';
+        setTimeout(() => {
+            modal.remove();
+        }, 300);
     }
+}
+
+function confirmRemoveFromCart(cartKey) {
+    closeDeleteModal();
+    
+    // Show loading toast
+    showToast('Menghapus produk...', 'loading');
     
     fetch(`/cart/remove/${cartKey}`, {
         method: 'POST',
@@ -188,13 +259,68 @@ function removeFromCart(cartKey) {
     .then(data => {
         if (data.success) {
             updateCart();
+            showToast('Produk berhasil dihapus dari keranjang!', 'success');
         } else {
             console.error('Remove from cart failed:', data.message);
-            alert('Gagal menghapus produk: ' + (data.message || 'Terjadi kesalahan'));
+            showToast('Gagal menghapus produk: ' + (data.message || 'Terjadi kesalahan'), 'error');
         }
     })
     .catch(error => {
         console.error('Error removing from cart:', error);
-        alert('Terjadi kesalahan saat menghapus produk dari keranjang');
+        showToast('Terjadi kesalahan saat menghapus produk dari keranjang', 'error');
     });
+}
+
+function showToast(message, type = 'info') {
+    // Remove existing toast
+    const existingToast = document.getElementById('cartToast');
+    if (existingToast) {
+        existingToast.remove();
+    }
+    
+    const toast = document.createElement('div');
+    toast.id = 'cartToast';
+    toast.className = 'fixed top-4 right-4 z-[110] transform translate-x-full transition-transform duration-300';
+    
+    const bgColors = {
+        success: 'bg-gradient-to-r from-green-500 to-green-600',
+        error: 'bg-gradient-to-r from-red-500 to-red-600',
+        loading: 'bg-gradient-to-r from-blue-500 to-blue-600',
+        info: 'bg-gradient-to-r from-gray-500 to-gray-600'
+    };
+    
+    const icons = {
+        success: '<i class="bi bi-check-circle-fill"></i>',
+        error: '<i class="bi bi-x-circle-fill"></i>',
+        loading: '<i class="bi bi-arrow-repeat animate-spin"></i>',
+        info: '<i class="bi bi-info-circle-fill"></i>'
+    };
+    
+    toast.innerHTML = `
+        <div class="${bgColors[type]} text-white px-6 py-4 rounded-xl shadow-2xl flex items-center space-x-3 min-w-[300px]">
+            <span class="text-lg">${icons[type]}</span>
+            <span class="font-medium">${message}</span>
+        </div>
+    `;
+    
+    document.body.appendChild(toast);
+    
+    // Animate toast appearance
+    requestAnimationFrame(() => {
+        toast.classList.remove('translate-x-full');
+    });
+    
+    // Auto remove toast (except for loading)
+    if (type !== 'loading') {
+        setTimeout(() => {
+            if (toast && toast.parentNode) {
+                toast.classList.add('translate-x-full');
+                setTimeout(() => {
+                    if (toast && toast.parentNode) {
+                        toast.remove();
+                    }
+                }, 300);
+            }
+        }, 3000);
+    }
 }
