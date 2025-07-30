@@ -80,6 +80,7 @@
 </head>
 
 <body class="font-sans bg-gradient-to-br from-rose-50 via-pink-50 to-orange-50 min-h-screen">
+    @include('public.partials.cart-panel')
 
     <!-- Header -->
     <header class="w-full glass-effect border-b border-gray-100 sticky top-0 z-40 bg-white/90 backdrop-blur-md">

@@ -10,6 +10,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function toggleCart() {
     const cart = document.getElementById('sideCart');
+    if (!cart) {
+        console.error('Element sideCart tidak ditemukan');
+        return;
+    }
     cart.classList.toggle('translate-x-full');
     let overlay = document.getElementById('cartOverlay');
     if (!overlay) {
