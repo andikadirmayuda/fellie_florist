@@ -7,6 +7,77 @@
         </div>
     </x-slot>
 
+    <style>
+        /* Custom Pagination Styling */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .pagination .page-item {
+            display: inline-block;
+        }
+
+        .pagination .page-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.5rem;
+            height: 2.5rem;
+            padding: 0.5rem;
+            margin: 0 0.125rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: rgb(107, 114, 128);
+            background: white;
+            border: 1px solid rgba(244, 63, 94, 0.1);
+            border-radius: 0.5rem;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+
+        .pagination .page-link:hover {
+            color: rgb(244, 63, 94);
+            background: rgba(244, 63, 94, 0.05);
+            border-color: rgba(244, 63, 94, 0.2);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .pagination .page-item.active .page-link {
+            color: white;
+            background: linear-gradient(135deg, rgb(244, 63, 94), rgb(225, 29, 72));
+            border-color: rgb(244, 63, 94);
+            box-shadow: 0 4px 6px -1px rgba(244, 63, 94, 0.3);
+        }
+
+        .pagination .page-item.disabled .page-link {
+            color: rgb(156, 163, 175);
+            background: rgb(249, 250, 251);
+            border-color: rgb(229, 231, 235);
+            cursor: not-allowed;
+        }
+
+        .pagination .page-item.disabled .page-link:hover {
+            transform: none;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+
+        /* Previous/Next pagination styling */
+        .pagination .page-link[rel="prev"],
+        .pagination .page-link[rel="next"] {
+            width: auto;
+            padding: 0.5rem 0.75rem;
+            font-weight: 600;
+        }
+    </style>
+
     <div class="py-8">
         <div class="max-w-6xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-sm">
@@ -170,8 +241,10 @@
                                 </tr>
                             </tbody>
                         </table>
-                        <div class="mt-4 flex justify-center">
-                            {{ $products->links() }}
+                        <div class="mt-6 flex justify-center">
+                            <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                                {{ $products->links() }}
+                            </div>
                         </div>
                     </div>
                 </div>

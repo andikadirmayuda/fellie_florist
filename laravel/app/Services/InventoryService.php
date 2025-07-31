@@ -15,12 +15,12 @@ class InventoryService
     /**
      * Get inventory movement history for a product
      */
-    public function getProductHistory(Product $product): Collection
+    public function getProductHistory(Product $product)
     {
         return $product->inventoryLogs()
             ->with('product')
             ->latest()
-            ->get();
+            ->paginate(20); // 20 items per page
     }
 
     /**
