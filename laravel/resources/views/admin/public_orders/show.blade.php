@@ -128,7 +128,7 @@
                 </span>
                 @if(!in_array($order->payment_status, ['paid', 'rejected', 'cancelled']) && !in_array($order->status, ['cancelled', 'completed', 'done']))
                     <form method="POST" action="{{ route('admin.public-orders.update-payment-status', $order->id) }}"
-                        class="inline-flex items-center gap-2 ml-2" enctype="multipart/form-data" id="paymentStatusForm">
+                        class="inline-flex items-center gap-2 ml-2 flex-wrap" enctype="multipart/form-data" id="paymentStatusForm">
                         @csrf
                         <select name="payment_status" class="border rounded p-1 mx-2" id="paymentStatusSelect">
                             @foreach($paymentStatusMap as $key => $label)
@@ -136,6 +136,13 @@
                                 </option>
                             @endforeach
                         </select>
+                        <input type="number" name="amount_paid" id="amountPaidInput" 
+                            class="border rounded p-1" style="max-width:150px; display:none;" 
+                            placeholder="Nominal bayar" min="0" step="1000">
+                        <small id="totalHelper" class="text-gray-500 text-xs" style="display:none;">
+                            @php $totalForHelper = $order->items->sum(function($item) { return ($item->price ?? 0) * ($item->quantity ?? 0); }); @endphp
+                            Total: Rp{{ number_format($totalForHelper, 0, ',', '.') }}
+                        </small>
                         <input type="file" name="payment_proof" id="paymentProofInput" accept="image/*,application/pdf"
                             class="border rounded p-1" style="max-width:180px; display:none;">
                         <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded">Update
@@ -145,97 +152,66 @@
                         document.addEventListener('DOMContentLoaded', function () {
                             const paymentStatusSelect = document.getElementById('paymentStatusSelect');
                             const paymentProofInput = document.getElementById('paymentProofInput');
+                            const amountPaidInput = document.getElementById('amountPaidInput');
+                            const totalHelper = document.getElementById('totalHelper');
                             const paymentStatusForm = document.getElementById('paymentStatusForm');
-                            function togglePaymentProof() {
+                            function togglePaymentInputs() {
                                 const val = paymentStatusSelect.value;
+                                // Tampilkan input untuk status yang perlu pembayaran
                                 if (["paid", "dp_paid", "partial_paid"].includes(val)) {
                                     paymentProofInput.style.display = '';
                                     paymentProofInput.required = true;
+                                    totalHelper.style.display = '';
+                                    
+                                    if (val === 'paid') {
+                                        // Untuk status lunas, input nominal opsional (auto-calculate total)
+                                        amountPaidInput.style.display = '';
+                                        amountPaidInput.required = false;
+                                        amountPaidInput.placeholder = 'Otomatis = total pesanan';
+                                    } else {
+                                        // Untuk DP/partial, input nominal wajib
+                                        amountPaidInput.style.display = '';
+                                        amountPaidInput.required = true;
+                                        if (val === 'dp_paid') {
+                                            amountPaidInput.placeholder = 'Nominal DP';
+                                        } else {
+                                            amountPaidInput.placeholder = 'Nominal bayar';
+                                        }
+                                    }
                                 } else {
                                     paymentProofInput.style.display = 'none';
                                     paymentProofInput.required = false;
+                                    amountPaidInput.style.display = 'none';
+                                    amountPaidInput.required = false;
+                                    totalHelper.style.display = 'none';
                                 }
                             }
-                            paymentStatusSelect.addEventListener('change', togglePaymentProof);
-                            togglePaymentProof();
+                            paymentStatusSelect.addEventListener('change', togglePaymentInputs);
+                            togglePaymentInputs();
                             paymentStatusForm.addEventListener('submit', function (e) {
-                                if (["paid", "dp_paid", "partial_paid"].includes(paymentStatusSelect.value) && !paymentProofInput.value) {
-                                    alert('Silakan pilih file bukti pembayaran sebelum submit!');
-                                    paymentProofInput.focus();
-                                    e.preventDefault();
+                                const val = paymentStatusSelect.value;
+                                if (["paid", "dp_paid", "partial_paid"].includes(val)) {
+                                    // Validasi bukti pembayaran (wajib untuk semua)
+                                    if (!paymentProofInput.value) {
+                                        alert('Silakan pilih file bukti pembayaran sebelum submit!');
+                                        paymentProofInput.focus();
+                                        e.preventDefault();
+                                        return;
+                                    }
+                                    
+                                    // Validasi nominal hanya untuk DP dan partial (paid otomatis)
+                                    if (val !== 'paid' && (!amountPaidInput.value || amountPaidInput.value <= 0)) {
+                                        alert('Silakan masukkan nominal pembayaran yang valid!');
+                                        amountPaidInput.focus();
+                                        e.preventDefault();
+                                        return;
+                                    }
                                 }
                             });
                         });
                     </script>
                 @endif
             </div>
-        </div>
-        <div class="bg-white rounded shadow p-6 mb-6">
-            <h3 class="font-semibold mb-2">Riwayat Pembayaran</h3>
-            <table class="min-w-full bg-white border border-gray-200 mb-4">
-                <thead>
-                    <tr>
-                        <th class="px-4 py-2 border">Tanggal</th>
-                        <th class="px-4 py-2 border">Nominal</th>
-                        <th class="px-4 py-2 border">Catatan</th>
-                        <th class="px-4 py-2 border">Bukti</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($order->payments as $payment)
-                        <tr>
-                            <td class="px-4 py-2 border">{{ $payment->created_at->format('Y-m-d H:i') }}</td>
-                            <td class="px-4 py-2 border">Rp{{ number_format($payment->amount, 0, ',', '.') }}</td>
-                            <td class="px-4 py-2 border">{{ $payment->note ?? '-' }}</td>
-                            <td class="px-4 py-2 border">
-                                @if($payment->proof)
-                                    @php $ext = pathinfo($payment->proof, PATHINFO_EXTENSION); @endphp
-                                    @if(in_array(strtolower($ext), ['jpg', 'jpeg', 'png', 'gif', 'webp']))
-                                        <a href="{{ asset('storage/' . $payment->proof) }}" target="_blank"><img
-                                                src="{{ asset('storage/' . $payment->proof) }}" alt="Bukti"
-                                                class="h-12 rounded shadow border inline-block"></a>
-                                    @elseif(strtolower($ext) == 'pdf')
-                                        <a href="{{ asset('storage/' . $payment->proof) }}" target="_blank"
-                                            class="text-blue-600 underline">PDF</a>
-                                    @else
-                                        <a href="{{ asset('storage/' . $payment->proof) }}" target="_blank"
-                                            class="text-blue-600 underline">Download</a>
-                                    @endif
-                                @else
-                                    -
-                                @endif
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="4" class="text-center text-gray-500">Belum ada pembayaran.</td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-            @if(auth()->user() && auth()->user()->hasRole(['owner', 'admin']) && !in_array($order->payment_status, ['paid', 'rejected', 'cancelled']) && !in_array($order->status, ['cancelled', 'completed', 'done']))
-                <form method="POST" action="{{ route('admin.public-orders.add-payment', $order->id) }}"
-                    enctype="multipart/form-data" class="flex flex-col md:flex-row md:items-end gap-2 border-t pt-4">
-                    @csrf
-                    <div>
-                        <label class="block text-xs font-semibold mb-1">Nominal Pembayaran</label>
-                        <input type="number" name="amount" min="1" required class="border rounded px-2 py-1 w-36"
-                            placeholder="Nominal">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold mb-1">Catatan</label>
-                        <input type="text" name="note" class="border rounded px-2 py-1 w-48" placeholder="(Opsional)">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold mb-1">Bukti Pembayaran</label>
-                        <input type="file" name="proof" accept="image/*,application/pdf"
-                            class="border rounded px-2 py-1 w-48">
-                    </div>
-                    <button type="submit"
-                        class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded shadow">Tambah
-                        Pembayaran</button>
-                </form>
-            @endif
         </div>
         <div class="bg-white rounded shadow p-6 mb-6">
             <h2 class="text-lg font-semibold mb-2">Produk Dipesan</h2>
@@ -264,6 +240,37 @@
                     @endforeach
                 </tbody>
             </table>
+            
+            <!-- Total dan Sisa Pembayaran -->
+            @php
+                $totalOrder = $order->items->sum(function($item) {
+                    return ($item->price ?? 0) * ($item->quantity ?? 0);
+                });
+                // Gunakan amount_paid langsung dari order (yang di-input admin via dropdown)
+                $totalPaid = $order->amount_paid ?? 0;
+                $sisaPembayaran = $order->payment_status === 'paid' ? 0 : max($totalOrder - $totalPaid, 0);
+            @endphp
+            <div class="mt-4 bg-gray-50 p-4 rounded-lg">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                    <div class="text-center">
+                        <span class="block text-gray-600 font-semibold">Total Pesanan</span>
+                        <span class="block text-lg font-bold text-green-600">Rp{{ number_format($totalOrder, 0, ',', '.') }}</span>
+                    </div>
+                    <div class="text-center">
+                        <span class="block text-gray-600 font-semibold">Sudah Dibayar</span>
+                        <span class="block text-lg font-bold text-blue-600">Rp{{ number_format($totalPaid, 0, ',', '.') }}</span>
+                    </div>
+                    <div class="text-center">
+                        <span class="block text-gray-600 font-semibold">Sisa Pembayaran</span>
+                        <span class="block text-lg font-bold {{ $sisaPembayaran > 0 ? 'text-red-600' : 'text-green-600' }}">
+                            Rp{{ number_format($sisaPembayaran, 0, ',', '.') }}
+                        </span>
+                        @if($sisaPembayaran == 0 && $order->payment_status === 'paid')
+                            <span class="block text-xs text-green-500 font-semibold mt-1">✓ LUNAS</span>
+                        @endif
+                    </div>
+                </div>
+            </div>
         </div>
 
         @if(!empty($order->payment_proof))

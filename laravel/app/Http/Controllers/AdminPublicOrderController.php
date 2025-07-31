@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\PublicOrder;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
 class AdminPublicOrderController extends Controller
@@ -135,6 +136,12 @@ class AdminPublicOrderController extends Controller
 
         // Jika status pembayaran ke dp_paid, partial_paid, atau paid, wajib upload bukti pembayaran
         if (in_array($newStatus, ['dp_paid', 'partial_paid', 'paid'])) {
+            // Validasi nominal pembayaran (hanya wajib untuk DP dan partial, paid otomatis)
+            if (in_array($newStatus, ['dp_paid', 'partial_paid']) && (!$amountPaid || $amountPaid <= 0)) {
+                return back()->with('error', 'Nominal pembayaran harus diisi dan lebih dari 0 untuk status DP/Sebagian.');
+            }
+            
+            // Validasi bukti pembayaran (wajib untuk semua)
             if ($request->hasFile('payment_proof')) {
                 $file = $request->file('payment_proof');
                 if (!$file->isValid()) {
@@ -163,9 +170,22 @@ class AdminPublicOrderController extends Controller
         }
 
         $order->payment_status = $newStatus;
-        if ($amountPaid !== null) {
+        
+        // Update amount_paid berdasarkan input admin atau otomatis untuk status paid
+        if (in_array($newStatus, ['dp_paid', 'partial_paid'])) {
+            // Untuk DP atau pembayaran sebagian, gunakan input dari admin
             $order->amount_paid = $amountPaid;
+        } elseif ($newStatus === 'paid') {
+            // Untuk status lunas, SELALU set amount_paid = total pesanan
+            $totalOrder = $order->items()->sum(DB::raw('quantity * price'));
+            $order->amount_paid = $totalOrder;
+            
+            // Jika admin input nominal yang berbeda, beri peringatan tapi tetap gunakan total
+            if ($amountPaid && $amountPaid != $totalOrder) {
+                Log::warning("Admin input amount_paid ($amountPaid) berbeda dengan total order ($totalOrder). Menggunakan total order.");
+            }
         }
+        
         $order->save();
         return back()->with('success', 'Status pembayaran berhasil diubah.');
     }

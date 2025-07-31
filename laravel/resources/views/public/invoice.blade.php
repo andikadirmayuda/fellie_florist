@@ -74,16 +74,26 @@
                             <th colspan="5" class="text-right px-2 py-2 sm:px-4 sm:py-2 font-semibold">Total</th>
                             <th class="px-2 py-2 sm:px-4 sm:py-2 text-right font-semibold text-green-600">Rp{{ number_format($total, 0, ',', '.') }}</th>
                         </tr>
-                        @php $total_paid = $order->total_paid ?? ($order->payments ? $order->payments->sum('amount') : 0); @endphp
+                        @php 
+                            // Gunakan amount_paid langsung dari order (yang di-set admin)
+                            $total_paid = $order->amount_paid ?? 0;
+                            // Jika status pembayaran sudah lunas, sisa pembayaran harus 0
+                            $sisa_pembayaran = $order->payment_status === 'paid' ? 0 : max($total - $total_paid, 0);
+                            
+                            // Untuk tampilan "Total Sudah Dibayar", jika status lunas maka tampilkan total penuh
+                            $display_total_paid = $order->payment_status === 'paid' ? $total : $total_paid;
+                        @endphp
                         @if($total_paid > 0)
                         <tr>
                             <th colspan="5" class="text-right px-2 py-2 sm:px-4 sm:py-2 font-semibold">Total Sudah Dibayar</th>
-                            <th class="px-2 py-2 sm:px-4 sm:py-2 text-right font-semibold text-blue-600">Rp{{ number_format($total_paid, 0, ',', '.') }}</th>
+                            <th class="px-2 py-2 sm:px-4 sm:py-2 text-right font-semibold text-blue-600">Rp{{ number_format($display_total_paid, 0, ',', '.') }}</th>
                         </tr>
+                        @if($sisa_pembayaran > 0)
                         <tr>
                             <th colspan="5" class="text-right px-2 py-2 sm:px-4 sm:py-2 font-semibold">Sisa Pembayaran</th>
-                            <th class="px-2 py-2 sm:px-4 sm:py-2 text-right font-semibold text-red-600">Rp{{ number_format(max($total - $total_paid, 0), 0, ',', '.') }}</th>
+                            <th class="px-2 py-2 sm:px-4 sm:py-2 text-right font-semibold text-red-600">Rp{{ number_format($sisa_pembayaran, 0, ',', '.') }}</th>
                         </tr>
+                        @endif
                         @endif
                     </tfoot>
                 </table>
@@ -123,26 +133,6 @@
             </button>
         </div>
     </div>
-            @if(!empty($order->payment_proof))
-                <div class="my-8 text-center">
-                    <h3 class="font-semibold text-base mb-2 flex items-center gap-2 justify-center"><i class="bi bi-receipt"></i> Bukti Pembayaran</h3>
-                    @php
-                        $ext = pathinfo($order->payment_proof, PATHINFO_EXTENSION);
-                    @endphp
-                    @if(in_array(strtolower($ext), ['jpg','jpeg','png','gif','webp']))
-                        <img src="{{ asset('storage/' . $order->payment_proof) }}"
-                             alt="Bukti Pembayaran"
-                             class="mx-auto rounded shadow max-h-64 border mb-2"
-                             style="max-width:300px;"
-                             onerror="this.style.display='none'; document.getElementById('payment-proof-error').style.display='block';" />
-                    @elseif(strtolower($ext) == 'pdf')
-                        <a href="{{ asset('storage/' . $order->payment_proof) }}" target="_blank" class="text-blue-600 underline">Lihat Bukti Pembayaran (PDF)</a>
-                    @else
-                        <a href="{{ asset('storage/' . $order->payment_proof) }}" target="_blank" class="text-blue-600 underline">Download Bukti Pembayaran</a>
-                    @endif
-                    <div id="payment-proof-error" style="display:none; color:red;">Bukti pembayaran tidak ditemukan di server.</div>
-                </div>
-            @endif
 
             {{-- Riwayat Pembayaran dihapus sesuai permintaan --}}
                 </tfoot>
@@ -163,11 +153,12 @@
                 <p class="mt-2 sm:mt-4">Fellie Florist &copy; {{ date('Y') }}</p>
             </div> --}}
         </div>
-    </div>
-    <div class="fixed bottom-2 right-2 sm:bottom-4 sm:right-4 print:hidden z-50">
-        <button onclick="window.print()" class="bg-pink-600 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-lg shadow hover:bg-pink-700 text-xs sm:text-base">
-            Print Invoice
-        </button>
+        
+        <div class="fixed bottom-2 right-2 sm:bottom-4 sm:right-4 print:hidden z-50">
+            <button onclick="window.print()" class="bg-pink-600 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-lg shadow hover:bg-pink-700 text-xs sm:text-base">
+                Print Invoice
+            </button>
+        </div>
     </div>
 </body>
 </html>

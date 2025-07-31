@@ -176,7 +176,7 @@ Route::get('/cart/json', [PublicCartController::class, 'getCart'])->name('public
 Route::get('/cart/get', [PublicCartController::class, 'getCart']); // Alias
 Route::get('/cart/items', [PublicCartController::class, 'getCart']); // Alias for backward compatibility
 
-Route::post('/admin/public-orders/{id}/add-payment', [AdminPublicOrderController::class, 'addPayment'])->name('admin.public-orders.add-payment');
+// Route::post('/admin/public-orders/{id}/add-payment', [AdminPublicOrderController::class, 'addPayment'])->name('admin.public-orders.add-payment'); // TIDAK DIGUNAKAN LAGI
 
 // Route resource untuk Pesanan & Penjualan Buket
 Route::resource('bouquets', BouquetController::class);

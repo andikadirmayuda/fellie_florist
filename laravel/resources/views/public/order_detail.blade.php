@@ -219,15 +219,20 @@
                                 Rp{{ number_format($total, 0, ',', '.') }}</th>
                         </tr>
                         @php
-                            $totalPaid = $order->payments ? $order->payments->sum('amount') : 0;
-                            $sisa = max($total - $totalPaid, 0);
+                            // Gunakan amount_paid langsung dari order (yang di-set admin)
+                            $totalPaid = $order->amount_paid ?? 0;
+                            // Jika status pembayaran sudah lunas, sisa pembayaran harus 0
+                            $sisa = $order->payment_status === 'paid' ? 0 : max($total - $totalPaid, 0);
+                            
+                            // Untuk tampilan "Total Sudah Dibayar", jika status lunas maka tampilkan total penuh
+                            $displayTotalPaid = $order->payment_status === 'paid' ? $total : $totalPaid;
                         @endphp
                         <tr>
                             <th colspan="5" class="text-right px-2 py-1 font-semibold text-[9px] sm:text-sm">Total Sudah
                                 Dibayar</th>
                             <th
                                 class="pr-4 py-1 text-right font-bold text-blue-600 text-[11px] sm:text-base whitespace-nowrap">
-                                Rp{{ number_format($totalPaid, 0, ',', '.') }}</th>
+                                Rp{{ number_format($displayTotalPaid, 0, ',', '.') }}</th>
                         </tr>
                         @if($sisa > 0)
                             <tr>
@@ -252,7 +257,7 @@
             @endif --}}
 
             <!-- Informasi Pembayaran Section -->
-            @if($sisa > 0)
+            @if($sisa > 0 && $order->payment_status !== 'paid')
                 <div "my-8">
                     <div class="bg-gradient-to-r from-orange-50 to-yellow-50 border-2 border-orange-200 rounded-2xl p-4 sm:p-6">
                         <div class="flex items-center justify-center mb-4">
@@ -363,6 +368,38 @@
                     </div>
                 </div>
             @endif
+            
+            <!-- Pesan untuk pesanan yang sudah lunas -->
+            @if($order->payment_status === 'paid' && $sisa == 0)
+                <div class="my-8">
+                    <div class="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-2xl p-4 sm:p-6">
+                        <div class="flex items-center justify-center mb-4">
+                            <div class="bg-green-500 rounded-full p-3 mr-3">
+                                <i class="bi bi-check-circle text-white text-xl"></i>
+                            </div>
+                            <h3 class="text-xl sm:text-2xl font-bold text-green-800">Pembayaran Lunas!</h3>
+                        </div>
+                        
+                        <div class="text-center">
+                            <p class="text-green-700 text-sm sm:text-base mb-3">
+                                Terima kasih! Pembayaran pesanan Anda telah diterima dengan lengkap.
+                            </p>
+                            <p class="text-green-600 text-xs sm:text-sm">
+                                Pesanan Anda sedang diproses. Silakan pantau status pesanan di halaman ini.
+                            </p>
+                        </div>
+                        
+                        @if($order->status === 'pending')
+                            <div class="mt-4 text-center">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                    <i class="bi bi-clock mr-1"></i>
+                                    Menunggu diproses oleh admin
+                                </span>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            @endif
 
             @if(!empty($order->payment_proof))
                 <div class="my-8 text-center">
@@ -387,54 +424,6 @@
                 </div>
             @endif
 
-            @if($order->payments && $order->payments->count())
-                <div class="my-8">
-                    <h3 class="font-semibold text-base mb-2 flex items-center gap-2 justify-center"><i
-                            class="bi bi-clock-history"></i> Riwayat Pembayaran</h3>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-xs sm:text-sm table-fixed border rounded-lg overflow-hidden">
-                            <thead>
-                                <tr class="bg-gray-50 text-left">
-                                    <th class="py-2 px-2 sm:px-4 font-semibold">Tanggal</th>
-                                    <th class="py-2 px-2 sm:px-4 font-semibold text-right">Jumlah</th>
-                                    <th class="py-2 px-2 sm:px-4 font-semibold">Catatan</th>
-                                    <th class="py-2 px-2 sm:px-4 font-semibold">Bukti</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y">
-                                @foreach($order->payments as $payment)
-                                    <tr>
-                                        <td class="py-2 px-2 sm:px-4 align-top">
-                                            {{ $payment->created_at ? $payment->created_at->format('Y-m-d H:i') : '-' }}</td>
-                                        <td class="py-2 px-2 sm:px-4 text-right align-top">
-                                            Rp{{ number_format($payment->amount, 0, ',', '.') }}</td>
-                                        <td class="py-2 px-2 sm:px-4 align-top">{{ $payment->note ?? '-' }}</td>
-                                        <td class="py-2 px-2 sm:px-4 align-top">
-                                            @if($payment->proof)
-                                                @php $ext = pathinfo($payment->proof, PATHINFO_EXTENSION); @endphp
-                                                @if(in_array(strtolower($ext), ['jpg', 'jpeg', 'png', 'gif', 'webp']))
-                                                    <a href="{{ asset('storage/' . $payment->proof) }}" target="_blank"><img
-                                                            src="{{ asset('storage/' . $payment->proof) }}" alt="Bukti"
-                                                            class="inline-block rounded shadow max-h-12 border"
-                                                            style="max-width:60px;" /></a>
-                                                @elseif(strtolower($ext) == 'pdf')
-                                                    <a href="{{ asset('storage/' . $payment->proof) }}" target="_blank"
-                                                        class="text-blue-600 underline">PDF</a>
-                                                @else
-                                                    <a href="{{ asset('storage/' . $payment->proof) }}" target="_blank"
-                                                        class="text-blue-600 underline">File</a>
-                                                @endif
-                                            @else
-                                                -
-                                            @endif
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            @endif
             @if(!empty($order->packing_photo))
                 <div class="my-8 text-center">
                     <h3 class="font-semibold text-base mb-2 flex items-center gap-2 justify-center">

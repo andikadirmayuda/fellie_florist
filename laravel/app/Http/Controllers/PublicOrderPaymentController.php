@@ -39,9 +39,9 @@ class PublicOrderPaymentController extends Controller
         // Update status pembayaran dan status order
         if ($order->amount_paid >= $total && $total > 0) {
             $order->payment_status = 'paid';
-            $order->status = 'confirmed';
+            $order->status = 'processed'; // Ubah ke processed agar konsisten dengan flow
         } elseif ($order->amount_paid > 0) {
-            $order->payment_status = 'dp';
+            $order->payment_status = 'waiting_verification'; // Menunggu verifikasi dari admin
         } else {
             $order->payment_status = 'waiting_confirmation';
         }
