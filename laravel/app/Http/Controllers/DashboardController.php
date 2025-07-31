@@ -21,8 +21,19 @@ class DashboardController extends Controller
         // Statistik utama
         $totalCustomers = Customer::count();
         $totalProducts = Product::count();
-        $totalOrders = PublicOrder::count(); // Ubah ke PublicOrder untuk pesanan online
-        $totalSales = Sale::count();
+        $totalOrders = PublicOrder::whereIn('status', ['pending', 'confirmed', 'processing', 'ready', 'completed'])->count();
+        $totalSales = Sale::count(); // Sales menggunakan SoftDeletes, count() otomatis exclude yang deleted
+        
+        // Total pendapatan dari Sales dan PublicOrder 
+        $salesRevenue = Sale::sum('total'); // Ambil semua sales yang tidak di-soft delete
+        
+        // Hitung pendapatan dari PublicOrder melalui items (quantity * price)
+        $ordersRevenue = \DB::table('public_orders')
+            ->join('public_order_items', 'public_orders.id', '=', 'public_order_items.public_order_id')
+            ->whereIn('public_orders.status', ['confirmed', 'processing', 'ready', 'completed'])
+            ->sum(\DB::raw('public_order_items.quantity * public_order_items.price'));
+            
+        $totalRevenue = $salesRevenue + $ordersRevenue;
 
         // Produk stok menipis
         $lowStockProducts = Product::whereColumn('current_stock', '<=', 'min_stock')->get();
@@ -30,9 +41,10 @@ class DashboardController extends Controller
         // Pesanan terbaru
         $recentOrders = PublicOrder::latest()->take(5)->get();
 
-        // Data grafik penjualan (7 hari terakhir)
-        $sales = Sale::selectRaw('DATE(created_at) as date, SUM(total) as total')
+        // Data grafik penjualan (7 hari terakhir) - PERBAIKAN
+        $sales = Sale::selectRaw('DATE(created_at) as date, COUNT(*) as count, SUM(total) as total')
             ->where('created_at', '>=', now()->subDays(6))
+            // Tidak ada filter status karena Sale menggunakan SoftDeletes
             ->groupBy('date')
             ->orderBy('date')
             ->get();
@@ -42,10 +54,13 @@ class DashboardController extends Controller
         for ($i = 6; $i >= 0; $i--) {
             $date = now()->subDays($i)->format('Y-m-d');
             $dateFormatted = now()->subDays($i)->format('d M');
-            $total = $sales->where('date', $date)->first()->total ?? 0;
+            $saleData = $sales->where('date', $date)->first();
+            $count = $saleData->count ?? 0;
+            $total = $saleData->total ?? 0;
             
             $last7DaysSales->push([
                 'date' => $dateFormatted,
+                'count' => $count,
                 'total' => $total
             ]);
         }
@@ -53,41 +68,76 @@ class DashboardController extends Controller
         $salesChartData = [
             'labels' => $last7DaysSales->pluck('date')->toArray(),
             'datasets' => [[
-                'label' => 'Penjualan',
-                'data' => $last7DaysSales->pluck('total')->toArray(),
-                'backgroundColor' => '#111827',
-                'borderColor' => '#111827',
+                'label' => 'Transaksi Penjualan',
+                'data' => $last7DaysSales->pluck('count')->toArray(),
+                'backgroundColor' => '#3B82F6',
+                'borderColor' => '#3B82F6',
                 'fill' => false,
             ]],
         ];
 
-        // Data grafik pesanan (7 hari terakhir)
-        // Ambil semua pesanan publik dalam 7 hari terakhir untuk menampilkan performa
-        $orders = PublicOrder::selectRaw('DATE(created_at) as date, COUNT(*) as total')
+        // Data grafik pesanan (7 hari terakhir) - PERBAIKAN ULANG
+        // Pisahkan query untuk menghindari error
+        $ordersQuery = PublicOrder::selectRaw('DATE(created_at) as date, COUNT(*) as total')
             ->where('created_at', '>=', now()->subDays(6))
+            ->whereIn('status', ['pending', 'confirmed', 'processing', 'ready', 'completed'])
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get();
+
+        // Hitung revenue terpisah dari items
+        $revenueQuery = \DB::table('public_orders')
+            ->join('public_order_items', 'public_orders.id', '=', 'public_order_items.public_order_id')
+            ->selectRaw('DATE(public_orders.created_at) as date, SUM(public_order_items.quantity * public_order_items.price) as revenue')
+            ->where('public_orders.created_at', '>=', now()->subDays(6))
+            ->whereIn('public_orders.status', ['pending', 'confirmed', 'processing', 'ready', 'completed'])
             ->groupBy('date')
             ->orderBy('date')
             ->get();
 
         // Buat array 7 hari terakhir untuk memastikan semua tanggal tampil
-        $last7Days = collect();
+        $last7DaysOrders = collect();
         for ($i = 6; $i >= 0; $i--) {
             $date = now()->subDays($i)->format('Y-m-d');
             $dateFormatted = now()->subDays($i)->format('d M');
-            $count = $orders->where('date', $date)->first()->total ?? 0;
             
-            $last7Days->push([
+            // Ambil data count dari ordersQuery
+            $orderData = $ordersQuery->where('date', $date)->first();
+            $count = $orderData->total ?? 0;
+            
+            // Ambil data revenue dari revenueQuery  
+            $revenueData = $revenueQuery->where('date', $date)->first();
+            $revenue = $revenueData->revenue ?? 0;
+            
+            $last7DaysOrders->push([
                 'date' => $dateFormatted,
-                'total' => $count
+                'count' => $count,
+                'revenue' => $revenue
             ]);
         }
 
         $ordersChartData = [
-            'labels' => $last7Days->pluck('date')->toArray(),
+            'labels' => $last7DaysOrders->pluck('date')->toArray(),
             'datasets' => [[
-                'label' => 'Pesanan Publik',
-                'data' => $last7Days->pluck('total')->toArray(),
-                'backgroundColor' => '#6B7280',
+                'label' => 'Pesanan Online',
+                'data' => $last7DaysOrders->pluck('count')->toArray(),
+                'backgroundColor' => '#8B5CF6',
+            ]],
+        ];
+
+        // Data grafik pendapatan (7 hari terakhir) - TAMBAHAN BARU
+        // Gabungkan pendapatan dari Sales dan PublicOrder
+        $revenueChartData = [
+            'labels' => $last7DaysOrders->pluck('date')->toArray(),
+            'datasets' => [[
+                'label' => 'Pendapatan Harian',
+                'data' => $last7DaysOrders->map(function($orderDay) use ($last7DaysSales) {
+                    $salesRevenue = $last7DaysSales->where('date', $orderDay['date'])->first()['total'] ?? 0;
+                    return $salesRevenue + $orderDay['revenue'];
+                })->toArray(),
+                'backgroundColor' => '#10B981',
+                'borderColor' => '#10B981',
+                'fill' => false,
             ]],
         ];
 
@@ -104,11 +154,13 @@ class DashboardController extends Controller
             'totalProducts',
             'totalOrders',
             'totalSales',
+            'totalRevenue',
             'lowStockProducts',
             'recentOrders',
             'salesChartData',
             'ordersChartData',
-            'readyProducts' // tambahkan ini
+            'revenueChartData',
+            'readyProducts'
         );
 
         // Selalu arahkan ke dashboard utama
