@@ -3,12 +3,12 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Models\Sale;
 use App\Models\Product;
 use App\Models\InventoryLog;
 use Carbon\Carbon;
-use Barryvdh\DomPDF\Facades\Pdf;
-
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ReportController extends Controller
 {
@@ -88,13 +88,34 @@ class ReportController extends Controller
     // Ekspor laporan penjualan ke PDF
     public function salesPdf(Request $request)
     {
-        $start = $request->input('start_date', now()->startOfMonth()->toDateString());
-        $end = $request->input('end_date', now()->endOfMonth()->toDateString());
-        $sales = \App\Models\Sale::with('items.product')
-            ->whereBetween('created_at', [$start, $end])
-            ->get();
-        $pdf = Pdf::loadView('reports.sales_pdf', compact('sales', 'start', 'end'));
-        return $pdf->download('laporan_penjualan.pdf');
+        try {
+            $start = $request->input('start_date', now()->startOfMonth()->toDateString());
+            $end = $request->input('end_date', now()->endOfMonth()->toDateString());
+            
+            // Get sales data with relationships
+            $sales = \App\Models\Sale::with(['items.product'])
+                ->whereBetween('created_at', [$start, $end])
+                ->get();
+            
+            // Calculate summary statistics
+            $totalPendapatan = $sales->sum('total');
+            $totalTransaksi = $sales->count();
+            
+            // Load and render PDF using DomPDF
+            $pdf = Pdf::loadView('reports.sales_pdf', compact('sales', 'start', 'end', 'totalPendapatan', 'totalTransaksi'));
+            
+            // Set paper size and orientation
+            $pdf->setPaper('a4', 'portrait');
+            
+            // Generate filename based on date range
+            $filename = "laporan_penjualan_{$start}_to_{$end}.pdf";
+            
+            // Return PDF for download
+            return $pdf->download($filename);
+            
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => 'Gagal mengexport PDF: ' . $e->getMessage()]);
+        }
     }
 
     // Laporan Pemesanan
@@ -146,7 +167,7 @@ class ReportController extends Controller
         // Total pendapatan dari penjualan
         $totalPenjualan = \App\Models\Sale::whereBetween('created_at', [$start, $end])->sum('total');
         // Total pendapatan dari pemesanan (order + ongkir)
-        $totalPemesanan = \App\Models\Order::whereBetween('created_at', [$start, $end])->sum(\DB::raw('total + delivery_fee'));
+        $totalPemesanan = \App\Models\Order::whereBetween('created_at', [$start, $end])->sum(DB::raw('total + delivery_fee'));
         // Total pendapatan gabungan
         $totalPendapatan = $totalPenjualan + $totalPemesanan;
 
@@ -156,7 +177,7 @@ class ReportController extends Controller
             $date = now()->parse($start)->copy()->addDays($i)->toDateString();
             $harian[$date] = [
                 'penjualan' => \App\Models\Sale::whereDate('created_at', $date)->sum('total'),
-                'pemesanan' => \App\Models\Order::whereDate('created_at', $date)->sum(\DB::raw('total + delivery_fee')),
+                'pemesanan' => \App\Models\Order::whereDate('created_at', $date)->sum(DB::raw('total + delivery_fee')),
             ];
         }
         // Pendapatan mingguan
@@ -168,7 +189,7 @@ class ReportController extends Controller
             $weekEnd = $date->copy()->endOfWeek();
             $mingguan[$weekStart->format('Y-m-d')] = [
                 'penjualan' => \App\Models\Sale::whereBetween('created_at', [$weekStart, $weekEnd])->sum('total'),
-                'pemesanan' => \App\Models\Order::whereBetween('created_at', [$weekStart, $weekEnd])->sum(\DB::raw('total + delivery_fee')),
+                'pemesanan' => \App\Models\Order::whereBetween('created_at', [$weekStart, $weekEnd])->sum(DB::raw('total + delivery_fee')),
             ];
         }
         // Pendapatan bulanan
@@ -180,7 +201,7 @@ class ReportController extends Controller
             $monthEnd = $date->copy()->endOfMonth();
             $bulanan[$monthStart->format('Y-m')] = [
                 'penjualan' => \App\Models\Sale::whereBetween('created_at', [$monthStart, $monthEnd])->sum('total'),
-                'pemesanan' => \App\Models\Order::whereBetween('created_at', [$monthStart, $monthEnd])->sum(\DB::raw('total + delivery_fee')),
+                'pemesanan' => \App\Models\Order::whereBetween('created_at', [$monthStart, $monthEnd])->sum(DB::raw('total + delivery_fee')),
             ];
         }
 

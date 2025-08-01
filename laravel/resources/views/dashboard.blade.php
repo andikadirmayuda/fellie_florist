@@ -1,5 +1,5 @@
 <x-app-layout>
-    <x-slot name="header">
+    {{-- <x-slot name="header">
         <div class="flex justify-between items-center">
             <h1 class="text-2xl font-bold text-gray-800">
                 <i class="bi bi-speedometer2 mr-2"></i>
@@ -18,7 +18,7 @@
                 </a>
             </div>
         </div>
-    </x-slot>
+    </x-slot> --}}
 
     <style>
         .clean-bg {
@@ -103,12 +103,12 @@
             <!-- Welcome Section -->
             <div class="text-center mb-8 form-enter">
                 <h2 class="text-3xl font-bold text-gray-800 mb-2">
-                    Selamat Datang di Dashboard
+                    Selamat Datang di Fellie Florist
                 </h2>
-                <p class="text-gray-600">Pantau performa bisnis Fellie Florist dengan mudah dan profesional</p>
+                <p class="text-4xl text-gray-600">-😊-</p>
             </div>
             <!-- Dashboard Stats -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 form-enter">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8 form-enter">
                 <!-- Total Customers Card -->
                 <div class="stats-card p-6">
                     <div class="flex items-center">
@@ -151,6 +151,20 @@
                     </div>
                 </div>
 
+                <!-- Total Sale Card -->
+                <div class="stats-card p-6">
+                    <div class="flex items-center">
+                        <div class="p-3 bg-indigo-100 rounded-lg mr-4">
+                            <i class="bi bi-receipt text-2xl text-indigo-600"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-500">Total Penjualan</p>
+                            <p class="text-2xl font-bold text-gray-800">{{ $totalSales ?? 0 }}</p>
+                            <p class="text-xs text-indigo-600 mt-1">Transactions</p>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Total Revenue Card -->
                 <div class="stats-card p-6">
                     <div class="flex items-center">
@@ -159,7 +173,7 @@
                         </div>
                         <div>
                             <p class="text-sm font-medium text-gray-500">Total Pendapatan</p>
-                            <p class="text-2xl font-bold text-gray-800">Rp {{ number_format($totalRevenue ?? 0, 0, ',', '.') }}</p>
+                            <p class="text-m font-bold text-gray-800">Rp {{ number_format($totalRevenue ?? 0, 0, ',', '.') }}</p>
                             <p class="text-xs text-orange-600 mt-1">Revenue</p>
                         </div>
                     </div>
@@ -167,7 +181,8 @@
             </div>
 
             <!-- Performance Charts -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 form-enter">
+            <!-- Baris 1: Performa Penjualan & Pesanan -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 form-enter">
                 <!-- Sales Performance Chart -->
                 <div class="chart-card p-6">
                     <div class="flex items-center justify-between mb-4">
@@ -195,7 +210,41 @@
                         <canvas id="ordersChart" class="w-full h-48"></canvas>
                     </div>
                 </div>
+            </div>
 
+            <!-- Baris 2: Performa Produk & Bouquet -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 form-enter">
+                <!-- Product Performance Chart (Doughnut) -->
+                <div class="chart-card p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+                            <i class="bi bi-pie-chart mr-2 text-rose-600"></i>
+                            Performa Produk
+                        </h3>
+                        <span class="text-xs text-rose-600 bg-rose-50 px-2 py-1 rounded">Top Categories</span>
+                    </div>
+                    <div class="relative">
+                        <canvas id="productChart" class="w-full h-48"></canvas>
+                    </div>
+                </div>
+
+                <!-- Bouquet Performance Chart (Bar) -->
+                <div class="chart-card p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+                            <i class="bi bi-flower2 mr-2 text-pink-600"></i>
+                            Performa Bouquet
+                        </h3>
+                        <span class="text-xs text-pink-600 bg-pink-50 px-2 py-1 rounded">Best Sellers</span>
+                    </div>
+                    <div class="relative">
+                        <canvas id="bouquetChart" class="w-full h-48"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Baris 3: Performa Pendapatan (Full Width) -->
+            <div class="grid grid-cols-1 gap-6 mb-8 form-enter">
                 <!-- Revenue Performance Chart -->
                 <div class="chart-card p-6">
                     <div class="flex items-center justify-between mb-4">
@@ -206,7 +255,7 @@
                         <span class="text-xs text-green-600 bg-green-50 px-2 py-1 rounded">Monthly</span>
                     </div>
                     <div class="relative">
-                        <canvas id="revenueChart" class="w-full h-48"></canvas>
+                        <canvas id="revenueChart" class="w-full h-64"></canvas>
                     </div>
                 </div>
             </div>
@@ -486,6 +535,8 @@
         const salesCtx = document.getElementById('salesChart').getContext('2d');
         const ordersCtx = document.getElementById('ordersChart').getContext('2d');
         const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+        const productCtx = document.getElementById('productChart').getContext('2d');
+        const bouquetCtx = document.getElementById('bouquetChart').getContext('2d');
 
         // Sales Performance Chart (Line Chart)
         new Chart(salesCtx, {
@@ -665,6 +716,156 @@
                 interaction: {
                     intersect: false,
                     mode: 'index'
+                }
+            }
+        });
+
+        // Product Performance Chart (Doughnut Chart) - DATA REAL DARI CONTROLLER
+        const productData = {
+            labels: {!! json_encode($productChartData['labels']) !!},
+            datasets: [{
+                data: {!! json_encode($productChartData['data']) !!},
+                backgroundColor: [
+                    '#FF6B6B', // Merah muda
+                    '#4ECDC4', // Teal
+                    '#45B7D1', // Biru
+                    '#96CEB4', // Hijau mint
+                    '#FFEAA7', // Kuning
+                    '#DDA0DD', // Plum
+                    '#F0E68C', // Khaki
+                    '#FFB6C1'  // Light Pink
+                ],
+                borderWidth: 2,
+                borderColor: '#fff',
+                hoverBorderWidth: 3,
+                hoverBorderColor: '#fff'
+            }]
+        };
+
+        new Chart(productCtx, {
+            type: 'doughnut',
+            data: productData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 15,
+                            usePointStyle: true,
+                            font: { size: 11 },
+                            color: '#6B7280'
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(55, 65, 81, 0.9)',
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        cornerRadius: 6,
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.parsed;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                return label + ': ' + value + ' stok (' + percentage + '%)';
+                            }
+                        }
+                    }
+                },
+                cutout: '60%',
+                elements: {
+                    arc: {
+                        borderWidth: 2
+                    }
+                }
+            }
+        });
+
+        // Bouquet Performance Chart (Bar Chart) - DATA REAL DARI CONTROLLER
+        const bouquetDataFromController = {!! json_encode($bouquetChartData) !!};
+        
+        // Fallback data jika tidak ada data bouquet
+        const bouquetData = {
+            labels: bouquetDataFromController.labels.length > 0 ? bouquetDataFromController.labels : ['Tidak ada data bouquet', 'Silakan tambah produk', 'dengan kata "bouquet"', 'atau "buket"', 'di nama produk'],
+            datasets: [{
+                label: 'Jumlah Terjual',
+                data: bouquetDataFromController.data.length > 0 ? bouquetDataFromController.data : [0, 0, 0, 0, 0],
+                backgroundColor: [
+                    '#FF6B9D', // Pink
+                    '#C44569', // Dark Pink
+                    '#F8B500', // Orange
+                    '#F39C12', // Yellow Orange
+                    '#8E44AD', // Purple
+                    '#E74C3C', // Red
+                    '#3498DB', // Blue
+                    '#2ECC71'  // Green
+                ],
+                borderColor: [
+                    '#E91E63',
+                    '#AD1457',
+                    '#FF8F00',
+                    '#F57C00',
+                    '#7B1FA2',
+                    '#C0392B',
+                    '#2980B9',
+                    '#27AE60'
+                ],
+                borderWidth: 1,
+                borderRadius: 6,
+                borderSkipped: false,
+            }]
+        };
+
+        new Chart(bouquetCtx, {
+            type: 'bar',
+            data: bouquetData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: 'rgba(55, 65, 81, 0.9)',
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        cornerRadius: 6,
+                        displayColors: false,
+                        callbacks: {
+                            title: function(context) {
+                                return 'Produk: ' + context[0].label;
+                            },
+                            label: function(context) {
+                                if (bouquetDataFromController.data.length > 0) {
+                                    return 'Terjual: ' + context.parsed.y + ' unit';
+                                } else {
+                                    return 'Tidak ada data';
+                                }
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: { 
+                        ticks: { 
+                            color: '#6B7280', 
+                            font: { size: 10 },
+                            maxRotation: 45
+                        },
+                        grid: { display: false }
+                    },
+                    y: { 
+                        ticks: { 
+                            color: '#6B7280',
+                            font: { size: 11 },
+                            stepSize: 1,
+                            callback: function(value) {
+                                return Math.floor(value); // Hanya tampilkan bilangan bulat
+                            }
+                        },
+                        grid: { color: '#F3F4F6' }
+                    }
                 }
             }
         });

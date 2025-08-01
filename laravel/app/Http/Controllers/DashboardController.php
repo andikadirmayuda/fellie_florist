@@ -11,6 +11,9 @@ use App\Models\Sale;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\PublicOrder;
+use App\Models\InventoryLog;
+use App\Models\BouquetCategory;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -28,10 +31,10 @@ class DashboardController extends Controller
         $salesRevenue = Sale::sum('total'); // Ambil semua sales yang tidak di-soft delete
         
         // Hitung pendapatan dari PublicOrder melalui items (quantity * price)
-        $ordersRevenue = \DB::table('public_orders')
+        $ordersRevenue = DB::table('public_orders')
             ->join('public_order_items', 'public_orders.id', '=', 'public_order_items.public_order_id')
             ->whereIn('public_orders.status', ['confirmed', 'processing', 'ready', 'completed'])
-            ->sum(\DB::raw('public_order_items.quantity * public_order_items.price'));
+            ->sum(DB::raw('public_order_items.quantity * public_order_items.price'));
             
         $totalRevenue = $salesRevenue + $ordersRevenue;
 
@@ -86,7 +89,7 @@ class DashboardController extends Controller
             ->get();
 
         // Hitung revenue terpisah dari items
-        $revenueQuery = \DB::table('public_orders')
+        $revenueQuery = DB::table('public_orders')
             ->join('public_order_items', 'public_orders.id', '=', 'public_order_items.public_order_id')
             ->selectRaw('DATE(public_orders.created_at) as date, SUM(public_order_items.quantity * public_order_items.price) as revenue')
             ->where('public_orders.created_at', '>=', now()->subDays(6))
@@ -148,6 +151,64 @@ class DashboardController extends Controller
             ->take(10)
             ->get();
 
+        // Data untuk Performa Produk (berdasarkan kategori)
+        $productPerformance = Product::select('categories.name as category_name', DB::raw('SUM(products.current_stock) as total_stock'))
+            ->join('categories', 'products.category_id', '=', 'categories.id')
+            ->where('products.current_stock', '>', 0)
+            ->groupBy('categories.id', 'categories.name')
+            ->orderByDesc('total_stock')
+            ->take(5)
+            ->get();
+
+        $productChartData = [
+            'labels' => $productPerformance->pluck('category_name')->toArray(),
+            'data' => $productPerformance->pluck('total_stock')->toArray()
+        ];
+
+        // Data untuk Performa Bouquet - Berdasarkan pesanan publik (public_order_items) yang merupakan produk bouquet
+        $bouquetCategorySales = DB::table('public_order_items')
+            ->join('products', 'public_order_items.product_id', '=', 'products.id')
+            ->join('bouquet_categories', 'products.category_id', '=', 'bouquet_categories.id')
+            ->join('public_orders', 'public_order_items.public_order_id', '=', 'public_orders.id')
+            ->whereIn('public_orders.status', ['confirmed', 'processing', 'ready', 'completed'])
+            ->selectRaw('bouquet_categories.name as category_name, SUM(public_order_items.quantity) as total_sold')
+            ->groupBy('bouquet_categories.id', 'bouquet_categories.name')
+            ->orderBy('total_sold', 'desc')
+            ->take(5)
+            ->get();
+
+        // Jika tidak ada data penjualan bouquet, fallback ke semua kategori yang tersedia
+        if ($bouquetCategorySales->isEmpty()) {
+            $allCategories = BouquetCategory::with('bouquets')->get();
+            $bouquetChartData = [
+                'labels' => $allCategories->pluck('name')->take(5)->toArray(),
+                'data' => $allCategories->map(function($category) {
+                    return $category->bouquets->count(); // Jumlah bouquet per kategori
+                })->take(5)->toArray()
+            ];
+        } else {
+            $bouquetChartData = [
+                'labels' => $bouquetCategorySales->pluck('category_name')->toArray(),
+                'data' => $bouquetCategorySales->pluck('total_sold')->toArray()
+            ];
+        }
+
+        // Jika masih kosong, buat data dummy
+        if (empty($bouquetChartData['labels'])) {
+            $bouquetChartData = [
+                'labels' => ['Wedding', 'Balloon Box', 'Anniversary', 'Birthday', 'Valentine'],
+                'data' => [25, 18, 15, 12, 8]
+            ];
+        }
+
+        // Debug: Uncomment untuk debugging
+        // dd([
+        //     'bouquet_category_sales' => $bouquetCategorySales,
+        //     'bouquet_chart_data' => $bouquetChartData,
+        //     'all_categories' => BouquetCategory::with('bouquets')->get(),
+        //     'bouquet_order_items_sample' => BouquetOrderItem::with(['bouquet.category'])->take(5)->get()
+        // ]);
+
         $data = compact(
             'user',
             'totalCustomers',
@@ -160,7 +221,9 @@ class DashboardController extends Controller
             'salesChartData',
             'ordersChartData',
             'revenueChartData',
-            'readyProducts'
+            'readyProducts',
+            'productChartData',
+            'bouquetChartData'
         );
 
         // Selalu arahkan ke dashboard utama
