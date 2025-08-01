@@ -121,20 +121,26 @@ class ReportController extends Controller
     // Laporan Pemesanan
     public function orders(Request $request)
     {
-        $start = $request->input('start_date', now()->startOfMonth()->toDateString());
-        $end = $request->input('end_date', now()->endOfMonth()->toDateString());
+        $start = $request->input('start_date', now()->startOfYear()->toDateString());
+        $end = $request->input('end_date', now()->endOfYear()->toDateString());
 
-        $orders = \App\Models\Order::with(['customer'])
+        // Mengambil data public order (pemesanan online)
+        $orders = \App\Models\PublicOrder::with(['items.product'])
             ->whereBetween('created_at', [$start, $end])
             ->latest()
             ->get();
 
         $totalOrder = $orders->count();
-        $totalNominal = $orders->sum(function($order) {
-            return $order->total + $order->delivery_fee;
-        });
-        $totalLunas = $orders->where('status', 'completed')->count();
-        $totalBelumLunas = $orders->where('status', '!=', 'completed')->count();
+        $totalNominal = $orders->sum('total');
+        
+        // Status untuk public order - mapping yang benar berdasarkan status yang ada
+        // Status yang dianggap "Lunas/Dibayar": paid, processed, completed
+        // Status yang dianggap "Belum Lunas": pending, unpaid
+        $statusLunas = ['paid', 'processed', 'completed'];
+        $statusBelumLunas = ['pending', 'unpaid'];
+        
+        $totalLunas = $orders->whereIn('status', $statusLunas)->count();
+        $totalBelumLunas = $orders->whereIn('status', $statusBelumLunas)->count();
 
         return view('reports.orders', compact('orders', 'start', 'end', 'totalOrder', 'totalNominal', 'totalLunas', 'totalBelumLunas'));
     }
@@ -142,18 +148,45 @@ class ReportController extends Controller
     // Laporan Pelanggan
     public function customers(Request $request)
     {
-        $start = $request->input('start_date', now()->startOfMonth()->toDateString());
-        $end = $request->input('end_date', now()->endOfMonth()->toDateString());
+        $start = $request->input('start_date', now()->startOfYear()->toDateString());
+        $end = $request->input('end_date', now()->endOfYear()->toDateString());
 
-        $customers = \App\Models\Customer::withCount(['orders' => function($q) use ($start, $end) {
-            $q->whereBetween('created_at', [$start, $end]);
-        }])->with(['orders' => function($q) use ($start, $end) {
-            $q->whereBetween('created_at', [$start, $end]);
-        }])->get();
+        // Mengambil data pelanggan dari public_order
+        $publicOrders = \App\Models\PublicOrder::with(['items.product'])
+            ->whereBetween('created_at', [$start, $end])
+            ->get();
+
+        // Grup data berdasarkan wa_number (nomor WhatsApp) dan kumpulkan semua nama yang berbeda
+        // Filter out orders with empty or null wa_number first
+        $validOrders = $publicOrders->filter(function($order) {
+            return !empty($order->wa_number) && $order->wa_number !== '-';
+        });
+
+        $customers = $validOrders->groupBy('wa_number')->map(function($orders, $waNumber) {
+            $totalOrders = $orders->count();
+            $totalSpent = $orders->sum('total');
+            
+            // Kumpulkan semua nama unik dari order dengan nomor WA yang sama
+            $uniqueNames = $orders->pluck('customer_name')->unique()->values()->toArray();
+            
+            // Ambil nama yang paling sering muncul sebagai nama utama
+            $nameFrequency = $orders->countBy('customer_name');
+            $primaryName = $nameFrequency->sortDesc()->keys()->first();
+            
+            return (object) [
+                'name' => $primaryName, // Nama yang paling sering digunakan
+                'all_names' => $uniqueNames, // Semua nama yang pernah digunakan
+                'names_count' => count($uniqueNames), // Jumlah variasi nama
+                'phone' => $waNumber,
+                'orders_count' => $totalOrders,
+                'total_spent' => $totalSpent,
+                'orders' => $orders
+            ];
+        })->sortByDesc('total_spent')->values();
 
         $totalCustomer = $customers->count();
-        $totalOrder = $customers->sum('orders_count');
-        $topCustomer = $customers->sortByDesc(function($c) { return $c->orders->sum('total'); })->first();
+        $totalOrder = $publicOrders->count();
+        $topCustomer = $customers->first();
 
         return view('reports.customers', compact('customers', 'start', 'end', 'totalCustomer', 'totalOrder', 'topCustomer'));
     }

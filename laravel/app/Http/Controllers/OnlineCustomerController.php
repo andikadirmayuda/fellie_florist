@@ -8,46 +8,83 @@ use App\Models\Customer;
 use App\Models\ResellerCode;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Carbon\Carbon;
 
 class OnlineCustomerController extends Controller
 {
     /**
      * Display a listing of online customers.
+     * Note: Halaman ini menampilkan SEMUA data pelanggan tanpa filter tanggal,
+     * berbeda dengan ReportController yang menggunakan filter periode tanggal.
+     * Total belanja dihitung dari items (quantity x price) untuk konsistensi.
      */
     public function index(Request $request)
     {
         $search = $request->get('search');
         
-        // Query untuk mendapatkan pelanggan online dari PublicOrder dengan join ke Customer
-        $query = PublicOrder::select(
-            'public_orders.customer_name',
-            'public_orders.wa_number',
-            DB::raw('COUNT(public_orders.id) as total_orders'),
-            DB::raw('SUM(public_orders.amount_paid) as total_spent'),
-            DB::raw('MAX(public_orders.created_at) as last_order_date'),
-            DB::raw('MIN(public_orders.created_at) as first_order_date'),
-            'customers.is_reseller',
-            'customers.promo_discount'
-        )
-        ->leftJoin('customers', 'public_orders.wa_number', '=', 'customers.phone')
-        ->whereNotNull('public_orders.customer_name')
-        ->whereNotNull('public_orders.wa_number')
-        ->groupBy(
-            'public_orders.customer_name', 
-            'public_orders.wa_number',
-            'customers.is_reseller',
-            'customers.promo_discount'
-        );
+        // Ambil data mentah dari PublicOrder dengan items untuk perhitungan total yang akurat
+        $query = PublicOrder::with(['items'])
+            ->whereNotNull('customer_name')
+            ->whereNotNull('wa_number')
+            ->where('wa_number', '!=', '')
+            ->where('wa_number', '!=', '-');
 
         if ($search) {
             $query->where(function($q) use ($search) {
-                $q->where('public_orders.customer_name', 'LIKE', "%{$search}%")
-                  ->orWhere('public_orders.wa_number', 'LIKE', "%{$search}%");
+                $q->where('customer_name', 'LIKE', "%{$search}%")
+                  ->orWhere('wa_number', 'LIKE', "%{$search}%");
             });
         }
 
-        $onlineCustomers = $query->orderBy('last_order_date', 'desc')->paginate(15);
+        $publicOrders = $query->get();
+        
+        // Grup berdasarkan wa_number dan kumpulkan informasi
+        $groupedCustomers = $publicOrders->groupBy('wa_number')->map(function($orders, $waNumber) {
+            // Kumpulkan semua nama unik
+            $uniqueNames = $orders->pluck('customer_name')->unique()->values();
+            
+            // Ambil nama yang paling sering muncul
+            $nameFrequency = $orders->countBy('customer_name');
+            $primaryName = $nameFrequency->sortDesc()->keys()->first();
+            
+            // Hitung statistik - gunakan total dari items seperti di ReportController
+            $totalOrders = $orders->count();
+            $totalSpent = $orders->sum('total'); // Gunakan accessor total, bukan amount_paid
+            $lastOrderDate = $orders->max('created_at');
+            $firstOrderDate = $orders->min('created_at');
+            
+            // Ambil data customer jika ada
+            $customer = Customer::where('phone', $waNumber)->first();
+            
+            return (object) [
+                'customer_name' => $primaryName,
+                'all_names' => $uniqueNames->toArray(),
+                'names_count' => $uniqueNames->count(),
+                'wa_number' => $waNumber,
+                'total_orders' => $totalOrders,
+                'total_spent' => $totalSpent,
+                'last_order_date' => $lastOrderDate,
+                'first_order_date' => $firstOrderDate,
+                'is_reseller' => $customer?->is_reseller ?? false,
+                'promo_discount' => $customer?->promo_discount ?? null,
+                'customer' => $customer
+            ];
+        })->sortByDesc('last_order_date');
+        
+        // Buat paginator manual
+        $page = $request->get('page', 1);
+        $perPage = 15;
+        $total = $groupedCustomers->count();
+        $items = $groupedCustomers->forPage($page, $perPage)->values();
+        
+        $onlineCustomers = new LengthAwarePaginator(
+            $items,
+            $total,
+            $perPage,
+            $page,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
 
         return view('online-customers.index', compact('onlineCustomers', 'search'));
     }

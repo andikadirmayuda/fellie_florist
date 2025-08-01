@@ -25,10 +25,10 @@ class UserSeeder extends Seeder
 
         // Create Owner
         $owner = User::updateOrCreate(
-            ['email' => 'owner@florist.com'],
+            ['email' => 'owner@fellieflorist.com'],
             [
                 'name' => 'Owner Florist',
-                'password' => Hash::make('password123'),
+                'password' => Hash::make('Websitefellie2025@#'),
                 'status' => 'active',
             ]
         );
@@ -36,10 +36,10 @@ class UserSeeder extends Seeder
 
         // Create Admin
         $admin = User::updateOrCreate(
-            ['email' => 'admin@florist.com'],
+            ['email' => 'admin@fellieflorist.com'],
             [
                 'name' => 'Admin Florist',
-                'password' => Hash::make('password123'),
+                'password' => Hash::make('Websitefellie2025@#'),
                 'status' => 'active',
             ]
         );
@@ -47,10 +47,10 @@ class UserSeeder extends Seeder
 
         // Create Kasir
         $kasir = User::updateOrCreate(
-            ['email' => 'kasir@florist.com'],
+            ['email' => 'kasir@fellieflorist.com'],
             [
                 'name' => 'Kasir Florist',
-                'password' => Hash::make('password123'),
+                'password' => Hash::make('Websitefellie2025@#'),
                 'status' => 'active',
             ]
         );
@@ -58,10 +58,10 @@ class UserSeeder extends Seeder
 
         // Create Staff
         $karyawan = User::updateOrCreate(
-            ['email' => 'karyawan@florist.com'],
+            ['email' => 'karyawan@fellieflorist.com'],
             [
                 'name' => 'karyawan',
-                'password' => Hash::make('password123'),
+                'password' => Hash::make('Websitefellie2025@#'),
                 'status' => 'active',
             ]
         );
@@ -69,10 +69,10 @@ class UserSeeder extends Seeder
 
         // Create Customers Service
         $cs = User::updateOrCreate(
-            ['email' => 'cs@florist.com'],
+            ['email' => 'cs@fellieflorist.com'],
             [
                 'name' => 'Customers Service',
-                'password' => Hash::make('password123'),
+                'password' => Hash::make('Websitefellie2025@#'),
                 'status' => 'active',
             ]
         );

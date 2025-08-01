@@ -1,9 +1,16 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            <i class="bi bi-people-fill text-pink-500 mr-2"></i>
-            {{ __('Daftar Pelanggan Online') }}
-        </h2>
+        <div class="flex flex-col space-y-2">
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                <i class="bi bi-people-fill text-pink-500 mr-2"></i>
+                {{ __('Daftar Pelanggan Online') }}
+            </h2>
+            {{-- <p class="text-sm text-gray-600">
+                <i class="bi bi-info-circle mr-1"></i>
+                Menampilkan semua data pelanggan (tidak ada filter tanggal). Data dikelompokkan berdasarkan nomor
+                WhatsApp.
+            </p> --}}
+        </div>
     </x-slot>
 
     <div class="py-12">
@@ -75,10 +82,14 @@
                                         <th
                                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Pelanggan
+                                            <div class="flex items-center text-xs text-gray-400 mt-1 normal-case">
+                                                <i class="bi bi-info-circle mr-1"></i>
+                                                <span>Berdasarkan No. WA</span>
+                                            </div>
                                         </th>
                                         <th
                                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Kontak
+                                            No. WhatsApp
                                         </th>
                                         <th
                                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -106,18 +117,38 @@
                                     @foreach($onlineCustomers as $customer)
                                         <tr class="hover:bg-gray-50">
                                             <td class="px-6 py-4 whitespace-nowrap">
-                                                <div class="flex items-center">
-                                                    <div class="flex-shrink-0 h-10 w-10">
+                                                <div class="flex items-start">
+                                                    <div class="flex-shrink-0 h-10 w-10 mt-0.5">
                                                         <div
                                                             class="h-10 w-10 rounded-full bg-pink-100 flex items-center justify-center">
                                                             <i class="bi bi-person-fill text-pink-500"></i>
                                                         </div>
                                                     </div>
-                                                    <div class="ml-4">
-                                                        <div class="text-sm font-medium text-gray-900">
+                                                    <div class="ml-4 flex-1">
+                                                        <div class="text-sm font-medium text-gray-900 mb-1">
                                                             {{ $customer->customer_name }}
                                                         </div>
-                                                        <div class="text-sm text-gray-500">
+                                                        @if($customer->names_count > 1)
+                                                            <div class="space-y-1">
+                                                                <div class="text-xs text-gray-500">
+                                                                    <i class="bi bi-info-circle mr-1"></i>
+                                                                    {{ $customer->names_count }} variasi nama:
+                                                                </div>
+                                                                <div class="flex flex-wrap gap-1">
+                                                                    @foreach($customer->all_names as $name)
+                                                                        <span
+                                                                            class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium 
+                                                                                                            {{ $name === $customer->customer_name ? 'bg-pink-100 text-pink-700' : 'bg-gray-100 text-gray-600' }}">
+                                                                            {{ $name }}
+                                                                            @if($name === $customer->customer_name)
+                                                                                <i class="bi bi-star-fill ml-1 text-xs"></i>
+                                                                            @endif
+                                                                        </span>
+                                                                    @endforeach
+                                                                </div>
+                                                            </div>
+                                                        @endif
+                                                        <div class="text-sm text-gray-500 mt-2">
                                                             Bergabung:
                                                             {{ \Carbon\Carbon::parse($customer->first_order_date)->format('d M Y') }}
                                                         </div>
@@ -125,9 +156,17 @@
                                                 </div>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
-                                                <div class="text-sm text-gray-900">
-                                                    <i class="bi bi-whatsapp text-green-500 mr-1"></i>
-                                                    {{ $customer->wa_number }}
+                                                <div class="flex flex-col">
+                                                    <div class="text-sm text-gray-900 mb-1">
+                                                        <i class="bi bi-whatsapp text-green-500 mr-1"></i>
+                                                        {{ $customer->wa_number }}
+                                                    </div>
+                                                    @if($customer->names_count > 1)
+                                                        <span class="text-xs text-gray-500">
+                                                            <i class="bi bi-people-fill mr-1"></i>
+                                                            {{ $customer->names_count }} nama berbeda
+                                                        </span>
+                                                    @endif
                                                 </div>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
@@ -235,15 +274,6 @@
                     </p>
 
                     <div class="space-y-3">
-                        <!-- Checkbox Set as Reseller -->
-                        <div class="flex items-center">
-                            <input type="checkbox" id="setAsReseller"
-                                class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded">
-                            <label for="setAsReseller" class="ml-2 block text-sm text-gray-700">
-                                Set sebagai Reseller (jika belum terdaftar)
-                            </label>
-                        </div>
-
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Kode Reseller</label>
                             <div class="flex">
@@ -284,15 +314,10 @@
                         class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition">
                         Batal
                     </button>
-                    <button type="button" onclick="generateAutoCode()"
-                        class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition">
-                        <i class="bi bi-magic mr-1"></i>
-                        Generate Otomatis
-                    </button>
-                    <button type="button" onclick="saveManualCode()"
+                    <button type="button" onclick="generateResellerCode()"
                         class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition">
-                        <i class="bi bi-save mr-1"></i>
-                        Simpan Kode
+                        <i class="bi bi-key mr-1"></i>
+                        Generate Kode
                     </button>
                 </div>
             </div>
@@ -332,88 +357,10 @@
             document.getElementById('resellerCode').value = code;
         }
 
-        // Generate kode otomatis
-        function generateAutoCode() {
-            const expiryHours = document.getElementById('expiryHours').value;
-            const notes = document.getElementById('notes').value.trim();
-            const setAsReseller = document.getElementById('setAsReseller').checked;
-
-            if (!expiryHours || expiryHours < 1 || expiryHours > 168) {
-                alert('Jam berlaku harus antara 1-168 jam!');
-                return;
-            }
-
-            // Show loading state
-            const generateBtn = event.target;
-            const originalText = generateBtn.innerHTML;
-            generateBtn.innerHTML = '<i class="bi bi-arrow-repeat animate-spin mr-1"></i> Generating...';
-            generateBtn.disabled = true;
-
-            // Debug URL
-            const url = `/online-customers/${currentCustomerWA}/generate-code`;
-            console.log('Request URL:', url);
-            console.log('Current customer WA:', currentCustomerWA);
-            console.log('CSRF Token:', document.querySelector('meta[name="csrf-token"]')?.getAttribute('content'));
-
-            // Send AJAX request tanpa kode (biar auto-generate)
-            fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                },
-                body: JSON.stringify({
-                    expiry_hours: expiryHours,
-                    notes: notes || null,
-                    set_as_reseller: setAsReseller
-                })
-            })
-                .then(response => {
-                    console.log('Response status:', response.status);
-                    console.log('Response headers:', response.headers.get('content-type'));
-
-                    // Cek apakah response adalah JSON
-                    const contentType = response.headers.get('content-type');
-                    if (contentType && contentType.includes('application/json')) {
-                        return response.json();
-                    } else {
-                        // Jika bukan JSON, ambil sebagai text untuk debugging
-                        return response.text().then(text => {
-                            console.log('Non-JSON response:', text.substring(0, 500));
-                            throw new Error('Server returned HTML instead of JSON. Check server logs.');
-                        });
-                    }
-                })
-                .then(data => {
-                    console.log('Response data:', data);
-                    if (data.success) {
-                        alert('Kode reseller berhasil di-generate!\n\nKode: ' + data.code + '\nBerlaku hingga: ' + data.expires_at);
-                        closeGenerateCodeModal();
-                        // Refresh halaman untuk update data
-                        location.reload();
-                    } else {
-                        alert('Error: ' + (data.message || 'Gagal generate kode reseller'));
-                    }
-                })
-                .catch(error => {
-                    console.error('Full error:', error);
-                    alert('Terjadi kesalahan saat generate kode reseller. Check console for details.');
-                })
-                .finally(() => {
-                    // Reset button state
-                    generateBtn.innerHTML = originalText;
-                    generateBtn.disabled = false;
-                });
-        }
-
-        // Simpan kode manual
-        function saveManualCode() {
+        function generateResellerCode() {
             const code = document.getElementById('resellerCode').value.trim();
             const expiryHours = document.getElementById('expiryHours').value;
             const notes = document.getElementById('notes').value.trim();
-            const setAsReseller = document.getElementById('setAsReseller').checked;
 
             if (!code) {
                 alert('Kode reseller tidak boleh kosong!');
@@ -426,68 +373,43 @@
             }
 
             // Show loading state
-            const saveBtn = event.target;
-            const originalText = saveBtn.innerHTML;
-            saveBtn.innerHTML = '<i class="bi bi-arrow-repeat animate-spin mr-1"></i> Menyimpan...';
-            saveBtn.disabled = true;
+            const generateBtn = event.target;
+            const originalText = generateBtn.innerHTML;
+            generateBtn.innerHTML = '<i class="bi bi-arrow-repeat animate-spin mr-1"></i> Generating...';
+            generateBtn.disabled = true;
 
-            // Debug URL
-            const url = `/online-customers/${currentCustomerWA}/generate-code`;
-            console.log('Request URL:', url);
-            console.log('Current customer WA:', currentCustomerWA);
-            console.log('CSRF Token:', document.querySelector('meta[name="csrf-token"]')?.getAttribute('content'));
-
-            // Send AJAX request dengan kode manual
-            fetch(url, {
+            // Send AJAX request
+            fetch(`/online-customers/${currentCustomerWA}/generate-code`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                 },
                 body: JSON.stringify({
                     code: code,
                     expiry_hours: expiryHours,
-                    notes: notes || null,
-                    set_as_reseller: setAsReseller
+                    notes: notes || null
                 })
             })
-                .then(response => {
-                    console.log('Response status:', response.status);
-                    console.log('Response headers:', response.headers.get('content-type'));
-
-                    // Cek apakah response adalah JSON
-                    const contentType = response.headers.get('content-type');
-                    if (contentType && contentType.includes('application/json')) {
-                        return response.json();
-                    } else {
-                        // Jika bukan JSON, ambil sebagai text untuk debugging
-                        return response.text().then(text => {
-                            console.log('Non-JSON response:', text.substring(0, 500));
-                            throw new Error('Server returned HTML instead of JSON. Check server logs.');
-                        });
-                    }
-                })
+                .then(response => response.json())
                 .then(data => {
-                    console.log('Response data:', data);
                     if (data.success) {
-                        alert('Kode reseller berhasil disimpan!\n\nKode: ' + data.code + '\nBerlaku hingga: ' + data.expires_at);
+                        alert('Kode reseller berhasil di-generate!\n\nKode: ' + data.code + '\nBerlaku hingga: ' + data.expires_at);
                         closeGenerateCodeModal();
                         // Refresh halaman untuk update data
                         location.reload();
                     } else {
-                        alert('Error: ' + (data.message || 'Gagal menyimpan kode reseller'));
+                        alert('Error: ' + (data.message || 'Gagal generate kode reseller'));
                     }
                 })
                 .catch(error => {
-                    console.error('Full error:', error);
-                    alert('Terjadi kesalahan saat menyimpan kode reseller. Check console for details: ' + error.message);
+                    console.error('Error:', error);
+                    alert('Terjadi kesalahan saat generate kode reseller');
                 })
                 .finally(() => {
                     // Reset button state
-                    saveBtn.innerHTML = originalText;
-                    saveBtn.disabled = false;
+                    generateBtn.innerHTML = originalText;
+                    generateBtn.disabled = false;
                 });
         }
 

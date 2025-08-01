@@ -21,6 +21,8 @@ class PublicOrder extends Model
         'packing_photo',
     ];
 
+    protected $appends = ['total', 'order_number'];
+
     public function items()
     {
         return $this->hasMany(PublicOrderItem::class);
@@ -29,5 +31,31 @@ class PublicOrder extends Model
     public function payments()
     {
         return $this->hasMany(PublicOrderPayment::class, 'public_order_id');
+    }
+
+    // Calculate total from items
+    public function getTotalAttribute()
+    {
+        return $this->items->sum(function($item) {
+            return $item->quantity * $item->price;
+        });
+    }
+
+    // Get order number from public_code or generate one
+    public function getOrderNumberAttribute()
+    {
+        return $this->public_code ?? 'PO-' . str_pad($this->id, 6, '0', STR_PAD_LEFT);
+    }
+
+    // Get customer phone from wa_number
+    public function getCustomerPhoneAttribute()
+    {
+        return $this->wa_number;
+    }
+
+    // Default delivery fee (can be customized based on business logic)
+    public function getDeliveryFeeAttribute()
+    {
+        return 0; // You can add logic here based on delivery_method or destination
     }
 }
