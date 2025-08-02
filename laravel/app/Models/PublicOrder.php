@@ -13,6 +13,7 @@ class PublicOrder extends Model
         'pickup_time',
         'delivery_method',
         'destination',
+        'notes',
         'status',
         'payment_status',
         'amount_paid',

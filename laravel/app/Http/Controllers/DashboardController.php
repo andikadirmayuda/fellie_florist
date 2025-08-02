@@ -22,7 +22,15 @@ class DashboardController extends Controller
         $user = Auth::user();
 
         // Statistik utama
-        $totalCustomers = Customer::count();
+        // Hitung pelanggan online berdasarkan unique wa_number dari PublicOrder, bukan dari tabel Customer
+        $totalCustomers = PublicOrder::select('wa_number')
+            ->whereNotNull('customer_name')
+            ->whereNotNull('wa_number')
+            ->where('wa_number', '!=', '')
+            ->where('wa_number', '!=', '-')
+            ->distinct()
+            ->count();
+            
         $totalProducts = Product::count();
         $totalOrders = PublicOrder::whereIn('status', ['pending', 'confirmed', 'processing', 'ready', 'completed'])->count();
         $totalSales = Sale::count(); // Sales menggunakan SoftDeletes, count() otomatis exclude yang deleted
@@ -79,9 +87,10 @@ class DashboardController extends Controller
             ]],
         ];
 
-        // Data grafik pesanan (7 hari terakhir) - PERBAIKAN ULANG
-        // Pisahkan query untuk menghindari error
-        $ordersQuery = PublicOrder::selectRaw('DATE(created_at) as date, COUNT(*) as total')
+        // Data grafik pesanan (7 hari terakhir) - PERBAIKAN QUERY
+        // Gunakan DB query builder langsung untuk menghindari konflik dengan model accessor
+        $ordersQuery = DB::table('public_orders')
+            ->selectRaw('DATE(created_at) as date, COUNT(*) as order_count')
             ->where('created_at', '>=', now()->subDays(6))
             ->whereIn('status', ['pending', 'confirmed', 'processing', 'ready', 'completed'])
             ->groupBy('date')
@@ -104,9 +113,9 @@ class DashboardController extends Controller
             $date = now()->subDays($i)->format('Y-m-d');
             $dateFormatted = now()->subDays($i)->format('d M');
             
-            // Ambil data count dari ordersQuery
+            // Ambil data count dari ordersQuery (gunakan order_count, bukan total)
             $orderData = $ordersQuery->where('date', $date)->first();
-            $count = $orderData->total ?? 0;
+            $count = $orderData->order_count ?? 0;
             
             // Ambil data revenue dari revenueQuery  
             $revenueData = $revenueQuery->where('date', $date)->first();

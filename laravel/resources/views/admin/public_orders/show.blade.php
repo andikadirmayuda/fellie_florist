@@ -42,6 +42,17 @@
                 <div>Metode Pengiriman: <b>{{ $order->delivery_method }}</b></div>
                 <div>Tujuan Pengiriman: <b>{{ $order->destination }}</b></div>
             </div>
+            @if(!empty($order->notes))
+                <div class="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <h4 class="font-semibold text-gray-800 mb-2 flex items-center">
+                        <svg class="w-4 h-4 mr-2 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M2 5a2 2 0 012-2h7a2 2 0 012 2v4a2 2 0 01-2 2H9l-3 3v-3H4a2 2 0 01-2-2V5z"></path>
+                        </svg>
+                        Catatan Pesanan:
+                    </h4>
+                    <p class="text-gray-700 whitespace-pre-wrap">{{ $order->notes }}</p>
+                </div>
+            @endif
             <div class="mb-4">
                 <h3 class="font-semibold mb-1">Status Pesanan</h3>
                 <div class="flex w-full justify-between mb-2">

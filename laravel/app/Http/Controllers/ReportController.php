@@ -204,6 +204,7 @@ class ReportController extends Controller
         $totalPemesanan = DB::table('public_orders')
             ->join('public_order_items', 'public_orders.id', '=', 'public_order_items.public_order_id')
             ->whereBetween('public_orders.created_at', [$start, $end])
+            ->whereIn('public_orders.status', ['confirmed', 'processing', 'ready', 'completed'])
             ->sum(DB::raw('public_order_items.quantity * public_order_items.price'));
         
         // Total pendapatan gabungan
@@ -219,6 +220,7 @@ class ReportController extends Controller
             $dailyPemesanan = DB::table('public_orders')
                 ->join('public_order_items', 'public_orders.id', '=', 'public_order_items.public_order_id')
                 ->whereDate('public_orders.created_at', $date)
+                ->whereIn('public_orders.status', ['confirmed', 'processing', 'ready', 'completed'])
                 ->sum(DB::raw('public_order_items.quantity * public_order_items.price'));
             
             $harian[$date] = [
@@ -240,6 +242,7 @@ class ReportController extends Controller
             $weeklyPemesanan = DB::table('public_orders')
                 ->join('public_order_items', 'public_orders.id', '=', 'public_order_items.public_order_id')
                 ->whereBetween('public_orders.created_at', [$weekStart, $weekEnd])
+                ->whereIn('public_orders.status', ['confirmed', 'processing', 'ready', 'completed'])
                 ->sum(DB::raw('public_order_items.quantity * public_order_items.price'));
             
             $mingguan[$weekStart->format('d M Y')] = [
@@ -264,6 +267,7 @@ class ReportController extends Controller
             $monthlyPemesanan = DB::table('public_orders')
                 ->join('public_order_items', 'public_orders.id', '=', 'public_order_items.public_order_id')
                 ->whereBetween('public_orders.created_at', [$monthStart, $monthEnd])
+                ->whereIn('public_orders.status', ['confirmed', 'processing', 'ready', 'completed'])
                 ->sum(DB::raw('public_order_items.quantity * public_order_items.price'));
             
             $bulanan[$monthStart->format('M Y')] = [
@@ -346,6 +350,7 @@ class ReportController extends Controller
             $totalPemesanan = DB::table('public_orders')
                 ->join('public_order_items', 'public_orders.id', '=', 'public_order_items.public_order_id')
                 ->whereBetween('public_orders.created_at', [$start, $end])
+                ->whereIn('public_orders.status', ['confirmed', 'processing', 'ready', 'completed'])
                 ->sum(DB::raw('public_order_items.quantity * public_order_items.price'));
             
             $totalPendapatan = $totalPenjualan + $totalPemesanan;
@@ -359,6 +364,7 @@ class ReportController extends Controller
                 $dailyPemesanan = DB::table('public_orders')
                     ->join('public_order_items', 'public_orders.id', '=', 'public_order_items.public_order_id')
                     ->whereDate('public_orders.created_at', $date)
+                    ->whereIn('public_orders.status', ['confirmed', 'processing', 'ready', 'completed'])
                     ->sum(DB::raw('public_order_items.quantity * public_order_items.price'));
                 
                 $harian[$date] = [

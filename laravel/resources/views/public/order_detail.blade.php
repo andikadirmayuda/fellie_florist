@@ -178,6 +178,39 @@
                     </div>
                 </div>
             </div>
+            
+            <!-- Catatan Pesanan -->
+            @if(!empty($order->notes))
+                <div class="mb-4 sm:mb-6">
+                    <div class="bg-gradient-to-br from-blue-50 via-indigo-50 to-blue-100 border border-blue-200 rounded-lg sm:rounded-xl shadow-sm overflow-hidden">
+                        <!-- Header -->
+                        <div class="bg-gradient-to-r from-blue-500 to-indigo-600 px-3 sm:px-6 py-2 sm:py-3">
+                            <div class="flex items-center">
+                                <div class="flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8 bg-white bg-opacity-20 rounded-full mr-2 sm:mr-3">
+                                    <i class="bi bi-chat-left-text text-white text-xs sm:text-sm"></i>
+                                </div>
+                                <h3 class="font-bold text-white text-sm sm:text-base lg:text-lg">Catatan Pesanan</h3>
+                            </div>
+                        </div>
+                        <!-- Content -->
+                        <div class="p-3 sm:p-4 lg:p-6">
+                            <div class="bg-white rounded-lg p-3 sm:p-4 lg:p-5 border border-gray-100 shadow-sm">
+                                <div class="flex items-start">
+                                    <div class="flex-shrink-0 mr-2 sm:mr-3 hidden sm:block">
+                                        <i class="bi bi-quote text-blue-400 text-lg sm:text-xl lg:text-2xl"></i>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <div class="text-gray-800 text-xs sm:text-sm lg:text-base leading-relaxed whitespace-pre-wrap break-words break-all font-medium italic">
+                                            {{ $order->notes }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+            
             <h2 class="text-base sm:text-lg font-semibold mb-2 mt-2 flex items-center gap-2"><i
                     class="bi bi-box-seam"></i> Produk Dipesan</h2>
             <div class="overflow-x-auto">

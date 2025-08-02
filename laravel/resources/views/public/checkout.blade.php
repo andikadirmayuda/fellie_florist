@@ -234,6 +234,21 @@
                                           class="w-full px-4 py-3 border border-rose-200 rounded-xl input-focus focus:outline-none" 
                                           rows="3" placeholder="Masukkan alamat lengkap pengiriman" required></textarea>
                             </div>
+
+                            <!-- Catatan Pesanan -->
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                    <i class="bi bi-chat-left-text mr-1 text-rose-500"></i>
+                                    Catatan untuk Pesanan <span class="text-gray-400 font-normal">(Opsional)</span>
+                                </label>
+                                <textarea name="notes" 
+                                          class="w-full px-4 py-3 border border-rose-200 rounded-xl input-focus focus:outline-none" 
+                                          rows="4" placeholder="Contoh: Bunga untuk acara ulang tahun, warna dominan pink, jangan terlalu besar, dll."></textarea>
+                                <p class="text-xs text-gray-500 mt-1">
+                                    <i class="bi bi-info-circle mr-1"></i>
+                                    Berikan detail khusus yang Anda inginkan untuk pesanan ini
+                                </p>
+                            </div>
                         </div>
 
                         <!-- Info Note -->

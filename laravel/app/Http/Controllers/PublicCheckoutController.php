@@ -47,6 +47,7 @@ class PublicCheckoutController extends Controller
             'pickup_time' => 'required',
             'delivery_method' => 'required|string',
             'destination' => 'required|string',
+            'notes' => 'nullable|string|max:1000',
         ]);
 
         DB::beginTransaction();
@@ -63,6 +64,7 @@ class PublicCheckoutController extends Controller
                 'pickup_time' => $validated['pickup_time'],
                 'delivery_method' => $validated['delivery_method'],
                 'destination' => $validated['destination'],
+                'notes' => $validated['notes'],
                 'wa_number' => $validated['wa_number'],
                 'status' => 'pending',
                 'payment_status' => 'waiting_confirmation',

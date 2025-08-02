@@ -279,7 +279,8 @@
                         <div class="flex-1 flex flex-col">
                             <div class="flex items-start justify-between mb-2">
                                 <h3 class="font-bold text-sm sm:text-base text-gray-800 line-clamp-2 flex-1 leading-tight">
-                                    {{ $bouquet->name }}</h3>
+                                    {{ $bouquet->name }}
+                                </h3>
                                 <span
                                     class="ml-2 px-2 py-1 bg-rose-100 text-rose-700 rounded-full text-[10px] sm:text-xs font-medium whitespace-nowrap flex-shrink-0">
                                     {{ $bouquet->category->name ?? 'Bouquet' }}
@@ -287,13 +288,24 @@
                             </div>
 
                             <p class="text-xs sm:text-sm text-gray-600 mb-3 line-clamp-2 leading-relaxed">
-                                {{ $bouquet->description }}</p>
+                                {{ $bouquet->description }}
+                            </p>
 
                             <!-- Sizes -->
                             <div class="mb-3">
                                 <span class="text-xs text-gray-500 block mb-2">Ukuran Tersedia:</span>
                                 <div class="flex flex-wrap gap-1">
-                                    @foreach($bouquet->sizes as $size)
+                                    @php
+                                        // Define size order
+                                        $sizeOrder = ['Extra Small', 'Small', 'Medium', 'Large'];
+
+                                        // Sort sizes based on the defined order
+                                        $sortedSizes = $bouquet->sizes->sortBy(function ($size) use ($sizeOrder) {
+                                            $index = array_search($size->name, $sizeOrder);
+                                            return $index !== false ? $index : 999; // Put unknown sizes at the end
+                                        });
+                                    @endphp
+                                    @foreach($sortedSizes as $size)
                                         <span
                                             class="inline-block px-2 py-1 bg-gradient-to-r from-rose-100 to-pink-100 text-rose-700 rounded-full text-[10px] sm:text-xs font-medium">
                                             {{ $size->name }}
