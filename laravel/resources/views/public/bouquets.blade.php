@@ -4,7 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🌸 Bouquet Fellie Florist</title>
+    {{-- Title --}}
+    <title>Bouquet | Fellie Florist</title>
+    <link rel="icon" href="{{ asset(config('app.logo')) }}" type="image/png">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -35,6 +37,25 @@
         .card-hover:hover {
             transform: translateY(-8px);
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Consistent card heights */
+        .bouquet-card {
+            min-height: 350px;
+        }
+
+        @media (min-width: 640px) {
+            .bouquet-card {
+                min-height: 420px;
+            }
+        }
+
+        /* Better text sizing for mobile */
+        @media (max-width: 639px) {
+            .bouquet-card .text-price {
+                font-size: 0.875rem;
+                line-height: 1.25rem;
+            }
         }
 
         /* Modal animations */
@@ -92,16 +113,15 @@
                 <!-- Brand Section -->
                 <div class="flex items-center space-x-3">
                     <a href="{{ route('public.flowers') }}" class="flex items-center space-x-3">
-                        <div class="w-10 h-10 bg-rose-500 rounded-full flex items-center justify-center">
-                            <img src="{{ asset('logo-fellie-02.png') }}" alt="Logo"
-                                class="brand-logo rounded-full w-8 h-8">
-                        </div>
+                        <img src="{{ asset('logo-fellie-02.png') }}" alt="Logo"
+                            class="brand-logo w-10 h-10 rounded-full">
                         <div>
                             <h1 class="text-lg font-bold text-gray-800">Fellie Florist</h1>
                             <p class="text-xs text-gray-500">Supplier Bunga</p>
                         </div>
                     </a>
                 </div>
+
 
                 <!-- Action Buttons -->
                 <div class="flex items-center space-x-4">
@@ -228,13 +248,14 @@
         </div>
 
         <!-- Bouquet Grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="bouquetGrid">
+        <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6" id="bouquetGrid">
             @forelse($bouquets as $bouquet)
                 <div class="bouquet-card group" data-name="{{ strtolower($bouquet->name) }}"
                     data-bouquet-category="{{ $bouquet->category_id ?? '' }}">
-                    <div class="card-hover glass-effect rounded-2xl shadow-lg p-4 h-full flex flex-col overflow-hidden">
+                    <div
+                        class="card-hover glass-effect rounded-2xl shadow-lg p-3 sm:p-4 h-full flex flex-col overflow-hidden">
                         <!-- Image -->
-                        <div class="relative h-40 mb-4 rounded-xl overflow-hidden">
+                        <div class="relative h-36 sm:h-40 mb-3 sm:mb-4 rounded-xl overflow-hidden">
                             @if($bouquet->image)
                                 <img src="{{ asset('storage/' . $bouquet->image) }}" alt="{{ $bouquet->name }}"
                                     class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
@@ -249,30 +270,32 @@
                             </div>
                             <!-- Wishlist Button -->
                             <button
-                                class="absolute top-3 right-3 w-8 h-8 bg-white/90 hover:bg-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
-                                <i class="bi bi-heart text-rose-500 text-sm"></i>
+                                class="absolute top-2 sm:top-3 right-2 sm:right-3 w-6 sm:w-8 h-6 sm:h-8 bg-white/90 hover:bg-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
+                                <i class="bi bi-heart text-rose-500 text-xs sm:text-sm"></i>
                             </button>
                         </div>
 
                         <!-- Details -->
                         <div class="flex-1 flex flex-col">
                             <div class="flex items-start justify-between mb-2">
-                                <h3 class="font-bold text-sm text-gray-800 line-clamp-2 flex-1">{{ $bouquet->name }}</h3>
+                                <h3 class="font-bold text-sm sm:text-base text-gray-800 line-clamp-2 flex-1 leading-tight">
+                                    {{ $bouquet->name }}</h3>
                                 <span
-                                    class="ml-2 px-2 py-1 bg-rose-100 text-rose-700 rounded-full text-xs font-medium whitespace-nowrap">
+                                    class="ml-2 px-2 py-1 bg-rose-100 text-rose-700 rounded-full text-[10px] sm:text-xs font-medium whitespace-nowrap flex-shrink-0">
                                     {{ $bouquet->category->name ?? 'Bouquet' }}
                                 </span>
                             </div>
 
-                            <p class="text-xs text-gray-600 mb-3 line-clamp-2">{{ $bouquet->description }}</p>
+                            <p class="text-xs sm:text-sm text-gray-600 mb-3 line-clamp-2 leading-relaxed">
+                                {{ $bouquet->description }}</p>
 
                             <!-- Sizes -->
                             <div class="mb-3">
-                                <span class="text-xs text-gray-500 block mb-1">Ukuran Tersedia:</span>
+                                <span class="text-xs text-gray-500 block mb-2">Ukuran Tersedia:</span>
                                 <div class="flex flex-wrap gap-1">
                                     @foreach($bouquet->sizes as $size)
                                         <span
-                                            class="inline-block px-2 py-0.5 bg-gradient-to-r from-rose-100 to-pink-100 text-rose-700 rounded-full text-[10px] font-medium">
+                                            class="inline-block px-2 py-1 bg-gradient-to-r from-rose-100 to-pink-100 text-rose-700 rounded-full text-[10px] sm:text-xs font-medium">
                                             {{ $size->name }}
                                         </span>
                                     @endforeach
@@ -280,7 +303,7 @@
                             </div>
 
                             <!-- Price Range -->
-                            <div class="mb-4">
+                            <div class="mb-3 sm:mb-4">
                                 @php
                                     $minPrice = $bouquet->prices->min('price');
                                     $maxPrice = $bouquet->prices->max('price');
@@ -288,11 +311,11 @@
                                 @if($minPrice && $maxPrice)
                                     <div class="text-center">
                                         @if($minPrice == $maxPrice)
-                                            <span class="text-lg font-bold text-rose-600">
+                                            <span class="text-price text-sm sm:text-lg font-bold text-rose-600">
                                                 Rp {{ number_format($minPrice, 0, ',', '.') }}
                                             </span>
                                         @else
-                                            <span class="text-lg font-bold text-rose-600">
+                                            <span class="text-price text-sm sm:text-lg font-bold text-rose-600">
                                                 Rp {{ number_format($minPrice, 0, ',', '.') }} -
                                                 {{ number_format($maxPrice, 0, ',', '.') }}
                                             </span>
@@ -302,25 +325,25 @@
                             </div>
 
                             <!-- Action Buttons -->
-                            <div class="mt-auto space-y-2">
+                            <div class="mt-auto space-y-1.5 sm:space-y-2">
                                 @if($bouquet->prices->count() == 1)
                                     <button onclick="addToCartWithPrice('{{ $bouquet->id }}', 'bouquet')"
-                                        class="w-full bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white font-semibold py-2 px-4 rounded-xl transition-all duration-200 shadow-md hover:shadow-lg text-sm">
-                                        <i class="bi bi-cart-plus mr-2"></i>Tambah ke Keranjang
+                                        class="w-full bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white font-semibold py-1.5 sm:py-2 px-3 sm:px-4 rounded-xl transition-all duration-200 shadow-md hover:shadow-lg text-xs sm:text-sm">
+                                        <i class="bi bi-cart-plus mr-1 sm:mr-2"></i>Tambah ke Keranjang
                                     </button>
                                 @else
                                     <button
                                         onclick="showBouquetPriceModal('{{ $bouquet->id }}', '{{ $bouquet->name }}', {{ json_encode($bouquet->prices) }})"
-                                        class="w-full bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white font-semibold py-2 px-4 rounded-xl transition-all duration-200 shadow-md hover:shadow-lg text-sm"
+                                        class="w-full bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white font-semibold py-1.5 sm:py-2 px-3 sm:px-4 rounded-xl transition-all duration-200 shadow-md hover:shadow-lg text-xs sm:text-sm"
                                         data-bouquet-id="{{ $bouquet->id }}" data-bouquet-name="{{ $bouquet->name }}"
                                         data-bouquet-prices="{{ htmlspecialchars(json_encode($bouquet->prices), ENT_QUOTES, 'UTF-8') }}">
-                                        <i class="bi bi-cart-plus mr-2"></i>Pilih Ukuran
+                                        <i class="bi bi-cart-plus mr-1 sm:mr-2"></i>Pilih Ukuran
                                     </button>
                                 @endif
 
                                 <button onclick="showBouquetDetailPanel({{ $bouquet->id }})"
-                                    class="block w-full text-center border-2 border-rose-200 text-rose-600 hover:bg-rose-50 font-semibold py-2 px-4 rounded-xl transition-all duration-200 text-sm">
-                                    <i class="bi bi-eye mr-2"></i>Lihat Detail
+                                    class="block w-full text-center border-2 border-rose-200 text-rose-600 hover:bg-rose-50 font-semibold py-1.5 sm:py-2 px-3 sm:px-4 rounded-xl transition-all duration-200 text-xs sm:text-sm">
+                                    <i class="bi bi-eye mr-1 sm:mr-2"></i>Lihat Detail
                                 </button>
                             </div>
                         </div>

@@ -1,9 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🌸 Product Fellie Florist</title>
+
+    {{-- Title --}}
+    <title>Product | Fellie Florist</title>
+    <link rel="icon" href="{{ asset(config('app.logo')) }}" type="image/png">
+
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -20,7 +25,7 @@
             const numPrice = parseFloat(String(price).replace(/[,.]/g, '')) || 0;
             return numPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
         }
-        
+
         // Fungsi untuk menambah ke keranjang dengan pilihan harga (global)
         function addToCartWithPrice(flowerId, priceType) {
             fetch('/cart/add', {
@@ -31,29 +36,29 @@
                 },
                 body: JSON.stringify({ product_id: flowerId, price_type: priceType })
             })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Gagal menambah ke keranjang. Status: ' + response.status);
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    closeCartPriceModal();
-                    updateCart();
-                    toggleCart();
-                }
-            })
-            .catch(error => {
-                alert('Terjadi masalah: ' + error.message);
-            });
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Gagal menambah ke keranjang. Status: ' + response.status);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        closeCartPriceModal();
+                        updateCart();
+                        toggleCart();
+                    }
+                })
+                .catch(error => {
+                    alert('Terjadi masalah: ' + error.message);
+                });
         }
         // Handler untuk tombol tambah ke keranjang dengan modal harga (hanya satu kali di bawah)
         function handleAddToCart(flowerId) {
             const prices = window.flowerPrices[flowerId] || [];
-        if (prices.length === 1) {
-            // Jika hanya 1 harga, langsung tambahkan
-            addToCartWithPrice(flowerId, prices[0].type);
+            if (prices.length === 1) {
+                // Jika hanya 1 harga, langsung tambahkan
+                addToCartWithPrice(flowerId, prices[0].type);
             } else if (prices.length > 1) {
                 // Jika ada beberapa harga, tampilkan modal
                 openCartPriceModal(flowerId, prices);
@@ -103,16 +108,43 @@
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
         }
 
+        /* Consistent card heights */
+        .flower-card,
+        .bouquet-card {
+            min-height: 350px;
+        }
+
+        @media (min-width: 640px) {
+
+            .flower-card,
+            .bouquet-card {
+                min-height: 420px;
+            }
+        }
+
+        /* Better text sizing for mobile */
+        @media (max-width: 639px) {
+
+            .flower-card .text-price,
+            .bouquet-card .text-price {
+                font-size: 0.875rem;
+                line-height: 1.25rem;
+            }
+        }
+
         /* Animation untuk order detail icon */
         .order-detail-pulse {
             animation: orderPulse 2s infinite;
         }
 
         @keyframes orderPulse {
-            0%, 100% {
+
+            0%,
+            100% {
                 transform: scale(1);
                 box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
             }
+
             50% {
                 transform: scale(1.05);
                 box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
@@ -124,12 +156,19 @@
         }
 
         @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% {
+
+            0%,
+            20%,
+            50%,
+            80%,
+            100% {
                 transform: translateY(0);
             }
+
             40% {
                 transform: translateY(-3px);
             }
+
             60% {
                 transform: translateY(-1px);
             }
@@ -149,10 +188,8 @@
                 <!-- Brand Section -->
                 <div class="flex items-center space-x-3">
                     <a href="{{ route('public.flowers') }}" class="flex items-center space-x-3">
-                        <div class="w-10 h-10 bg-rose-500 rounded-full flex items-center justify-center">
-                            {{-- <span class="text-white font-bold text-xl">F</span> --}}
-                            <img src="{{ asset('logo-fellie-02.png') }}" alt="Logo" class="brand-logo rounded-full w-12 h-12">
-                        </div>
+                        <img src="{{ asset('logo-fellie-02.png') }}" alt="Logo"
+                            class="brand-logo w-10 h-10 rounded-full">
                         <div>
                             <h1 class="text-lg font-bold text-gray-800">Fellie Florist</h1>
                             <p class="text-xs text-gray-500">Supplier Bunga</p>
@@ -160,10 +197,11 @@
                     </a>
                 </div>
 
+
                 <!-- Search Bar -->
                 {{-- <div class="flex-1 max-w-md mx-8">
                     <div class="relative">
-                        <input type="text" placeholder="Cari bunga impian Anda..." 
+                        <input type="text" placeholder="Cari bunga impian Anda..."
                             class="w-full h-10 pl-4 pr-10 text-sm bg-gray-50 border border-gray-200 rounded-full focus:outline-none focus:border-rose-300 focus:ring-1 focus:ring-rose-300">
                         <button class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-rose-500">
                             <i class="bi bi-search"></i>
@@ -179,19 +217,20 @@
                         title="Lacak Pesanan">
                         <i class="bi bi-truck text-xl"></i>
                     </a>
-                    
+
                     <!-- Order Detail - Muncul setelah checkout -->
                     @if(session('last_public_order_code'))
                         <a href="{{ route('public.order.detail', ['public_code' => session('last_public_order_code')]) }}"
                             class="relative text-white bg-rose-500 hover:bg-rose-600 p-2 rounded-full hover:shadow-lg transition-all duration-200 order-detail-pulse"
                             title="Lihat Detail Pesanan Terbaru - Kode: {{ session('last_public_order_code') }}">
                             <i class="bi bi-receipt-cutoff text-xl"></i>
-                            <span class="absolute -top-1 -right-1 bg-green-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold notification-badge">
+                            <span
+                                class="absolute -top-1 -right-1 bg-green-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold notification-badge">
                                 ✓
                             </span>
                         </a>
                     @endif
-                    
+
                     <!-- Cart -->
                     <button onclick="toggleCart()"
                         class="text-gray-600 hover:text-rose-600 relative p-2 rounded-full hover:bg-rose-50 transition-all duration-200"
@@ -203,7 +242,7 @@
                     <a href="{{ route('login') }}"
                         class="text-gray-600 hover:text-rose-600 p-2 rounded-full hover:bg-rose-50 transition-all duration-200"
                         title="Login">
-                            <i class="bi bi-person-circle text-xl"></i>
+                        <i class="bi bi-person-circle text-xl"></i>
                     </a>
                 </div>
             </div>
@@ -217,7 +256,8 @@
             <p class="text-gray-600 mb-2">Temukan bunga segar berkualitas tinggi untuk setiap momen spesial</p>
             <p class="text-sm text-gray-500 flex items-center justify-center gap-2">
                 <i class="bi bi-clock text-rose-400"></i>
-                Terakhir diperbarui: {{ $lastUpdated ? \Carbon\Carbon::parse($lastUpdated)->translatedFormat('d F Y H:i') : '-' }}
+                Terakhir diperbarui:
+                {{ $lastUpdated ? \Carbon\Carbon::parse($lastUpdated)->translatedFormat('d F Y H:i') : '-' }}
             </p>
         </div>
     </div>
@@ -240,7 +280,7 @@
             @endif
         </a>
     </nav>
-        </div>
+    </div>
     </header>
 
     <!-- Main Content -->
@@ -252,7 +292,8 @@
             <!-- Enhanced Search Bar -->
             <div class="w-full max-w-2xl mb-4">
                 <div class="relative">
-                    <i class="bi bi-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg"></i>
+                    <i
+                        class="bi bi-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg"></i>
                     <input type="text" id="searchInput"
                         placeholder="{{ $activeTab === 'flowers' ? 'Cari bunga impian Anda...' : 'Cari bouquet impian Anda...' }}"
                         class="w-full pl-12 pr-4 py-4 text-lg border-2 border-rose-200 rounded-2xl focus:ring-2 focus:ring-rose-400 focus:border-rose-400 focus:outline-none shadow-lg transition-all duration-200 bg-white/90"
@@ -302,63 +343,72 @@
             @if($activeTab === 'flowers')
                 @forelse($flowers as $flower)
                     <div class="flower-card group" data-category="{{ $flower->category->name ?? 'lainnya' }}"
-                        data-name="{{ strtolower($flower->name) }}"
-                        data-flower-id="{{ (int) $flower->id }}">
-                        <div class="card-hover glass-effect rounded-2xl shadow-lg p-4 h-full flex flex-col overflow-hidden">
+                        data-name="{{ strtolower($flower->name) }}" data-flower-id="{{ (int) $flower->id }}">
+                        <div
+                            class="card-hover glass-effect rounded-2xl shadow-lg p-3 sm:p-4 h-full flex flex-col overflow-hidden">
                             <!-- Image -->
-                            <div class="relative h-40 mb-4 rounded-xl overflow-hidden">
+                            <div class="relative h-36 sm:h-40 mb-3 sm:mb-4 rounded-xl overflow-hidden">
                                 @if($flower->image)
                                     <img src="{{ asset('storage/' . $flower->image) }}" alt="{{ $flower->name }}"
                                         class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
                                 @else
-                                    <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-rose-100 to-pink-100 rounded-xl">
+                                    <div
+                                        class="w-full h-full flex items-center justify-center bg-gradient-to-br from-rose-100 to-pink-100 rounded-xl">
                                         <i class="bi bi-flower1 text-3xl text-rose-400"></i>
                                     </div>
                                 @endif
-                                <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                <div
+                                    class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                </div>
                                 <!-- Wishlist Button -->
-                                <button class="absolute top-3 right-3 w-8 h-8 bg-white/90 hover:bg-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
-                                    <i class="bi bi-heart text-rose-500 text-sm"></i>
+                                <button
+                                    class="absolute top-2 sm:top-3 right-2 sm:right-3 w-6 sm:w-8 h-6 sm:h-8 bg-white/90 hover:bg-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
+                                    <i class="bi bi-heart text-rose-500 text-xs sm:text-sm"></i>
                                 </button>
                             </div>
 
                             <!-- Details -->
                             <div class="flex-1 flex flex-col">
                                 <div class="flex items-start justify-between mb-2">
-                                    <h3 class="font-bold text-sm text-gray-800 line-clamp-2 flex-1">{{ $flower->name }}</h3>
-                                    <span class="ml-2 px-2 py-1 bg-rose-100 text-rose-700 rounded-full text-xs font-medium whitespace-nowrap">
+                                    <h3 class="font-bold text-sm sm:text-base text-gray-800 line-clamp-2 flex-1 leading-tight">
+                                        {{ $flower->name }}</h3>
+                                    <span
+                                        class="ml-2 px-2 py-1 bg-rose-100 text-rose-700 rounded-full text-[10px] sm:text-xs font-medium whitespace-nowrap flex-shrink-0">
                                         {{ $flower->category->name ?? 'Umum' }}
                                     </span>
                                 </div>
 
-                                <p class="text-xs text-gray-600 mb-3 line-clamp-2">{{ $flower->description }}</p>
+                                <p class="text-xs sm:text-sm text-gray-600 mb-3 line-clamp-2 leading-relaxed">
+                                    {{ $flower->description }}</p>
 
                                 <!-- Price -->
                                 <div class="mb-3">
                                     @php
-        // Siapkan array harga untuk JS
-        $jsPrices = $flower->prices->map(function ($price) {
-            return [
-                'id' => $price->id,
-                'type' => $price->type,
-                'label' => __(ucwords(str_replace('_', ' ', $price->type))),
-                'price' => (int) $price->price // Pastikan price adalah integer
-            ];
-        });
+                                        // Siapkan array harga untuk JS
+                                        $jsPrices = $flower->prices->map(function ($price) {
+                                            return [
+                                                'id' => $price->id,
+                                                'type' => $price->type,
+                                                'label' => __(ucwords(str_replace('_', ' ', $price->type))),
+                                                'price' => (int) $price->price // Pastikan price adalah integer
+                                            ];
+                                        });
                                     @endphp
-                                    <div class="text-lg font-bold text-rose-600">
-                                        @if($jsPrices->count() === 1)
-                                            Rp {{ number_format($jsPrices[0]['price'], 0, ',', '.') }}
-                                        @else
-                                            Pilih harga
-                                        @endif
-                                    </div>
-                                    <div class="text-xs text-gray-500">
-                                        @if($jsPrices->count() === 1)
-                                            {{ $jsPrices[0]['label'] }}
-                                        @else
-                                            Beberapa pilihan harga
-                                        @endif
+                                    <div class="text-center">
+                                        <div class="text-price text-sm sm:text-lg font-bold text-rose-600">
+                                            @if($jsPrices->count() === 1)
+                                                Rp {{ number_format($jsPrices[0]['price'], 0, ',', '.') }}
+                                            @else
+                                                Pilih harga
+                                            @endif
+                                        </div>
+                                        <div class="text-xs text-gray-500">
+                                            @if($jsPrices->count() === 1)
+                                                {{ $jsPrices[0]['label'] }}
+                                            @else
+                                                Beberapa pilihan harga
+                                            @endif
+                                        </div>
                                     </div>
                                 </div>
 
@@ -366,20 +416,21 @@
                                 <div class="mb-4">
                                     <div class="flex items-center justify-between text-xs mb-1">
                                         <span class="text-gray-500">Stok:</span>
-                                        <span class="font-semibold {{ $flower->current_stock > 10 ? 'text-green-600' : ($flower->current_stock > 0 ? 'text-yellow-600' : 'text-red-600') }}">
+                                        <span
+                                            class="font-semibold {{ $flower->current_stock > 10 ? 'text-green-600' : ($flower->current_stock > 0 ? 'text-yellow-600' : 'text-red-600') }}">
                                             {{ $flower->current_stock }} tangkai
                                         </span>
                                     </div>
                                     <div class="w-full bg-gray-200 rounded-full h-1.5">
-                                        <div class="bg-gradient-to-r from-rose-400 to-pink-500 h-1.5 rounded-full transition-all duration-300" 
-                                             style="width: {{ min(($flower->current_stock / 50) * 100, 100) }}%"></div>
+                                        <div class="bg-gradient-to-r from-rose-400 to-pink-500 h-1.5 rounded-full transition-all duration-300"
+                                            style="width: {{ min(($flower->current_stock / 50) * 100, 100) }}%"></div>
                                     </div>
                                 </div>
 
                                 <!-- Action Button -->
                                 <button onclick="handleAddToCart({{ (int) $flower->id }})"
-                                    class="mt-auto w-full bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white text-xs font-semibold py-2.5 px-3 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-md hover:shadow-lg">
-                                    <i class="bi bi-cart-plus mr-1"></i>Tambah ke Keranjang
+                                    class="mt-auto w-full bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white font-semibold py-1.5 sm:py-2 px-3 sm:px-4 rounded-xl transition-all duration-200 shadow-md hover:shadow-lg text-xs sm:text-sm">
+                                    <i class="bi bi-cart-plus mr-1 sm:mr-2"></i>Tambah ke Keranjang
                                 </button>
                                 <script>
                                     window.flowerPrices = window.flowerPrices || {};
@@ -407,48 +458,58 @@
                             <i class="bi bi-flower1 text-2xl text-rose-400"></i>
                         </div>
                         <h3 class="text-lg font-semibold text-gray-600 mb-2">Tidak ada bunga yang tersedia saat ini</h3>
-                        <p class="text-gray-500 text-sm">Silakan coba lagi nanti atau hubungi kami untuk informasi lebih lanjut.</p>
+                        <p class="text-gray-500 text-sm">Silakan coba lagi nanti atau hubungi kami untuk informasi lebih lanjut.
+                        </p>
                     </div>
                 @endforelse
             @else
                 @forelse($bouquets as $bouquet)
                     <div class="bouquet-card group" data-name="{{ strtolower($bouquet->name) }}"
                         data-bouquet-category="{{ $bouquet->category_id ? (int) $bouquet->category_id : '' }}">
-                        <div class="card-hover glass-effect rounded-2xl shadow-lg p-4 h-full flex flex-col overflow-hidden">
+                        <div
+                            class="card-hover glass-effect rounded-2xl shadow-lg p-3 sm:p-4 h-full flex flex-col overflow-hidden">
                             <!-- Image -->
-                            <div class="relative h-40 mb-4 rounded-xl overflow-hidden">
+                            <div class="relative h-36 sm:h-40 mb-3 sm:mb-4 rounded-xl overflow-hidden">
                                 @if($bouquet->image)
                                     <img src="{{ asset('storage/' . $bouquet->image) }}" alt="{{ $bouquet->name }}"
                                         class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
                                 @else
-                                    <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-rose-100 to-pink-100 rounded-xl">
+                                    <div
+                                        class="w-full h-full flex items-center justify-center bg-gradient-to-br from-rose-100 to-pink-100 rounded-xl">
                                         <i class="bi bi-flower3 text-3xl text-rose-400"></i>
                                     </div>
                                 @endif
-                                <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                <div
+                                    class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                </div>
                                 <!-- Wishlist Button -->
-                                <button class="absolute top-3 right-3 w-8 h-8 bg-white/90 hover:bg-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
-                                    <i class="bi bi-heart text-rose-500 text-sm"></i>
+                                <button
+                                    class="absolute top-2 sm:top-3 right-2 sm:right-3 w-6 sm:w-8 h-6 sm:h-8 bg-white/90 hover:bg-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
+                                    <i class="bi bi-heart text-rose-500 text-xs sm:text-sm"></i>
                                 </button>
                             </div>
 
                             <!-- Details -->
                             <div class="flex-1 flex flex-col">
                                 <div class="flex items-start justify-between mb-2">
-                                    <h3 class="font-bold text-sm text-gray-800 line-clamp-2 flex-1">{{ $bouquet->name }}</h3>
-                                    <span class="ml-2 px-2 py-1 bg-rose-100 text-rose-700 rounded-full text-xs font-medium whitespace-nowrap">
+                                    <h3 class="font-bold text-sm sm:text-base text-gray-800 line-clamp-2 flex-1 leading-tight">
+                                        {{ $bouquet->name }}</h3>
+                                    <span
+                                        class="ml-2 px-2 py-1 bg-rose-100 text-rose-700 rounded-full text-[10px] sm:text-xs font-medium whitespace-nowrap flex-shrink-0">
                                         {{ $bouquet->category->name ?? 'Bouquet' }}
                                     </span>
                                 </div>
 
-                                <p class="text-xs text-gray-600 mb-3 line-clamp-2">{{ $bouquet->description }}</p>
+                                <p class="text-xs sm:text-sm text-gray-600 mb-3 line-clamp-2 leading-relaxed">
+                                    {{ $bouquet->description }}</p>
 
                                 <!-- Sizes -->
                                 <div class="mb-3">
-                                    <span class="text-xs text-gray-500 block mb-1">Ukuran Tersedia:</span>
+                                    <span class="text-xs text-gray-500 block mb-2">Ukuran Tersedia:</span>
                                     <div class="flex flex-wrap gap-1">
                                         @foreach($bouquet->sizes as $size)
-                                            <span class="inline-block px-2 py-0.5 bg-gradient-to-r from-rose-100 to-pink-100 text-rose-700 rounded-full text-[10px] font-medium">
+                                            <span
+                                                class="inline-block px-2 py-1 bg-gradient-to-r from-rose-100 to-pink-100 text-rose-700 rounded-full text-[10px] sm:text-xs font-medium">
                                                 {{ $size->name }}
                                             </span>
                                         @endforeach
@@ -456,25 +517,28 @@
                                 </div>
 
                                 <!-- Price Range -->
-                                <div class="mb-4">
+                                <div class="mb-3 sm:mb-4">
                                     @php
-        $minPrice = $bouquet->prices->min('price');
-        $maxPrice = $bouquet->prices->max('price');
+                                        $minPrice = $bouquet->prices->min('price');
+                                        $maxPrice = $bouquet->prices->max('price');
                                     @endphp
-                                    <div class="text-lg font-bold text-rose-600">
-                                        @if($minPrice === $maxPrice)
-                                            Rp {{ number_format($minPrice, 0, ',', '.') }}
-                                        @else
-                                            Rp {{ number_format($minPrice, 0, ',', '.') }} - {{ number_format($maxPrice, 0, ',', '.') }}
-                                        @endif
+                                    <div class="text-center">
+                                        <div class="text-price text-sm sm:text-lg font-bold text-rose-600">
+                                            @if($minPrice === $maxPrice)
+                                                Rp {{ number_format($minPrice, 0, ',', '.') }}
+                                            @else
+                                                Rp {{ number_format($minPrice, 0, ',', '.') }} -
+                                                {{ number_format($maxPrice, 0, ',', '.') }}
+                                            @endif
+                                        </div>
+                                        <div class="text-xs text-gray-500">rentang harga</div>
                                     </div>
-                                    <div class="text-xs text-gray-500">rentang harga</div>
                                 </div>
 
                                 <!-- Action Button -->
                                 <a href="{{ route('public.bouquet.detail', $bouquet->id) }}"
-                                    class="mt-auto w-full bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white text-xs font-semibold py-2.5 px-3 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-md hover:shadow-lg text-center block">
-                                    <i class="bi bi-eye mr-1"></i>Lihat Detail
+                                    class="mt-auto w-full bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white font-semibold py-1.5 sm:py-2 px-3 sm:px-4 rounded-xl transition-all duration-200 shadow-md hover:shadow-lg text-xs sm:text-sm text-center block">
+                                    <i class="bi bi-eye mr-1 sm:mr-2"></i>Lihat Detail
                                 </a>
                             </div>
                         </div>
@@ -485,7 +549,8 @@
                             <i class="bi bi-flower3 text-2xl text-rose-400"></i>
                         </div>
                         <h3 class="text-lg font-semibold text-gray-600 mb-2">Tidak ada bouquet yang tersedia saat ini</h3>
-                        <p class="text-gray-500 text-sm">Silakan coba lagi nanti atau hubungi kami untuk informasi lebih lanjut.</p>
+                        <p class="text-gray-500 text-sm">Silakan coba lagi nanti atau hubungi kami untuk informasi lebih lanjut.
+                        </p>
                     </div>
                 @endforelse
             @endif
@@ -493,28 +558,30 @@
 
         <!-- Call to Action untuk Bouquet (hanya tampil di tab flowers) -->
         @if($activeTab === 'flowers')
-        <div class="mt-16 text-center">
-            <div class="bg-gradient-to-br from-rose-100 via-pink-50 to-orange-50 rounded-3xl p-8 shadow-lg border border-rose-200">
-                <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-rose-500 to-pink-600 rounded-full mb-6 shadow-lg">
-                    <i class="bi bi-flower3 text-2xl text-white"></i>
-                </div>
-                <h3 class="text-2xl font-bold text-gray-800 mb-4">Lihat Koleksi Bouquet Kami</h3>
-                <p class="text-gray-600 mb-6 max-w-2xl mx-auto">
-                    Rangkaian bunga cantik yang dirancang khusus untuk momen spesial Anda. 
-                    Berbagai ukuran dan kategori tersedia untuk setiap kebutuhan.
-                </p>
-                <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                    <a href="{{ route('public.bouquets') }}" 
-                        class="inline-flex items-center px-8 py-3 bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white font-semibold rounded-xl transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105">
-                        <i class="bi bi-flower3 mr-2"></i>
-                        Lihat Semua Bouquet
-                    </a>
-                    <span class="text-sm text-gray-500">
-                        atau klik tab "💐 Bouquet" di atas
-                    </span>
+            <div class="mt-16 text-center">
+                <div
+                    class="bg-gradient-to-br from-rose-100 via-pink-50 to-orange-50 rounded-3xl p-8 shadow-lg border border-rose-200">
+                    <div
+                        class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-rose-500 to-pink-600 rounded-full mb-6 shadow-lg">
+                        <i class="bi bi-flower3 text-2xl text-white"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4">Lihat Koleksi Bouquet Kami</h3>
+                    <p class="text-gray-600 mb-6 max-w-2xl mx-auto">
+                        Rangkaian bunga cantik yang dirancang khusus untuk momen spesial Anda.
+                        Berbagai ukuran dan kategori tersedia untuk setiap kebutuhan.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                        <a href="{{ route('public.bouquets') }}"
+                            class="inline-flex items-center px-8 py-3 bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white font-semibold rounded-xl transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105">
+                            <i class="bi bi-flower3 mr-2"></i>
+                            Lihat Semua Bouquet
+                        </a>
+                        <span class="text-sm text-gray-500">
+                            atau klik tab "💐 Bouquet" di atas
+                        </span>
+                    </div>
                 </div>
             </div>
-        </div>
         @endif
     </div>
 
@@ -530,15 +597,16 @@
                 Menghadirkan keindahan bunga segar berkualitas premium untuk setiap momen berharga dalam hidup Anda
             </p>
             <div class="flex justify-center space-x-6 mb-6">
-                <a href="https://www.instagram.com/fellieflorist/" class="text-rose-200 hover:text-white transition-colors">
+                <a href="https://www.instagram.com/fellieflorist/"
+                    class="text-rose-200 hover:text-white transition-colors">
                     <i class="bi bi-instagram text-xl"></i>
                 </a>
-                <a href="https://www.tiktok.com/@fellieflorist" class="text-rose-200 hover:text-white transition-colors" target="_blank"
-                    rel="noopener noreferrer">
+                <a href="https://www.tiktok.com/@fellieflorist" class="text-rose-200 hover:text-white transition-colors"
+                    target="_blank" rel="noopener noreferrer">
                     <i class="bi bi-tiktok text-xl"></i>
                 </a>
-                <a href="https://wa.me/6282177929879?text=Halo%20Fellie%20!" class="text-rose-200 hover:text-white transition-colors"
-                    target="_blank" rel="noopener noreferrer">
+                <a href="https://wa.me/6282177929879?text=Halo%20Fellie%20!"
+                    class="text-rose-200 hover:text-white transition-colors" target="_blank" rel="noopener noreferrer">
                     <i class="bi bi-whatsapp text-xl"></i>
                 </a>
             </div>
@@ -604,20 +672,21 @@
             }
             const images = document.querySelectorAll('img');
             images.forEach(img => {
-                img.addEventListener('load', function() {
+                img.addEventListener('load', function () {
                     this.style.opacity = '1';
                 });
             });
             let searchTimeout;
             const searchInput = document.getElementById('searchInput');
-            searchInput.addEventListener('input', function() {
+            searchInput.addEventListener('input', function () {
                 clearTimeout(searchTimeout);
                 searchTimeout = setTimeout(filterItems, 300);
             });
         });
     </script>
-    
+
     <!-- Include Greeting Card Modal -->
     @include('components.greeting-card-modal')
 </body>
+
 </html>

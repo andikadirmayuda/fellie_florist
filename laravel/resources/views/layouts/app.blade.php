@@ -11,7 +11,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'Fellie Florist') }}</title>
+    <title>{{ app_name() }}</title>
+    <link rel="icon" type="image/png" href="{{ app_logo() }}" sizes="32x32">
+
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -73,9 +75,9 @@
                         </svg>
                     </button>
 
-                    <div class="ml-4 font-semibold text-xl text-gray-800 dark:text-gray-200">
-                        Fellie Florist
-                    </div>
+                    {{-- <div class="ml-4 font-semibold text-xl text-gray-800 dark:text-gray-200">
+                        {{ app_name() }}
+                    </div> --}}
 
                     <!-- User Dropdown -->
                     <div class="ml-auto flex items-center">

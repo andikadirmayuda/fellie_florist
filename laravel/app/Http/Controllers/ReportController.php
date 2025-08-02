@@ -199,8 +199,13 @@ class ReportController extends Controller
 
         // Total pendapatan dari penjualan
         $totalPenjualan = \App\Models\Sale::whereBetween('created_at', [$start, $end])->sum('total');
-        // Total pendapatan dari pemesanan (order + ongkir)
-        $totalPemesanan = \App\Models\Order::whereBetween('created_at', [$start, $end])->sum(DB::raw('total + delivery_fee'));
+        
+        // Total pendapatan dari pemesanan (hitung dari items menggunakan join)
+        $totalPemesanan = DB::table('public_orders')
+            ->join('public_order_items', 'public_orders.id', '=', 'public_order_items.public_order_id')
+            ->whereBetween('public_orders.created_at', [$start, $end])
+            ->sum(DB::raw('public_order_items.quantity * public_order_items.price'));
+        
         // Total pendapatan gabungan
         $totalPendapatan = $totalPenjualan + $totalPemesanan;
 
@@ -208,11 +213,20 @@ class ReportController extends Controller
         $harian = [];
         foreach (range(0, now()->parse($end)->diffInDays(now()->parse($start))) as $i) {
             $date = now()->parse($start)->copy()->addDays($i)->toDateString();
+            
+            $dailyPenjualan = \App\Models\Sale::whereDate('created_at', $date)->sum('total');
+            
+            $dailyPemesanan = DB::table('public_orders')
+                ->join('public_order_items', 'public_orders.id', '=', 'public_order_items.public_order_id')
+                ->whereDate('public_orders.created_at', $date)
+                ->sum(DB::raw('public_order_items.quantity * public_order_items.price'));
+            
             $harian[$date] = [
-                'penjualan' => \App\Models\Sale::whereDate('created_at', $date)->sum('total'),
-                'pemesanan' => \App\Models\Order::whereDate('created_at', $date)->sum(DB::raw('total + delivery_fee')),
+                'penjualan' => $dailyPenjualan,
+                'pemesanan' => $dailyPemesanan,
             ];
         }
+        
         // Pendapatan mingguan
         $mingguan = [];
         $startWeek = now()->parse($start)->startOfWeek();
@@ -220,24 +234,182 @@ class ReportController extends Controller
         for ($date = $startWeek->copy(); $date <= $endWeek; $date->addWeek()) {
             $weekStart = $date->copy();
             $weekEnd = $date->copy()->endOfWeek();
-            $mingguan[$weekStart->format('Y-m-d')] = [
-                'penjualan' => \App\Models\Sale::whereBetween('created_at', [$weekStart, $weekEnd])->sum('total'),
-                'pemesanan' => \App\Models\Order::whereBetween('created_at', [$weekStart, $weekEnd])->sum(DB::raw('total + delivery_fee')),
+            
+            $weeklyPenjualan = \App\Models\Sale::whereBetween('created_at', [$weekStart, $weekEnd])->sum('total');
+            
+            $weeklyPemesanan = DB::table('public_orders')
+                ->join('public_order_items', 'public_orders.id', '=', 'public_order_items.public_order_id')
+                ->whereBetween('public_orders.created_at', [$weekStart, $weekEnd])
+                ->sum(DB::raw('public_order_items.quantity * public_order_items.price'));
+            
+            $mingguan[$weekStart->format('d M Y')] = [
+                'penjualan' => $weeklyPenjualan,
+                'pemesanan' => $weeklyPemesanan,
             ];
         }
+        
         // Pendapatan bulanan
         $bulanan = [];
-        $startMonth = now()->parse($start)->startOfYear();
-        $endMonth = now()->parse($end)->endOfYear();
-        for ($date = $startMonth->copy(); $date <= $endMonth; $date->addMonth()) {
-            $monthStart = $date->copy()->startOfMonth();
-            $monthEnd = $date->copy()->endOfMonth();
-            $bulanan[$monthStart->format('Y-m')] = [
-                'penjualan' => \App\Models\Sale::whereBetween('created_at', [$monthStart, $monthEnd])->sum('total'),
-                'pemesanan' => \App\Models\Order::whereBetween('created_at', [$monthStart, $monthEnd])->sum(DB::raw('total + delivery_fee')),
+        $startMonth = now()->parse($start)->startOf('month');
+        $endMonth = now()->parse($end)->endOf('month');
+        
+        // Generate bulan berdasarkan range yang dipilih
+        $currentMonth = $startMonth->copy();
+        while ($currentMonth <= $endMonth) {
+            $monthStart = $currentMonth->copy()->startOfMonth();
+            $monthEnd = $currentMonth->copy()->endOfMonth();
+            
+            $monthlyPenjualan = \App\Models\Sale::whereBetween('created_at', [$monthStart, $monthEnd])->sum('total');
+            
+            $monthlyPemesanan = DB::table('public_orders')
+                ->join('public_order_items', 'public_orders.id', '=', 'public_order_items.public_order_id')
+                ->whereBetween('public_orders.created_at', [$monthStart, $monthEnd])
+                ->sum(DB::raw('public_order_items.quantity * public_order_items.price'));
+            
+            $bulanan[$monthStart->format('M Y')] = [
+                'penjualan' => $monthlyPenjualan,
+                'pemesanan' => $monthlyPemesanan,
             ];
+            
+            $currentMonth->addMonth();
         }
 
         return view('reports.income', compact('start', 'end', 'totalPenjualan', 'totalPemesanan', 'totalPendapatan', 'harian', 'mingguan', 'bulanan'));
+    }
+
+    // Ekspor laporan stok ke PDF
+    public function stockPdf(Request $request)
+    {
+        try {
+            $start = $request->input('start_date', now()->startOfMonth()->toDateString());
+            $end = $request->input('end_date', now()->endOfMonth()->toDateString());
+            
+            // Get products with categories
+            $products = Product::with('category')->get();
+            
+            // Get stock logs
+            $logs = InventoryLog::with('product')
+                ->whereBetween('created_at', [$start, $end])
+                ->orderBy('created_at', 'desc')
+                ->limit(50)
+                ->get();
+            
+            // Calculate stock recap
+            $rekap = [];
+            foreach ($products as $product) {
+                $masuk = InventoryLog::where('product_id', $product->id)
+                    ->where('type', 'masuk')
+                    ->whereBetween('created_at', [$start, $end])
+                    ->sum('qty');
+                
+                $keluar = InventoryLog::where('product_id', $product->id)
+                    ->where('type', 'keluar')
+                    ->whereBetween('created_at', [$start, $end])
+                    ->sum('qty');
+                
+                $penyesuaian = InventoryLog::where('product_id', $product->id)
+                    ->where('type', 'penyesuaian')
+                    ->whereBetween('created_at', [$start, $end])
+                    ->sum('qty');
+                
+                $rekap[$product->id] = [
+                    'masuk' => $masuk,
+                    'keluar' => abs($keluar),
+                    'penyesuaian' => $penyesuaian,
+                    'stok_akhir' => $product->current_stock
+                ];
+            }
+            
+            // Load and render PDF
+            $pdf = Pdf::loadView('reports.stock_pdf', compact('products', 'logs', 'rekap', 'start', 'end'));
+            $pdf->setPaper('a4', 'portrait');
+            
+            $filename = "laporan_stok_{$start}_to_{$end}.pdf";
+            return $pdf->download($filename);
+            
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => 'Gagal mengexport PDF: ' . $e->getMessage()]);
+        }
+    }
+
+    // Ekspor laporan pendapatan ke PDF
+    public function incomePdf(Request $request)
+    {
+        try {
+            $start = $request->input('start_date', now()->startOfMonth()->toDateString());
+            $end = $request->input('end_date', now()->endOfMonth()->toDateString());
+
+            // Total pendapatan dari penjualan
+            $totalPenjualan = \App\Models\Sale::whereBetween('created_at', [$start, $end])->sum('total');
+            
+            // Total pendapatan dari pemesanan
+            $totalPemesanan = DB::table('public_orders')
+                ->join('public_order_items', 'public_orders.id', '=', 'public_order_items.public_order_id')
+                ->whereBetween('public_orders.created_at', [$start, $end])
+                ->sum(DB::raw('public_order_items.quantity * public_order_items.price'));
+            
+            $totalPendapatan = $totalPenjualan + $totalPemesanan;
+
+            // Pendapatan harian
+            $harian = [];
+            foreach (range(0, now()->parse($end)->diffInDays(now()->parse($start))) as $i) {
+                $date = now()->parse($start)->copy()->addDays($i)->toDateString();
+                
+                $dailyPenjualan = \App\Models\Sale::whereDate('created_at', $date)->sum('total');
+                $dailyPemesanan = DB::table('public_orders')
+                    ->join('public_order_items', 'public_orders.id', '=', 'public_order_items.public_order_id')
+                    ->whereDate('public_orders.created_at', $date)
+                    ->sum(DB::raw('public_order_items.quantity * public_order_items.price'));
+                
+                $harian[$date] = [
+                    'penjualan' => $dailyPenjualan,
+                    'pemesanan' => $dailyPemesanan,
+                ];
+            }
+            
+            // Load and render PDF
+            $pdf = Pdf::loadView('reports.income_pdf', compact('start', 'end', 'totalPenjualan', 'totalPemesanan', 'totalPendapatan', 'harian'));
+            $pdf->setPaper('a4', 'portrait');
+            
+            $filename = "laporan_pendapatan_{$start}_to_{$end}.pdf";
+            return $pdf->download($filename);
+            
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => 'Gagal mengexport PDF: ' . $e->getMessage()]);
+        }
+    }
+
+    // Ekspor laporan pesanan ke PDF
+    public function ordersPdf(Request $request)
+    {
+        try {
+            $start = $request->input('start_date', now()->startOfMonth()->toDateString());
+            $end = $request->input('end_date', now()->endOfMonth()->toDateString());
+            
+            // Get public orders data
+            $orders = \App\Models\PublicOrder::with('items.product')
+                ->whereBetween('created_at', [$start, $end])
+                ->orderBy('created_at', 'desc')
+                ->get();
+            
+            // Calculate statistics
+            $totalOrder = $orders->count();
+            $totalNominal = $orders->sum(function($order) {
+                return $order->items->sum(function($item) {
+                    return $item->quantity * $item->price;
+                });
+            });
+            $totalLunas = $orders->where('payment_status', 'lunas')->count();
+            
+            // Load and render PDF
+            $pdf = Pdf::loadView('reports.orders_pdf', compact('orders', 'start', 'end', 'totalOrder', 'totalNominal', 'totalLunas'));
+            $pdf->setPaper('a4', 'portrait');
+            
+            $filename = "laporan_pesanan_{$start}_to_{$end}.pdf";
+            return $pdf->download($filename);
+            
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => 'Gagal mengexport PDF: ' . $e->getMessage()]);
+        }
     }
 }

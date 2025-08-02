@@ -1,5 +1,11 @@
 <nav class="font-sans">
     <div class="px-4 py-6 bg-black border-r border-gray-700 h-full min-h-screen">
+        <!-- Logo Section -->
+        <div class="flex flex-col items-center justify-center mb-6 pb-4 border-b border-gray-700">
+            <img src="{{ app_logo() }}" alt="{{ app_name() }}" class="h-12 w-auto mb-3">
+            <h3 class="text-white text-lg text-center font-bold">{{ app_name() }}</h3>
+        </div>
+
         <ul class="space-y-1">
 
 
@@ -87,7 +93,7 @@
                     <x-slot name="icon">
                         <i class="bi bi-flower1 text-lg mr-1"></i>
                     </x-slot>
-                    Master Buket
+                    Bouquet
                 </x-sidebar-link>
             @endif
             @if(auth()->user()->hasRole('owner') || auth()->user()->hasRole('admin'))
@@ -96,20 +102,20 @@
                     <x-slot name="icon">
                         <i class="bi bi-bookmark-heart text-lg mr-1"></i>
                     </x-slot>
-                    Kategori Buket
+                    Kategori Bouquet
                 </x-sidebar-link>
                 <x-sidebar-link :href="route('bouquet-sizes.index')" :active="request()->routeIs('bouquet-sizes.*')">
                     <x-slot name="icon">
                         <i class="bi bi-rulers text-lg mr-1"></i>
                     </x-slot>
-                    Ukuran Buket
+                    Ukuran Bouquet
                 </x-sidebar-link>
                 <x-sidebar-link :href="route('bouquet-components.index')"
                     :active="request()->routeIs('bouquet-components.*')">
                     <x-slot name="icon">
                         <i class="bi bi-boxes text-lg mr-1"></i>
                     </x-slot>
-                    Komponen Buket
+                    Komponen Bouquet
                 </x-sidebar-link>
             @endif
 

@@ -115,10 +115,16 @@ Route::get('/public/receipt/{public_code}', [PublicSaleController::class, 'show'
 Route::prefix('reports')->name('reports.')->group(function () {
     Route::get('/sales', [ReportController::class, 'sales'])->name('sales');
     Route::get('/stock', [ReportController::class, 'stock'])->name('stock');
-    Route::get('/sales/pdf', [ReportController::class, 'salesPdf'])->name('sales.pdf');
     Route::get('/orders', [ReportController::class, 'orders'])->name('orders'); // laporan pemesanan
     Route::get('/customers', [ReportController::class, 'customers'])->name('customers'); // laporan pelanggan
     Route::get('/income', [ReportController::class, 'income'])->name('income'); // laporan pendapatan
+    
+    // PDF Export Routes
+    Route::get('/sales/pdf', [ReportController::class, 'salesPdf'])->name('sales.pdf');
+    Route::get('/stock/pdf', [ReportController::class, 'stockPdf'])->name('stock.pdf');
+    Route::get('/orders/pdf', [ReportController::class, 'ordersPdf'])->name('orders.pdf');
+    Route::get('/income/pdf', [ReportController::class, 'incomePdf'])->name('income.pdf');
+    
     // Route berikut bisa diaktifkan jika fitur Excel sudah tersedia
     // Route::get('/sales/excel', [ReportController::class, 'salesExcel'])->name('sales.excel');
 });

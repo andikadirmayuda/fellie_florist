@@ -81,6 +81,11 @@
                         <i class="bi bi-arrow-counterclockwise mr-1.5"></i>
                         Reset
                     </a>
+                    <a href="{{ route('reports.orders.pdf', request()->all()) }}" 
+                       class="h-9 px-4 bg-white border border-gray-200 hover:border-red-500 hover:bg-red-50 text-gray-700 hover:text-red-600 text-sm font-semibold rounded-lg transition-all duration-200 flex items-center">
+                        <i class="bi bi-file-pdf mr-1.5"></i>
+                        Export PDF
+                    </a>
                 </div>
             </form>
     </x-slot>
