@@ -142,6 +142,12 @@ class BouquetComponentController extends Controller
             ->with('success', 'Komponen buket berhasil ditambahkan.');
     }
 
+    public function show(BouquetComponent $bouquetComponent)
+    {
+        $bouquetComponent->load(['bouquet', 'size', 'product']);
+        return view('bouquet-components.show', compact('bouquetComponent'));
+    }
+
     public function edit(BouquetComponent $bouquetComponent)
     {
         $bouquets = Bouquet::orderBy('name')->get();
