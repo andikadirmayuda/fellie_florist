@@ -100,33 +100,62 @@
 
                         <!-- Product Selection -->
                         <div class="border-t border-gray-200 pt-8">
-                            <h4 class="text-lg font-medium text-gray-900 mb-6">Pilih Produk</h4>
+                            <h4 class="text-lg font-medium text-gray-900 mb-6">
+                                <i class="bi bi-box-seam mr-2 text-blue-600"></i>Pilih Produk
+                            </h4>
 
-                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                            <!-- Product Selection Form with proper layout -->
+                            <div class="space-y-6">
+                                <!-- Step 1: Category Selection -->
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                                        <i class="bi bi-tags mr-2 text-indigo-600"></i>Kategori Produk
+                                    <label class="block text-sm font-medium text-gray-700 mb-3">
+                                        <i class="bi bi-tags mr-2 text-indigo-600"></i>1. Kategori Produk
                                     </label>
                                     <select
-                                        class="w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-colors"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-all duration-200"
                                         id="categorySelect">
-                                        <option value="">Pilih Kategori</option>
+                                        <option value="">-- Semua Kategori --</option>
                                         @foreach($categories as $category)
                                             <option value="{{ $category->id }}">{{ $category->name }}</option>
                                         @endforeach
                                     </select>
                                 </div>
 
+                                <!-- Step 2: Product Search -->
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                                        <i class="bi bi-box mr-2 text-teal-600"></i>Produk
+                                    <label class="block text-sm font-medium text-gray-700 mb-3">
+                                        <i class="bi bi-search mr-2 text-green-600"></i>2. Cari Produk
+                                    </label>
+                                    <div class="relative">
+                                        <input type="text" id="productSearchInput"
+                                            class="w-full px-4 py-3 pl-11 pr-11 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-all duration-200"
+                                            placeholder="Ketik nama produk untuk mencari...">
+                                        <div
+                                            class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <i class="bi bi-search text-gray-400"></i>
+                                        </div>
+                                        <button type="button" id="clearSearchBtn"
+                                            class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-red-500 transition-colors duration-150 hidden"
+                                            onclick="clearProductSearch()">
+                                            <i class="bi bi-x-circle-fill text-lg"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Step 3: Product Selection -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-3">
+                                        <i class="bi bi-box mr-2 text-purple-600"></i>3. Pilih Produk
                                     </label>
                                     <select
-                                        class="w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-colors"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-all duration-200"
                                         id="productSelect">
-                                        <option value="">Pilih Produk</option>
+                                        <option value="">-- Pilih Produk --</option>
                                         @foreach($products as $product)
                                             <option value="{{ $product->id }}" data-category="{{ $product->category_id }}"
+                                                data-name="{{ strtolower($product->name ?? '') }}"
+                                                data-code="{{ strtolower($product->code ?? '') }}"
+                                                data-original-name="{{ $product->name ?? '' }}"
                                                 @if($product->current_stock == 0) disabled @endif>
                                                 {{ $product->name }}
                                                 @if($product->current_stock == 0)
@@ -135,49 +164,78 @@
                                             </option>
                                         @endforeach
                                     </select>
+
+                                    <!-- Search Results Info -->
+                                    <div id="searchResultsInfo" class="mt-3 hidden">
+                                        <div class="flex items-center p-3 rounded-lg">
+                                            <i class="bi bi-info-circle mr-2 flex-shrink-0"></i>
+                                            <span id="searchResultsText" class="text-sm font-medium"></span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                            <!-- Product Details Form -->
+                            <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <!-- Price Type Selection -->
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                                        <i class="bi bi-cash-coin mr-2 text-yellow-600"></i>Tipe Harga
+                                    <label class="block text-sm font-medium text-gray-700 mb-3">
+                                        <i class="bi bi-cash-coin mr-2 text-yellow-600"></i>4. Tipe Harga
                                     </label>
                                     <select
-                                        class="w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-colors"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-all duration-200"
                                         id="priceTypeSelect">
-                                        <option value="">Pilih Tipe Harga</option>
+                                        <option value="">-- Pilih Tipe Harga --</option>
                                     </select>
                                 </div>
 
+                                <!-- Quantity Input -->
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                                        <i class="bi bi-123 mr-2 text-red-600"></i>Jumlah
+                                    <label class="block text-sm font-medium text-gray-700 mb-3">
+                                        <i class="bi bi-123 mr-2 text-red-600"></i>5. Jumlah
                                     </label>
                                     <input type="number"
-                                        class="w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-colors"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-all duration-200"
                                         id="quantityInput" min="1" value="1" placeholder="Masukkan jumlah">
                                 </div>
 
+                                <!-- Add to Cart Button -->
                                 <div class="flex items-end">
                                     <button type="button" id="addItemBtn"
-                                        class="w-full px-4 py-2.5 bg-pink-600 hover:bg-pink-700 text-white font-medium rounded-lg shadow-sm transition-all duration-200 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed">
-                                        <i class="bi bi-plus-circle mr-2"></i>Tambah Item
+                                        class="w-full px-4 py-3 bg-pink-600 hover:bg-pink-700 text-white font-medium rounded-lg shadow-sm transition-all duration-200 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                                        <i class="bi bi-plus-circle mr-2"></i>Tambah ke Keranjang
                                     </button>
                                 </div>
                             </div>
 
-                            <!-- Quick Search -->
-                            <div class="bg-gray-50 rounded-lg p-4 mb-6">
-                                <label class="block text-sm font-medium text-gray-700 mb-2">
-                                    <i class="bi bi-upc-scan mr-2 text-gray-600"></i>Cari Cepat dengan Kode Produk
-                                </label>
-                                <div class="relative">
-                                    <input type="text" id="searchByCodeInput"
-                                        class="w-full px-3 py-2.5 pl-10 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-colors"
-                                        placeholder="Scan atau ketik kode produk...">
-                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <i class="bi bi-search text-gray-400"></i>
+                            <!-- Quick Search by Barcode -->
+                            <div
+                                class="mt-8 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-5 border border-blue-200">
+                                <div class="flex items-start space-x-3">
+                                    <div class="flex-shrink-0">
+                                        <div class="flex items-center justify-center w-10 h-10 bg-blue-100 rounded-lg">
+                                            <i class="bi bi-upc-scan text-blue-600 text-lg"></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-grow">
+                                        <label class="block text-sm font-medium text-gray-700 mb-3">
+                                            <i class="bi bi-lightning-charge mr-2 text-orange-500"></i>Cari Cepat dengan
+                                            Kode Produk
+                                        </label>
+                                        <div class="relative">
+                                            <input type="text" id="searchByCodeInput"
+                                                class="w-full px-4 py-3 pl-11 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                                                placeholder="Scan atau ketik kode produk untuk pencarian cepat...">
+                                            <div
+                                                class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <i class="bi bi-qr-code-scan text-gray-400"></i>
+                                            </div>
+                                        </div>
+                                        <div id="searchByCodeResult" class="mt-3"></div>
+                                        <p class="mt-2 text-xs text-gray-500">
+                                            <i class="bi bi-info-circle mr-1"></i>
+                                            Ketik minimal 2 karakter untuk mencari produk berdasarkan kode
+                                        </p>
                                     </div>
                                 </div>
                             </div>
@@ -189,7 +247,6 @@
                                 <h4 class="text-lg font-medium text-gray-900">
                                     <i class="bi bi-cart-check mr-2 text-green-600"></i>Daftar Produk
                                 </h4>
-                                <div id="searchByCodeResult"></div>
                             </div>
 
                             <div class="overflow-hidden rounded-lg border border-gray-200 shadow-sm">
@@ -553,13 +610,173 @@
         // Category filter
         document.getElementById('categorySelect').onchange = function () {
             let catId = this.value;
-            Array.from(productSelect.options).forEach(opt => {
-                if (!opt.value) return;
-                opt.style.display = opt.getAttribute('data-category') == catId ? '' : 'none';
-            });
-            productSelect.value = '';
-            priceTypeSelect.innerHTML = '<option value="">Pilih Tipe Harga</option>';
+            filterProducts(catId, document.getElementById('productSearchInput').value);
         };
+
+        // Product search functionality with debouncing
+        const productSearchInput = document.getElementById('productSearchInput');
+        const clearSearchBtn = document.getElementById('clearSearchBtn');
+        const searchResultsInfo = document.getElementById('searchResultsInfo');
+        const searchResultsText = document.getElementById('searchResultsText');
+
+        let searchTimeout;
+
+        productSearchInput.addEventListener('input', function () {
+            const searchTerm = this.value.trim();
+            const categoryId = document.getElementById('categorySelect').value;
+
+            // Show/hide clear button
+            if (searchTerm.length > 0) {
+                clearSearchBtn.classList.remove('hidden');
+            } else {
+                clearSearchBtn.classList.add('hidden');
+            }
+
+            // Debounce search for better performance
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                filterProducts(categoryId, searchTerm);
+            }, 100);
+        });
+
+        // Function to filter products based on category and search term
+        function filterProducts(categoryId, searchTerm) {
+            const productOptions = Array.from(productSelect.options);
+            let visibleCount = 0;
+            let totalCount = 0;
+
+            productOptions.forEach(option => {
+                if (!option.value) return; // Skip empty option
+
+                totalCount++;
+                let shouldShow = true;
+
+                // Filter by category
+                if (categoryId && option.getAttribute('data-category') !== categoryId) {
+                    shouldShow = false;
+                }
+
+                // Filter by search term (name or code)
+                if (searchTerm.length > 0 && shouldShow) {
+                    const productName = option.getAttribute('data-name') || '';
+                    const productCode = option.getAttribute('data-code') || '';
+                    const originalName = option.getAttribute('data-original-name') || '';
+                    const optionText = option.textContent.toLowerCase();
+                    const searchLower = searchTerm.toLowerCase();
+
+                    // Multiple matching strategies
+                    const nameMatch = productName.includes(searchLower);
+                    const codeMatch = productCode.includes(searchLower);
+                    const originalNameMatch = originalName.toLowerCase().includes(searchLower);
+                    const textMatch = optionText.includes(searchLower);
+
+                    if (!nameMatch && !codeMatch && !originalNameMatch && !textMatch) {
+                        shouldShow = false;
+                    }
+                }
+
+                option.style.display = shouldShow ? '' : 'none';
+                if (shouldShow) visibleCount++;
+            });
+
+            // Update search results info with better styling
+            updateSearchResultsInfo(searchTerm, categoryId, visibleCount, totalCount);
+
+            // Reset product selection if current selection is hidden
+            if (productSelect.value && productSelect.options[productSelect.selectedIndex].style.display === 'none') {
+                productSelect.value = '';
+                priceTypeSelect.innerHTML = '<option value="">Pilih Tipe Harga</option>';
+            }
+        }
+
+        // Update search results info display
+        function updateSearchResultsInfo(searchTerm, categoryId, visibleCount, totalCount) {
+            if (searchTerm.length > 0 || categoryId) {
+                searchResultsInfo.classList.remove('hidden');
+
+                let message = '';
+                let alertClass = '';
+                let iconClass = '';
+
+                if (visibleCount === 0) {
+                    message = 'Tidak ada produk yang ditemukan';
+                    alertClass = 'bg-red-50 border-red-200 text-red-700';
+                    iconClass = 'bi bi-exclamation-triangle text-red-500';
+                } else {
+                    if (searchTerm.length > 0 && categoryId) {
+                        message = `Menampilkan ${visibleCount} dari ${totalCount} produk (kategori + pencarian)`;
+                    } else if (searchTerm.length > 0) {
+                        message = `Menampilkan ${visibleCount} dari ${totalCount} produk untuk "${searchTerm}"`;
+                    } else if (categoryId) {
+                        message = `Menampilkan ${visibleCount} dari ${totalCount} produk (kategori dipilih)`;
+                    }
+                    alertClass = 'bg-blue-50 border-blue-200 text-blue-700';
+                    iconClass = 'bi bi-info-circle text-blue-500';
+                }
+
+                const infoDiv = searchResultsInfo.querySelector('div');
+                infoDiv.className = `flex items-center p-3 rounded-lg border ${alertClass}`;
+                infoDiv.querySelector('i').className = `${iconClass} mr-2 flex-shrink-0`;
+                searchResultsText.textContent = message;
+            } else {
+                searchResultsInfo.classList.add('hidden');
+            }
+        }
+
+        // Clear search function with improved animation
+        function clearProductSearch() {
+            productSearchInput.value = '';
+            clearSearchBtn.classList.add('hidden');
+            const categoryId = document.getElementById('categorySelect').value;
+            filterProducts(categoryId, '');
+
+            // Smooth visual feedback
+            productSearchInput.classList.add('ring-2', 'ring-green-300', 'bg-green-50');
+            setTimeout(() => {
+                productSearchInput.classList.remove('ring-2', 'ring-green-300', 'bg-green-50');
+                productSearchInput.focus();
+            }, 300);
+        }
+
+        // Auto-select single result on Enter key
+        productSearchInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+
+                const visibleOptions = Array.from(productSelect.options).filter(option =>
+                    option.value && option.style.display !== 'none'
+                );
+
+                if (visibleOptions.length === 1) {
+                    // Success animation
+                    this.classList.add('ring-2', 'ring-green-400', 'bg-green-50');
+
+                    setTimeout(() => {
+                        productSelect.value = visibleOptions[0].value;
+                        productSelect.dispatchEvent(new Event('change'));
+
+                        this.classList.remove('ring-2', 'ring-green-400', 'bg-green-50');
+                        this.blur();
+
+                        // Focus next input for better UX
+                        setTimeout(() => {
+                            if (priceTypeSelect.options.length > 1) {
+                                priceTypeSelect.focus();
+                            }
+                        }, 100);
+                    }, 250);
+                } else if (visibleOptions.length === 0) {
+                    // Error animation
+                    this.classList.add('ring-2', 'ring-red-400', 'bg-red-50');
+                    setTimeout(() => {
+                        this.classList.remove('ring-2', 'ring-red-400', 'bg-red-50');
+                    }, 400);
+                }
+            } else if (e.key === 'Escape') {
+                this.blur();
+                clearProductSearch();
+            }
+        });
 
         // Cash input formatting with real-time formatting
         if (cashGivenInput) {
@@ -618,19 +835,93 @@
             return true;
         };
 
-        // Search by code functionality
+        // Enhanced barcode search functionality
         document.getElementById('searchByCodeInput').addEventListener('input', function () {
-            let code = this.value.trim();
-            if (code.length >= 3) {
-                let product = products.find(p => p.code && p.code.toLowerCase().includes(code.toLowerCase()));
+            const code = this.value.trim();
+            const resultDiv = document.getElementById('searchByCodeResult');
+
+            if (code.length >= 2) {
+                const product = products.find(p => p.code && p.code.toLowerCase().includes(code.toLowerCase()));
+
                 if (product) {
+                    // Clear other filters
+                    document.getElementById('categorySelect').value = '';
+                    productSearchInput.value = '';
+                    clearSearchBtn.classList.add('hidden');
+                    filterProducts('', '');
+
+                    // Select the product
                     productSelect.value = product.id;
                     productSelect.dispatchEvent(new Event('change'));
+
+                    // Show success feedback
+                    resultDiv.innerHTML = `
+                        <div class="inline-flex items-center px-3 py-2 bg-green-100 border border-green-200 text-green-800 text-sm rounded-lg">
+                            <i class="bi bi-check-circle-fill mr-2"></i>
+                            Produk ditemukan: <strong>${product.name}</strong>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="inline-flex items-center px-3 py-2 bg-yellow-100 border border-yellow-200 text-yellow-800 text-sm rounded-lg">
+                            <i class="bi bi-exclamation-triangle-fill mr-2"></i>
+                            Kode tidak ditemukan
+                        </div>
+                    `;
                 }
+
+                // Auto-clear feedback after 3 seconds
+                setTimeout(() => {
+                    resultDiv.innerHTML = '';
+                }, 3000);
+            } else {
+                resultDiv.innerHTML = '';
             }
         });
 
-        // Initialize table
+        // Global keyboard shortcuts
+        document.addEventListener('keydown', function (e) {
+            // Ctrl/Cmd + F to focus on product search
+            if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+                e.preventDefault();
+                productSearchInput.focus();
+                productSearchInput.select();
+            }
+
+            // Ctrl/Cmd + B to focus on barcode search  
+            if ((e.ctrlKey || e.metaKey) && e.key === 'b') {
+                e.preventDefault();
+                document.getElementById('searchByCodeInput').focus();
+                document.getElementById('searchByCodeInput').select();
+            }
+        });
+
+        // Add help text for shortcuts
+        const helpContainer = document.createElement('div');
+        helpContainer.className = 'mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200';
+        helpContainer.innerHTML = `
+            <div class="flex items-start space-x-2">
+                <div class="flex-shrink-0">
+                    <i class="bi bi-lightbulb text-yellow-500 mt-0.5"></i>
+                </div>
+                <div class="text-xs text-gray-600 space-y-1">
+                    <div class="font-medium text-gray-700">Tips Pencarian:</div>
+                    <div>• Tekan <kbd class="px-1.5 py-0.5 bg-white border border-gray-300 rounded text-xs font-mono shadow-sm">Ctrl+F</kbd> untuk fokus ke pencarian produk</div>
+                    <div>• Tekan <kbd class="px-1.5 py-0.5 bg-white border border-gray-300 rounded text-xs font-mono shadow-sm">Enter</kbd> untuk pilih otomatis jika hanya 1 hasil</div>
+                    <div>• Tekan <kbd class="px-1.5 py-0.5 bg-white border border-gray-300 rounded text-xs font-mono shadow-sm">Escape</kbd> untuk bersihkan pencarian</div>
+                </div>
+            </div>
+        `;
+
+        // Append help text after the product search container
+        const productSearchContainer = productSearchInput.closest('.space-y-3').parentElement;
+        productSearchContainer.appendChild(helpContainer);
+
+        // Initialize
+        filterProducts('', '');
         updateTable();
+
+        // Debug info (remove in production)
+        console.log(`✅ Search system loaded with ${Array.from(productSelect.options).filter(option => option.value).length} products`);
     </script>
 </x-app-layout>

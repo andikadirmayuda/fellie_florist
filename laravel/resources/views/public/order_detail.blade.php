@@ -38,9 +38,24 @@
             </div>
             <!-- Status Badge -->
             <div class="flex flex-col sm:flex-row gap-2 justify-center items-center mb-6">
+                @php
+                    $statusIndo = [
+                        'pending' => 'Menunggu',
+                        'confirmed' => 'Dikonfirmasi',
+                        'processing' => 'Diproses',
+                        'processed' => 'Diproses',
+                        'packing' => 'Sedang Dikemas',
+                        'ready' => 'Sudah Siap',
+                        'shipping' => 'Dikirim',
+                        'shipped' => 'Dikirim',
+                        'delivered' => 'Terkirim',
+                        'completed' => 'Selesai',
+                        'cancelled' => 'Dibatalkan'
+                    ];
+                @endphp
                 <span
                     class="inline-flex items-center gap-1 px-3 py-1 rounded-full font-semibold text-white text-xs sm:text-sm shadow bg-pink-600">
-                    <i class="bi bi-clipboard-check"></i> {{ ucfirst($order->status) }}
+                    <i class="bi bi-clipboard-check"></i> {{ $statusIndo[$order->status] ?? ucfirst($order->status) }}
                 </span>
                 @php
                     $paymentStatusMap = [
@@ -73,19 +88,28 @@
             <!-- Stepper Status Responsive Split for Mobile -->
             <div class="w-full mb-8">
                 @php
-                    $steps = [
+                    // Base steps untuk flow normal pesanan
+                    $baseSteps = [
                         'pending' => 'Pesanan Diterima',
                         'processing' => 'Diproses',
                         'packing' => 'Dikemas',
+                        'ready' => 'Sudah Siap',
                         'shipped' => 'Dikirim',
                         'done' => 'Selesai',
-                        'cancelled' => 'Dibatalkan',
                     ];
+                    
+                    // Tambahkan status dibatalkan hanya jika pesanan dibatalkan
+                    $steps = $baseSteps;
+                    if (in_array(strtolower($order->status), ['cancelled', 'canceled'])) {
+                        $steps['cancelled'] = 'Dibatalkan';
+                    }
+                    
                     $statusMap = [
                         'pending' => 'pending',
                         'processed' => 'processing',
                         'processing' => 'processing',
                         'packing' => 'packing',
+                        'ready' => 'ready',
                         'shipped' => 'shipped',
                         'done' => 'done',
                         'completed' => 'done',
@@ -98,48 +122,83 @@
                     $currentIndex = array_search($currentStatus, $stepKeys);
                 @endphp
                 <!-- Mobile: 2 rows, Desktop: 1 row -->
-                <div class="hidden sm:flex flex-nowrap justify-between items-center w-full gap-2 px-1">
-                    @foreach($steps as $key => $label)
-                        <div class="flex flex-col items-center min-w-[44px] max-w-[60px] flex-shrink-0">
-                            <div
-                                class="rounded-full w-8 h-8 flex items-center justify-center mb-1 text-[15px] font-bold {{ $currentStatus === $key || $currentIndex > array_search($key, $stepKeys) ? 'bg-pink-600 text-white shadow-lg' : 'bg-gray-200 text-gray-400' }}">
-                                {{ $loop->iteration }}
+                @php 
+                    $isCancelled = in_array(strtolower($order->status), ['cancelled', 'canceled']);
+                @endphp
+                
+                @if($isCancelled)
+                    <!-- Special layout untuk pesanan dibatalkan di desktop -->
+                    <div class="hidden sm:flex justify-center">
+                        <div class="inline-flex items-center px-6 py-3 bg-red-100 border border-red-300 rounded-xl">
+                            <div class="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center mr-3">
+                                <i class="bi bi-x text-white text-lg"></i>
                             </div>
-                            <div class="text-xs text-center font-medium leading-tight {{ $currentStatus === $key || $currentIndex > array_search($key, $stepKeys) ? 'text-pink-600' : 'text-gray-400' }}"
-                                style="word-break:break-word;">{{ $label }}</div>
+                            <span class="text-red-700 font-semibold text-lg">Pesanan Dibatalkan</span>
                         </div>
-                        @if(!$loop->last)
-                            <div
-                                class="h-1 w-5 bg-gray-200 mt-4 flex-shrink-0 {{ $currentIndex >= $loop->index ? 'bg-pink-500' : '' }}">
+                    </div>
+                @else
+                    <!-- Layout normal untuk desktop -->
+                    <div class="hidden sm:flex flex-nowrap justify-between items-center w-full gap-2 px-1">
+                        @foreach($steps as $key => $label)
+                            <div class="flex flex-col items-center min-w-[44px] max-w-[60px] flex-shrink-0">
+                                <div
+                                    class="rounded-full w-8 h-8 flex items-center justify-center mb-1 text-[15px] font-bold {{ $currentStatus === $key || $currentIndex > array_search($key, $stepKeys) ? 'bg-pink-600 text-white shadow-lg' : 'bg-gray-200 text-gray-400' }}">
+                                    {{ $loop->iteration }}
+                                </div>
+                                <div class="text-xs text-center font-medium leading-tight {{ $currentStatus === $key || $currentIndex > array_search($key, $stepKeys) ? 'text-pink-600' : 'text-gray-400' }}"
+                                    style="word-break:break-word;">{{ $label }}</div>
                             </div>
-                        @endif
-                    @endforeach
-                </div>
+                            @if(!$loop->last)
+                                <div
+                                    class="h-1 w-5 bg-gray-200 mt-4 flex-shrink-0 {{ $currentIndex >= $loop->index ? 'bg-pink-500' : '' }}">
+                                </div>
+                            @endif
+                        @endforeach
+                    </div>
+                @endif
                 <div class="flex flex-col gap-1 sm:hidden">
-                    <div class="grid grid-cols-3 w-full gap-0 px-1">
-                        @foreach(array_slice($stepKeys, 0, 3) as $i => $key)
-                            <div class="flex flex-col items-center">
-                                <div
-                                    class="rounded-full w-6 h-6 flex items-center justify-center mb-0.5 text-[11px] font-bold {{ $currentStatus === $key || $currentIndex > array_search($key, $stepKeys) ? 'bg-pink-600 text-white shadow-lg' : 'bg-gray-200 text-gray-400' }}">
-                                    {{ $i + 1 }}
+                    @php 
+                        $stepCount = count($steps);
+                        $isCancelled = in_array(strtolower($order->status), ['cancelled', 'canceled']);
+                    @endphp
+                    
+                    @if($isCancelled)
+                        <!-- Special layout untuk pesanan dibatalkan -->
+                        <div class="text-center">
+                            <div class="inline-flex items-center px-4 py-2 bg-red-100 border border-red-300 rounded-lg">
+                                <div class="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center mr-2">
+                                    <i class="bi bi-x text-white text-sm"></i>
                                 </div>
-                                <div class="text-[9px] text-center font-medium leading-tight {{ $currentStatus === $key || $currentIndex > array_search($key, $stepKeys) ? 'text-pink-600' : 'text-gray-400' }}"
-                                    style="word-break:break-word;">{{ $steps[$key] }}</div>
+                                <span class="text-red-700 font-semibold text-sm">Pesanan Dibatalkan</span>
                             </div>
-                        @endforeach
-                    </div>
-                    <div class="grid grid-cols-3 w-full gap-0 px-1 mt-1">
-                        @foreach(array_slice($stepKeys, 3, 3) as $i => $key)
-                            <div class="flex flex-col items-center">
-                                <div
-                                    class="rounded-full w-6 h-6 flex items-center justify-center mb-0.5 text-[11px] font-bold {{ $currentStatus === $key || $currentIndex > array_search($key, $stepKeys) ? 'bg-pink-600 text-white shadow-lg' : 'bg-gray-200 text-gray-400' }}">
-                                    {{ $i + 4 }}
+                        </div>
+                    @else
+                        <!-- Layout normal untuk 6 steps (3 + 3) -->
+                        <div class="grid grid-cols-3 w-full gap-0 px-1">
+                            @foreach(array_slice($stepKeys, 0, 3) as $i => $key)
+                                <div class="flex flex-col items-center">
+                                    <div
+                                        class="rounded-full w-6 h-6 flex items-center justify-center mb-0.5 text-[11px] font-bold {{ $currentStatus === $key || $currentIndex > array_search($key, $stepKeys) ? 'bg-pink-600 text-white shadow-lg' : 'bg-gray-200 text-gray-400' }}">
+                                        {{ $i + 1 }}
+                                    </div>
+                                    <div class="text-[9px] text-center font-medium leading-tight {{ $currentStatus === $key || $currentIndex > array_search($key, $stepKeys) ? 'text-pink-600' : 'text-gray-400' }}"
+                                        style="word-break:break-word;">{{ $steps[$key] }}</div>
                                 </div>
-                                <div class="text-[9px] text-center font-medium leading-tight {{ $currentStatus === $key || $currentIndex > array_search($key, $stepKeys) ? 'text-pink-600' : 'text-gray-400' }}"
-                                    style="word-break:break-word;">{{ $steps[$key] }}</div>
-                            </div>
-                        @endforeach
-                    </div>
+                            @endforeach
+                        </div>
+                        <div class="grid grid-cols-3 w-full gap-0 px-1 mt-1">
+                            @foreach(array_slice($stepKeys, 3, 3) as $i => $key)
+                                <div class="flex flex-col items-center">
+                                    <div
+                                        class="rounded-full w-6 h-6 flex items-center justify-center mb-0.5 text-[11px] font-bold {{ $currentStatus === $key || $currentIndex > array_search($key, $stepKeys) ? 'bg-pink-600 text-white shadow-lg' : 'bg-gray-200 text-gray-400' }}">
+                                        {{ $i + 4 }}
+                                    </div>
+                                    <div class="text-[9px] text-center font-medium leading-tight {{ $currentStatus === $key || $currentIndex > array_search($key, $stepKeys) ? 'text-pink-600' : 'text-gray-400' }}"
+                                        style="word-break:break-word;">{{ $steps[$key] }}</div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
                 </div>
             </div>
             <!-- Info Pemesanan (3 Columns) -->
@@ -457,16 +516,127 @@
                 </div>
             @endif
 
-            @if(!empty($order->packing_photo))
+            @if(!empty($order->packing_photo) || !empty($order->packing_files))
                 <div class="my-8 text-center">
-                    <h3 class="font-semibold text-base mb-2 flex items-center gap-2 justify-center">
+                    <h3 class="font-semibold text-base mb-4 flex items-center gap-2 justify-center">
                         <i class="bi bi-camera text-pink-500"></i> 
                         <i class="bi bi-box-seam text-blue-500"></i>
-                        Foto Barang Saat Dikemas
+                        Foto & Video Packing
                     </h3>
-                    <img src="{{ asset('storage/' . $order->packing_photo) }}" alt="Foto Barang Dikemas"
-                        class="mx-auto rounded shadow max-h-64 border" onerror="this.style.display='none';" />
+                    
+                    @php
+                        $packingFiles = [];
+                        
+                        // Prioritize new multiple files format
+                        if (!empty($order->packing_files)) {
+                            $files = is_string($order->packing_files) ? json_decode($order->packing_files, true) : $order->packing_files;
+                            if (is_array($files)) {
+                                $packingFiles = $files;
+                            }
+                        } 
+                        // Fallback to old single photo format only if no packing_files
+                        elseif (!empty($order->packing_photo)) {
+                            $packingFiles[] = $order->packing_photo;
+                        }
+                    @endphp
+                    
+                    @if(count($packingFiles) > 0)
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl mx-auto">
+                            @foreach($packingFiles as $index => $file)
+                                @php
+                                    $filePath = asset('storage/' . $file);
+                                    $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+                                    $isVideo = in_array($ext, ['mp4', 'mov', 'avi', 'wmv', 'flv', 'webm']);
+                                    $isImage = in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp']);
+                                @endphp
+                                
+                                <div class="bg-white rounded-lg border border-gray-200 p-3 shadow-sm">
+                                    @if($isVideo)
+                                        <video controls class="w-full h-48 rounded-lg object-cover bg-black mb-2"
+                                               onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                                            <source src="{{ $filePath }}" type="video/{{ $ext }}">
+                                            Browser Anda tidak mendukung video.
+                                        </video>
+                                        <div style="display:none;" class="text-center p-4 text-red-600 bg-red-50 rounded-lg border border-red-200">
+                                            <i class="bi bi-exclamation-triangle mr-2"></i>Video tidak ditemukan.
+                                        </div>
+                                        <div class="flex items-center justify-center text-sm text-gray-600">
+                                            <i class="bi bi-play-circle mr-2 text-blue-500"></i>
+                                            Video Packing {{ $index + 1 }}
+                                        </div>
+                                    @elseif($isImage)
+                                        <img src="{{ $filePath }}" alt="Foto Packing {{ $index + 1 }}"
+                                             class="w-full h-48 object-cover rounded-lg border border-gray-200 mb-2 cursor-pointer hover:opacity-90 transition-opacity"
+                                             onclick="openImageModal('{{ $filePath }}', 'Foto Packing {{ $index + 1 }}')"
+                                             onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
+                                        <div style="display:none;" class="text-center p-4 text-red-600 bg-red-50 rounded-lg border border-red-200">
+                                            <i class="bi bi-exclamation-triangle mr-2"></i>Foto tidak ditemukan.
+                                        </div>
+                                        <div class="flex items-center justify-center text-sm text-gray-600">
+                                            <i class="bi bi-camera mr-2 text-green-500"></i>
+                                            Foto Packing {{ $index + 1 }}
+                                        </div>
+                                    @else
+                                        <div class="w-full h-48 bg-gray-100 rounded-lg flex items-center justify-center mb-2">
+                                            <div class="text-center">
+                                                <i class="bi bi-file-earmark text-3xl text-gray-400 mb-2"></i>
+                                                <p class="text-sm text-gray-500">File {{ $index + 1 }}</p>
+                                            </div>
+                                        </div>
+                                        <a href="{{ $filePath }}" target="_blank" 
+                                           class="inline-flex items-center text-sm text-blue-600 hover:text-blue-800">
+                                            <i class="bi bi-download mr-1"></i>
+                                            Download File
+                                        </a>
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <div class="text-center p-8 text-gray-500 bg-gray-50 rounded-lg border border-gray-200">
+                            <i class="bi bi-camera text-4xl mb-3"></i>
+                            <p>Belum ada foto atau video packing.</p>
+                        </div>
+                    @endif
                 </div>
+                
+                <!-- Image Modal for Order Detail -->
+                <div id="imageModal" class="fixed inset-0 bg-black bg-opacity-75 z-50 hidden flex items-center justify-center p-4">
+                    <div class="relative max-w-4xl max-h-full">
+                        <img id="modalImage" src="" alt="" class="max-w-full max-h-full object-contain rounded-lg">
+                        <button onclick="closeImageModal()" 
+                                class="absolute top-4 right-4 text-white bg-black bg-opacity-50 hover:bg-opacity-75 rounded-full p-2 transition-colors">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                        <div id="modalTitle" class="absolute bottom-4 left-4 text-white bg-black bg-opacity-50 px-3 py-1 rounded-lg text-sm"></div>
+                    </div>
+                </div>
+                
+                <script>
+                    function openImageModal(src, title) {
+                        document.getElementById('modalImage').src = src;
+                        document.getElementById('modalTitle').textContent = title;
+                        document.getElementById('imageModal').classList.remove('hidden');
+                    }
+                    
+                    function closeImageModal() {
+                        document.getElementById('imageModal').classList.add('hidden');
+                    }
+                    
+                    // Close modal when clicking outside
+                    document.getElementById('imageModal').addEventListener('click', function(e) {
+                        if (e.target === this) {
+                            closeImageModal();
+                        }
+                    });
+                    
+                    // Close modal with Escape key
+                    document.addEventListener('keydown', function(e) {
+                        if (e.key === 'Escape') {
+                            closeImageModal();
+                        }
+                    });
+                </script>
             @endif
             <div class="text-center text-gray-500 text-xs sm:text-sm mt-8">
                 <p class="font-medium">Terima kasih telah memesan di Fellie Florist!</p>

@@ -85,10 +85,14 @@ function updateCart() {
                         </div>
                         <div class="flex items-center">
                             <span class="inline-block bg-gradient-to-r from-rose-500 to-pink-500 text-white text-xs px-2 py-0.5 rounded-full mr-2">Bouquet</span>
-                            <span>Rangkaian bunga siap jadi dengan berbagai ukuran</span>
+                            <span>Rangkaian bunga siap jadi dengan berbagai ukuran
+                        </div>
+                        <div class="flex items-center">
+                            <span class="inline-block bg-gradient-to-r from-purple-500 to-indigo-500 text-white text-xs px-2 py-0.5 rounded-full mr-2">Custom</span>
+                            <span>Bouquet custom sesuai keinginan Anda</span></span>
                         </div>
                         <p class="text-rose-600 mt-2 text-xs italic">
-                            💡 Anda dapat menambahkan bunga dan bouquet dalam satu keranjang yang sama!
+                            💡 Anda dapat menambahkan bunga, bouquet, dan custom bouquet dalam satu keranjang!
                         </p>
                     </div>
                 </div>
@@ -124,10 +128,14 @@ function updateCart() {
                         </div>
                         <div class="flex items-center">
                             <span class="inline-block bg-gradient-to-r from-rose-500 to-pink-500 text-white text-xs px-2 py-0.5 rounded-full mr-2">Bouquet</span>
-                            <span>Rangkaian bunga siap jadi dengan berbagai ukuran</span>
+                            <span>Rangkaian bunga siap jadi dengan berbagai ukuran
+                        </div>
+                        <div class="flex items-center">
+                            <span class="inline-block bg-gradient-to-r from-purple-500 to-indigo-500 text-white text-xs px-2 py-0.5 rounded-full mr-2">Custom</span>
+                            <span>Bouquet custom sesuai keinginan Anda</span></span>
                         </div>
                         <p class="text-rose-600 mt-2 text-xs italic">
-                            💡 Anda dapat menambahkan bunga dan bouquet dalam satu keranjang yang sama!
+                            💡 Anda dapat menambahkan bunga, bouquet, dan custom bouquet dalam satu keranjang!
                         </p>
                     </div>
                 </div>
@@ -145,6 +153,8 @@ function updateCart() {
                         <h4 class="font-semibold text-gray-800 text-sm">${item.name}</h4>
                         ${item.type === 'bouquet' ? 
                             `<span class="inline-block bg-gradient-to-r from-rose-500 to-pink-500 text-white text-xs px-2 py-1 rounded-full mb-1">Bouquet</span>` : 
+                            item.type === 'custom_bouquet' ?
+                            `<span class="inline-block bg-gradient-to-r from-purple-500 to-indigo-500 text-white text-xs px-2 py-1 rounded-full mb-1">Custom Bouquet</span>` :
                             `<span class="inline-block bg-gradient-to-r from-green-500 to-teal-500 text-white text-xs px-2 py-1 rounded-full mb-1">Bunga</span>`
                         }
                         <p class="text-sm text-gray-500">${item.quantity} x Rp ${formatPrice(item.price)}</p>
@@ -165,6 +175,15 @@ function updateCart() {
                                     <span class="text-xs font-medium text-pink-700">Kartu Ucapan:</span>
                                 </div>
                                 <p class="text-xs text-pink-800 italic">"${item.greeting_card.length > 50 ? item.greeting_card.substring(0, 50) + '...' : item.greeting_card}"</p>
+                            </div>` : ''
+                        }
+                        ${item.components_summary && item.type === 'custom_bouquet' ? 
+                            `<div class="mt-2 p-2 bg-purple-50 border border-purple-200 rounded-lg">
+                                <div class="flex items-center mb-1">
+                                    <i class="bi bi-palette text-purple-600 mr-1"></i>
+                                    <span class="text-xs font-medium text-purple-700">Komponen:</span>
+                                </div>
+                                <p class="text-xs text-purple-800">${Array.isArray(item.components_summary) ? item.components_summary.slice(0, 2).join(', ') + (item.components_summary.length > 2 ? ', +' + (item.components_summary.length - 2) + ' lainnya' : '') : item.components_summary}</p>
                             </div>` : ''
                         }
                         <div class="flex items-center space-x-2 mt-2">

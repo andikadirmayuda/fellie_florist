@@ -20,6 +20,11 @@ class PublicOrder extends Model
         'payment_proof',
         'wa_number',
         'packing_photo',
+        'packing_files',
+    ];
+
+    protected $casts = [
+        'packing_files' => 'array',
     ];
 
     protected $appends = ['total', 'order_number'];
@@ -37,7 +42,7 @@ class PublicOrder extends Model
     // Calculate total from items
     public function getTotalAttribute()
     {
-        return $this->items->sum(function($item) {
+        return $this->items->sum(function ($item) {
             return $item->quantity * $item->price;
         });
     }
@@ -58,5 +63,30 @@ class PublicOrder extends Model
     public function getDeliveryFeeAttribute()
     {
         return 0; // You can add logic here based on delivery_method or destination
+    }
+
+    /**
+     * Generate WhatsApp notification URL for employee group
+     */
+    public function getEmployeeGroupWhatsAppUrlAttribute()
+    {
+        $message = \App\Services\WhatsAppNotificationService::generateNewOrderMessage($this);
+        return $message ? \App\Services\WhatsAppNotificationService::generateEmployeeGroupWhatsAppUrl($message) : null;
+    }
+
+    /**
+     * Generate WhatsApp notification message for employees
+     */
+    public function getEmployeeNotificationMessageAttribute()
+    {
+        return \App\Services\WhatsAppNotificationService::generateNewOrderMessage($this);
+    }
+
+    /**
+     * Check if order can be shared to employee group
+     */
+    public function canShareToEmployeeGroupAttribute()
+    {
+        return !empty($this->public_code) && $this->items->count() > 0;
     }
 }

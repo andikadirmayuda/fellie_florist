@@ -80,7 +80,24 @@
                     </div> --}}
 
                     <!-- User Dropdown -->
-                    <div class="ml-auto flex items-center">
+                    <div class="ml-auto flex items-center space-x-4">
+                        <!-- Notification Bell -->
+                        <div class="relative">
+                            <button id="notification-bell"
+                                class="relative text-white hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 rounded p-2"
+                                title="Notifikasi">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                </svg>
+                                <!-- Notification Badge -->
+                                <span id="notification-badge"
+                                    class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">
+                                    0
+                                </span>
+                            </button>
+                        </div>
+
                         <x-dropdown align="right" width="48">
                             <x-slot name="trigger">
                                 <button
@@ -193,6 +210,96 @@
 
         <!-- Fallback script untuk sidebar -->
         <script src="{{ asset('js/sidebar-fallback.js') }}"></script>
+
+        <!-- Push Notifications Component (hanya untuk authenticated users) -->
+        @auth
+            @include('components.push-notifications')
+        @endauth
+
+        <!-- Notification Bell Script -->
+        <script>
+            // Update notification badge
+            function updateNotificationBadge(count) {
+                const badge = document.getElementById('notification-badge');
+                const bell = document.getElementById('notification-bell');
+
+                if (count > 0) {
+                    badge.textContent = count > 99 ? '99+' : count;
+                    badge.classList.remove('hidden');
+                    // Add visual indicator
+                    bell.classList.add('animate-pulse');
+                } else {
+                    badge.classList.add('hidden');
+                    bell.classList.remove('animate-pulse');
+                }
+            }
+
+            // Poll untuk notification count
+            function checkNotifications() {
+                fetch('/api/admin/notifications/pending')
+                    .then(response => response.json())
+                    .then(notifications => {
+                        updateNotificationBadge(notifications.length);
+
+                        // Show desktop notifications untuk notifikasi baru
+                        notifications.forEach(notification => {
+                            if (notification.message && notification.message.title) {
+                                // Show desktop notification jika permission granted
+                                if (Notification.permission === 'granted') {
+                                    const desktopNotif = new Notification(notification.message.title, {
+                                        body: notification.message.body,
+                                        icon: notification.message.icon,
+                                        tag: notification.message.tag
+                                    });
+
+                                    desktopNotif.onclick = function () {
+                                        if (notification.message.url) {
+                                            window.focus();
+                                            window.location.href = notification.message.url;
+                                        }
+                                    };
+                                }
+
+                                // Mark as delivered
+                                fetch(`/api/admin/notifications/${notification.id}/delivered`, {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                                    }
+                                });
+                            }
+                        });
+                    })
+                    .catch(error => {
+                        console.log('Error checking notifications:', error);
+                    });
+            }
+
+            // Check notifications setiap 10 detik
+            document.addEventListener('DOMContentLoaded', function () {
+                // Request notification permission if not granted
+                if ('Notification' in window && Notification.permission === 'default') {
+                    Notification.requestPermission().then(function (permission) {
+                        console.log('Notification permission:', permission);
+                    });
+                }
+
+                checkNotifications(); // Check immediately
+                setInterval(checkNotifications, 10000); // Then every 10 seconds
+            });
+
+            // Bell click handler
+            document.addEventListener('DOMContentLoaded', function () {
+                const bell = document.getElementById('notification-bell');
+                if (bell) {
+                    bell.addEventListener('click', function () {
+                        // Navigate ke halaman orders
+                        window.location.href = '{{ route("admin.public-orders.index") }}';
+                    });
+                }
+            });
+        </script>
 
         @stack('scripts')
 </body>

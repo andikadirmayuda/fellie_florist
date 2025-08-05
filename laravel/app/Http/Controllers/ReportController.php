@@ -38,9 +38,9 @@ class ReportController extends Controller
         $produkKurangLaku = \App\Models\Product::select('products.*')
             ->leftJoin('sale_items', 'products.id', '=', 'sale_items.product_id')
             ->leftJoin('sales', 'sales.id', '=', 'sale_items.sale_id')
-            ->where(function($q) use ($start, $end) {
+            ->where(function ($q) use ($start, $end) {
                 $q->whereNull('sales.created_at')
-                  ->orWhereBetween('sales.created_at', [$start, $end]);
+                    ->orWhereBetween('sales.created_at', [$start, $end]);
             })
             ->selectRaw('COALESCE(SUM(sale_items.quantity),0) as total_terjual')
             ->groupBy('products.id')
@@ -91,28 +91,27 @@ class ReportController extends Controller
         try {
             $start = $request->input('start_date', now()->startOfMonth()->toDateString());
             $end = $request->input('end_date', now()->endOfMonth()->toDateString());
-            
+
             // Get sales data with relationships
             $sales = \App\Models\Sale::with(['items.product'])
                 ->whereBetween('created_at', [$start, $end])
                 ->get();
-            
+
             // Calculate summary statistics
             $totalPendapatan = $sales->sum('total');
             $totalTransaksi = $sales->count();
-            
+
             // Load and render PDF using DomPDF
             $pdf = Pdf::loadView('reports.sales_pdf', compact('sales', 'start', 'end', 'totalPendapatan', 'totalTransaksi'));
-            
+
             // Set paper size and orientation
             $pdf->setPaper('a4', 'portrait');
-            
+
             // Generate filename based on date range
             $filename = "laporan_penjualan_{$start}_to_{$end}.pdf";
-            
+
             // Return PDF for download
             return $pdf->download($filename);
-            
         } catch (\Exception $e) {
             return back()->withErrors(['error' => 'Gagal mengexport PDF: ' . $e->getMessage()]);
         }
@@ -132,13 +131,13 @@ class ReportController extends Controller
 
         $totalOrder = $orders->count();
         $totalNominal = $orders->sum('total');
-        
+
         // Status untuk public order - mapping yang benar berdasarkan status yang ada
         // Status yang dianggap "Lunas/Dibayar": paid, processed, completed
         // Status yang dianggap "Belum Lunas": pending, unpaid
         $statusLunas = ['paid', 'processed', 'completed'];
         $statusBelumLunas = ['pending', 'unpaid'];
-        
+
         $totalLunas = $orders->whereIn('status', $statusLunas)->count();
         $totalBelumLunas = $orders->whereIn('status', $statusBelumLunas)->count();
 
@@ -158,21 +157,21 @@ class ReportController extends Controller
 
         // Grup data berdasarkan wa_number (nomor WhatsApp) dan kumpulkan semua nama yang berbeda
         // Filter out orders with empty or null wa_number first
-        $validOrders = $publicOrders->filter(function($order) {
+        $validOrders = $publicOrders->filter(function ($order) {
             return !empty($order->wa_number) && $order->wa_number !== '-';
         });
 
-        $customers = $validOrders->groupBy('wa_number')->map(function($orders, $waNumber) {
+        $customers = $validOrders->groupBy('wa_number')->map(function ($orders, $waNumber) {
             $totalOrders = $orders->count();
             $totalSpent = $orders->sum('total');
-            
+
             // Kumpulkan semua nama unik dari order dengan nomor WA yang sama
             $uniqueNames = $orders->pluck('customer_name')->unique()->values()->toArray();
-            
+
             // Ambil nama yang paling sering muncul sebagai nama utama
             $nameFrequency = $orders->countBy('customer_name');
             $primaryName = $nameFrequency->sortDesc()->keys()->first();
-            
+
             return (object) [
                 'name' => $primaryName, // Nama yang paling sering digunakan
                 'all_names' => $uniqueNames, // Semua nama yang pernah digunakan
@@ -199,14 +198,14 @@ class ReportController extends Controller
 
         // Total pendapatan dari penjualan
         $totalPenjualan = \App\Models\Sale::whereBetween('created_at', [$start, $end])->sum('total');
-        
+
         // Total pendapatan dari pemesanan (hitung dari items menggunakan join)
         $totalPemesanan = DB::table('public_orders')
             ->join('public_order_items', 'public_orders.id', '=', 'public_order_items.public_order_id')
             ->whereBetween('public_orders.created_at', [$start, $end])
             ->whereIn('public_orders.status', ['confirmed', 'processing', 'ready', 'completed'])
             ->sum(DB::raw('public_order_items.quantity * public_order_items.price'));
-        
+
         // Total pendapatan gabungan
         $totalPendapatan = $totalPenjualan + $totalPemesanan;
 
@@ -214,21 +213,21 @@ class ReportController extends Controller
         $harian = [];
         foreach (range(0, now()->parse($end)->diffInDays(now()->parse($start))) as $i) {
             $date = now()->parse($start)->copy()->addDays($i)->toDateString();
-            
+
             $dailyPenjualan = \App\Models\Sale::whereDate('created_at', $date)->sum('total');
-            
+
             $dailyPemesanan = DB::table('public_orders')
                 ->join('public_order_items', 'public_orders.id', '=', 'public_order_items.public_order_id')
                 ->whereDate('public_orders.created_at', $date)
                 ->whereIn('public_orders.status', ['confirmed', 'processing', 'ready', 'completed'])
                 ->sum(DB::raw('public_order_items.quantity * public_order_items.price'));
-            
+
             $harian[$date] = [
                 'penjualan' => $dailyPenjualan,
                 'pemesanan' => $dailyPemesanan,
             ];
         }
-        
+
         // Pendapatan mingguan
         $mingguan = [];
         $startWeek = now()->parse($start)->startOfWeek();
@@ -236,45 +235,45 @@ class ReportController extends Controller
         for ($date = $startWeek->copy(); $date <= $endWeek; $date->addWeek()) {
             $weekStart = $date->copy();
             $weekEnd = $date->copy()->endOfWeek();
-            
+
             $weeklyPenjualan = \App\Models\Sale::whereBetween('created_at', [$weekStart, $weekEnd])->sum('total');
-            
+
             $weeklyPemesanan = DB::table('public_orders')
                 ->join('public_order_items', 'public_orders.id', '=', 'public_order_items.public_order_id')
                 ->whereBetween('public_orders.created_at', [$weekStart, $weekEnd])
                 ->whereIn('public_orders.status', ['confirmed', 'processing', 'ready', 'completed'])
                 ->sum(DB::raw('public_order_items.quantity * public_order_items.price'));
-            
+
             $mingguan[$weekStart->format('d M Y')] = [
                 'penjualan' => $weeklyPenjualan,
                 'pemesanan' => $weeklyPemesanan,
             ];
         }
-        
+
         // Pendapatan bulanan
         $bulanan = [];
         $startMonth = now()->parse($start)->startOf('month');
         $endMonth = now()->parse($end)->endOf('month');
-        
+
         // Generate bulan berdasarkan range yang dipilih
         $currentMonth = $startMonth->copy();
         while ($currentMonth <= $endMonth) {
             $monthStart = $currentMonth->copy()->startOfMonth();
             $monthEnd = $currentMonth->copy()->endOfMonth();
-            
+
             $monthlyPenjualan = \App\Models\Sale::whereBetween('created_at', [$monthStart, $monthEnd])->sum('total');
-            
+
             $monthlyPemesanan = DB::table('public_orders')
                 ->join('public_order_items', 'public_orders.id', '=', 'public_order_items.public_order_id')
                 ->whereBetween('public_orders.created_at', [$monthStart, $monthEnd])
                 ->whereIn('public_orders.status', ['confirmed', 'processing', 'ready', 'completed'])
                 ->sum(DB::raw('public_order_items.quantity * public_order_items.price'));
-            
+
             $bulanan[$monthStart->format('M Y')] = [
                 'penjualan' => $monthlyPenjualan,
                 'pemesanan' => $monthlyPemesanan,
             ];
-            
+
             $currentMonth->addMonth();
         }
 
@@ -287,17 +286,17 @@ class ReportController extends Controller
         try {
             $start = $request->input('start_date', now()->startOfMonth()->toDateString());
             $end = $request->input('end_date', now()->endOfMonth()->toDateString());
-            
+
             // Get products with categories
             $products = Product::with('category')->get();
-            
+
             // Get stock logs
             $logs = InventoryLog::with('product')
                 ->whereBetween('created_at', [$start, $end])
                 ->orderBy('created_at', 'desc')
                 ->limit(50)
                 ->get();
-            
+
             // Calculate stock recap
             $rekap = [];
             foreach ($products as $product) {
@@ -305,17 +304,17 @@ class ReportController extends Controller
                     ->where('type', 'masuk')
                     ->whereBetween('created_at', [$start, $end])
                     ->sum('qty');
-                
+
                 $keluar = InventoryLog::where('product_id', $product->id)
                     ->where('type', 'keluar')
                     ->whereBetween('created_at', [$start, $end])
                     ->sum('qty');
-                
+
                 $penyesuaian = InventoryLog::where('product_id', $product->id)
                     ->where('type', 'penyesuaian')
                     ->whereBetween('created_at', [$start, $end])
                     ->sum('qty');
-                
+
                 $rekap[$product->id] = [
                     'masuk' => $masuk,
                     'keluar' => abs($keluar),
@@ -323,14 +322,13 @@ class ReportController extends Controller
                     'stok_akhir' => $product->current_stock
                 ];
             }
-            
+
             // Load and render PDF
             $pdf = Pdf::loadView('reports.stock_pdf', compact('products', 'logs', 'rekap', 'start', 'end'));
             $pdf->setPaper('a4', 'portrait');
-            
+
             $filename = "laporan_stok_{$start}_to_{$end}.pdf";
             return $pdf->download($filename);
-            
         } catch (\Exception $e) {
             return back()->withErrors(['error' => 'Gagal mengexport PDF: ' . $e->getMessage()]);
         }
@@ -345,41 +343,40 @@ class ReportController extends Controller
 
             // Total pendapatan dari penjualan
             $totalPenjualan = \App\Models\Sale::whereBetween('created_at', [$start, $end])->sum('total');
-            
+
             // Total pendapatan dari pemesanan
             $totalPemesanan = DB::table('public_orders')
                 ->join('public_order_items', 'public_orders.id', '=', 'public_order_items.public_order_id')
                 ->whereBetween('public_orders.created_at', [$start, $end])
                 ->whereIn('public_orders.status', ['confirmed', 'processing', 'ready', 'completed'])
                 ->sum(DB::raw('public_order_items.quantity * public_order_items.price'));
-            
+
             $totalPendapatan = $totalPenjualan + $totalPemesanan;
 
             // Pendapatan harian
             $harian = [];
             foreach (range(0, now()->parse($end)->diffInDays(now()->parse($start))) as $i) {
                 $date = now()->parse($start)->copy()->addDays($i)->toDateString();
-                
+
                 $dailyPenjualan = \App\Models\Sale::whereDate('created_at', $date)->sum('total');
                 $dailyPemesanan = DB::table('public_orders')
                     ->join('public_order_items', 'public_orders.id', '=', 'public_order_items.public_order_id')
                     ->whereDate('public_orders.created_at', $date)
                     ->whereIn('public_orders.status', ['confirmed', 'processing', 'ready', 'completed'])
                     ->sum(DB::raw('public_order_items.quantity * public_order_items.price'));
-                
+
                 $harian[$date] = [
                     'penjualan' => $dailyPenjualan,
                     'pemesanan' => $dailyPemesanan,
                 ];
             }
-            
+
             // Load and render PDF
             $pdf = Pdf::loadView('reports.income_pdf', compact('start', 'end', 'totalPenjualan', 'totalPemesanan', 'totalPendapatan', 'harian'));
             $pdf->setPaper('a4', 'portrait');
-            
+
             $filename = "laporan_pendapatan_{$start}_to_{$end}.pdf";
             return $pdf->download($filename);
-            
         } catch (\Exception $e) {
             return back()->withErrors(['error' => 'Gagal mengexport PDF: ' . $e->getMessage()]);
         }
@@ -391,29 +388,28 @@ class ReportController extends Controller
         try {
             $start = $request->input('start_date', now()->startOfMonth()->toDateString());
             $end = $request->input('end_date', now()->endOfMonth()->toDateString());
-            
+
             // Get public orders data
             $orders = \App\Models\PublicOrder::with('items.product')
                 ->whereBetween('created_at', [$start, $end])
                 ->orderBy('created_at', 'desc')
                 ->get();
-            
+
             // Calculate statistics
             $totalOrder = $orders->count();
-            $totalNominal = $orders->sum(function($order) {
-                return $order->items->sum(function($item) {
+            $totalNominal = $orders->sum(function ($order) {
+                return $order->items->sum(function ($item) {
                     return $item->quantity * $item->price;
                 });
             });
             $totalLunas = $orders->where('payment_status', 'lunas')->count();
-            
+
             // Load and render PDF
             $pdf = Pdf::loadView('reports.orders_pdf', compact('orders', 'start', 'end', 'totalOrder', 'totalNominal', 'totalLunas'));
             $pdf->setPaper('a4', 'portrait');
-            
+
             $filename = "laporan_pesanan_{$start}_to_{$end}.pdf";
             return $pdf->download($filename);
-            
         } catch (\Exception $e) {
             return back()->withErrors(['error' => 'Gagal mengexport PDF: ' . $e->getMessage()]);
         }

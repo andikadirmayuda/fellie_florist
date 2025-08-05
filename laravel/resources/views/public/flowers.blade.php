@@ -279,6 +279,16 @@
                 </div>
             @endif
         </a>
+        <a href="{{ route('custom.bouquet.create') }}"
+            class="relative px-4 py-2 text-sm font-semibold transition-all duration-200 text-purple-600 hover:text-purple-700 bg-purple-50 hover:bg-purple-100 rounded-lg">
+            🎨 Custom Bouquet
+            <span class="absolute -top-1 -right-1 text-xs bg-gradient-to-r from-purple-500 to-indigo-500 text-white px-1.5 py-0.5 rounded-full">Baru!</span>
+        </a>
+        <a href="{{ route('custom.bouquet.create') }}"
+            class="relative px-4 py-2 text-sm font-semibold transition-all duration-200 text-gray-500 hover:text-gray-700">
+            🎨 Custom Bouquet
+        </a>
+    </nav>
     </nav>
     </div>
     </header>
@@ -304,15 +314,20 @@
             <!-- Enhanced Filter Chips -->
             @if($activeTab === 'flowers')
                 <div class="flex flex-wrap gap-3 justify-center">
-                    <button type="button"
+                    {{-- <button type="button"
                         class="chip-btn px-6 py-3 rounded-full border-2 border-rose-200 bg-white text-gray-700 text-sm font-semibold shadow-md hover:shadow-lg hover:bg-rose-50 transition-all duration-200 active"
                         data-category="" onclick="selectCategory(this)">
                         <span class="mr-2">🌺</span>Semua
+                    </button> --}}
+                    <button type="button"
+                        class="chip-btn px-6 py-3 rounded-full border-2 border-rose-200 bg-white text-gray-700 text-sm font-semibold shadow-md hover:shadow-lg hover:bg-rose-50 transition-all duration-200 active"
+                        data-category="Fresh Flowers" onclick="selectCategory(this)">
+                        <span class="mr-2">🌿</span>Fresh Flowers
                     </button>
                     <button type="button"
                         class="chip-btn px-6 py-3 rounded-full border-2 border-rose-200 bg-white text-gray-700 text-sm font-semibold shadow-md hover:shadow-lg hover:bg-rose-50 transition-all duration-200"
-                        data-category="Fresh Flowers" onclick="selectCategory(this)">
-                        <span class="mr-2">🌿</span>Fresh Flowers
+                        data-category="Artificial" onclick="selectCategory(this)">
+                        <span class="mr-2">🍁</span>Artificial
                     </button>
                     <button type="button"
                         class="chip-btn px-6 py-3 rounded-full border-2 border-rose-200 bg-white text-gray-700 text-sm font-semibold shadow-md hover:shadow-lg hover:bg-rose-50 transition-all duration-200"
@@ -321,8 +336,8 @@
                     </button>
                     <button type="button"
                         class="chip-btn px-6 py-3 rounded-full border-2 border-rose-200 bg-white text-gray-700 text-sm font-semibold shadow-md hover:shadow-lg hover:bg-rose-50 transition-all duration-200"
-                        data-category="Produk Lainya" onclick="selectCategory(this)">
-                        <span class="mr-2">📦</span>Produk Lainya
+                        data-category="Aksesoris" onclick="selectCategory(this)">
+                        <span class="mr-2">🎀</span>Aksesoris
                     </button>
                 </div>
             @else
@@ -371,7 +386,8 @@
                             <div class="flex-1 flex flex-col">
                                 <div class="flex items-start justify-between mb-2">
                                     <h3 class="font-bold text-sm sm:text-base text-gray-800 line-clamp-2 flex-1 leading-tight">
-                                        {{ $flower->name }}</h3>
+                                        {{ $flower->name }}
+                                    </h3>
                                     <span
                                         class="ml-2 px-2 py-1 bg-rose-100 text-rose-700 rounded-full text-[10px] sm:text-xs font-medium whitespace-nowrap flex-shrink-0">
                                         {{ $flower->category->name ?? 'Umum' }}
@@ -379,7 +395,8 @@
                                 </div>
 
                                 <p class="text-xs sm:text-sm text-gray-600 mb-3 line-clamp-2 leading-relaxed">
-                                    {{ $flower->description }}</p>
+                                    {{ $flower->description }}
+                                </p>
 
                                 <!-- Price -->
                                 <div class="mb-3">
@@ -418,7 +435,28 @@
                                         <span class="text-gray-500">Stok:</span>
                                         <span
                                             class="font-semibold {{ $flower->current_stock > 10 ? 'text-green-600' : ($flower->current_stock > 0 ? 'text-yellow-600' : 'text-red-600') }}">
-                                            {{ $flower->current_stock }} tangkai
+                                            @php
+                                                // Cari harga ikat yang tersedia, prioritas ikat 5
+                                                $ikatPrice = $flower->prices->firstWhere('type', 'ikat_5')
+                                                    ?: $flower->prices->firstWhere('type', 'ikat 5')
+                                                    ?: $flower->prices->firstWhere('type', 'ikat_10')
+                                                    ?: $flower->prices->firstWhere('type', 'ikat 10')
+                                                    ?: $flower->prices->firstWhere('type', 'ikat_20')
+                                                    ?: $flower->prices->firstWhere('type', 'ikat 20');
+
+                                                $ikatCount = 0;
+                                                $ikatLabel = '';
+
+                                                if ($ikatPrice && $ikatPrice->unit_equivalent > 0) {
+                                                    $ikatCount = floor($flower->current_stock / $ikatPrice->unit_equivalent);
+                                                    $unitSize = $ikatPrice->unit_equivalent;
+                                                    $ikatLabel = " / {$ikatCount} ikat";
+                                                }
+
+                                                // Gunakan base_unit dari database atau default ke 'tangkai'
+                                                $baseUnit = $flower->base_unit ?? 'tangkai';
+                                            @endphp
+                                            {{ $flower->current_stock }} {{ $baseUnit }}{{ $ikatLabel }}
                                         </span>
                                     </div>
                                     <div class="w-full bg-gray-200 rounded-full h-1.5">
@@ -493,7 +531,8 @@
                             <div class="flex-1 flex flex-col">
                                 <div class="flex items-start justify-between mb-2">
                                     <h3 class="font-bold text-sm sm:text-base text-gray-800 line-clamp-2 flex-1 leading-tight">
-                                        {{ $bouquet->name }}</h3>
+                                        {{ $bouquet->name }}
+                                    </h3>
                                     <span
                                         class="ml-2 px-2 py-1 bg-rose-100 text-rose-700 rounded-full text-[10px] sm:text-xs font-medium whitespace-nowrap flex-shrink-0">
                                         {{ $bouquet->category->name ?? 'Bouquet' }}
@@ -501,7 +540,8 @@
                                 </div>
 
                                 <p class="text-xs sm:text-sm text-gray-600 mb-3 line-clamp-2 leading-relaxed">
-                                    {{ $bouquet->description }}</p>
+                                    {{ $bouquet->description }}
+                                </p>
 
                                 <!-- Sizes -->
                                 <div class="mb-3">

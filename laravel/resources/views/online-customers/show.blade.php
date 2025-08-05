@@ -194,33 +194,20 @@
                                 @endif
 
                                 <form action="{{ route('online-customers.generate-code', $customerData->wa_number) }}"
-                                    method="POST" class="space-y-3">
+                                    method="POST" class="flex gap-3 items-end">
                                     @csrf
-                                    
-                                    <!-- Set as Reseller checkbox (if not already reseller) -->
-                                    @if(!$customerData->customer || !$customerData->customer->is_reseller)
-                                        <div class="flex items-center">
-                                            <input type="checkbox" id="set_as_reseller" name="set_as_reseller" value="1"
-                                                class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded">
-                                            <label for="set_as_reseller" class="ml-2 block text-sm text-gray-700">
-                                                Set sebagai Reseller (jika belum terdaftar)
-                                            </label>
-                                        </div>
-                                    @endif
-                                    
-                                    <div class="flex gap-3 items-end">
-                                        <div class="flex-1">
-                                            <label class="block text-sm text-gray-600 mb-1">Masa Berlaku (Jam)</label>
-                                            <input type="number" name="expiry_hours" value="24" min="1" max="168"
-                                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500 text-sm"
-                                                required>
-                                        </div>
-                                        <div class="flex-2">
-                                            <label class="block text-sm text-gray-600 mb-1">Catatan (Opsional)</label>
-                                            <input type="text" name="notes" placeholder="Catatan untuk kode ini..."
-                                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500 text-sm">
-                                        </div>
-                                        <button type="submit"
+                                    <div class="flex-1">
+                                        <label class="block text-sm text-gray-600 mb-1">Masa Berlaku (Jam)</label>
+                                        <input type="number" name="expiry_hours" value="24" min="1" max="168"
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500 text-sm"
+                                            required>
+                                    </div>
+                                    <div class="flex-2">
+                                        <label class="block text-sm text-gray-600 mb-1">Catatan (Opsional)</label>
+                                        <input type="text" name="notes" placeholder="Catatan untuk kode ini..."
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500 text-sm">
+                                    </div>
+                                    <button type="submit"
                                         class="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition text-sm">
                                         <i class="bi bi-plus-circle mr-1"></i>
                                         Generate

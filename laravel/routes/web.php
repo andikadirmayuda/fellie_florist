@@ -23,6 +23,7 @@ use App\Http\Controllers\BouquetCategoryController;
 use App\Http\Controllers\BouquetSizeController;
 use App\Http\Controllers\BouquetComponentController;
 use App\Http\Controllers\PublicCartController;
+use App\Http\Controllers\Api\NotificationController;
 
 use Illuminate\Support\Facades\Route;
 
@@ -33,6 +34,39 @@ Route::get('/', function () {
 // Public API Routes untuk validasi kode reseller
 Route::post('/api/validate-reseller-code', [OnlineCustomerController::class, 'validateResellerCode'])->name('api.validate-reseller-code');
 Route::post('/api/mark-reseller-code-used', [OnlineCustomerController::class, 'markResellerCodeUsed'])->name('api.mark-reseller-code-used');
+
+// Push Notification API Routes
+Route::middleware('auth')->group(function () {
+    Route::get('/api/admin/notifications/pending', [NotificationController::class, 'getPendingNotifications'])->name('api.notifications.pending');
+    Route::post('/api/admin/notifications/{id}/delivered', [NotificationController::class, 'markAsDelivered'])->name('api.notifications.delivered');
+    Route::post('/api/admin/notifications/test', [NotificationController::class, 'testNotification'])->name('api.notifications.test');
+});
+
+// Test route untuk debug notifikasi
+Route::get('/test-notification', function() {
+    try {
+        $testOrder = (object) [
+            'id' => 999,
+            'customer_name' => 'Test Customer Debug',
+            'total' => 250000,
+            'public_code' => 'TEST' . now()->format('His')
+        ];
+
+        $success = \App\Services\PushNotificationService::sendNewOrderNotification($testOrder);
+        
+        return response()->json([
+            'success' => $success,
+            'message' => 'Test notification sent',
+            'order' => $testOrder
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+    }
+})->middleware('auth')->name('test.notification');
 
 Route::get('/dashboard', [DashboardController::class, 'index'])
 ->middleware(['auth', 'verified'])
@@ -153,6 +187,7 @@ Route::post('/public-order', [App\Http\Controllers\PublicOrderController::class,
 Route::post('/public-order/{public_code}/pay', [App\Http\Controllers\PublicOrderController::class, 'pay'])->name('public.order.pay');
 Route::post('/admin/public-orders/{id}/update-status', [App\Http\Controllers\AdminPublicOrderController::class, 'updateStatus'])->name('admin.public-orders.update-status');
 Route::post('/admin/public-orders/{id}/update-payment-status', [App\Http\Controllers\AdminPublicOrderController::class, 'updatePaymentStatus'])->name('admin.public-orders.update-payment-status');
+Route::get('/admin/public-orders/{id}/whatsapp-message', [App\Http\Controllers\AdminPublicOrderController::class, 'generateWhatsAppMessage'])->name('admin.public-orders.whatsapp-message');
 
 // =====================
 // Route test upload sederhana

@@ -198,6 +198,10 @@
                     <div class="absolute inset-0 bg-gradient-to-r from-rose-500 to-pink-500 rounded-xl -z-10"></div>
                     <div class="absolute inset-0.5 bg-white rounded-xl -z-10"></div>
                 </a>
+                <a href="{{ route('custom.bouquet.create') }}"
+                    class="relative px-4 py-2 text-sm font-semibold transition-all duration-200 text-gray-500 hover:text-gray-700">
+                    🎨 Custom Bouquet
+                </a>
             </div>
         </div>
 

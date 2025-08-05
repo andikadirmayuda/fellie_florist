@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\PublicOrder;
 use App\Models\PublicOrderItem;
+use App\Services\PushNotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class PublicOrderController extends Controller
 {
@@ -108,6 +110,17 @@ class PublicOrderController extends Controller
                 ]);
             }
             DB::commit();
+
+            // Trigger push notification untuk pesanan baru
+            try {
+                PushNotificationService::sendNewOrderNotification($order);
+            } catch (\Exception $e) {
+                Log::warning('Failed to send push notification for new order', [
+                    'order_id' => $order->id,
+                    'error' => $e->getMessage()
+                ]);
+            }
+
             // Kirim link invoice publik ke frontend
             $invoiceUrl = url('/invoice/' . $order->public_code);
             return response()->json([

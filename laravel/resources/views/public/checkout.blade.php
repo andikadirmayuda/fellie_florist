@@ -249,6 +249,33 @@
                                     Berikan detail khusus yang Anda inginkan untuk pesanan ini
                                 </p>
                             </div>
+
+                            @php
+                                $hasCustomBouquet = false;
+                                foreach($cartData as $item) {
+                                    if(isset($item['type']) && $item['type'] === 'custom_bouquet') {
+                                        $hasCustomBouquet = true;
+                                        break;
+                                    }
+                                }
+                            @endphp
+
+                            @if($hasCustomBouquet)
+                                <!-- Instruksi Custom Bouquet -->
+                                <div class="bg-purple-50 border border-purple-200 rounded-xl p-4">
+                                    <label class="block text-sm font-semibold text-purple-700 mb-2">
+                                        <i class="bi bi-palette mr-1 text-purple-500"></i>
+                                        Instruksi Khusus untuk Custom Bouquet <span class="text-purple-400 font-normal">(Opsional)</span>
+                                    </label>
+                                    <textarea name="custom_instructions" 
+                                              class="w-full px-4 py-3 border border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 focus:outline-none" 
+                                              rows="3" placeholder="Contoh: Tambahkan pita warna emas, bungkus dengan kertas transparan, dominasi warna ungu, dll."></textarea>
+                                    <p class="text-xs text-purple-600 mt-1">
+                                        <i class="bi bi-lightbulb mr-1"></i>
+                                        Berikan detail tambahan untuk custom bouquet Anda (warna preferensi, style wrapping, dll.)
+                                    </p>
+                                </div>
+                            @endif
                         </div>
 
                         <!-- Info Note -->
@@ -297,6 +324,10 @@
                                                 <span class="inline-block bg-gradient-to-r from-rose-500 to-pink-500 text-white text-xs px-2 py-1 rounded-full">
                                                     Bouquet
                                                 </span>
+                                            @elseif(isset($item['type']) && $item['type'] === 'custom_bouquet')
+                                                <span class="inline-block bg-gradient-to-r from-purple-500 to-indigo-500 text-white text-xs px-2 py-1 rounded-full">
+                                                    Custom Bouquet
+                                                </span>
                                             @else
                                                 <span class="inline-block bg-gradient-to-r from-green-500 to-teal-500 text-white text-xs px-2 py-1 rounded-full">
                                                     Bunga
@@ -314,6 +345,33 @@
                                                     <span class="font-medium text-xs">Kartu Ucapan:</span>
                                                 </div>
                                                 <p class="text-pink-800 italic text-xs">"{{ Str::limit($item['greeting_card'], 40) }}"</p>
+                                            </div>
+                                        @endif
+                                        @if(isset($item['type']) && $item['type'] === 'custom_bouquet' && isset($item['components_summary']))
+                                            <div class="mt-2 p-2 bg-purple-50 border border-purple-200 rounded-lg">
+                                                <div class="flex items-center text-purple-700 mb-1">
+                                                    <i class="bi bi-palette mr-1 text-xs"></i>
+                                                    <span class="font-medium text-xs">Komponen:</span>
+                                                </div>
+                                                <p class="text-purple-800 text-xs">
+                                                    @if(is_array($item['components_summary']))
+                                                        {{ implode(', ', array_slice($item['components_summary'], 0, 3)) }}
+                                                        @if(count($item['components_summary']) > 3)
+                                                            , +{{ count($item['components_summary']) - 3 }} lainnya
+                                                        @endif
+                                                    @else
+                                                        {{ $item['components_summary'] }}
+                                                    @endif
+                                                </p>
+                                            </div>
+                                        @endif
+                                        @if(isset($item['type']) && $item['type'] === 'custom_bouquet' && isset($item['image']) && !empty($item['image']))
+                                            <div class="mt-2 p-2 bg-blue-50 border border-blue-200 rounded-lg">
+                                                <div class="flex items-center text-blue-700 mb-1">
+                                                    <i class="bi bi-image mr-1 text-xs"></i>
+                                                    <span class="font-medium text-xs">Referensi:</span>
+                                                </div>
+                                                <img src="{{ asset('storage/' . $item['image']) }}" alt="Reference" class="w-16 h-16 rounded object-cover">
                                             </div>
                                         @endif
                                     </div>

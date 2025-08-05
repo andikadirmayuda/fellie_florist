@@ -14,6 +14,10 @@ class PublicOrderItem extends Model
         'unit_equivalent',
         'quantity',
         'price',
+        'item_type',
+        'custom_bouquet_id',
+        'reference_image',
+        'custom_instructions',
     ];
 
     public function order()
@@ -24,5 +28,10 @@ class PublicOrderItem extends Model
     public function product()
     {
         return $this->belongsTo(Product::class, 'product_id');
+    }
+
+    public function customBouquet()
+    {
+        return $this->belongsTo(CustomBouquet::class, 'custom_bouquet_id');
     }
 }

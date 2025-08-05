@@ -6,12 +6,23 @@ use App\Http\Controllers\PublicOrderController;
 use App\Http\Controllers\PublicCheckoutController;
 use App\Http\Controllers\PublicCartController;
 use App\Http\Controllers\PublicBouquetController;
+use App\Http\Controllers\CustomBouquetController;
 
 Route::get('/product-fellie', [PublicFlowerController::class, 'index'])->name('public.flowers');
 Route::get('/bouquet-fellie', [PublicBouquetController::class, 'index'])->name('public.bouquets');
 Route::get('/bouquet/{id}', [PublicBouquetController::class, 'detail'])->name('public.bouquet.detail');
 Route::get('/bouquet/{id}/detail-json', [PublicBouquetController::class, 'detailJson'])->name('public.bouquet.detail.json');
 Route::post('/public-order', [PublicOrderController::class, 'store'])->name('public.order.store');
+
+// Custom Bouquet routes
+Route::get('/custom-bouquet/create', [CustomBouquetController::class, 'create'])->name('custom.bouquet.create');
+Route::get('/custom-bouquet/{customBouquet}/details', [CustomBouquetController::class, 'getDetails'])->name('custom.bouquet.details');
+Route::get('/product/{product}/details', [CustomBouquetController::class, 'getProductDetails'])->name('product.details');
+Route::post('/custom-bouquet/add-item', [CustomBouquetController::class, 'addItem'])->name('custom.bouquet.add-item');
+Route::post('/custom-bouquet/remove-item', [CustomBouquetController::class, 'removeItem'])->name('custom.bouquet.remove-item');
+Route::post('/custom-bouquet/update-item', [CustomBouquetController::class, 'updateItem'])->name('custom.bouquet.update-item');
+Route::post('/custom-bouquet/upload-reference', [CustomBouquetController::class, 'uploadReference'])->name('custom.bouquet.upload-reference');
+Route::post('/custom-bouquet/{id}/finalize', [CustomBouquetController::class, 'finalize'])->name('custom.bouquet.finalize');
 
 // Edit public order (form & update)
 Route::get('/public-order/{public_code}/edit', [PublicOrderController::class, 'edit'])->name('public.order.edit');
@@ -25,6 +36,7 @@ Route::post('/checkout', [PublicCheckoutController::class, 'process'])->name('pu
 Route::get('/cart', [PublicCartController::class, 'index'])->name('public.cart.index');
 Route::post('/cart/add', [PublicCartController::class, 'add'])->name('public.cart.add');
 Route::post('/cart/add-bouquet', [PublicCartController::class, 'addBouquet'])->name('public.cart.add-bouquet');
+Route::post('/cart/add-custom-bouquet', [PublicCartController::class, 'addCustomBouquet'])->name('public.cart.add-custom-bouquet');
 Route::post('/cart/update/{cartKey}', [PublicCartController::class, 'updateQuantity'])->name('public.cart.update');
 Route::post('/cart/remove/{cartKey}', [PublicCartController::class, 'remove'])->name('public.cart.remove');
 Route::post('/cart/clear', [PublicCartController::class, 'clear'])->name('public.cart.clear');

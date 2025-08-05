@@ -101,12 +101,12 @@
     <div class="py-6 clean-bg min-h-screen">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <!-- Welcome Section -->
-            <div class="text-center mb-8 form-enter">
+            {{-- <div class="text-center mb-8 form-enter">
                 <h2 class="text-3xl font-bold text-gray-800 mb-2">
-                    Selamat Datang di Fellie Florist
+                    DASHBOARD FELLIE FLORIST
                 </h2>
-                <p class="text-4xl text-gray-600">-😊-</p>
-            </div>
+                <p class="text-4xl text-gray-600">❤️</p>
+            </div> --}}
             <!-- Dashboard Stats -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8 form-enter">
                 <!-- Total Customers Card -->

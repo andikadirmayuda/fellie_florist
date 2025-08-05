@@ -277,4 +277,75 @@ class PublicCartController extends Controller
             'cart' => $cart
         ]);
     }
+
+    public function addCustomBouquet(Request $request)
+    {
+        $validated = $request->validate([
+            'custom_bouquet_id' => 'required|integer|exists:custom_bouquets,id',
+            'quantity' => 'integer|min:1',
+        ]);
+
+        $customBouquetId = $validated['custom_bouquet_id'];
+        $qty = $validated['quantity'] ?? 1;
+
+        // Ambil data custom bouquet beserta items-nya
+        $customBouquet = \App\Models\CustomBouquet::with(['items.product'])->find($customBouquetId);
+        if (!$customBouquet) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Custom bouquet tidak ditemukan.'
+            ], 404);
+        }
+
+        // Cek apakah custom bouquet sudah finalized
+        if ($customBouquet->status !== 'finalized') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Custom bouquet belum selesai dibuat.'
+            ], 400);
+        }
+
+        // Hitung total harga
+        $totalPrice = $customBouquet->calculateTotalPrice();
+        
+        // Build nama descriptive untuk cart
+        $componentsArray = $customBouquet->getComponentsArray();
+        $cartName = "Custom Bouquet";
+        if (!empty($componentsArray)) {
+            $cartName .= " (" . implode(', ', array_slice($componentsArray, 0, 3));
+            if (count($componentsArray) > 3) {
+                $cartName .= ", +" . (count($componentsArray) - 3) . " lainnya";
+            }
+            $cartName .= ")";
+        }
+
+        $product = [
+            'id' => 'custom_bouquet_' . $customBouquet->id,
+            'name' => $cartName,
+            'price' => $totalPrice,
+            'qty' => $qty,
+            'price_type' => 'Custom',
+            'type' => 'custom_bouquet',
+            'custom_bouquet_id' => $customBouquet->id,
+            'image' => $customBouquet->reference_image ?? null,
+            'components_summary' => $componentsArray
+        ];
+
+        $cart = session()->get('cart', []);
+        $cartKey = 'custom_bouquet_' . $customBouquet->id;
+
+        if (isset($cart[$cartKey])) {
+            $cart[$cartKey]['qty'] += $product['qty'];
+        } else {
+            $cart[$cartKey] = $product;
+        }
+
+        session(['cart' => $cart]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Custom bouquet berhasil ditambahkan ke keranjang.',
+            'cart' => $cart
+        ]);
+    }
 }
