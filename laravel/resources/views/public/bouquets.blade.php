@@ -69,6 +69,19 @@
             transform: scale(1);
             transition: all 0.3s ease-out;
         }
+
+        /* Chip button styling */
+        .chip-btn.active {
+            background: linear-gradient(135deg, #f43f5e, #ec4899);
+            color: white;
+            border-color: #f43f5e;
+            transform: translateY(-2px);
+        }
+
+        .chip-btn:hover {
+            border-color: #f43f5e;
+            background-color: #fdf2f8;
+        }
     </style>
     <script>
         // Fungsi untuk menambah ke keranjang dengan pilihan harga (global)
@@ -160,81 +173,61 @@
                     </a>
                 </div>
             </div>
-        </div>
-    </header>
 
-    <!-- Main Container -->
-    <div class="container mx-auto px-4 py-8">
-        <!-- Header -->
-        <div class="text-center mb-12">
-            <div
-                class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-rose-500 to-pink-600 rounded-full mb-6 shadow-lg">
-                <i class="bi bi-flower3 text-3xl text-white"></i>
+            <!-- Hero Section -->
+            <div class="bg-white">
+                <div class="max-w-4xl mx-auto px-4 py-8 text-center">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-2">Koleksi Bouquet Premium</h2>
+                    <p class="text-gray-600 mb-2">Temukan bouquet yang sempurna untuk setiap momen spesial</p>
+                    <p class="text-sm text-gray-500 flex items-center justify-center gap-2">
+                        <i class="bi bi-clock text-rose-400"></i>
+                        Terakhir diperbarui:
+                        {{ $lastUpdated ? \Carbon\Carbon::parse($lastUpdated)->translatedFormat('d F Y H:i') : '-' }}
+                    </p>
+                </div>
             </div>
-            <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
-                Koleksi <span
-                    class="text-transparent bg-clip-text bg-gradient-to-r from-rose-600 to-pink-600">Bouquet</span> Kami
-            </h1>
-            <p class="text-lg text-gray-600 max-w-2xl mx-auto">
-                Rangkaian bunga indah yang dirancang khusus untuk momen spesial Anda
-            </p>
-            <div class="flex items-center justify-center gap-2 mt-4 text-sm text-gray-500">
-                <i class="bi bi-clock"></i>
-                <span>Terakhir diperbarui:
-                    {{ $lastUpdated ? \Carbon\Carbon::parse($lastUpdated)->format('d M Y, H:i') : '-' }}</span>
-            </div>
-        </div>
 
-        <!-- Navigation Tabs -->
-        <div class="flex justify-center mb-8">
-            <div class="flex bg-white rounded-2xl shadow-lg p-2 border border-rose-100">
+            <!-- Main Navigation -->
+            <nav class="flex justify-center space-x-8 py-4">
                 <a href="{{ route('public.flowers') }}"
                     class="relative px-4 py-2 text-sm font-semibold transition-all duration-200 text-gray-500 hover:text-gray-700">
-                    🌺 Bunga
+                    🌸 Bunga
                 </a>
                 <a href="{{ route('public.bouquets') }}"
                     class="relative px-4 py-2 text-sm font-semibold transition-all duration-200 text-rose-600">
                     💐 Bouquet
-                    <div class="absolute inset-0 bg-gradient-to-r from-rose-500 to-pink-500 rounded-xl -z-10"></div>
-                    <div class="absolute inset-0.5 bg-white rounded-xl -z-10"></div>
+                    <div
+                        class="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-rose-400 to-pink-500 rounded-full">
+                    </div>
                 </a>
                 <a href="{{ route('custom.bouquet.create') }}"
-                    class="relative px-4 py-2 text-sm font-semibold transition-all duration-200 text-gray-500 hover:text-gray-700">
+                    class="relative px-4 py-2 text-sm font-semibold transition-all duration-200 text-purple-600 hover:text-purple-700 bg-purple-50 hover:bg-purple-100 rounded-lg">
                     🎨 Custom Bouquet
+                    <span
+                        class="absolute -top-1 -right-1 text-xs bg-gradient-to-r from-purple-500 to-indigo-500 text-white px-1.5 py-0.5 rounded-full">Baru!</span>
                 </a>
-            </div>
+            </nav>
         </div>
+    </header>
 
-        <!-- Search and Filter Section -->
-        <div class="bg-white rounded-2xl shadow-lg border border-rose-100 p-6 mb-8">
-            <div class="flex flex-col lg:flex-row gap-6">
-                <!-- Search -->
-                <div class="flex-1">
-                    <div class="relative">
-                        <input type="text" id="searchInput"
-                            class="w-full pl-12 pr-4 py-3 border border-rose-200 rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all duration-200"
-                            placeholder="Cari bouquet impian Anda..." onkeyup="searchBouquets()">
-                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                            <i class="bi bi-search text-rose-400"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Category Filter -->
-                <div class="lg:w-80">
-                    <select id="categoryFilter" onchange="filterByCategory()"
-                        class="w-full px-4 py-3 border border-rose-200 rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all duration-200">
-                        <option value="">Semua Kategori</option>
-                        @foreach($bouquetCategories as $category)
-                            <option value="{{ $category->id }}">{{ $category->name }}</option>
-                        @endforeach
-                    </select>
+    <!-- Main Content -->
+    <div class="w-full max-w-6xl mx-auto px-4 py-6">
+        <!-- Search and Filters -->
+        <div class="mb-8 flex flex-col items-center">
+            <!-- Enhanced Search Bar -->
+            <div class="w-full max-w-2xl mb-4">
+                <div class="relative">
+                    <i
+                        class="bi bi-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg"></i>
+                    <input type="text" id="searchInput" placeholder="Cari bouquet impian Anda..."
+                        class="w-full pl-12 pr-4 py-4 text-lg border-2 border-rose-200 rounded-2xl focus:ring-2 focus:ring-rose-400 focus:border-rose-400 focus:outline-none shadow-lg transition-all duration-200 bg-white/90"
+                        onkeyup="searchBouquets()">
                 </div>
             </div>
 
-            <!-- Category Chips -->
+            <!-- Enhanced Filter Chips -->
             @if($bouquetCategories->count() > 0)
-                <div class="flex flex-wrap gap-3 justify-center mt-6">
+                <div class="flex flex-wrap gap-3 justify-center">
                     <button type="button"
                         class="chip-btn px-6 py-3 rounded-full border-2 border-rose-200 bg-white text-gray-700 text-sm font-semibold shadow-md hover:shadow-lg hover:bg-rose-50 transition-all duration-200 active"
                         data-category="" onclick="selectBouquetCategory(this)">

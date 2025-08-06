@@ -134,13 +134,8 @@ class PublicCheckoutController extends Controller
                         (strlen($item['greeting_card']) > 50 ? '...")' : '")');
                 }
 
-                // Add components info for custom bouquet
-                if (isset($item['type']) && $item['type'] === 'custom_bouquet' && !empty($item['components_summary'])) {
-                    $components = is_array($item['components_summary']) ?
-                        implode(', ', array_slice($item['components_summary'], 0, 3)) :
-                        $item['components_summary'];
-                    $orderItemData['product_name'] .= ' (Komponen: ' . $components . ')';
-                }
+                // Note: Components info is already included in product_name for custom bouquet,
+                // so we don't need to add it again to avoid duplication
 
                 // Debug: Log order item data
                 Log::info('Creating Order Item:', $orderItemData);

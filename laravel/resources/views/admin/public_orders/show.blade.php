@@ -52,11 +52,11 @@
             $currentIndex = count($baseSteps); // Set ke indeks terakhir setelah semua status normal
         }
     @endphp
-    <div class="max-w-6xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-full mx-auto py-4 px-3 sm:py-6 sm:px-6 lg:max-w-6xl lg:px-8">
         <!-- Navigation Back -->
-        <div class="mb-6">
+        <div class="mb-4 sm:mb-6">
             <a href="{{ route('admin.public-orders.index') }}"
-                class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-900 transition-colors duration-200">
+                class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-900 transition-colors duration-200 w-full sm:w-auto justify-center sm:justify-start">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -66,7 +66,7 @@
         </div>
 
         <!-- Customer Information Card -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 mb-4 sm:mb-6">
             <div class="flex items-center mb-4">
                 <div class="bg-pink-100 p-2 rounded-lg mr-3">
                     <svg class="w-5 h-5 text-pink-600" fill="currentColor" viewBox="0 0 20 20">
@@ -74,49 +74,55 @@
                             clip-rule="evenodd" />
                     </svg>
                 </div>
-                <h2 class="text-xl font-semibold text-gray-900">Informasi Pelanggan</h2>
+                <h2 class="text-lg sm:text-xl font-semibold text-gray-900">Informasi Pelanggan</h2>
             </div>
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                 <div class="space-y-3">
-                    <div class="flex items-center">
-                        <span class="text-sm font-medium text-gray-500 w-32">Nama:</span>
+                    <div class="flex flex-col sm:flex-row sm:items-center">
+                        <span class="text-sm font-medium text-gray-500 sm:w-32 mb-1 sm:mb-0">Nama:</span>
                         <span class="text-sm font-semibold text-gray-900">{{ $order->customer_name }}</span>
                     </div>
-                    <div class="flex items-center">
-                        <span class="text-sm font-medium text-gray-500 w-32">WhatsApp:</span>
+                    <div class="flex flex-col sm:flex-row sm:items-center">
+                        <span class="text-sm font-medium text-gray-500 sm:w-32 mb-1 sm:mb-0">WhatsApp:</span>
                         <span class="text-sm font-semibold text-gray-900">{{ $order->wa_number }}</span>
                     </div>
-                    <div class="flex items-center">
-                        <span class="text-sm font-medium text-gray-500 w-32">Tanggal:</span>
+                    <div class="flex flex-col sm:flex-row sm:items-center">
+                        <span class="text-sm font-medium text-gray-500 sm:w-32 mb-1 sm:mb-0">Tanggal:</span>
                         <span class="text-sm font-semibold text-gray-900">{{ $order->pickup_date }}</span>
                     </div>
                 </div>
                 <div class="space-y-3">
-                    <div class="flex items-center">
-                        <span class="text-sm font-medium text-gray-500 w-32">Waktu:</span>
+                    <div class="flex flex-col sm:flex-row sm:items-center">
+                        <span class="text-sm font-medium text-gray-500 sm:w-32 mb-1 sm:mb-0">Waktu:</span>
                         <span class="text-sm font-semibold text-gray-900">{{ $order->pickup_time }}</span>
                     </div>
-                    <div class="flex items-center">
-                        <span class="text-sm font-medium text-gray-500 w-32">Metode:</span>
+                    <div class="flex flex-col sm:flex-row sm:items-center">
+                        <span class="text-sm font-medium text-gray-500 sm:w-32 mb-1 sm:mb-0">Metode:</span>
                         <span class="text-sm font-semibold text-gray-900">{{ $order->delivery_method }}</span>
                     </div>
-                    <div class="flex items-center">
-                        <span class="text-sm font-medium text-gray-500 w-32">Tujuan:</span>
-                        <span class="text-sm font-semibold text-gray-900">{{ $order->destination }}</span>
+                    @if($order->shipping_fee > 0)
+                        <div class="flex flex-col sm:flex-row sm:items-center">
+                            <span class="text-sm font-medium text-gray-500 sm:w-32 mb-1 sm:mb-0">Ongkir:</span>
+                            <span class="text-sm font-semibold text-red-600">Rp{{ number_format($order->shipping_fee, 0, ',', '.') }}</span>
+                        </div>
+                    @endif
+                    <div class="flex flex-col sm:flex-row sm:items-center">
+                        <span class="text-sm font-medium text-gray-500 sm:w-32 mb-1 sm:mb-0">Tujuan:</span>
+                        <span class="text-sm font-semibold text-gray-900 break-words">{{ $order->destination }}</span>
                     </div>
                 </div>
             </div>
             @if(!empty($order->notes))
-                <div class="mt-6 p-4 bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-lg">
+                <div class="mt-4 sm:mt-6 p-3 sm:p-4 bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-lg">
                     <div class="flex items-start">
                         <div class="bg-amber-100 p-2 rounded-lg mr-3 flex-shrink-0">
                             <svg class="w-4 h-4 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M2 5a2 2 0 012-2h7a2 2 0 012 2v4a2 2 0 01-2 2H9l-3 3v-3H4a2 2 0 01-2-2V5z" />
                             </svg>
                         </div>
-                        <div class="flex-1">
+                        <div class="flex-1 min-w-0">
                             <h4 class="font-semibold text-amber-800 mb-2">Catatan Pesanan</h4>
-                            <p class="text-amber-700 text-sm whitespace-pre-wrap">{{ $order->notes }}</p>
+                            <p class="text-amber-700 text-sm whitespace-pre-wrap break-words">{{ $order->notes }}</p>
                         </div>
                     </div>
                 </div>
@@ -124,8 +130,8 @@
         </div>
 
         <!-- Order Status Card -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-            <div class="flex items-center mb-6">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 mb-4 sm:mb-6">
+            <div class="flex items-center mb-4 sm:mb-6">
                 <div class="bg-pink-100 p-2 rounded-lg mr-3">
                     <svg class="w-5 h-5 text-pink-600" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd"
@@ -133,54 +139,136 @@
                             clip-rule="evenodd" />
                     </svg>
                 </div>
-                <h3 class="text-xl font-semibold text-gray-900">Status Pesanan</h3>
+                <h3 class="text-lg sm:text-xl font-semibold text-gray-900">Status Pesanan</h3>
             </div>
 
             @if (in_array(strtolower($order->status), ['cancelled', 'canceled']))
                 <!-- Layout khusus untuk pesanan dibatalkan -->
-                <div class="flex justify-center mb-6">
-                    <div class="bg-red-100 border-2 border-red-300 rounded-lg p-4 text-center">
+                <div class="flex justify-center mb-4 sm:mb-6">
+                    <div class="bg-red-100 border-2 border-red-300 rounded-lg p-3 sm:p-4 text-center">
                         <div class="flex items-center justify-center space-x-2">
-                            <i class="bi bi-x-circle-fill text-red-500 text-2xl"></i>
-                            <span class="text-red-700 font-semibold text-lg">Pesanan Dibatalkan</span>
+                            <i class="bi bi-x-circle-fill text-red-500 text-xl sm:text-2xl"></i>
+                            <span class="text-red-700 font-semibold text-base sm:text-lg">Pesanan Dibatalkan</span>
                         </div>
                     </div>
                 </div>
             @else
                 <!-- Progress bar untuk pesanan normal -->
-                <div class="flex w-full justify-between mb-6">
+                <!-- Desktop: Layout horizontal -->
+                <div class="hidden sm:flex w-full justify-between mb-4 sm:mb-6 overflow-x-auto pb-2">
                     @foreach($baseSteps as $key => $label)
                         @php
                             $index = array_search($key, array_keys($baseSteps));
                             $isCompleted = $index <= $currentIndex;
                             $isCurrent = $index == $currentIndex;
                         @endphp
-                        <div class="flex-1 flex flex-col items-center">
+                        <div class="flex-1 flex flex-col items-center min-w-0 px-1">
                             <div
-                                class="rounded-full w-10 h-10 flex items-center justify-center mb-2 transition-all duration-300 {{ $isCompleted ? 'bg-pink-600 text-white shadow-lg' : 'bg-gray-200 text-gray-500' }}">
+                                class="rounded-full w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center mb-2 transition-all duration-300 {{ $isCompleted ? 'bg-pink-600 text-white shadow-lg' : 'bg-gray-200 text-gray-500' }} flex-shrink-0">
                                 @if($isCompleted)
-                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                    <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd"
                                             d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
                                             clip-rule="evenodd" />
                                     </svg>
                                 @else
-                                    {{ $index + 1 }}
+                                    <span class="text-xs sm:text-sm">{{ $index + 1 }}</span>
                                 @endif
                             </div>
                             <div
-                                class="text-xs text-center px-2 {{ $isCompleted ? 'text-pink-600 font-semibold' : 'text-gray-500' }}">
+                                class="text-xs text-center px-1 leading-tight {{ $isCompleted ? 'text-pink-600 font-semibold' : 'text-gray-500' }}">
                                 {{ $label }}
                             </div>
                         </div>
                         @if(!$loop->last)
-                            <div class="flex-1 h-1 bg-gray-200 mx-2 mt-4 rounded-full overflow-hidden">
+                            <div class="flex-1 h-1 bg-gray-200 mx-1 sm:mx-2 mt-3 sm:mt-4 rounded-full overflow-hidden">
                                 @if($index < $currentIndex)
                                     <div class="h-full bg-pink-600 rounded-full"></div>
                                 @endif
                             </div>
                         @endif
                     @endforeach
+                </div>
+
+                <!-- Mobile: Layout grid 2 baris (1-2-3 di atas, 4-5-6 di bawah) -->
+                <div class="sm:hidden mb-4">
+                    @php
+                        $stepsArray = array_keys($baseSteps);
+                        $labelsArray = array_values($baseSteps);
+                        $firstRow = array_slice($stepsArray, 0, 3);
+                        $secondRow = array_slice($stepsArray, 3, 3);
+                        $firstRowLabels = array_slice($labelsArray, 0, 3);
+                        $secondRowLabels = array_slice($labelsArray, 3, 3);
+                    @endphp
+                    
+                    <!-- Baris pertama: Step 1, 2, 3 -->
+                    <div class="grid grid-cols-3 gap-2 mb-3">
+                        @foreach($firstRow as $rowIndex => $key)
+                            @php
+                                $index = array_search($key, $stepsArray);
+                                $isCompleted = $index <= $currentIndex;
+                                $isCurrent = $index == $currentIndex;
+                                $label = $firstRowLabels[$rowIndex];
+                            @endphp
+                            <div class="flex flex-col items-center">
+                                <div
+                                    class="rounded-full w-10 h-10 flex items-center justify-center mb-2 transition-all duration-300 {{ $isCompleted ? 'bg-pink-600 text-white shadow-lg' : 'bg-gray-200 text-gray-500' }}">
+                                    @if($isCompleted)
+                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd"
+                                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                clip-rule="evenodd" />
+                                        </svg>
+                                    @else
+                                        <span class="text-sm font-medium">{{ $index + 1 }}</span>
+                                    @endif
+                                </div>
+                                <div
+                                    class="text-xs text-center leading-tight {{ $isCompleted ? 'text-pink-600 font-semibold' : 'text-gray-500' }}">
+                                    {{ $label }}
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+
+                    <!-- Baris kedua: Step 4, 5, 6 (jika ada) -->
+                    @if(count($secondRow) > 0)
+                        <div class="grid grid-cols-3 gap-2">
+                            @foreach($secondRow as $rowIndex => $key)
+                                @php
+                                    $index = array_search($key, $stepsArray);
+                                    $isCompleted = $index <= $currentIndex;
+                                    $isCurrent = $index == $currentIndex;
+                                    $label = $secondRowLabels[$rowIndex];
+                                @endphp
+                                <div class="flex flex-col items-center">
+                                    <div
+                                        class="rounded-full w-10 h-10 flex items-center justify-center mb-2 transition-all duration-300 {{ $isCompleted ? 'bg-pink-600 text-white shadow-lg' : 'bg-gray-200 text-gray-500' }}">
+                                        @if($isCompleted)
+                                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd"
+                                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                    clip-rule="evenodd" />
+                                            </svg>
+                                        @else
+                                            <span class="text-sm font-medium">{{ $index + 1 }}</span>
+                                        @endif
+                                    </div>
+                                    <div
+                                        class="text-xs text-center leading-tight {{ $isCompleted ? 'text-pink-600 font-semibold' : 'text-gray-500' }}">
+                                        {{ $label }}
+                                    </div>
+                                </div>
+                            @endforeach
+                            
+                            <!-- Fill empty cells if less than 3 items in second row -->
+                            @for($i = count($secondRow); $i < 3; $i++)
+                                <div class="flex flex-col items-center">
+                                    <!-- Empty cell -->
+                                </div>
+                            @endfor
+                        </div>
+                    @endif
                 </div>
             @endif
 
@@ -194,7 +282,7 @@
                 </div>
             </div>
             @if(!in_array($order->status, ['completed', 'done', 'cancelled', 'canceled']))
-                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4">
                     <h4 class="font-semibold text-blue-800 mb-3">Update Status Pesanan</h4>
                     <form method="POST" action="{{ route('admin.public-orders.update-status', $order->id) }}"
                         class="space-y-4" enctype="multipart/form-data" id="statusForm">
@@ -397,9 +485,17 @@
                                     style="display:none;">
                             </div>
                             <small id="totalHelper" class="text-gray-600 text-sm block" style="display:none;">
-                                @php $totalForHelper = $order->items->sum(function ($item) {
-                                return ($item->price ?? 0) * ($item->quantity ?? 0); }); @endphp
-                                Total Pesanan: Rp{{ number_format($totalForHelper, 0, ',', '.') }}
+                                @php 
+                                    $totalForHelper = $order->items->sum(function ($item) {
+                                        return ($item->price ?? 0) * ($item->quantity ?? 0); 
+                                    });
+                                    $totalWithShipping = $totalForHelper + ($order->shipping_fee ?? 0);
+                                @endphp
+                                Total Produk: Rp{{ number_format($totalForHelper, 0, ',', '.') }}
+                                @if($order->shipping_fee > 0)
+                                    <br>Ongkir: Rp{{ number_format($order->shipping_fee, 0, ',', '.') }}
+                                    <br><strong>Total Keseluruhan: Rp{{ number_format($totalWithShipping, 0, ',', '.') }}</strong>
+                                @endif
                             </small>
                             <button type="submit"
                                 class="bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200">
@@ -468,6 +564,54 @@
             </div>
         </div>
 
+        <!-- Update Ongkir Card -->
+        @php
+            $needsShippingFee = in_array($order->delivery_method, [
+                'Gosend (Pesan Dari Toko)',
+                'Gocar (Pesan Dari Toko)'
+            ]);
+        @endphp
+        @if($needsShippingFee)
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+                <div class="flex items-center mb-6">
+                    <div class="bg-orange-100 p-2 rounded-lg mr-3">
+                        <svg class="w-5 h-5 text-orange-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z" />
+                            <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900">Update Ongkir</h3>
+                </div>
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 text-blue-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                        </svg>
+                        <span class="text-blue-800 text-sm font-medium">
+                            Metode pengiriman "{{ $order->delivery_method }}" memerlukan ongkir yang bisa diatur admin.
+                        </span>
+                    </div>
+                </div>
+                <form method="POST" action="{{ route('admin.public-orders.update-shipping-fee', $order->id) }}" class="space-y-4">
+                    @csrf
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                        <label class="text-sm font-medium text-gray-700 sm:w-24">Ongkir:</label>
+                        <input type="number" name="shipping_fee" min="0" step="1000" 
+                               value="{{ $order->shipping_fee ?? 0 }}"
+                               class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-orange-500 focus:border-orange-500 w-full sm:w-48"
+                               placeholder="Masukkan biaya ongkir">
+                        <button type="submit"
+                                class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 w-full sm:w-auto">
+                            Update Ongkir
+                        </button>
+                    </div>
+                    <small class="text-gray-600 text-sm block">
+                        Ongkir akan ditambahkan ke total pesanan. Current ongkir: Rp{{ number_format($order->shipping_fee ?? 0, 0, ',', '.') }}
+                    </small>
+                </form>
+            </div>
+        @endif
+
         <!-- Products Ordered Card -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
             <div class="flex items-center mb-6">
@@ -481,7 +625,7 @@
                 <h2 class="text-xl font-semibold text-gray-900">Produk Dipesan</h2>
             </div>
 
-            <div class="overflow-hidden border border-gray-200 rounded-lg">
+            <div class="overflow-hidden border border-gray-200 rounded-lg mb-6 hidden sm:block">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
@@ -502,8 +646,14 @@
                     <tbody class="bg-white divide-y divide-gray-200">
                         @foreach($order->items as $item)
                             <tr class="hover:bg-gray-50">
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                    {{ $item->product_name }}</td>
+                                <td class="px-6 py-4 text-sm font-medium text-gray-900">
+                                    @php
+                                        // Clean product name dari duplikasi komponen
+                                        $cleanName = preg_replace('/\s*\(Komponen:.*?\)\s*/', '', $item->product_name);
+                                        $cleanName = trim($cleanName) ?: $item->product_name;
+                                    @endphp
+                                    {{ $cleanName }}
+                                </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $item->price_type ?? '-' }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -520,24 +670,142 @@
                 </table>
             </div>
 
-            <!-- Payment Summary -->
+            <!-- Mobile: Card Layout -->
+            <div class="sm:hidden space-y-3 mb-6">
+                @foreach($order->items as $item)
+                    @php 
+                        $subtotal = ($item->price ?? 0) * ($item->quantity ?? 0);
+                        $cleanName = preg_replace('/\s*\(Komponen:.*?\)\s*/', '', $item->product_name);
+                        $cleanName = trim($cleanName) ?: $item->product_name;
+                    @endphp
+                    <div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+                        <!-- Product Header -->
+                        <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-3 py-3 border-b border-gray-200">
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1 min-w-0 pr-2">
+                                    <h3 class="font-semibold text-gray-800 text-sm leading-relaxed break-words whitespace-normal">
+                                        {{ $cleanName }}
+                                    </h3>
+                                    @if($item->price_type && $item->price_type !== '-')
+                                        <span class="inline-block mt-2 px-2 py-0.5 bg-blue-100 text-blue-800 text-xs rounded-md font-medium">
+                                            {{ $item->price_type }}
+                                        </span>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Product Details -->
+                        <div class="p-3">
+                            <!-- Harga dan Satuan -->
+                            <div class="flex justify-between items-center py-1.5 border-b border-gray-100">
+                                <div class="flex-1">
+                                    <span class="text-gray-500 text-xs">Harga Satuan</span>
+                                    <p class="text-gray-800 text-sm font-semibold">Rp{{ number_format($item->price ?? 0, 0, ',', '.') }}</p>
+                                </div>
+                                <div class="flex-1 text-right">
+                                    <span class="text-gray-500 text-xs">Satuan</span>
+                                    <p class="text-gray-800 text-sm font-semibold">{{ $item->unit_equivalent ?? '-' }}</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Jumlah dan Subtotal -->
+                            <div class="flex justify-between items-center py-1.5">
+                                <div class="flex-1">
+                                    <span class="text-gray-500 text-xs">Jumlah</span>
+                                    <p class="text-gray-800 text-sm font-semibold">{{ $item->quantity }}</p>
+                                </div>
+                                <div class="flex-1 text-right">
+                                    <span class="text-gray-500 text-xs">Subtotal</span>
+                                    <p class="text-green-600 text-sm font-bold">Rp{{ number_format($subtotal, 0, ',', '.') }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+
             @php
                 $totalOrder = $order->items->sum(function ($item) {
                     return ($item->price ?? 0) * ($item->quantity ?? 0);
                 });
+                $shippingFee = $order->shipping_fee ?? 0;
+                $grandTotal = $totalOrder + $shippingFee;
                 $totalPaid = $order->amount_paid ?? 0;
-                $sisaPembayaran = $order->payment_status === 'paid' ? 0 : max($totalOrder - $totalPaid, 0);
+                $sisaPembayaran = $order->payment_status === 'paid' ? 0 : max($grandTotal - $totalPaid, 0);
             @endphp
-            <div class="mt-6 bg-gradient-to-r from-pink-50 to-red-50 border border-pink-200 rounded-lg p-6">
+
+            <!-- Mobile Payment Summary Card -->
+            <div class="sm:hidden bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden mb-6">
+                <div class="bg-gradient-to-r from-pink-600 to-pink-700 px-3 py-2.5">
+                    <h3 class="text-white font-semibold text-sm flex items-center">
+                        <i class="bi bi-calculator mr-2"></i>
+                        Ringkasan Pembayaran
+                    </h3>
+                </div>
+                <div class="p-3 space-y-2">
+                    <div class="flex justify-between items-center py-1.5 border-b border-gray-100">
+                        <span class="text-gray-600 text-sm">Total Produk</span>
+                        <span class="text-green-600 text-sm font-bold">Rp{{ number_format($totalOrder, 0, ',', '.') }}</span>
+                    </div>
+                    @if($shippingFee > 0)
+                        <div class="flex justify-between items-center py-1.5 border-b border-gray-100">
+                            <span class="text-gray-600 text-sm">Ongkir</span>
+                            <span class="text-orange-600 text-sm font-bold">Rp{{ number_format($shippingFee, 0, ',', '.') }}</span>
+                        </div>
+                    @endif
+                    <div class="flex justify-between items-center py-1.5 border-b border-gray-100 bg-gray-50 -mx-3 px-3">
+                        <span class="text-gray-700 text-sm font-semibold">Total Keseluruhan</span>
+                        <span class="text-purple-600 text-sm font-bold">Rp{{ number_format($grandTotal, 0, ',', '.') }}</span>
+                    </div>
+                    <div class="flex justify-between items-center py-1.5 border-b border-gray-100">
+                        <span class="text-gray-600 text-sm">Sudah Dibayar</span>
+                        <span class="text-blue-600 text-sm font-bold">Rp{{ number_format($totalPaid, 0, ',', '.') }}</span>
+                    </div>
+                    @if($sisaPembayaran > 0)
+                        <div class="flex justify-between items-center py-1.5">
+                            <span class="text-gray-600 text-sm">Sisa Pembayaran</span>
+                            <span class="text-red-600 text-sm font-bold">Rp{{ number_format($sisaPembayaran, 0, ',', '.') }}</span>
+                        </div>
+                    @else
+                        <div class="flex justify-between items-center py-1.5">
+                            <span class="text-gray-600 text-sm">Status</span>
+                            <span class="text-green-600 text-sm font-bold flex items-center">
+                                <i class="bi bi-check-circle-fill mr-1 text-xs"></i>
+                                Lunas
+                            </span>
+                        </div>
+                    @endif
+                </div>
+            </div>
+
+            <!-- Desktop Payment Summary -->
+            <div class="hidden sm:block mt-6 bg-gradient-to-r from-pink-50 to-red-50 border border-pink-200 rounded-lg p-6">
                 <h3 class="text-lg font-semibold text-gray-900 mb-4">Ringkasan Pembayaran</h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                     <div class="text-center">
                         <div class="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
-                            <span class="block text-sm font-medium text-gray-600 mb-1">Total Pesanan</span>
+                            <span class="block text-sm font-medium text-gray-600 mb-1">Total Produk</span>
                             <span
                                 class="block text-2xl font-bold text-green-600">Rp{{ number_format($totalOrder, 0, ',', '.') }}</span>
                         </div>
                     </div>
+                    @if($shippingFee > 0)
+                        <div class="text-center">
+                            <div class="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
+                                <span class="block text-sm font-medium text-gray-600 mb-1">Ongkir</span>
+                                <span
+                                    class="block text-2xl font-bold text-orange-600">Rp{{ number_format($shippingFee, 0, ',', '.') }}</span>
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <div class="bg-white rounded-lg p-4 shadow-sm border border-purple-200 bg-purple-50">
+                                <span class="block text-sm font-medium text-purple-600 mb-1">Total Keseluruhan</span>
+                                <span
+                                    class="block text-2xl font-bold text-purple-600">Rp{{ number_format($grandTotal, 0, ',', '.') }}</span>
+                            </div>
+                        </div>
+                    @endif
                     <div class="text-center">
                         <div class="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
                             <span class="block text-sm font-medium text-gray-600 mb-1">Sudah Dibayar</span>
@@ -568,6 +836,96 @@
                 </div>
             </div>
         </div>
+
+        <!-- Custom Bouquet Information Card -->
+        @php
+            $customBouquetItems = $order->items->filter(function($item) {
+                return $item->item_type === 'custom_bouquet' && (!empty($item->reference_image) || !empty($item->custom_instructions));
+            });
+        @endphp
+        
+        @if($customBouquetItems->count() > 0)
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+                <div class="flex items-center mb-6">
+                    <div class="bg-purple-100 p-3 rounded-lg mr-4">
+                        <i class="bi bi-palette text-purple-600 text-2xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold text-gray-900">Custom Bouquet Information</h3>
+                        <p class="text-gray-600">Detail referensi dan instruksi khusus dari customer</p>
+                    </div>
+                </div>
+
+                @foreach($customBouquetItems as $item)
+                    <div class="border border-purple-200 rounded-lg p-6 mb-4 bg-purple-50">
+                        <h4 class="font-semibold text-purple-800 mb-4 text-lg">
+                            @php
+                                // Extract simple product name without components info
+                                $simpleName = preg_replace('/\s*\(.*?\)\s*/', '', $item->product_name);
+                                $simpleName = trim($simpleName) ?: 'Custom Bouquet';
+                            @endphp
+                            {{ $simpleName }}
+                        </h4>
+                        
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <!-- Reference Image Section -->
+                            @if(!empty($item->reference_image))
+                                <div class="bg-white rounded-lg border border-purple-200 p-4">
+                                    <div class="flex items-center mb-3">
+                                        <i class="bi bi-image text-purple-600 text-lg mr-2"></i>
+                                        <h5 class="font-semibold text-purple-800">Upload Referensi</h5>
+                                    </div>
+                                    
+                                    <div class="space-y-3">
+                                        <div class="relative group cursor-pointer" onclick="openImageModal('{{ asset('storage/' . $item->reference_image) }}', 'Referensi - {{ $item->product_name }}')">
+                                            <img src="{{ asset('storage/' . $item->reference_image) }}" 
+                                                 alt="Referensi Custom Bouquet" 
+                                                 class="w-full h-48 object-cover rounded-lg border border-gray-200 transition-transform hover:scale-105">
+                                            <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-200 rounded-lg flex items-center justify-center">
+                                                <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                                    <i class="bi bi-zoom-in text-white text-2xl"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="flex gap-2">
+                                            <button onclick="openImageModal('{{ asset('storage/' . $item->reference_image) }}', 'Referensi - {{ $item->product_name }}')"
+                                                    class="flex-1 bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded text-sm font-medium transition-colors">
+                                                <i class="bi bi-zoom-in mr-1"></i>Lihat
+                                            </button>
+                                            <a href="{{ asset('storage/' . $item->reference_image) }}" 
+                                               download="referensi-{{ Str::slug($item->product_name) }}.jpg"
+                                               class="flex-1 bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded text-sm font-medium transition-colors text-center">
+                                                <i class="bi bi-download mr-1"></i>Download
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+                            
+                            <!-- Custom Instructions Section -->
+                            @if(!empty($item->custom_instructions))
+                                <div class="bg-white rounded-lg border border-purple-200 p-4">
+                                    <div class="flex items-center mb-3">
+                                        <i class="bi bi-chat-left-text text-purple-600 text-lg mr-2"></i>
+                                        <h5 class="font-semibold text-purple-800">Instruksi Khusus</h5>
+                                    </div>
+                                    
+                                    <div class="bg-purple-50 border border-purple-200 rounded p-4">
+                                        <p class="text-purple-800 leading-relaxed">"{{ $item->custom_instructions }}"</p>
+                                    </div>
+                                    
+                                    <div class="mt-3 text-sm text-purple-600">
+                                        <i class="bi bi-info-circle mr-1"></i>
+                                        Instruksi dari customer untuk pembuatan bouquet
+                                    </div>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        @endif
 
         <!-- Payment Proof Card -->
         @if(!empty($order->payment_proof))
@@ -1015,5 +1373,74 @@
                 }, 300);
             }, 5000);
         }
+
+        // Image Modal Functions for Custom Bouquet
+        function openImageModal(imageSrc, title = 'Gambar Referensi') {
+            const modal = document.getElementById('imageModal');
+            const modalImage = document.getElementById('modalImage');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalDownloadBtn = document.getElementById('modalDownloadBtn');
+            
+            modalImage.src = imageSrc;
+            modalTitle.textContent = title;
+            modalDownloadBtn.href = imageSrc;
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeImageModal() {
+            const modal = document.getElementById('imageModal');
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        // Initialize modal events
+        document.addEventListener('DOMContentLoaded', function() {
+            const modal = document.getElementById('imageModal');
+            if (modal) {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        closeImageModal();
+                    }
+                });
+            }
+            
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeImageModal();
+                }
+            });
+        });
+    </script>
+
+    <!-- Image Modal -->
+    <div id="imageModal" class="fixed inset-0 bg-black bg-opacity-75 z-50 items-center justify-center p-4" style="display: none;">
+        <div class="relative max-w-4xl max-h-full bg-white rounded-lg overflow-hidden">
+            <!-- Modal Header -->
+            <div class="bg-purple-600 text-white p-4 flex items-center justify-between">
+                <h3 id="modalTitle" class="font-bold text-lg">Gambar Referensi</h3>
+                <button onclick="closeImageModal()" class="text-white hover:text-gray-300 text-2xl">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+            
+            <!-- Modal Body -->
+            <div class="p-4 max-h-96 overflow-auto">
+                <img id="modalImage" src="" alt="Gambar Referensi" class="w-full h-auto rounded-lg">
+            </div>
+            
+            <!-- Modal Footer -->
+            <div class="bg-gray-50 p-4 flex justify-end space-x-3">
+                <button onclick="closeImageModal()" 
+                        class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors duration-200">
+                    <i class="bi bi-x-circle mr-2"></i>Tutup
+                </button>
+                <a id="modalDownloadBtn" href="" download="referensi-custom-bouquet.jpg"
+                   class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors duration-200">
+                    <i class="bi bi-download mr-2"></i>Download
+                </a>
+            </div>
+        </div>
+    </div>
     </script>
 </x-app-layout>

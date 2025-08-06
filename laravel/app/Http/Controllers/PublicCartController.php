@@ -12,7 +12,7 @@ class PublicCartController extends Controller
     {
         return view('public.cart');
     }
-    
+
     // Tambahkan method sesuai kebutuhan, contoh:
     public function addToCart(Request $request)
     {
@@ -20,7 +20,7 @@ class PublicCartController extends Controller
         // return response atau redirect sesuai kebutuhan
         return response()->json(['message' => 'Produk berhasil ditambahkan ke keranjang.']);
     }
-    
+
     public function getCart()
     {
         $cart = session()->get('cart', []);
@@ -28,20 +28,20 @@ class PublicCartController extends Controller
         $items = [];
         foreach ($cart as $cartKey => $item) {
             $total += $item['price'] * $item['qty'];
-            
+
             // Format image URL dengan benar
             $imageUrl = null;
             if (isset($item['image']) && $item['image']) {
                 $imageUrl = asset('storage/' . $item['image']);
             }
-            
+
             // Format nama produk dengan price_type
             $productName = $item['name'];
             if (isset($item['price_type']) && $item['price_type']) {
                 $priceTypeLabel = $this->getPriceTypeLabel($item['price_type']);
                 $productName .= ' (' . $priceTypeLabel . ')';
             }
-            
+
             $items[] = [
                 'id' => $cartKey, // Gunakan cartKey sebagai ID unik
                 'product_id' => $item['id'], // ID produk asli
@@ -65,10 +65,10 @@ class PublicCartController extends Controller
         $labels = [
             'tangkai' => 'Per Tangkai',
             'ikat5' => 'Ikat 5',
-            'reseller' => 'Reseller', 
+            'reseller' => 'Reseller',
             'promo' => 'Promo'
         ];
-        
+
         return $labels[$priceType] ?? ucfirst($priceType);
     }
     public function add(Request $request)
@@ -134,14 +134,14 @@ class PublicCartController extends Controller
 
         if (isset($cart[$cartKey])) {
             $cart[$cartKey]['qty'] += $quantityChange;
-            
+
             // Hapus item jika quantity <= 0
             if ($cart[$cartKey]['qty'] <= 0) {
                 unset($cart[$cartKey]);
             }
-            
+
             session(['cart' => $cart]);
-            
+
             return response()->json([
                 'success' => true,
                 'message' => 'Keranjang berhasil diperbarui.',
@@ -162,7 +162,7 @@ class PublicCartController extends Controller
         if (isset($cart[$cartKey])) {
             unset($cart[$cartKey]);
             session(['cart' => $cart]);
-            
+
             return response()->json([
                 'success' => true,
                 'message' => 'Produk berhasil dihapus dari keranjang.',
@@ -179,7 +179,7 @@ class PublicCartController extends Controller
     public function clear(Request $request)
     {
         session()->forget('cart');
-        
+
         return response()->json([
             'success' => true,
             'message' => 'Keranjang berhasil dikosongkan.'
@@ -244,7 +244,7 @@ class PublicCartController extends Controller
         // Gunakan kombinasi bouquet_id dan size_id sebagai key unik
         // Jika ada greeting card berbeda, buat entry terpisah
         $cartKey = 'bouquet_' . $bouquet->id . '_' . $size->id;
-        
+
         // Jika sudah ada item yang sama dan greeting card berbeda, buat key baru
         if (isset($cart[$cartKey])) {
             $existingGreeting = $cart[$cartKey]['greeting_card'] ?? '';
@@ -255,9 +255,9 @@ class PublicCartController extends Controller
                 // Same item, same greeting - just add quantity
                 $cart[$cartKey]['qty'] += $product['qty'];
                 session(['cart' => $cart]);
-                
+
                 Log::info('Updated existing cart item:', ['cart_key' => $cartKey, 'new_qty' => $cart[$cartKey]['qty']]);
-                
+
                 return response()->json([
                     'success' => true,
                     'message' => 'Bouquet berhasil ditambahkan ke keranjang.',
@@ -307,17 +307,10 @@ class PublicCartController extends Controller
 
         // Hitung total harga
         $totalPrice = $customBouquet->calculateTotalPrice();
-        
-        // Build nama descriptive untuk cart
+
+        // Gunakan nama sederhana tanpa komponen untuk menghindari duplikasi
         $componentsArray = $customBouquet->getComponentsArray();
         $cartName = "Custom Bouquet";
-        if (!empty($componentsArray)) {
-            $cartName .= " (" . implode(', ', array_slice($componentsArray, 0, 3));
-            if (count($componentsArray) > 3) {
-                $cartName .= ", +" . (count($componentsArray) - 3) . " lainnya";
-            }
-            $cartName .= ")";
-        }
 
         $product = [
             'id' => 'custom_bouquet_' . $customBouquet->id,

@@ -215,12 +215,15 @@
                                     <i class="bi bi-truck mr-1 text-rose-500"></i>
                                     Metode Pengiriman
                                 </label>
-                                <select name="delivery_method" 
+                                <select name="delivery_method" id="delivery_method"
                                         class="w-full px-4 py-3 border border-rose-200 rounded-xl input-focus focus:outline-none" required>
                                     <option value="">Pilih metode pengiriman</option>
-                                    <option value="Ambil Langsung">🏪 Ambil Langsung</option>
-                                    <option value="GoSend">🚗 GoSend</option>
-                                    <option value="Kurir Toko">🛵 Kurir Toko</option>
+                                    <option value="Ambil Langsung Ke Toko">🏪 (1) Ambil Langsung Ke Toko</option>
+                                    <option value="Gosend (Dipesan Pribadi)">🚗 (2) Gosend (Dipesan Pribadi)</option>
+                                    <option value="Gocar (Dipesan Pribadi)">🚕 (3) Gocar (Dipesan Pribadi)</option>
+                                    <option value="Gosend (Pesan Dari Toko)">� (4) Gosend (Pesan Dari Toko)</option>
+                                    <option value="Gocar (Pesan Dari Toko)">🚕 (5) Gocar (Pesan Dari Toko)</option>
+                                    <option value="Travel (Di Pesan Sendiri)">🚌 (6) Travel (Di Pesan Sendiri - Khusus Luar Kota)</option>
                                 </select>
                             </div>
 
@@ -402,6 +405,9 @@
             </div>
         @endif
     </div>
+
+    <script>
+    </script>
 </body>
 
 </html>

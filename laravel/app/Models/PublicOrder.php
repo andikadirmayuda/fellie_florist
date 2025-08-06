@@ -21,6 +21,7 @@ class PublicOrder extends Model
         'wa_number',
         'packing_photo',
         'packing_files',
+        'shipping_fee',
     ];
 
     protected $casts = [
@@ -42,9 +43,11 @@ class PublicOrder extends Model
     // Calculate total from items
     public function getTotalAttribute()
     {
-        return $this->items->sum(function ($item) {
+        $itemsTotal = $this->items->sum(function ($item) {
             return $item->quantity * $item->price;
         });
+
+        return $itemsTotal + ($this->shipping_fee ?? 0);
     }
 
     // Get order number from public_code or generate one

@@ -104,8 +104,16 @@
                                 <select id="filter-metode"
                                     class="w-full border border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 rounded-lg px-3 py-2 text-sm transition">
                                     <option value="">Semua</option>
-                                    <option value="delivery">Delivery</option>
-                                    <option value="pickup">Pickup</option>
+                                    <option value="Ambil Langsung Ke Toko">Ambil Langsung Ke Toko</option>
+                                    <option value="Gosend (Dipesan Pribadi)">Gosend (Dipesan Pribadi)</option>
+                                    <option value="Gocar (Dipesan Pribadi)">Gocar (Dipesan Pribadi)</option>
+                                    <option value="Gosend (Pesan Dari Toko)">Gosend (Pesan Dari Toko)</option>
+                                    <option value="Gocar (Pesan Dari Toko)">Gocar (Pesan Dari Toko)</option>
+                                    <option value="Travel (Di Pesan Sendiri)">Travel (Di Pesan Sendiri)</option>
+                                    <!-- Legacy options -->
+                                    <option value="Ambil Langsung">Ambil Langsung (Legacy)</option>
+                                    <option value="GoSend">GoSend (Legacy)</option>
+                                    <option value="Kurir Toko">Kurir Toko (Legacy)</option>
                                 </select>
                             </div>
                             <div>

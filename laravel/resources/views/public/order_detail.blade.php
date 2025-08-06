@@ -270,74 +270,351 @@
                 </div>
             @endif
             
-            <h2 class="text-base sm:text-lg font-semibold mb-2 mt-2 flex items-center gap-2"><i
-                    class="bi bi-box-seam"></i> Produk Dipesan</h2>
-            <div class="overflow-x-auto">
+            <h2 class="text-base sm:text-lg font-semibold mb-4 mt-2 flex items-center gap-2">
+                <i class="bi bi-box-seam"></i> Produk Dipesan
+            </h2>
+            
+            @php 
+                $itemsTotal = 0;
+                // Calculate totals from items only
+                foreach($order->items as $item) {
+                    $subtotal = ($item->price ?? 0) * ($item->quantity ?? 0);
+                    $itemsTotal += $subtotal;
+                }
+                
+                // Check if delivery method needs shipping fee
+                $needsShippingFee = in_array($order->delivery_method, [
+                    'Gosend (Pesan Dari Toko)',
+                    'Gocar (Pesan Dari Toko)'
+                ]);
+                
+                // Check if admin has set shipping fee
+                $shippingFee = $order->shipping_fee ?? 0;
+                $shippingFeeSet = $shippingFee > 0;
+                
+                // Determine if we should show grand total
+                $showGrandTotal = !$needsShippingFee || $shippingFeeSet;
+                
+                // Calculate grand total
+                $grandTotal = $itemsTotal + $shippingFee;
+                
+                // Payment calculations
+                $totalPaid = $order->amount_paid ?? 0;
+                $sisa = $order->payment_status === 'paid' ? 0 : max($grandTotal - $totalPaid, 0);
+                $displayTotalPaid = $order->payment_status === 'paid' ? $grandTotal : $totalPaid;
+            @endphp
+
+            <!-- Desktop: Table Layout -->
+            <div class="hidden sm:block overflow-x-auto">
                 <table class="w-full mb-6 text-xs sm:text-base table-fixed border rounded-lg overflow-hidden">
                     <thead>
                         <tr class="text-left bg-gray-50">
-                            <th class="py-1 px-2 w-[28%] whitespace-nowrap font-semibold">Nama</th>
-                            <th class="py-1 px-2 w-[14%] whitespace-nowrap font-semibold">Tipe</th>
-                            <th class="py-1 px-2 w-[14%] text-right whitespace-nowrap font-semibold">Harga</th>
-                            <th class="py-1 px-2 w-[14%] text-right whitespace-nowrap font-semibold">Satuan</th>
-                            <th class="py-1 px-2 w-[14%] text-right whitespace-nowrap font-semibold">Jumlah</th>
-                            <th class="py-1 px-2 w-[16%] text-right whitespace-nowrap font-semibold">Subtotal</th>
+                            <th class="py-3 px-4 w-[28%] whitespace-nowrap font-semibold">Nama</th>
+                            <th class="py-3 px-4 w-[14%] whitespace-nowrap font-semibold">Tipe</th>
+                            <th class="py-3 px-4 w-[14%] text-right whitespace-nowrap font-semibold">Harga</th>
+                            <th class="py-3 px-4 w-[14%] text-right whitespace-nowrap font-semibold">Satuan</th>
+                            <th class="py-3 px-4 w-[14%] text-right whitespace-nowrap font-semibold">Jumlah</th>
+                            <th class="py-3 px-4 w-[16%] text-right whitespace-nowrap font-semibold">Subtotal</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y">
-                        @php $total = 0; @endphp
                         @foreach($order->items as $item)
-                            @php $subtotal = ($item->price ?? 0) * ($item->quantity ?? 0);
-                            $total += $subtotal; @endphp
+                            @php 
+                                $subtotal = ($item->price ?? 0) * ($item->quantity ?? 0);
+                                $cleanName = preg_replace('/\s*\(Komponen:.*?\)\s*/', '', $item->product_name);
+                                $cleanName = trim($cleanName) ?: $item->product_name;
+                            @endphp
                             <tr>
-                                <td class="py-1 px-2 break-words whitespace-normal align-top">{{ $item->product_name }}</td>
-                                <td class="py-1 px-2 break-words whitespace-normal align-top">{{ $item->price_type ?? '-' }}
-                                </td>
-                                <td class="py-1 px-2 text-right align-top whitespace-nowrap">
-                                    Rp{{ number_format($item->price ?? 0, 0, ',', '.') }}</td>
-                                <td class="py-1 px-2 text-right align-top whitespace-nowrap">
-                                    {{ $item->unit_equivalent ?? '-' }}</td>
-                                <td class="py-1 px-2 text-right align-top whitespace-nowrap">{{ $item->quantity }}</td>
-                                <td class="py-1 px-2 text-right align-top whitespace-nowrap">
-                                    Rp{{ number_format($subtotal, 0, ',', '.') }}</td>
+                                <td class="py-3 px-4 break-words whitespace-normal align-top">{{ $cleanName }}</td>
+                                <td class="py-3 px-4 break-words whitespace-normal align-top">{{ $item->price_type ?? '-' }}</td>
+                                <td class="py-3 px-4 text-right align-top whitespace-nowrap">Rp{{ number_format($item->price ?? 0, 0, ',', '.') }}</td>
+                                <td class="py-3 px-4 text-right align-top whitespace-nowrap">{{ $item->unit_equivalent ?? '-' }}</td>
+                                <td class="py-3 px-4 text-right align-top whitespace-nowrap">{{ $item->quantity }}</td>
+                                <td class="py-3 px-4 text-right align-top whitespace-nowrap">Rp{{ number_format($subtotal, 0, ',', '.') }}</td>
                             </tr>
                         @endforeach
                     </tbody>
-                    <tfoot class="mt-4">
+                    <tfoot class="bg-gray-50">
                         <tr>
-                            <th colspan="5" class="text-right px-2 py-1 font-semibold text-[9px] sm:text-sm">Total</th>
-                            <th
-                                class="pr-4 py-1 text-right font-bold text-green-600 text-[11px] sm:text-base whitespace-nowrap">
-                                Rp{{ number_format($total, 0, ',', '.') }}</th>
+                            <th colspan="5" class="text-right px-4 py-3 font-semibold">Total Produk</th>
+                            <th class="px-4 py-3 text-right font-bold text-green-600">Rp{{ number_format($itemsTotal, 0, ',', '.') }}</th>
                         </tr>
-                        @php
-                            // Gunakan amount_paid langsung dari order (yang di-set admin)
-                            $totalPaid = $order->amount_paid ?? 0;
-                            // Jika status pembayaran sudah lunas, sisa pembayaran harus 0
-                            $sisa = $order->payment_status === 'paid' ? 0 : max($total - $totalPaid, 0);
-                            
-                            // Untuk tampilan "Total Sudah Dibayar", jika status lunas maka tampilkan total penuh
-                            $displayTotalPaid = $order->payment_status === 'paid' ? $total : $totalPaid;
-                        @endphp
-                        <tr>
-                            <th colspan="5" class="text-right px-2 py-1 font-semibold text-[9px] sm:text-sm">Total Sudah
-                                Dibayar</th>
-                            <th
-                                class="pr-4 py-1 text-right font-bold text-blue-600 text-[11px] sm:text-base whitespace-nowrap">
-                                Rp{{ number_format($displayTotalPaid, 0, ',', '.') }}</th>
-                        </tr>
-                        @if($sisa > 0)
-                            <tr>
-                                <th colspan="5" class="text-right px-2 py-1 font-semibold text-[9px] sm:text-sm">Sisa
-                                    Pembayaran</th>
-                                <th
-                                    class="pr-4 py-1 text-right font-bold text-red-600 text-[11px] sm:text-base whitespace-nowrap">
-                                    Rp{{ number_format($sisa, 0, ',', '.') }}</th>
+                        
+                        @if($needsShippingFee && !$shippingFeeSet)
+                            <!-- Pemberitahuan menunggu ongkir -->
+                            <tr class="bg-yellow-50">
+                                <th colspan="6" class="px-4 py-4 text-center">
+                                    <div class="flex flex-col items-center space-y-2">
+                                        <div class="flex items-center text-yellow-700">
+                                            <i class="bi bi-clock-history mr-2 text-lg"></i>
+                                            <span class="font-semibold">Menunggu Admin Menghitung Ongkir</span>
+                                        </div>
+                                        <p class="text-sm text-yellow-600">
+                                            Total keseluruhan akan ditampilkan setelah admin menentukan biaya ongkir untuk metode <strong>{{ $order->delivery_method }}</strong>
+                                        </p>
+                                        <p class="text-xs text-yellow-500 italic">
+                                            Mohon jangan transfer dulu sampai total final tersedia
+                                        </p>
+                                    </div>
+                                </th>
                             </tr>
+                        @elseif($shippingFee > 0)
+                            <tr>
+                                <th colspan="5" class="text-right px-4 py-3 font-semibold">Ongkir</th>
+                                <th class="px-4 py-3 text-right font-bold text-orange-600">Rp{{ number_format($shippingFee, 0, ',', '.') }}</th>
+                            </tr>
+                            <tr class="bg-purple-50">
+                                <th colspan="5" class="text-right px-4 py-3 font-semibold text-purple-700">Total Keseluruhan</th>
+                                <th class="px-4 py-3 text-right font-bold text-purple-700">Rp{{ number_format($grandTotal, 0, ',', '.') }}</th>
+                            </tr>
+                        @endif
+                        
+                        @if($showGrandTotal)
+                            <tr>
+                                <th colspan="5" class="text-right px-4 py-3 font-semibold">Total Sudah Dibayar</th>
+                                <th class="px-4 py-3 text-right font-bold text-blue-600">Rp{{ number_format($displayTotalPaid, 0, ',', '.') }}</th>
+                            </tr>
+                            @if($sisa > 0)
+                                <tr>
+                                    <th colspan="5" class="text-right px-4 py-3 font-semibold">Sisa Pembayaran</th>
+                                    <th class="px-4 py-3 text-right font-bold text-red-600">Rp{{ number_format($sisa, 0, ',', '.') }}</th>
+                                </tr>
+                            @endif
                         @endif
                     </tfoot>
                 </table>
             </div>
+
+            <!-- Mobile: Card Layout -->
+            <div class="sm:hidden space-y-3 mb-6">
+                @foreach($order->items as $item)
+                    @php 
+                        $subtotal = ($item->price ?? 0) * ($item->quantity ?? 0);
+                        $cleanName = preg_replace('/\s*\(Komponen:.*?\)\s*/', '', $item->product_name);
+                        $cleanName = trim($cleanName) ?: $item->product_name;
+                    @endphp
+                    <div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+                        <!-- Product Header -->
+                        <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-3 py-3 border-b border-gray-200">
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1 min-w-0 pr-2">
+                                    <h3 class="font-semibold text-gray-800 text-sm leading-relaxed break-words whitespace-normal">
+                                        {{ $cleanName }}
+                                    </h3>
+                                    @if($item->price_type && $item->price_type !== '-')
+                                        <span class="inline-block mt-2 px-2 py-0.5 bg-blue-100 text-blue-800 text-xs rounded-md font-medium">
+                                            {{ $item->price_type }}
+                                        </span>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Product Details -->
+                        <div class="p-3">
+                            <!-- Harga dan Satuan -->
+                            <div class="flex justify-between items-center py-1.5 border-b border-gray-100">
+                                <div class="flex-1">
+                                    <span class="text-gray-500 text-xs">Harga Satuan</span>
+                                    <p class="text-gray-800 text-sm font-semibold">Rp{{ number_format($item->price ?? 0, 0, ',', '.') }}</p>
+                                </div>
+                                <div class="flex-1 text-right">
+                                    <span class="text-gray-500 text-xs">Satuan</span>
+                                    <p class="text-gray-800 text-sm font-semibold">{{ $item->unit_equivalent ?? '-' }}</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Jumlah dan Subtotal -->
+                            <div class="flex justify-between items-center py-1.5">
+                                <div class="flex-1">
+                                    <span class="text-gray-500 text-xs">Jumlah</span>
+                                    <p class="text-gray-800 text-sm font-semibold">{{ $item->quantity }}</p>
+                                </div>
+                                <div class="flex-1 text-right">
+                                    <span class="text-gray-500 text-xs">Subtotal</span>
+                                    <p class="text-green-600 text-sm font-bold">Rp{{ number_format($subtotal, 0, ',', '.') }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+                
+                <!-- Total Summary Card -->
+                <div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden mt-4">
+                    <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-3 py-2.5">
+                        <h3 class="text-white font-semibold text-sm flex items-center">
+                            <i class="bi bi-calculator mr-2"></i>
+                            Ringkasan Pembayaran
+                        </h3>
+                    </div>
+                    <div class="p-3 space-y-2">
+                        <div class="flex justify-between items-center py-1.5 border-b border-gray-100">
+                            <span class="text-gray-600 text-sm">Total Produk</span>
+                            <span class="text-green-600 text-sm font-bold">Rp{{ number_format($itemsTotal, 0, ',', '.') }}</span>
+                        </div>
+                        
+                        @if($needsShippingFee && !$shippingFeeSet)
+                            <!-- Pemberitahuan menunggu ongkir (Mobile) -->
+                            <div class="py-3 px-2 bg-yellow-50 border border-yellow-200 rounded-lg -mx-1">
+                                <div class="text-center space-y-2">
+                                    <div class="flex items-center justify-center text-yellow-700">
+                                        <i class="bi bi-clock-history mr-2"></i>
+                                        <span class="text-sm font-semibold">Menunggu Admin Menghitung Ongkir</span>
+                                    </div>
+                                    <p class="text-xs text-yellow-600">
+                                        Total keseluruhan akan ditampilkan setelah admin menentukan biaya ongkir untuk <strong>{{ $order->delivery_method }}</strong>
+                                    </p>
+                                    <p class="text-xs text-yellow-500 italic">
+                                        Mohon jangan transfer dulu sampai total final tersedia
+                                    </p>
+                                </div>
+                            </div>
+                        @elseif($shippingFee > 0)
+                            <div class="flex justify-between items-center py-1.5 border-b border-gray-100">
+                                <span class="text-gray-600 text-sm">Ongkir</span>
+                                <span class="text-orange-600 text-sm font-bold">Rp{{ number_format($shippingFee, 0, ',', '.') }}</span>
+                            </div>
+                            <div class="flex justify-between items-center py-1.5 border-b border-gray-100 bg-purple-50 -mx-3 px-3">
+                                <span class="text-gray-700 text-sm font-semibold">Total Keseluruhan</span>
+                                <span class="text-purple-600 text-sm font-bold">Rp{{ number_format($grandTotal, 0, ',', '.') }}</span>
+                            </div>
+                        @endif
+                        
+                        @if($showGrandTotal)
+                            <div class="flex justify-between items-center py-1.5 border-b border-gray-100">
+                                <span class="text-gray-600 text-sm">Sudah Dibayar</span>
+                                <span class="text-blue-600 text-sm font-bold">Rp{{ number_format($displayTotalPaid, 0, ',', '.') }}</span>
+                            </div>
+                            @if($sisa > 0)
+                                <div class="flex justify-between items-center py-1.5">
+                                    <span class="text-gray-600 text-sm">Sisa Pembayaran</span>
+                                    <span class="text-red-600 text-sm font-bold">Rp{{ number_format($sisa, 0, ',', '.') }}</span>
+                                </div>
+                            @else
+                                <div class="flex justify-between items-center py-1.5">
+                                    <span class="text-gray-600 text-sm">Status</span>
+                                    <span class="text-green-600 text-sm font-bold flex items-center">
+                                        <i class="bi bi-check-circle-fill mr-1 text-xs"></i>
+                                        Lunas
+                                    </span>
+                                </div>
+                            @endif
+                        @endif
+                    </div>
+                </div>
+            </div>
+
+            <!-- Custom Bouquet Information Card -->
+            @php
+                $customBouquetItems = $order->items->filter(function($item) {
+                    return $item->item_type === 'custom_bouquet' && (!empty($item->reference_image) || !empty($item->custom_instructions));
+                });
+            @endphp
+            
+            @if($customBouquetItems->count() > 0)
+                <div class="my-6 sm:my-8">
+                    @foreach($customBouquetItems as $item)
+                        <div class="bg-gradient-to-br from-purple-50 via-purple-50 to-indigo-50 border-2 border-purple-200 rounded-2xl shadow-lg overflow-hidden mb-6">
+                            <!-- Header -->
+                            <div class="bg-gradient-to-r from-purple-600 to-indigo-600 px-4 sm:px-6 py-3 sm:py-4">
+                                <div class="flex items-center">
+                                    <div class="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-white bg-opacity-20 rounded-full mr-3 sm:mr-4">
+                                        <i class="bi bi-palette text-white text-lg sm:text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-bold text-white text-base sm:text-lg">Custom Bouquet</h3>
+                                        <p class="text-purple-100 text-xs sm:text-sm">
+                                            @php
+                                                // Extract simple product name without components info
+                                                $simpleName = preg_replace('/\s*\(.*?\)\s*/', '', $item->product_name);
+                                                $simpleName = trim($simpleName) ?: 'Custom Bouquet';
+                                            @endphp
+                                            {{ $simpleName }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Content -->
+                            <div class="p-4 sm:p-6 space-y-6">
+                                <!-- Reference Image Section -->
+                                @if(!empty($item->reference_image))
+                                    <div class="bg-white rounded-xl border border-purple-200 p-4 sm:p-6 shadow-sm">
+                                        <div class="flex items-center mb-4">
+                                            <div class="bg-purple-100 p-2 rounded-lg mr-3">
+                                                <i class="bi bi-image text-purple-600 text-lg"></i>
+                                            </div>
+                                            <h4 class="font-bold text-purple-800 text-sm sm:text-base">Upload Referensi</h4>
+                                        </div>
+                                        
+                                        <div class="grid grid-cols-1 gap-6">
+                                            <!-- Image Preview -->
+                                            <div class="space-y-3">
+                                                <div class="relative group">
+                                                    <img src="{{ asset('storage/' . $item->reference_image) }}" 
+                                                         alt="Referensi Custom Bouquet" 
+                                                         class="w-full h-64 sm:h-80 object-cover rounded-lg border-2 border-purple-200 shadow-md cursor-pointer transition-transform hover:scale-105"
+                                                         onclick="openImageModal('{{ asset('storage/' . $item->reference_image) }}')">
+                                                    <!-- Zoom overlay -->
+                                                    <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-200 rounded-lg flex items-center justify-center">
+                                                        <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                                            <i class="bi bi-zoom-in text-white text-3xl"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <!-- Action buttons -->
+                                                <div class="flex flex-col sm:flex-row gap-2">
+                                                    <button onclick="openImageModal('{{ asset('storage/' . $item->reference_image) }}')"
+                                                            class="flex-1 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 text-sm">
+                                                        <i class="bi bi-zoom-in mr-2"></i>Lihat Gambar
+                                                    </button>
+                                                    <a href="{{ asset('storage/' . $item->reference_image) }}" 
+                                                       download="referensi-custom-bouquet.jpg"
+                                                       class="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 text-sm text-center">
+                                                        <i class="bi bi-download mr-2"></i>Download
+                                                    </a>
+                                                </div>
+                                                
+                                                <!-- Simple Status -->
+                                                <div class="text-center">
+                                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                                        <i class="bi bi-check-circle-fill mr-1"></i>
+                                                        Terupload
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
+                                
+                                <!-- Custom Instructions Section -->
+                                @if(!empty($item->custom_instructions))
+                                    <div class="bg-white rounded-xl border border-purple-200 p-4 sm:p-6 shadow-sm">
+                                        <div class="flex items-center mb-4">
+                                            <div class="bg-purple-100 p-2 rounded-lg mr-3">
+                                                <i class="bi bi-chat-left-text text-purple-600 text-lg"></i>
+                                            </div>
+                                            <h4 class="font-bold text-purple-800 text-sm sm:text-base">Instruksi Khusus</h4>
+                                        </div>
+                                        
+                                        <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                                            <div class="text-sm sm:text-base text-purple-800 leading-relaxed font-medium">
+                                                "{{ $item->custom_instructions }}"
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="mt-4 text-xs sm:text-sm text-purple-600">
+                                            <i class="bi bi-info-circle mr-1"></i>
+                                            Instruksi ini akan disampaikan kepada tim florist untuk memastikan bouquet sesuai dengan keinginan Anda.
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
 
             <!-- Debug Info (remove in production) -->
             {{-- @if($sisa > 0)
@@ -349,7 +626,7 @@
             @endif --}}
 
             <!-- Informasi Pembayaran Section -->
-            @if($sisa > 0 && $order->payment_status !== 'paid')
+            @if($showGrandTotal && $sisa > 0 && $order->payment_status !== 'paid')
                 <div "my-8">
                     <div class="bg-gradient-to-r from-orange-50 to-yellow-50 border-2 border-orange-200 rounded-2xl p-4 sm:p-6">
                         <div class="flex items-center justify-center mb-4">
@@ -442,9 +719,17 @@
                                         $waMessage .= "⏰ *Waktu :* {$order->pickup_time}\n";
                                         $waMessage .= "🚚 *Pengiriman :* {$order->delivery_method}\n";
                                         $waMessage .= "📍 *Tujuan :* {$order->destination}\n\n";
-                                        $waMessage .= "💰 *Total Pesanan :* Rp " . number_format($total, 0, ',', '.') . "\n\n";
-                                        $waMessage .= "═══════════\n";
-                                        $waMessage .= "Mohon konfirmasi pembayaran 🙏\n";
+                                        
+                                        if ($showGrandTotal) {
+                                            $waMessage .= "💰 *Total Pesanan :* Rp " . number_format($grandTotal, 0, ',', '.') . "\n\n";
+                                            $waMessage .= "═══════════\n";
+                                            $waMessage .= "Mohon konfirmasi pembayaran 🙏\n";
+                                        } else {
+                                            $waMessage .= "⏳ *Status :* Menunggu admin menghitung ongkir\n\n";
+                                            $waMessage .= "═══════════\n";
+                                            $waMessage .= "Mohon tunggu info total final dari admin 🙏\n";
+                                        }
+                                        
                                         $waMessage .= "Terima kasih 😊";
                                         $encodedMessage = urlencode($waMessage);
                                     @endphp
@@ -694,6 +979,76 @@
                 alert('Nomor rekening berhasil disalin!');
             }
         }
+
+        // Image Modal Functions
+        function openImageModal(imageSrc, title = 'Gambar Referensi') {
+            const modal = document.getElementById('imageModal');
+            const modalImage = document.getElementById('modalImage');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalDownloadBtn = document.getElementById('modalDownloadBtn');
+            
+            modalImage.src = imageSrc;
+            modalTitle.textContent = title;
+            modalDownloadBtn.href = imageSrc;
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeImageModal() {
+            const modal = document.getElementById('imageModal');
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        // Close modal when clicking outside the image
+        document.addEventListener('DOMContentLoaded', function() {
+            const modal = document.getElementById('imageModal');
+            if (modal) {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        closeImageModal();
+                    }
+                });
+            }
+            
+            // Close modal with Escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeImageModal();
+                }
+            });
+        });
+    </script>
+
+    <!-- Image Modal -->
+    <div id="imageModal" class="fixed inset-0 bg-black bg-opacity-75 z-50 items-center justify-center p-4" style="display: none;">
+        <div class="relative max-w-4xl max-h-full bg-white rounded-lg overflow-hidden">
+            <!-- Modal Header -->
+            <div class="bg-purple-600 text-white p-4 flex items-center justify-between">
+                <h3 id="modalTitle" class="font-bold text-lg">Gambar Referensi</h3>
+                <button onclick="closeImageModal()" class="text-white hover:text-gray-300 text-2xl">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+            
+            <!-- Modal Body -->
+            <div class="p-4 max-h-96 overflow-auto">
+                <img id="modalImage" src="" alt="Gambar Referensi" class="w-full h-auto rounded-lg">
+            </div>
+            
+            <!-- Modal Footer -->
+            <div class="bg-gray-50 p-4 flex justify-end space-x-3">
+                <button onclick="closeImageModal()" 
+                        class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors duration-200">
+                    <i class="bi bi-x-circle mr-2"></i>Tutup
+                </button>
+                <a id="modalDownloadBtn" href="" download="referensi-custom-bouquet.jpg"
+                   class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors duration-200">
+                    <i class="bi bi-download mr-2"></i>Download
+                </a>
+            </div>
+        </div>
+    </div>
     </script>
     
     <!-- Include cart.js for toast notifications -->
