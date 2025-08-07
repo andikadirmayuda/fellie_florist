@@ -108,28 +108,211 @@
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
         }
 
-        /* Consistent card heights */
+        /* Flexible card heights - auto-adjust based on content */
         .flower-card,
         .bouquet-card {
-            min-height: 350px;
+            min-height: auto;
+            /* Remove fixed height for better flexibility */
         }
 
-        @media (min-width: 640px) {
+        /* Consistent content spacing */
+        .product-content {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        /* Better text handling for long names */
+        .product-title {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            /* Limit to 2 lines for better layout */
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.25;
+            height: 2.5em;
+            /* Fixed height for consistency */
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            margin-bottom: 0.125rem;
+            /* Very close to description */
+        }
+
+        /* Compact spacing for product cards */
+        .flower-card .product-title+p,
+        .bouquet-card .product-title+p {
+            margin-top: 0.125rem;
+            /* Very close to title */
+            margin-bottom: 0.25rem;
+        }
+
+        .flower-card .text-price,
+        .bouquet-card .text-price {
+            margin-top: 0.25rem;
+            /* Reduced top margin for price */
+        }
+
+        /* Responsive category badge */
+        .category-badge {
+            font-size: 0.6rem;
+            padding: 0.2rem 0.5rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 90px;
+            display: inline-block;
+            cursor: help;
+            transition: all 0.2s ease;
+        }
+
+        .category-badge:hover {
+            background-color: rgb(244 63 94);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        /* Mobile optimizations */
+        @media (max-width: 640px) {
 
             .flower-card,
             .bouquet-card {
-                min-height: 420px;
+                min-height: auto;
             }
-        }
 
-        /* Better text sizing for mobile */
-        @media (max-width: 639px) {
+            .product-title {
+                font-size: 0.875rem;
+                line-height: 1.2;
+                height: 2.4em;
+                /* Fixed height for mobile */
+                -webkit-line-clamp: 2;
+            }
+
+            .category-badge {
+                font-size: 0.55rem;
+                padding: 0.15rem 0.35rem;
+                max-width: 70px;
+            }
 
             .flower-card .text-price,
             .bouquet-card .text-price {
                 font-size: 0.875rem;
                 line-height: 1.25rem;
             }
+
+            /* Compact layout for mobile 2-column */
+            .card-hover {
+                padding: 0.5rem;
+            }
+
+            .relative.h-36 {
+                height: 120px;
+            }
+
+            .mb-3 {
+                margin-bottom: 0.25rem;
+                /* Reduced spacing on mobile */
+            }
+
+            .text-xs {
+                font-size: 0.65rem;
+            }
+        }
+
+        /* Desktop optimizations */
+        @media (min-width: 641px) {
+            .product-title {
+                font-size: 0.95rem;
+                line-height: 1.25;
+                height: 2.5em;
+                /* Fixed height for desktop */
+                -webkit-line-clamp: 2;
+            }
+
+            .category-badge {
+                font-size: 0.65rem;
+                max-width: 100px;
+                padding: 0.2rem 0.5rem;
+            }
+        }
+
+        /* Large screen optimizations */
+        @media (min-width: 1024px) {
+            .product-title {
+                font-size: 1rem;
+                line-height: 1.3;
+                height: 2.6em;
+                /* Slightly more space for larger screens */
+            }
+
+            .category-badge {
+                max-width: 110px;
+                font-size: 0.7rem;
+            }
+        }
+
+        /* Grid responsiveness improvements */
+        .product-grid {
+            display: grid;
+            gap: 1rem;
+            grid-template-columns: repeat(1, minmax(0, 1fr));
+        }
+
+        @media (min-width: 640px) {
+            .product-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 1.5rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .product-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+        }
+
+        @media (min-width: 1280px) {
+            .product-grid {
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+            }
+        }
+
+        /* Card content improvements */
+        .card-content {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            padding: 0.75rem;
+        }
+
+        @media (min-width: 640px) {
+            .card-content {
+                padding: 1rem;
+            }
+        }
+
+        /* Title and category wrapper */
+        .title-section {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Auto-sizing for title and category */
+        .title-text {
+            flex: 1;
+            min-width: 0;
+            /* Allow text to shrink */
+        }
+
+        .category-text {
+            flex-shrink: 0;
+            /* Don't shrink category badge */
+        }
+
+        line-height: 1.25rem;
+        }
         }
 
         /* Animation untuk order detail icon */
@@ -172,6 +355,76 @@
             60% {
                 transform: translateY(-1px);
             }
+        }
+
+        /* Enhanced Navigation Styles */
+        .nav-tab {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-tab::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: left 0.5s;
+        }
+
+        .nav-tab:hover::before {
+            left: 100%;
+        }
+
+        /* Enhanced responsive design */
+        @media (max-width: 640px) {
+            .nav-mobile-text {
+                font-size: 0.75rem;
+                line-height: 1rem;
+            }
+
+            .nav-icon {
+                width: 1.5rem;
+                height: 1.5rem;
+            }
+        }
+
+        @media (min-width: 641px) and (max-width: 768px) {
+            .nav-tablet-spacing {
+                margin-left: 1rem;
+                margin-right: 1rem;
+            }
+        }
+
+        /* Smooth hover animations */
+        .nav-hover-effect {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .nav-hover-effect:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Active tab gradient animation */
+        @keyframes gradientShift {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .nav-active-gradient {
+            background-size: 200% 200%;
+            animation: gradientShift 3s ease infinite;
         }
     </style>
 </head>
@@ -262,36 +515,62 @@
         </div>
     </div>
     <!-- Main Navigation -->
-    <nav class="flex justify-center space-x-8 py-4">
-        <a href="{{ route('public.flowers') }}"
-            class="relative px-4 py-2 text-sm font-semibold transition-all duration-200 {{ $activeTab === 'flowers' ? 'text-rose-600' : 'text-gray-500 hover:text-gray-700' }}">
-            🌸 Bunga
-            @if($activeTab === 'flowers')
-                <div class="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-rose-400 to-pink-500 rounded-full">
+    <div class="bg-white/80 backdrop-blur-md border-t border-gray-100 sticky top-16 z-30">
+        <div class="max-w-7xl mx-auto px-4">
+            <nav class="flex items-center justify-center py-4">
+                <div class="flex items-center space-x-2 md:space-x-6 lg:space-x-8">
+                    <!-- Bunga Tab -->
+                    <a href="{{ route('public.flowers') }}"
+                        class="nav-tab nav-hover-effect group relative flex items-center space-x-2 px-4 py-3 rounded-xl transition-all duration-300 {{ $activeTab === 'flowers' ? 'bg-gradient-to-r from-rose-500 to-pink-500 text-white shadow-lg nav-active-gradient' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50' }}">
+                        <div
+                            class="flex items-center justify-center w-8 h-8 rounded-lg {{ $activeTab === 'flowers' ? 'bg-white/20' : 'bg-rose-50 group-hover:bg-rose-100' }} transition-colors duration-300">
+                            <i
+                                class="bi bi-flower3 text-lg {{ $activeTab === 'flowers' ? 'text-white' : 'text-rose-500' }}"></i>
+                        </div>
+                        <span class="text-sm md:text-base font-semibold hidden sm:block">Bunga</span>
+                        <span class="text-xs md:text-sm font-medium sm:hidden nav-mobile-text">Bunga</span>
+                        @if($activeTab === 'flowers')
+                            <div
+                                class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-6 h-1 bg-white rounded-full">
+                            </div>
+                        @endif
+                    </a>
+
+                    <!-- Bouquet Tab -->
+                    <a href="{{ route('public.bouquets') }}"
+                        class="nav-tab nav-hover-effect group relative flex items-center space-x-2 px-4 py-3 rounded-xl transition-all duration-300 {{ $activeTab === 'bouquets' ? 'bg-gradient-to-r from-rose-500 to-pink-500 text-white shadow-lg nav-active-gradient' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50' }}">
+                        <div
+                            class="flex items-center justify-center w-8 h-8 rounded-lg {{ $activeTab === 'bouquets' ? 'bg-white/20' : 'bg-rose-50 group-hover:bg-rose-100' }} transition-colors duration-300">
+                            <i
+                                class="bi bi-flower2 text-lg {{ $activeTab === 'bouquets' ? 'text-white' : 'text-rose-500' }}"></i>
+                        </div>
+                        <span class="text-sm md:text-base font-semibold hidden sm:block">Bouquet</span>
+                        <span class="text-xs md:text-sm font-medium sm:hidden nav-mobile-text">Bouquet</span>
+                        @if($activeTab === 'bouquets')
+                            <div
+                                class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-6 h-1 bg-white rounded-full">
+                            </div>
+                        @endif
+                    </a>
+
+                    <!-- Custom Bouquet Tab -->
+                    <a href="{{ route('custom.bouquet.create') }}"
+                        class="nav-tab nav-hover-effect group relative flex items-center space-x-2 px-4 py-3 rounded-xl transition-all duration-300 text-gray-600 hover:text-gray-800 hover:bg-gray-50">
+                        <div
+                            class="flex items-center justify-center w-8 h-8 rounded-lg bg-purple-50 group-hover:bg-purple-100 transition-colors duration-300">
+                            <i class="bi bi-palette text-lg text-purple-500"></i>
+                        </div>
+                        <span class="text-sm md:text-base font-semibold hidden sm:block">Custom Bouquet</span>
+                        <span class="text-xs md:text-sm font-medium sm:hidden nav-mobile-text">Custom</span>
+                        <span
+                            class="absolute -top-1 -right-1 text-xs bg-gradient-to-r from-yellow-400 to-orange-400 text-orange-900 px-2 py-0.5 rounded-full font-bold shadow-md animate-pulse">
+                            NEW
+                        </span>
+                    </a>
                 </div>
-            @endif
-        </a>
-        <a href="{{ route('public.bouquets') }}"
-            class="relative px-4 py-2 text-sm font-semibold transition-all duration-200 {{ $activeTab === 'bouquets' ? 'text-rose-600' : 'text-gray-500 hover:text-gray-700' }}">
-            💐 Bouquet
-            @if($activeTab === 'bouquets')
-                <div class="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-rose-400 to-pink-500 rounded-full">
-                </div>
-            @endif
-        </a>
-        <a href="{{ route('custom.bouquet.create') }}"
-            class="relative px-4 py-2 text-sm font-semibold transition-all duration-200 text-purple-600 hover:text-purple-700 bg-purple-50 hover:bg-purple-100 rounded-lg">
-            🎨 Custom Bouquet
-            <span
-                class="absolute -top-1 -right-1 text-xs bg-gradient-to-r from-purple-500 to-indigo-500 text-white px-1.5 py-0.5 rounded-full">Baru!</span>
-        </a>
-        {{-- <a href="{{ route('custom.bouquet.create') }}"
-            class="relative px-4 py-2 text-sm font-semibold transition-all duration-200 text-gray-500 hover:text-gray-700">
-            🎨 Custom Bouquet
-        </a> --}}
-    </nav>
+            </nav>
+        </div>
     </div>
-    </header>
 
     <!-- Main Content -->
     <div class="w-full max-w-6xl mx-auto px-4 py-6">
@@ -354,7 +633,7 @@
         </div>
 
         <!-- Content Grid -->
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
+        <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
             @if($activeTab === 'flowers')
                 @forelse($flowers as $flower)
                     <div class="flower-card group" data-category="{{ $flower->category->name ?? 'lainnya' }}"
@@ -383,23 +662,30 @@
                             </div>
 
                             <!-- Details -->
-                            <div class="flex-1 flex flex-col">
-                                <div class="flex items-start justify-between mb-2">
-                                    <h3 class="font-bold text-sm sm:text-base text-gray-800 line-clamp-2 flex-1 leading-tight">
-                                        {{ $flower->name }}
-                                    </h3>
+                            <div class="product-content flex-1">
+                                <!-- Category Badge - Left Aligned -->
+                                <div class="flex justify-start mb-3">
                                     <span
-                                        class="ml-2 px-2 py-1 bg-rose-100 text-rose-700 rounded-full text-[10px] sm:text-xs font-medium whitespace-nowrap flex-shrink-0">
+                                        class="category-badge bg-rose-100 text-rose-700 rounded-full px-3 py-1 text-xs font-medium"
+                                        title="{{ $flower->category->name ?? 'Umum' }}">
                                         {{ $flower->category->name ?? 'Umum' }}
                                     </span>
                                 </div>
 
-                                <p class="text-xs sm:text-sm text-gray-600 mb-3 line-clamp-2 leading-relaxed">
+                                <!-- Product Title - Left Aligned -->
+                                <h3 class="product-title font-bold text-gray-800 text-left leading-none"
+                                    style="margin-bottom: -4px;">
+                                    {{ $flower->name }}
+                                </h3>
+
+                                <!-- Description - Left Aligned with no spacing from title -->
+                                <p class="text-xs sm:text-sm text-gray-600 text-left line-clamp-2 leading-none mb-3"
+                                    style="margin-top: -4px;">
                                     {{ $flower->description }}
                                 </p>
 
-                                <!-- Price -->
-                                <div class="mb-3">
+                                <!-- Price - Left Aligned -->
+                                <div class="mb-1">
                                     @php
                                         // Siapkan array harga untuk JS
                                         $jsPrices = $flower->prices->map(function ($price) {
@@ -411,7 +697,7 @@
                                             ];
                                         });
                                     @endphp
-                                    <div class="text-center">
+                                    <div class="text-left">
                                         <div class="text-price text-sm sm:text-lg font-bold text-rose-600">
                                             @if($jsPrices->count() === 1)
                                                 Rp {{ number_format($jsPrices[0]['price'], 0, ',', '.') }}
@@ -430,7 +716,7 @@
                                 </div>
 
                                 <!-- Stock -->
-                                <div class="mb-4">
+                                <div class="mb-2">
                                     <div class="flex items-center justify-between text-xs mb-1">
                                         <span class="text-gray-500">Stok:</span>
                                         <span
@@ -528,25 +814,30 @@
                             </div>
 
                             <!-- Details -->
-                            <div class="flex-1 flex flex-col">
-                                <div class="flex items-start justify-between mb-2">
-                                    <h3 class="font-bold text-sm sm:text-base text-gray-800 line-clamp-2 flex-1 leading-tight">
-                                        {{ $bouquet->name }}
-                                    </h3>
+                            <div class="product-content flex-1">
+                                <!-- Category Badge - Left Aligned -->
+                                <div class="flex justify-start mb-3">
                                     <span
-                                        class="ml-2 px-2 py-1 bg-rose-100 text-rose-700 rounded-full text-[10px] sm:text-xs font-medium whitespace-nowrap flex-shrink-0">
+                                        class="category-badge bg-rose-100 text-rose-700 rounded-full px-3 py-1 text-xs font-medium"
+                                        title="{{ $bouquet->category->name ?? 'Bouquet' }}">
                                         {{ $bouquet->category->name ?? 'Bouquet' }}
                                     </span>
                                 </div>
 
-                                <p class="text-xs sm:text-sm text-gray-600 mb-3 line-clamp-2 leading-relaxed">
+                                <!-- Product Title - Left Aligned -->
+                                <h3 class="product-title font-bold text-gray-800 mb-0 text-left leading-tight">
+                                    {{ $bouquet->name }}
+                                </h3>
+
+                                <!-- Description - Left Aligned with no spacing from title -->
+                                <p class="text-xs sm:text-sm text-gray-600 mb-3 line-clamp-2 leading-tight text-left -mt-1">
                                     {{ $bouquet->description }}
                                 </p>
 
-                                <!-- Sizes -->
-                                <div class="mb-3">
-                                    <span class="text-xs text-gray-500 block mb-2">Ukuran Tersedia:</span>
-                                    <div class="flex flex-wrap gap-1">
+                                <!-- Sizes - Left Aligned -->
+                                <div class="mb-1">
+                                    <span class="text-xs text-gray-500 block mb-1 text-left">Ukuran Tersedia:</span>
+                                    <div class="flex flex-wrap gap-1 justify-start">
                                         @foreach($bouquet->sizes as $size)
                                             <span
                                                 class="inline-block px-2 py-1 bg-gradient-to-r from-rose-100 to-pink-100 text-rose-700 rounded-full text-[10px] sm:text-xs font-medium">
@@ -556,13 +847,13 @@
                                     </div>
                                 </div>
 
-                                <!-- Price Range -->
-                                <div class="mb-3 sm:mb-4">
+                                <!-- Price Range - Left Aligned -->
+                                <div class="mb-1">
                                     @php
                                         $minPrice = $bouquet->prices->min('price');
                                         $maxPrice = $bouquet->prices->max('price');
                                     @endphp
-                                    <div class="text-center">
+                                    <div class="text-left">
                                         <div class="text-price text-sm sm:text-lg font-bold text-rose-600">
                                             @if($minPrice === $maxPrice)
                                                 Rp {{ number_format($minPrice, 0, ',', '.') }}

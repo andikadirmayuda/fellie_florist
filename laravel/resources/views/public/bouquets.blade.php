@@ -82,6 +82,76 @@
             border-color: #f43f5e;
             background-color: #fdf2f8;
         }
+
+        /* Enhanced Navigation Styles */
+        .nav-tab {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-tab::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: left 0.5s;
+        }
+
+        .nav-tab:hover::before {
+            left: 100%;
+        }
+
+        /* Enhanced responsive design */
+        @media (max-width: 640px) {
+            .nav-mobile-text {
+                font-size: 0.75rem;
+                line-height: 1rem;
+            }
+
+            .nav-icon {
+                width: 1.5rem;
+                height: 1.5rem;
+            }
+        }
+
+        @media (min-width: 641px) and (max-width: 768px) {
+            .nav-tablet-spacing {
+                margin-left: 1rem;
+                margin-right: 1rem;
+            }
+        }
+
+        /* Smooth hover animations */
+        .nav-hover-effect {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .nav-hover-effect:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Active tab gradient animation */
+        @keyframes gradientShift {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .nav-active-gradient {
+            background-size: 200% 200%;
+            animation: gradientShift 3s ease infinite;
+        }
     </style>
     <script>
         // Fungsi untuk menambah ke keranjang dengan pilihan harga (global)
@@ -173,42 +243,69 @@
                     </a>
                 </div>
             </div>
-
-            <!-- Hero Section -->
-            <div class="bg-white">
-                <div class="max-w-4xl mx-auto px-4 py-8 text-center">
-                    <h2 class="text-3xl font-bold text-gray-800 mb-2">Koleksi Bouquet Premium</h2>
-                    <p class="text-gray-600 mb-2">Temukan bouquet yang sempurna untuk setiap momen spesial</p>
-                    <p class="text-sm text-gray-500 flex items-center justify-center gap-2">
-                        <i class="bi bi-clock text-rose-400"></i>
-                        Terakhir diperbarui:
-                        {{ $lastUpdated ? \Carbon\Carbon::parse($lastUpdated)->translatedFormat('d F Y H:i') : '-' }}
-                    </p>
-                </div>
-            </div>
-
-            <!-- Main Navigation -->
-            <nav class="flex justify-center space-x-8 py-4">
-                <a href="{{ route('public.flowers') }}"
-                    class="relative px-4 py-2 text-sm font-semibold transition-all duration-200 text-gray-500 hover:text-gray-700">
-                    🌸 Bunga
-                </a>
-                <a href="{{ route('public.bouquets') }}"
-                    class="relative px-4 py-2 text-sm font-semibold transition-all duration-200 text-rose-600">
-                    💐 Bouquet
-                    <div
-                        class="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-rose-400 to-pink-500 rounded-full">
-                    </div>
-                </a>
-                <a href="{{ route('custom.bouquet.create') }}"
-                    class="relative px-4 py-2 text-sm font-semibold transition-all duration-200 text-purple-600 hover:text-purple-700 bg-purple-50 hover:bg-purple-100 rounded-lg">
-                    🎨 Custom Bouquet
-                    <span
-                        class="absolute -top-1 -right-1 text-xs bg-gradient-to-r from-purple-500 to-indigo-500 text-white px-1.5 py-0.5 rounded-full">Baru!</span>
-                </a>
-            </nav>
         </div>
     </header>
+
+    <!-- Hero Section -->
+    <div class="bg-white">
+        <div class="max-w-4xl mx-auto px-4 py-8 text-center">
+            <h2 class="text-3xl font-bold text-gray-800 mb-2">Koleksi Bouquet Premium</h2>
+            <p class="text-gray-600 mb-2">Temukan bouquet yang sempurna untuk setiap momen spesial</p>
+            <p class="text-sm text-gray-500 flex items-center justify-center gap-2">
+                <i class="bi bi-clock text-rose-400"></i>
+                Terakhir diperbarui:
+                {{ $lastUpdated ? \Carbon\Carbon::parse($lastUpdated)->translatedFormat('d F Y H:i') : '-' }}
+            </p>
+        </div>
+    </div>
+    <!-- Main Navigation -->
+    <div class="bg-white/80 backdrop-blur-md border-t border-gray-100 sticky top-16 z-30">
+        <div class="max-w-7xl mx-auto px-4">
+            <nav class="flex items-center justify-center py-4">
+                <div class="flex items-center space-x-2 md:space-x-6 lg:space-x-8">
+                    <!-- Bunga Tab -->
+                    <a href="{{ route('public.flowers') }}"
+                        class="nav-tab nav-hover-effect group relative flex items-center space-x-2 px-4 py-3 rounded-xl transition-all duration-300 text-gray-600 hover:text-gray-800 hover:bg-gray-50">
+                        <div
+                            class="flex items-center justify-center w-8 h-8 rounded-lg bg-rose-50 group-hover:bg-rose-100 transition-colors duration-300">
+                            <i class="bi bi-flower3 text-lg text-rose-500"></i>
+                        </div>
+                        <span class="text-sm md:text-base font-semibold hidden sm:block">Bunga</span>
+                        <span class="text-xs md:text-sm font-medium sm:hidden nav-mobile-text">Bunga</span>
+                    </a>
+
+                    <!-- Bouquet Tab -->
+                    <a href="{{ route('public.bouquets') }}"
+                        class="nav-tab nav-hover-effect group relative flex items-center space-x-2 px-4 py-3 rounded-xl transition-all duration-300 bg-gradient-to-r from-rose-500 to-pink-500 text-white shadow-lg nav-active-gradient">
+                        <div
+                            class="flex items-center justify-center w-8 h-8 rounded-lg bg-white/20 transition-colors duration-300">
+                            <i class="bi bi-flower2 text-lg text-white"></i>
+                        </div>
+                        <span class="text-sm md:text-base font-semibold hidden sm:block">Bouquet</span>
+                        <span class="text-xs md:text-sm font-medium sm:hidden nav-mobile-text">Bouquet</span>
+                        <div
+                            class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-6 h-1 bg-white rounded-full">
+                        </div>
+                    </a>
+
+                    <!-- Custom Bouquet Tab -->
+                    <a href="{{ route('custom.bouquet.create') }}"
+                        class="nav-tab nav-hover-effect group relative flex items-center space-x-2 px-4 py-3 rounded-xl transition-all duration-300 text-gray-600 hover:text-gray-800 hover:bg-gray-50">
+                        <div
+                            class="flex items-center justify-center w-8 h-8 rounded-lg bg-purple-50 group-hover:bg-purple-100 transition-colors duration-300">
+                            <i class="bi bi-palette text-lg text-purple-500"></i>
+                        </div>
+                        <span class="text-sm md:text-base font-semibold hidden sm:block">Custom Bouquet</span>
+                        <span class="text-xs md:text-sm font-medium sm:hidden nav-mobile-text">Custom</span>
+                        <span
+                            class="absolute -top-1 -right-1 text-xs bg-gradient-to-r from-yellow-400 to-orange-400 text-orange-900 px-2 py-0.5 rounded-full font-bold shadow-md animate-pulse">
+                            NEW
+                        </span>
+                    </a>
+                </div>
+            </nav>
+        </div>
+    </div>
 
     <!-- Main Content -->
     <div class="w-full max-w-6xl mx-auto px-4 py-6">

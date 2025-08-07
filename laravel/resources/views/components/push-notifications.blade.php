@@ -1,36 +1,70 @@
 <!-- Push Notification Component -->
 <div id="push-notification-manager" class="hidden">
-    <!-- Notification Permission Banner -->
+    <!-- Notification Permission Modal -->
     <div id="notification-permission-banner"
-        class="hidden fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg">
-        <div class="container mx-auto px-4 py-3">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-3">
-                    <div class="bg-white bg-opacity-20 p-2 rounded-full">
-                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+        class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm opacity-0 transition-all duration-300">
+        <div
+            class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 transform transition-all duration-300 scale-95">
+            <!-- Modal Header -->
+            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-t-2xl p-6 text-white">
+                <div class="flex items-center space-x-4">
+                    <div class="bg-white bg-opacity-20 p-3 rounded-full animate-pulse">
+                        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
                             <path
                                 d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
                         </svg>
                     </div>
-                    <div>
-                        <h4 class="font-semibold">🔔 Aktifkan Notifikasi Real-time</h4>
-                        <p class="text-sm opacity-90">Dapatkan alert instant untuk pesanan baru dan update status</p>
+                    <div class="flex-1">
+                        <h3 class="text-xl font-bold">Aktifkan Notifikasi Real-time</h3>
+                        {{-- <p class="text-blue-100 text-sm mt-1">Fellie Florist Admin Panel</p> --}}
                     </div>
                 </div>
-                <div class="flex items-center space-x-3">
-                    <button onclick="enablePushNotifications()"
-                        class="bg-white text-blue-600 px-4 py-2 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
-                        Aktifkan
-                    </button>
-                    <button onclick="dismissNotificationBanner()"
-                        class="text-white hover:text-gray-200 transition-colors">
-                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd"
-                                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                                clip-rule="evenodd"></path>
-                        </svg>
-                    </button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="p-6">
+                <div class="text-gray-600 space-y-4">
+                    <p class="text-lg text-gray-800 font-medium">
+                        Dapatkan alert instant untuk:
+                    </p>
+                    <div class="space-y-3">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+                            <span>Pesanan baru masuk</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                            <span>Update status pesanan</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <div class="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                            <span>Pembayaran diterima</span>
+                        </div>
+                    </div>
+                    {{-- <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-lg mt-4">
+                        <p class="text-blue-800 text-sm">
+                            <span class="font-semibold">Tetap responsif</span> - Notifikasi akan muncul meskipun Anda
+                            sedang bekerja di tab lain
+                        </p>
+                    </div> --}}
                 </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="p-6 pt-0 flex space-x-3">
+                <button onclick="enablePushNotifications()"
+                    class="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-xl active:scale-95 shadow-lg flex items-center justify-center space-x-2">
+                    <span>✨</span>
+                    <span>Aktifkan Sekarang</span>
+                </button>
+                <button onclick="dismissNotificationBanner()"
+                    class="px-4 py-3 text-gray-500 hover:text-gray-700 transition-all duration-200 rounded-xl hover:bg-gray-100 active:scale-95">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd"
+                            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                            clip-rule="evenodd"></path>
+                    </svg>
+                </button>
             </div>
         </div>
     </div>
@@ -108,7 +142,12 @@
                 if (banner) {
                     setTimeout(() => {
                         banner.classList.remove('hidden');
-                    }, 2000);
+                        // Add smooth entrance animation
+                        setTimeout(() => {
+                            banner.classList.remove('opacity-0');
+                            banner.querySelector('.bg-white').classList.remove('scale-95');
+                        }, 50);
+                    }, 500);
                 }
             }
         } else {
@@ -134,10 +173,18 @@
                 // Fallback to simple notification request
                 const permission = await Notification.requestPermission();
                 if (permission === 'granted') {
-                    // Hide banner
+                    // Hide banner with animation
                     const banner = document.getElementById('notification-permission-banner');
                     if (banner) {
-                        banner.classList.add('hidden');
+                        banner.querySelector('.bg-white').classList.add('scale-95', 'opacity-75');
+                        banner.classList.add('opacity-0');
+
+                        setTimeout(() => {
+                            banner.classList.add('hidden');
+                            // Reset classes for next time
+                            banner.querySelector('.bg-white').classList.remove('scale-95', 'opacity-75');
+                            banner.classList.remove('opacity-0');
+                        }, 300);
                     }
 
                     // Update status
@@ -159,10 +206,18 @@
             const granted = await window.pushManager.requestPermission();
 
             if (granted) {
-                // Hide banner
+                // Hide banner with animation
                 const banner = document.getElementById('notification-permission-banner');
                 if (banner) {
-                    banner.classList.add('hidden');
+                    banner.querySelector('.bg-white').classList.add('scale-95', 'opacity-75');
+                    banner.classList.add('opacity-0');
+
+                    setTimeout(() => {
+                        banner.classList.add('hidden');
+                        // Reset classes for next time
+                        banner.querySelector('.bg-white').classList.remove('scale-95', 'opacity-75');
+                        banner.classList.remove('opacity-0');
+                    }, 300);
                 }
 
                 // Update status
@@ -185,7 +240,20 @@
     }
 
     function dismissNotificationBanner() {
-        document.getElementById('notification-permission-banner').classList.add('hidden');
+        const modal = document.getElementById('notification-permission-banner');
+        if (modal) {
+            // Add fade out animation
+            modal.querySelector('.bg-white').classList.add('scale-95', 'opacity-75');
+            modal.classList.add('opacity-0');
+
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                // Reset classes for next time
+                modal.querySelector('.bg-white').classList.remove('scale-95', 'opacity-75');
+                modal.classList.remove('opacity-0');
+            }, 300);
+        }
+
         // Store dismissal in localStorage
         localStorage.setItem('notification-banner-dismissed', 'true');
     }

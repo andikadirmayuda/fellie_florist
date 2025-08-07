@@ -241,35 +241,9 @@
                     .then(notifications => {
                         updateNotificationBadge(notifications.length);
 
-                        // Show desktop notifications untuk notifikasi baru
-                        notifications.forEach(notification => {
-                            if (notification.message && notification.message.title) {
-                                // Show desktop notification jika permission granted
-                                if (Notification.permission === 'granted') {
-                                    const desktopNotif = new Notification(notification.message.title, {
-                                        body: notification.message.body,
-                                        icon: notification.message.icon,
-                                        tag: notification.message.tag
-                                    });
-
-                                    desktopNotif.onclick = function () {
-                                        if (notification.message.url) {
-                                            window.focus();
-                                            window.location.href = notification.message.url;
-                                        }
-                                    };
-                                }
-
-                                // Mark as delivered
-                                fetch(`/api/admin/notifications/${notification.id}/delivered`, {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json',
-                                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                                    }
-                                });
-                            }
-                        });
+                        // Only update badge count, don't show notifications here
+                        // Notifications are handled by the push notification manager
+                        // to prevent duplicates
                     })
                     .catch(error => {
                         console.log('Error checking notifications:', error);
