@@ -158,9 +158,6 @@
             font-size: 0.6rem;
             padding: 0.2rem 0.5rem;
             white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 90px;
             display: inline-block;
             cursor: help;
             transition: all 0.2s ease;
@@ -190,8 +187,11 @@
 
             .category-badge {
                 font-size: 0.55rem;
-                padding: 0.15rem 0.35rem;
-                max-width: 70px;
+                padding: 0.15rem 0.4rem;
+                max-width: none;
+                /* Remove max-width to allow full text display */
+                white-space: nowrap;
+                /* Ensure text stays on one line */
             }
 
             .flower-card .text-price,
@@ -231,7 +231,6 @@
 
             .category-badge {
                 font-size: 0.65rem;
-                max-width: 100px;
                 padding: 0.2rem 0.5rem;
             }
         }
@@ -246,7 +245,6 @@
             }
 
             .category-badge {
-                max-width: 110px;
                 font-size: 0.7rem;
             }
         }

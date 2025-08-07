@@ -387,7 +387,7 @@
 
                             <!-- Sizes -->
                             <div class="mb-3">
-                                <span class="text-xs text-gray-500 block mb-2">Ukuran Tersedia:</span>
+                                <span class="text-xs text-gray-500 text-center block mb-2">Ukuran Tersedia:</span>
                                 <div class="flex flex-wrap gap-1">
                                     @php
                                         // Define size order

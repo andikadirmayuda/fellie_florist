@@ -45,7 +45,7 @@ class CustomBouquetController extends Controller
     public function getProductDetails(Product $product)
     {
         $product->load(['prices', 'category']);
-        
+
         return response()->json([
             'success' => true,
             'product' => [
@@ -147,7 +147,7 @@ class CustomBouquetController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Item added to custom bouquet successfully.',
+                'message' => 'Berhasil Di Tambahkan.',
                 'item' => [
                     'id' => $item->id,
                     'product_name' => $product->name,
@@ -159,11 +159,10 @@ class CustomBouquetController extends Controller
                 ],
                 'total_price' => $customBouquet->total_price
             ]);
-
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error adding item to custom bouquet: ' . $e->getMessage());
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Error adding item to custom bouquet: ' . $e->getMessage()
@@ -198,11 +197,10 @@ class CustomBouquetController extends Controller
                 'message' => 'Item removed from custom bouquet successfully.',
                 'total_price' => $customBouquet->total_price
             ]);
-
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error removing item from custom bouquet: ' . $e->getMessage());
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Error removing item from custom bouquet.'
@@ -223,7 +221,7 @@ class CustomBouquetController extends Controller
         DB::beginTransaction();
         try {
             $item = CustomBouquetItem::with(['product', 'customBouquet'])->find($validated['item_id']);
-            
+
             // Get the price info for stock calculation
             $productPrice = ProductPrice::where('product_id', $item->product_id)
                 ->where('type', $item->price_type)
@@ -259,11 +257,10 @@ class CustomBouquetController extends Controller
                 ],
                 'total_price' => $item->customBouquet->total_price
             ]);
-
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error updating item quantity: ' . $e->getMessage());
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Error updating item quantity.'
@@ -291,7 +288,7 @@ class CustomBouquetController extends Controller
 
             // Store new image
             $imagePath = $request->file('reference_image')->store('custom-bouquets', 'public');
-            
+
             $customBouquet->reference_image = $imagePath;
             $customBouquet->save();
 
@@ -301,10 +298,9 @@ class CustomBouquetController extends Controller
                 'image_path' => $imagePath,
                 'image_url' => Storage::url($imagePath)
             ]);
-
         } catch (\Exception $e) {
             Log::error('Error uploading reference image: ' . $e->getMessage());
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Error uploading reference image.'
@@ -375,7 +371,7 @@ class CustomBouquetController extends Controller
     {
         try {
             Log::info('Attempting to finalize custom bouquet with ID: ' . $id);
-            
+
             // Find the custom bouquet
             $customBouquet = CustomBouquet::find($id);
             if (!$customBouquet) {
@@ -385,13 +381,13 @@ class CustomBouquetController extends Controller
                     'message' => 'Custom bouquet tidak ditemukan.'
                 ], 404);
             }
-            
+
             Log::info('Found custom bouquet ID: ' . $customBouquet->id);
-            
+
             // Check if custom bouquet has items
             $itemsCount = $customBouquet->items()->count();
             Log::info('Custom bouquet has ' . $itemsCount . ' items');
-            
+
             if ($itemsCount === 0) {
                 Log::warning('Custom bouquet has no items');
                 return response()->json([

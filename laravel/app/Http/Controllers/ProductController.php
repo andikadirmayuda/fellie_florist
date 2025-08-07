@@ -18,12 +18,11 @@ class ProductController extends Controller
     public function index(Request $request)
     {
         $categories = Category::orderBy('name')->pluck('name', 'id');
-          $products = Product::with('category')
+        $products = Product::with('category')
             ->search($request->search)
             ->filterByCategory($request->category)
-            ->orderBy('code')
-            ->paginate(10)
-            ->withQueryString();
+            ->orderBy('name')
+            ->get();
 
         return view('products.index', compact('products', 'categories'));
     }
@@ -77,7 +76,7 @@ class ProductController extends Controller
 
         // Prepare existing prices
         $existingPrices = $product->prices->keyBy('type');
-        
+
         return view('products.form', compact('product', 'categories', 'priceTypes', 'defaultUnitEquivalents', 'existingPrices'));
     }
 
