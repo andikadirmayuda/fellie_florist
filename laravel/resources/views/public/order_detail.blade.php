@@ -720,6 +720,14 @@
                                         $waMessage .= "🚚 *Pengiriman :* {$order->delivery_method}\n";
                                         $waMessage .= "📍 *Tujuan :* {$order->destination}\n\n";
                                         
+                                        // Tambahkan breakdown harga dengan ongkir
+                                        $waMessage .= "💰 *Detail Harga:*\n";
+                                        $waMessage .= "• Total Produk: Rp " . number_format($itemsTotal, 0, ',', '.') . "\n";
+                                        if ($shippingFee > 0) {
+                                            $waMessage .= "• Ongkir: Rp " . number_format($shippingFee, 0, ',', '.') . "\n";
+                                        }
+                                        $waMessage .= "• *Total Keseluruhan: Rp " . number_format($grandTotal, 0, ',', '.') . "*\n\n";
+                                        
                                         if ($showGrandTotal) {
                                             $waMessage .= "💰 *Total Pesanan :* Rp " . number_format($grandTotal, 0, ',', '.') . "\n\n";
                                             $waMessage .= "═══════════\n";
@@ -742,8 +750,46 @@
                                 </div>
                             </div>
                         </div>
+                        
+                        <!-- Button Petunjuk Pembayaran yang Prominent -->
+                        <div class="mt-6 text-center">
+                            <button onclick="scrollToPetunjukPembayaran()" 
+                                    class="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 inline-flex items-center gap-3">
+                                <i class="bi bi-info-circle-fill text-xl"></i>
+                                <span class="text-base">Lihat Petunjuk Pembayaran Lengkap</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
+                
+                <script>
+                function scrollToPetunjukPembayaran() {
+                    // Cari element yang berisi "Petunjuk Pembayaran"
+                    const elements = document.querySelectorAll('h4');
+                    for (let element of elements) {
+                        if (element.textContent.includes('Petunjuk Pembayaran')) {
+                            element.scrollIntoView({ 
+                                behavior: 'smooth', 
+                                block: 'center' 
+                            });
+                            
+                            // Highlight effect
+                            const parentCard = element.closest('.bg-white');
+                            if (parentCard) {
+                                parentCard.style.transition = 'all 0.3s ease';
+                                parentCard.style.transform = 'scale(1.02)';
+                                parentCard.style.boxShadow = '0 8px 25px rgba(0,0,0,0.15)';
+                                
+                                setTimeout(() => {
+                                    parentCard.style.transform = 'scale(1)';
+                                    parentCard.style.boxShadow = '';
+                                }, 1000);
+                            }
+                            break;
+                        }
+                    }
+                }
+                </script>
             @endif
             
             <!-- Pesan untuk pesanan yang sudah lunas -->

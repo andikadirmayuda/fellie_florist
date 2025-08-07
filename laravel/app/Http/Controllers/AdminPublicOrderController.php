@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\PublicOrder;
+use App\Models\Product;
 use App\Services\WhatsAppNotificationService;
 use App\Services\PushNotificationService;
 use Illuminate\Support\Facades\Log;
@@ -84,7 +85,7 @@ class AdminPublicOrderController extends Controller
             'files_count' => $request->hasFile('packing_files') ? count($request->file('packing_files')) : 0
         ]);
 
-        $order = \App\Models\PublicOrder::with('items')->findOrFail($id);
+        $order = PublicOrder::with('items')->findOrFail($id);
         $oldStatus = $order->status;
         $newStatus = $request->input('status');
 
@@ -108,7 +109,7 @@ class AdminPublicOrderController extends Controller
         if ($oldStatus === 'pending') {
             if ($newStatus === 'processed') {
                 foreach ($order->items as $item) {
-                    $product = \App\Models\Product::find($item->product_id);
+                    $product = Product::find($item->product_id);
                     if ($product) {
                         $product->reduceStock($item->quantity * $item->unit_equivalent, 'public_order', 'public_order:' . $order->id, 'Pesanan publik diproses');
                     }
@@ -116,7 +117,7 @@ class AdminPublicOrderController extends Controller
                 $order->stock_holded = true;
             } elseif ($newStatus === 'cancelled') {
                 foreach ($order->items as $item) {
-                    $product = \App\Models\Product::find($item->product_id);
+                    $product = Product::find($item->product_id);
                     if ($product) {
                         $product->addStock($item->quantity * $item->unit_equivalent, 'public_order_cancel', 'public_order:' . $order->id, 'Pesanan publik dibatalkan');
                     }
@@ -234,7 +235,7 @@ class AdminPublicOrderController extends Controller
 
     public function updatePaymentStatus(Request $request, $id)
     {
-        $order = \App\Models\PublicOrder::findOrFail($id);
+        $order = PublicOrder::findOrFail($id);
         $newStatus = $request->input('payment_status');
         $amountPaid = $request->input('amount_paid');
         $allowed = [
@@ -376,6 +377,47 @@ class AdminPublicOrderController extends Controller
             return response()->json([
                 'success' => false,
                 'error' => 'Terjadi kesalahan saat generate pesan WhatsApp'
+            ], 500);
+        }
+    }
+
+    /**
+     * Generate pesan WhatsApp untuk share link detail pesanan ke customer
+     */
+    public function generateCustomerLinkMessage($id)
+    {
+        try {
+            $order = PublicOrder::with('items')->findOrFail($id);
+            $message = WhatsAppNotificationService::generateCustomerOrderLinkMessage($order);
+
+            if (!$message) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Gagal generate pesan untuk customer'
+                ], 500);
+            }
+
+            // Format nomor WhatsApp customer
+            $customerWhatsApp = preg_replace('/^0/', '62', preg_replace('/[^0-9]/', '', $order->wa_number));
+            $whatsappUrl = WhatsAppNotificationService::generateCustomerWhatsAppUrl($customerWhatsApp, $message);
+
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+                'encoded_message' => urlencode($message),
+                'customer_name' => $order->customer_name,
+                'customer_whatsapp' => $order->wa_number,
+                'whatsapp_url' => $whatsappUrl
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error generating customer WhatsApp message', [
+                'order_id' => $id,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'error' => 'Terjadi kesalahan saat generate pesan untuk customer'
             ], 500);
         }
     }

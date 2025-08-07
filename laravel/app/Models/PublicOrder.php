@@ -4,6 +4,32 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property int $id
+ * @property string|null $public_code
+ * @property string $customer_name
+ * @property string $pickup_date
+ * @property string|null $pickup_time
+ * @property string $delivery_method
+ * @property string|null $destination
+ * @property string|null $notes
+ * @property string $status
+ * @property string|null $payment_status
+ * @property float|null $amount_paid
+ * @property string|null $payment_proof
+ * @property string|null $wa_number
+ * @property string|null $packing_photo
+ * @property array|null $packing_files
+ * @property float $shipping_fee
+ * @property bool $stock_holded
+ * @property string|null $info
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property float $total
+ * @property string $order_number
+ * @property \Illuminate\Database\Eloquent\Collection|\App\Models\PublicOrderItem[] $items
+ * @property \Illuminate\Database\Eloquent\Collection|\App\Models\PublicOrderPayment[] $payments
+ */
 class PublicOrder extends Model
 {
     protected $fillable = [
@@ -22,6 +48,8 @@ class PublicOrder extends Model
         'packing_photo',
         'packing_files',
         'shipping_fee',
+        'stock_holded',
+        'info',
     ];
 
     protected $casts = [
@@ -43,8 +71,13 @@ class PublicOrder extends Model
     // Calculate total from items
     public function getTotalAttribute()
     {
+        // Load items relation if not already loaded
+        if (!$this->relationLoaded('items')) {
+            $this->load('items');
+        }
+
         $itemsTotal = $this->items->sum(function ($item) {
-            return $item->quantity * $item->price;
+            return ($item->quantity ?? 0) * ($item->price ?? 0);
         });
 
         return $itemsTotal + ($this->shipping_fee ?? 0);

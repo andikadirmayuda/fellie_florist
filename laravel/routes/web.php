@@ -188,6 +188,7 @@ Route::post('/admin/public-orders/{id}/update-status', [App\Http\Controllers\Adm
 Route::post('/admin/public-orders/{id}/update-payment-status', [App\Http\Controllers\AdminPublicOrderController::class, 'updatePaymentStatus'])->name('admin.public-orders.update-payment-status');
 Route::post('/admin/public-orders/{id}/update-shipping-fee', [App\Http\Controllers\AdminPublicOrderController::class, 'updateShippingFee'])->name('admin.public-orders.update-shipping-fee');
 Route::get('/admin/public-orders/{id}/whatsapp-message', [App\Http\Controllers\AdminPublicOrderController::class, 'generateWhatsAppMessage'])->name('admin.public-orders.whatsapp-message');
+Route::get('/admin/public-orders/{id}/customer-link-message', [App\Http\Controllers\AdminPublicOrderController::class, 'generateCustomerLinkMessage'])->name('admin.public-orders.customer-link-message');
 
 // =====================
 // Route test upload sederhana
