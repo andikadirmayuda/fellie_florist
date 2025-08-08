@@ -336,29 +336,120 @@
                     </h3>
                     
                     <div class="space-y-3">
-                        <a href="{{ route('products.create') }}" 
-                           class="w-full bg-gray-800 hover:bg-gray-900 text-white font-medium py-3 px-4 rounded-lg flex items-center justify-center transition-colors">
-                            <i class="bi bi-plus-circle mr-2"></i>
-                            Tambah Produk
-                        </a>
-                        
-                        <a href="{{ route('inventory.index') }}" 
-                           class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg flex items-center justify-center transition-colors">
-                            <i class="bi bi-box-seam mr-2"></i>
-                            Kelola Inventaris
-                        </a>
-                        
-                        <a href="{{ route('admin.public-orders.index') }}" 
-                           class="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-3 px-4 rounded-lg flex items-center justify-center transition-colors">
-                            <i class="bi bi-globe2 mr-2"></i>
-                            Pesanan Online
-                        </a>
+                        @if(auth()->user()->hasRole(['owner', 'admin']))
+                            <!-- Aksi untuk Owner & Admin -->
+                            <a href="{{ route('products.create') }}" 
+                               class="w-full bg-gray-800 hover:bg-gray-900 text-white font-medium py-3 px-4 rounded-lg flex items-center justify-center transition-colors">
+                                <i class="bi bi-plus-circle mr-2"></i>
+                                Tambah Produk
+                            </a>
+                            
+                            <a href="{{ route('inventory.index') }}" 
+                               class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg flex items-center justify-center transition-colors">
+                                <i class="bi bi-box-seam mr-2"></i>
+                                Kelola Inventaris
+                            </a>
+                            
+                            <a href="{{ route('admin.public-orders.index') }}" 
+                               class="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-3 px-4 rounded-lg flex items-center justify-center transition-colors">
+                                <i class="bi bi-globe2 mr-2"></i>
+                                Pesanan Online
+                            </a>
 
-                        <a href="{{ route('reports.sales') }}" 
-                           class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-4 rounded-lg flex items-center justify-center transition-colors">
-                            <i class="bi bi-bar-chart mr-2"></i>
-                            Laporan
-                        </a>
+                            <a href="{{ route('reports.sales') }}" 
+                               class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-4 rounded-lg flex items-center justify-center transition-colors">
+                                <i class="bi bi-bar-chart mr-2"></i>
+                                Laporan
+                            </a>
+                        @elseif(auth()->user()->hasRole('kasir'))
+                            <!-- Aksi untuk Kasir -->
+                            <a href="{{ route('products.index') }}" 
+                               class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg flex items-center justify-center transition-colors">
+                                <i class="bi bi-eye mr-2"></i>
+                                Lihat Produk
+                            </a>
+                            
+                            <a href="{{ route('inventory.index') }}" 
+                               class="w-full bg-teal-600 hover:bg-teal-700 text-white font-medium py-3 px-4 rounded-lg flex items-center justify-center transition-colors">
+                                <i class="bi bi-box-seam mr-2"></i>
+                                Lihat Inventaris
+                            </a>
+                            
+                            <a href="{{ route('admin.public-orders.index') }}" 
+                               class="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-3 px-4 rounded-lg flex items-center justify-center transition-colors">
+                                <i class="bi bi-globe2 mr-2"></i>
+                                Pesanan Online
+                            </a>
+
+                            <a href="{{ route('sales.index') }}" 
+                               class="w-full bg-orange-600 hover:bg-orange-700 text-white font-medium py-3 px-4 rounded-lg flex items-center justify-center transition-colors">
+                                <i class="bi bi-cash-coin mr-2"></i>
+                                Penjualan
+                            </a>
+
+                            <a href="{{ route('reports.sales') }}" 
+                               class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-4 rounded-lg flex items-center justify-center transition-colors">
+                                <i class="bi bi-bar-chart mr-2"></i>
+                                Laporan
+                            </a>
+                        @elseif(auth()->user()->hasRole('karyawan'))
+                            <!-- Aksi untuk Karyawan -->
+                            <a href="{{ route('products.index') }}" 
+                               class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg flex items-center justify-center transition-colors">
+                                <i class="bi bi-eye mr-2"></i>
+                                Lihat Produk
+                            </a>
+                            
+                            <a href="{{ route('inventory.index') }}" 
+                               class="w-full bg-teal-600 hover:bg-teal-700 text-white font-medium py-3 px-4 rounded-lg flex items-center justify-center transition-colors">
+                                <i class="bi bi-box-seam mr-2"></i>
+                                Kelola Inventaris
+                            </a>
+                            
+                            <a href="{{ route('admin.public-orders.index') }}" 
+                               class="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-3 px-4 rounded-lg flex items-center justify-center transition-colors">
+                                <i class="bi bi-globe2 mr-2"></i>
+                                Pesanan Online
+                            </a>
+
+                            <a href="{{ route('reports.stock') }}" 
+                               class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-4 rounded-lg flex items-center justify-center transition-colors">
+                                <i class="bi bi-bar-chart mr-2"></i>
+                                Laporan Stok
+                            </a>
+                        @elseif(auth()->user()->hasRole('customers service'))
+                            <!-- Aksi untuk Customer Service -->
+                            <a href="{{ route('online-customers.index') }}" 
+                               class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg flex items-center justify-center transition-colors">
+                                <i class="bi bi-people-fill mr-2"></i>
+                                Kelola Pelanggan
+                            </a>
+                            
+                            <a href="{{ route('admin.public-orders.index') }}" 
+                               class="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-3 px-4 rounded-lg flex items-center justify-center transition-colors">
+                                <i class="bi bi-globe2 mr-2"></i>
+                                Pesanan Online
+                            </a>
+
+                            <a href="{{ route('reports.customers') }}" 
+                               class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-4 rounded-lg flex items-center justify-center transition-colors">
+                                <i class="bi bi-bar-chart mr-2"></i>
+                                Laporan Pelanggan
+                            </a>
+                        @else
+                            <!-- Default Aksi -->
+                            <a href="{{ route('products.index') }}" 
+                               class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg flex items-center justify-center transition-colors">
+                                <i class="bi bi-eye mr-2"></i>
+                                Lihat Produk
+                            </a>
+                            
+                            <a href="{{ route('admin.public-orders.index') }}" 
+                               class="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-3 px-4 rounded-lg flex items-center justify-center transition-colors">
+                                <i class="bi bi-globe2 mr-2"></i>
+                                Pesanan Online
+                            </a>
+                        @endif
                     </div>
                 </div>
             </div>

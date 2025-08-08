@@ -1,10 +1,12 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-pink-700">Daftar Kategori</h1>
-            <a href="{{ route('categories.create') }}"
-                class="bg-pink-600 hover:bg-pink-700 text-white font-bold py-2 px-4 rounded">Tambah Kategori</a>
-        </div>
+        @if(!auth()->user()->hasRole('kasir'))
+            <div class="flex justify-between items-center">
+                <h1 class="text-2xl font-bold text-pink-700">Daftar Kategori</h1>
+                <a href="{{ route('categories.create') }}"
+                    class="bg-pink-600 hover:bg-pink-700 text-white font-bold py-2 px-4 rounded">Tambah Kategori</a>
+            </div>
+        @endif
     </x-slot>
 
     <style>

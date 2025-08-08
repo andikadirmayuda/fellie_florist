@@ -26,7 +26,7 @@
             <!-- MANAJEMEN PENGGUNA -->
             <li class="mt-4 mb-1 text-xs font-bold uppercase tracking-wider text-pink-400 flex items-center gap-2"><i
                     class="bi bi-people"></i> Manajemen Pengguna</li>
-            @if(auth()->user()->hasRole('owner') || auth()->user()->hasRole('admin') || auth()->user()->hasRole('customers service'))
+            @if(auth()->user()->hasRole('owner') || auth()->user()->hasRole('admin') || auth()->user()->hasRole('customers service') || auth()->user()->hasRole('kasir'))
                 <x-sidebar-link :href="route('online-customers.index')" :active="request()->routeIs('online-customers.*')">
                     <x-slot name="icon">
                         <i class="bi bi-people-fill text-lg mr-1"></i>
@@ -39,13 +39,19 @@
             <!-- MANAJEMEN PRODUK -->
             <li class="mt-4 mb-1 text-xs font-bold uppercase tracking-wider text-pink-400 flex items-center gap-2"><i
                     class="bi bi-box-seam"></i> Manajemen Produk</li>
+
             @if(auth()->user()->hasRole('owner') || auth()->user()->hasRole('admin') || auth()->user()->hasRole('karyawan'))
+                {{-- Kategori hanya untuk owner, admin, karyawan --}}
                 <x-sidebar-link :href="route('categories.index')" :active="request()->routeIs('categories.*')">
                     <x-slot name="icon">
                         <i class="bi bi-tags-fill text-lg mr-1"></i>
                     </x-slot>
                     {{ __('Kategori') }}
                 </x-sidebar-link>
+            @endif
+
+            @if(auth()->user()->hasRole('owner') || auth()->user()->hasRole('admin') || auth()->user()->hasRole('karyawan') || auth()->user()->hasRole('kasir'))
+                {{-- Produk untuk owner, admin, karyawan, kasir --}}
                 <x-sidebar-link :href="route('products.index')" :active="request()->routeIs('products.*')">
                     <x-slot name="icon">
                         <i class="bi bi-box-seam text-lg mr-1"></i>
@@ -53,7 +59,9 @@
                     {{ __('Produk') }}
                 </x-sidebar-link>
             @endif
-            @if(auth()->user()->hasRole('owner') || auth()->user()->hasRole('admin') || auth()->user()->hasRole('karyawan'))
+
+            @if(auth()->user()->hasRole('owner') || auth()->user()->hasRole('admin') || auth()->user()->hasRole('karyawan') || auth()->user()->hasRole('kasir'))
+                {{-- Inventaris untuk owner, admin, karyawan, kasir --}}
                 <x-sidebar-link :href="route('inventory.index')" :active="request()->routeIs('inventory.*')">
                     <x-slot name="icon">
                         <i class="bi bi-archive-fill text-lg mr-1"></i>
@@ -67,7 +75,7 @@
             <!-- PEMESANAN & PENJUALAN -->
             <li class="mt-4 mb-1 text-xs font-bold uppercase tracking-wider text-pink-400 flex items-center gap-2"><i
                     class="bi bi-cart"></i> Pemesanan & Penjualan</li>
-            @if(auth()->user()->hasRole('owner') || auth()->user()->hasRole('admin'))
+            @if(auth()->user()->hasRole('owner') || auth()->user()->hasRole('admin') || auth()->user()->hasRole('kasir'))
                 <x-sidebar-link :href="route('admin.public-orders.index')"
                     :active="request()->routeIs('admin.public-orders.*')">
                     <x-slot name="icon">
@@ -88,7 +96,7 @@
             <!-- MANAJEMEN BUKET -->
             <li class="mt-4 mb-1 text-xs font-bold uppercase tracking-wider text-pink-400 flex items-center gap-2"><i
                     class="bi bi-flower1"></i> Manajemen Buket</li>
-            @if(auth()->user()->hasRole('owner') || auth()->user()->hasRole('admin') || auth()->user()->hasRole('karyawan'))
+            @if(auth()->user()->hasRole('owner') || auth()->user()->hasRole('admin') || auth()->user()->hasRole('kasir'))
                 <x-sidebar-link :href="route('bouquets.index')" :active="request()->routeIs('bouquets.*')">
                     <x-slot name="icon">
                         <i class="bi bi-flower1 text-lg mr-1"></i>
@@ -96,7 +104,7 @@
                     Bouquet
                 </x-sidebar-link>
             @endif
-            @if(auth()->user()->hasRole('owner') || auth()->user()->hasRole('admin'))
+            @if(auth()->user()->hasRole('owner') || auth()->user()->hasRole('admin') || auth()->user()->hasRole('kasir'))
                 <x-sidebar-link :href="route('bouquet-categories.index')"
                     :active="request()->routeIs('bouquet-categories.*')">
                     <x-slot name="icon">

@@ -2,8 +2,10 @@
     <x-slot name="header">
         <div class="flex justify-between items-center">
             <h1 class="text-2xl font-bold text-pink-700">Daftar Produk</h1>
-            <a href="{{ route('products.create') }}"
-                class="bg-pink-600 hover:bg-pink-700 text-white font-bold py-2 px-4 rounded">Tambah Produk</a>
+            @if(!auth()->user()->hasRole('kasir'))
+                <a href="{{ route('products.create') }}"
+                    class="bg-pink-600 hover:bg-pink-700 text-white font-bold py-2 px-4 rounded">Tambah Produk</a>
+            @endif
         </div>
     </x-slot>
 
@@ -137,21 +139,23 @@
                                                     <i class="bi bi-eye mr-1"></i>
                                                     Detail
                                                 </a>
-                                                <a href="{{ route('products.edit', $product) }}"
-                                                    class="inline-flex items-center px-2 py-1 bg-green-100 text-green-700 rounded-sm hover:bg-green-200 transition-colors">
-                                                    <i class="bi bi-pencil mr-1"></i>
-                                                    Edit
-                                                </a>
-                                                <form action="{{ route('products.destroy', $product) }}" method="POST"
-                                                    class="inline">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="button"
-                                                        class="inline-flex items-center px-2 py-1 bg-red-100 text-red-700 rounded-sm hover:bg-red-200 transition-colors delete-confirm">
-                                                        <i class="bi bi-trash mr-1"></i>
-                                                        Hapus
-                                                    </button>
-                                                </form>
+                                                @if(!auth()->user()->hasRole('kasir'))
+                                                    <a href="{{ route('products.edit', $product) }}"
+                                                        class="inline-flex items-center px-2 py-1 bg-green-100 text-green-700 rounded-sm hover:bg-green-200 transition-colors">
+                                                        <i class="bi bi-pencil mr-1"></i>
+                                                        Edit
+                                                    </a>
+                                                    <form action="{{ route('products.destroy', $product) }}" method="POST"
+                                                        class="inline">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="button"
+                                                            class="inline-flex items-center px-2 py-1 bg-red-100 text-red-700 rounded-sm hover:bg-red-200 transition-colors delete-confirm">
+                                                            <i class="bi bi-trash mr-1"></i>
+                                                            Hapus
+                                                        </button>
+                                                    </form>
+                                                @endif
                                             </div>
                                         </td>
                                     </tr>

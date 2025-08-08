@@ -76,11 +76,13 @@
                         <i class="bi bi-funnel mr-1.5"></i>
                         Filter
                     </button>
+                    @if(!auth()->user()->hasRole('kasir'))
                     <a href="{{ route('reports.sales.pdf', request()->all()) }}" 
                        class="h-9 px-4 bg-white border border-gray-200 hover:border-pink-500 hover:bg-pink-50 text-gray-700 hover:text-pink-600 text-sm font-semibold rounded-lg transition-all duration-200 flex items-center">
                         <i class="bi bi-file-pdf mr-1.5"></i>
                         Export PDF
                     </a>
+                    @endif
                 </div>
             </form>
         </div>

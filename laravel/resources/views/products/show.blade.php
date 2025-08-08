@@ -303,25 +303,27 @@
             </div>
 
             <!-- Action Buttons -->
-            <div class="mt-8 flex justify-center space-x-4 form-enter">
-                <a href="{{ route('products.edit', $product) }}"
-                    class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl">
-                    <i class="bi bi-pencil-square mr-2"></i>
-                    Edit Produk
-                </a>
+            @if(!auth()->user()->hasRole('kasir'))
+                <div class="mt-8 flex justify-center space-x-4 form-enter">
+                    <a href="{{ route('products.edit', $product) }}"
+                        class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl">
+                        <i class="bi bi-pencil-square mr-2"></i>
+                        Edit Produk
+                    </a>
 
-                <form action="{{ route('products.destroy', $product) }}" method="POST"
-                    onsubmit="return confirm('Apakah Anda yakin ingin menghapus produk ini? Tindakan ini tidak dapat dibatalkan.')"
-                    class="inline-block">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit"
-                        class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white font-semibold rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl">
-                        <i class="bi bi-trash mr-2"></i>
-                        Hapus Produk
-                    </button>
-                </form>
-            </div>
+                    <form action="{{ route('products.destroy', $product) }}" method="POST"
+                        onsubmit="return confirm('Apakah Anda yakin ingin menghapus produk ini? Tindakan ini tidak dapat dibatalkan.')"
+                        class="inline-block">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit"
+                            class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white font-semibold rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl">
+                            <i class="bi bi-trash mr-2"></i>
+                            Hapus Produk
+                        </button>
+                    </form>
+                </div>
+            @endif
         </div>
     </div>
 </x-app-layout>

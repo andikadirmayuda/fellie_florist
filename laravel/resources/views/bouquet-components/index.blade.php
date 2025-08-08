@@ -7,14 +7,16 @@
                 </h2>
                 {{-- <Bo class="text-gray-600">Datfar Bouqet</Bo> --}}
             </div>
-            <a href="{{ route('bouquet-components.create') }}"
-                class="bg-pink-600 hover:bg-pink-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition-all duration-200 flex items-center gap-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                </svg>
-                Tambah Komponen
-            </a>
+            @if(!auth()->user()->hasRole('kasir'))
+                <a href="{{ route('bouquet-components.create') }}"
+                    class="bg-pink-600 hover:bg-pink-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition-all duration-200 flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    Tambah Komponen
+                </a>
+            @endif
         </div>
     </x-slot>
 
