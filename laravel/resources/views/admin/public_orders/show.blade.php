@@ -1216,7 +1216,7 @@
                         </svg>
                         Copy Pesan
                     </button>
-
+                    @if(!auth()->user()->hasRole(['customer service', 'karyawan']))
                     @if(config('public_order.enable_public_order_edit') && $order->status === 'pending')
                         <a href="{{ route('public.order.edit', ['public_code' => $order->public_code]) }}" target="_blank"
                             class="inline-flex items-center justify-center px-4 py-3 bg-yellow-600 hover:bg-yellow-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-sm">
@@ -1226,6 +1226,7 @@
                             </svg>
                             Edit Pesanan
                         </a>
+                    @endif
                     @endif
                 @else
                     <div class="col-span-full">

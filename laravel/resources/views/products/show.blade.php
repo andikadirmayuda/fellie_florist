@@ -303,7 +303,8 @@
             </div>
 
             <!-- Action Buttons -->
-            @if(!auth()->user()->hasRole('kasir'))
+            {{-- @if(!auth()->user()->hasRole('kasir')) --}}
+            @if(!auth()->user()->hasRole(['kasir', 'karyawan']))
                 <div class="mt-8 flex justify-center space-x-4 form-enter">
                     <a href="{{ route('products.edit', $product) }}"
                         class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl">

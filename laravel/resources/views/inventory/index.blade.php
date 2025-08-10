@@ -5,7 +5,8 @@
                 <i class="bi bi-box-seam mr-2"></i>
                 Manajemen Inventaris
             </h1>
-            @if(!auth()->user()->hasRole('kasir'))
+            {{-- @if(!auth()->user()->hasRole('kasir')) --}}
+            @if(!auth()->user()->hasRole(['kasir', 'karyawan']))
                 <div class="flex gap-3">
                     <a href="{{ route('inventory.adjust.form') }}"
                         class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-4 rounded-xl transition-all duration-200">
@@ -516,7 +517,7 @@
                                             <i class="bi bi-clock-history mr-1"></i>
                                             History
                                         </a>
-                                        @if(!auth()->user()->hasRole('kasir'))
+                                        @if(!auth()->user()->hasRole(['kasir', 'karyawan']))
                                             <a href="{{ route('inventory.adjust-form', $product) }}" 
                                                class="inline-flex items-center px-3 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-sm font-medium rounded-lg transition-all duration-200 shadow-sm hover:shadow-md">
                                                 <i class="bi bi-pencil-square mr-1"></i>

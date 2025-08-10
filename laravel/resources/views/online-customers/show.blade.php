@@ -10,10 +10,12 @@
                     {{ __('Detail Pelanggan Online') }} - {{ $customerData->customer_name }}
                 </h2>
             </div>
+            @if(!auth()->user()->hasRole(['customer service', 'karyawan']))
             <a href="{{ route('online-customers.edit', $customerData->wa_number) }}"
                 class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition">
                 <i class="bi bi-pencil mr-1"></i> Edit Pelanggan
             </a>
+            @endif
         </div>
     </x-slot>
 
@@ -117,6 +119,7 @@
                     </div>
 
                     <!-- Quick Actions -->
+                    @if(!auth()->user()->hasRole(['customer service', 'karyawan']))
                     <div class="bg-gray-50 rounded-lg p-6 mb-6">
                         <h3 class="text-lg font-semibold text-gray-800 mb-4">Aksi Cepat</h3>
 
@@ -167,6 +170,7 @@
                             </div>
                         </div>
                     </div>
+                    @endif
 
                     <!-- Reseller Code Management -->
                     @if($customerData->customer && $customerData->customer->is_reseller)

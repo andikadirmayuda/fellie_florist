@@ -176,34 +176,36 @@
                                                                                             d="M15 12a3 3 0 11-6 0 3 3 0 016 0zm6 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                                                     </svg>
                                                                                 </a>
-                                                                                <a href="{{ route('bouquet-components.edit', $comp->id) }}"
-                                                                                    title="Edit"
-                                                                                    class="p-1 rounded hover:bg-indigo-100 text-indigo-600 transition-colors">
-                                                                                    <svg xmlns="http://www.w3.org/2000/svg"
-                                                                                        class="h-4 w-4" fill="none" viewBox="0 0 24 24"
-                                                                                        stroke="currentColor">
-                                                                                        <path stroke-linecap="round"
-                                                                                            stroke-linejoin="round" stroke-width="2"
-                                                                                            d="M11 5h2m-1 0v14m-7-7h14" />
-                                                                                    </svg>
-                                                                                </a>
-                                                                                <form
-                                                                                    action="{{ route('bouquet-components.destroy', $comp->id) }}"
-                                                                                    method="POST" class="inline">
-                                                                                    @csrf
-                                                                                    @method('DELETE')
-                                                                                    <button type="submit" title="Hapus"
-                                                                                        class="p-1 rounded hover:bg-red-100 text-red-600 transition-colors"
-                                                                                        onclick="return confirm('Hapus komponen ini?')">
+                                                                                @if(!auth()->user()->hasRole('kasir'))
+                                                                                    <a href="{{ route('bouquet-components.edit', $comp->id) }}"
+                                                                                        title="Edit"
+                                                                                        class="p-1 rounded hover:bg-indigo-100 text-indigo-600 transition-colors">
                                                                                         <svg xmlns="http://www.w3.org/2000/svg"
-                                                                                            class="h-4 w-4" fill="none"
-                                                                                            viewBox="0 0 24 24" stroke="currentColor">
+                                                                                            class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                                                                                            stroke="currentColor">
                                                                                             <path stroke-linecap="round"
                                                                                                 stroke-linejoin="round" stroke-width="2"
-                                                                                                d="M6 18L18 6M6 6l12 12" />
+                                                                                                d="M11 5h2m-1 0v14m-7-7h14" />
                                                                                         </svg>
-                                                                                    </button>
-                                                                                </form>
+                                                                                    </a>
+                                                                                    <form
+                                                                                        action="{{ route('bouquet-components.destroy', $comp->id) }}"
+                                                                                        method="POST" class="inline">
+                                                                                        @csrf
+                                                                                        @method('DELETE')
+                                                                                        <button type="submit" title="Hapus"
+                                                                                            class="p-1 rounded hover:bg-red-100 text-red-600 transition-colors"
+                                                                                            onclick="return confirm('Hapus komponen ini?')">
+                                                                                            <svg xmlns="http://www.w3.org/2000/svg"
+                                                                                                class="h-4 w-4" fill="none"
+                                                                                                viewBox="0 0 24 24" stroke="currentColor">
+                                                                                                <path stroke-linecap="round"
+                                                                                                    stroke-linejoin="round" stroke-width="2"
+                                                                                                    d="M6 18L18 6M6 6l12 12" />
+                                                                                            </svg>
+                                                                                        </button>
+                                                                                    </form>
+                                                                                @endif
                                                                             </div>
                                                                         </div>
                                                                     </div>
@@ -213,16 +215,18 @@
                                                     </div>
 
                                                     <!-- Action Button -->
-                                                    <a href="{{ route('bouquet-components.manage', ['bouquet' => $group['bouquet']->id, 'size' => $sizeGroup['size']->id]) }}"
-                                                        class="w-full bg-pink-600 hover:bg-pink-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2">
-                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor"
-                                                            viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                stroke-width="2"
-                                                                d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.5 6M7 13l-1.5-6m0 0L4 5M7 13h10m0 0v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6z" />
-                                                        </svg>
-                                                        Kelola Komponen
-                                                    </a>
+                                                    @if(!auth()->user()->hasRole('kasir'))
+                                                        <a href="{{ route('bouquet-components.manage', ['bouquet' => $group['bouquet']->id, 'size' => $sizeGroup['size']->id]) }}"
+                                                            class="w-full bg-pink-600 hover:bg-pink-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2">
+                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                                viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                                    stroke-width="2"
+                                                                    d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.5 6M7 13l-1.5-6m0 0L4 5M7 13h10m0 0v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6z" />
+                                                            </svg>
+                                                            Kelola Komponen
+                                                        </a>
+                                                    @endif
                                                 </div>
                                             @endforeach
                                         </div>
