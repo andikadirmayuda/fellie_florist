@@ -21,7 +21,10 @@ class CreateProductPricesTable extends Migration
                 'ikat_20',
                 'reseller',
                 'normal',
-                'promo'
+                'promo',
+                'custom_ikat',
+                'custom_tangkai',
+                'custom_khusus'
             ]);
             $table->decimal('price', 12, 2);
             $table->integer('unit_equivalent');

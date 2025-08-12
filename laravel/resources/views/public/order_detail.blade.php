@@ -30,7 +30,7 @@
                     class="text-2xl sm:text-3xl font-extrabold text-pink-600 tracking-tight mb-1 flex items-center justify-center gap-2">
                     <i class="bi bi-flower1 text-pink-400 text-2xl"></i> Fellie Florist
                 </h1>
-                <p class="text-gray-500 text-xs sm:text-base font-medium">Detail Pemesanan Via - Website</p>
+                <p class="text-gray-500 text-xs sm:text-base font-medium">Detail Pemesanan</p>
                 <div class="mt-2 mb-4">
                     <span class="text-sm text-gray-600">Kode Pesanan:</span>
                     <span class="font-mono font-bold text-lg text-pink-600 bg-pink-50 px-3 py-1 rounded-lg border">{{ $order->public_code }}</span>

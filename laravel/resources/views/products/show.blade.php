@@ -255,6 +255,8 @@
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
                             @forelse($product->prices as $price)
+                                {{-- @if(!in_array($price->type, ['custom_ikat', 'custom_tangkai',
+                                'custom_khusus'])) --}}
                                 <tr class="hover:bg-gray-50 transition-colors">
                                     <td class="px-6 py-4">
                                         <div class="flex items-center">
@@ -286,6 +288,7 @@
                                         @endif
                                     </td>
                                 </tr>
+                                {{-- @endif --}}
                             @empty
                                 <tr>
                                     <td colspan="4" class="px-6 py-8 text-center">

@@ -17,18 +17,21 @@ return new class extends Migration
             $table->foreignId('product_id')->constrained('products');
             $table->enum('price_type', [
                 'per_tangkai',
-                'ikat_5', 
+                'ikat_5',
                 'ikat_10',
                 'ikat_20',
                 'reseller',
                 'normal',
-                'promo'
+                'promo',
+                'custom_ikat',
+                'custom_tangkai',
+                'custom_khusus'
             ])->default('per_tangkai');
             $table->integer('quantity');
             $table->decimal('unit_price', 12, 2);
             $table->decimal('subtotal', 12, 2);
             $table->timestamps();
-            
+
             $table->index(['custom_bouquet_id', 'product_id']);
             $table->index('price_type');
         });

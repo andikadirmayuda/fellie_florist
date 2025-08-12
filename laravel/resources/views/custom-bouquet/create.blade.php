@@ -404,50 +404,6 @@
 
     <!-- Main Content -->
     <div class="w-full max-w-6xl mx-auto px-4 py-6">
-        <!-- Status Bar -->
-        <div class="mb-6 flex items-center justify-center gap-4 text-sm">
-            <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full">
-                <i class="bi bi-palette2 mr-1"></i>
-                Draft ID: #{{ $customBouquet->id }}
-            </span>
-            <span class="bg-rose-100 text-rose-800 px-3 py-1 rounded-full font-semibold" id="totalPrice">
-                <i class="bi bi-currency-dollar mr-1"></i>
-                Rp {{ number_format($customBouquet->total_price, 0, ',', '.') }}
-            </span>
-        </div>
-
-        <!-- Search and Filters -->
-        <div class="mb-8 flex flex-col items-center">
-            <!-- Enhanced Filter Chips -->
-            <div class="flex flex-wrap gap-3 justify-center">
-                <button
-                    class="category-tab chip-btn px-6 py-3 rounded-full border-2 border-rose-200 bg-white text-gray-700 text-sm font-semibold shadow-md hover:shadow-lg hover:bg-rose-50 transition-all duration-200 active"
-                    data-category="">
-                    <span class="mr-2">🌺</span>Semua Produk
-                </button>
-                <button type="button"
-                    class="category-tab chip-btn px-6 py-3 rounded-full border-2 border-rose-200 bg-white text-gray-700 text-sm font-semibold shadow-md hover:shadow-lg hover:bg-rose-50 transition-all duration-200"
-                    data-category="Fresh Flowers">
-                    <span class="mr-2">🌿</span>Fresh Flowers
-                </button>
-                <button type="button"
-                    class="category-tab chip-btn px-6 py-3 rounded-full border-2 border-rose-200 bg-white text-gray-700 text-sm font-semibold shadow-md hover:shadow-lg hover:bg-rose-50 transition-all duration-200"
-                    data-category="Artificial">
-                    <span class="mr-2">🍁</span>Artificial
-                </button>
-                <button type="button"
-                    class="category-tab chip-btn px-6 py-3 rounded-full border-2 border-rose-200 bg-white text-gray-700 text-sm font-semibold shadow-md hover:shadow-lg hover:bg-rose-50 transition-all duration-200"
-                    data-category="Daun">
-                    <span class="mr-2">🍃</span>Daun
-                </button>
-                <button type="button"
-                    class="category-tab chip-btn px-6 py-3 rounded-full border-2 border-rose-200 bg-white text-gray-700 text-sm font-semibold shadow-md hover:shadow-lg hover:bg-rose-50 transition-all duration-200"
-                    data-category="Aksesoris">
-                    <span class="mr-2">🎀</span>Aksesoris
-                </button>
-            </div>
-        </div>
-
         <!-- Horizontal Bouquet Builder -->
         <div class="mb-6 horizontal-builder">
             <div class="bg-white rounded-xl shadow-lg overflow-hidden">
@@ -489,7 +445,7 @@
                         </div>
                     </div>
                 </div>
-
+    
                 <!-- Builder Content -->
                 <div class="p-6">
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -522,7 +478,7 @@
                                 </div>
                             </div>
                         </div>
-
+    
                         <!-- Actions & Reference (Right) -->
                         <div class="lg:col-span-1">
                             <!-- Reference Upload -->
@@ -561,7 +517,7 @@
                                     </button>
                                 </div>
                             </div>
-
+    
                             <!-- Action Buttons -->
                             <div class="space-y-3">
                                 <button type="button" id="addToMainCartBtn"
@@ -575,7 +531,7 @@
                                         <span>Tambah ke Keranjang Utama</span>
                                     </div>
                                 </button>
-
+    
                                 <div class="flex space-x-2">
                                     <button type="button" id="clearBuilderBtn"
                                         class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-800 font-medium py-2 px-3 rounded-lg transition-all duration-200 text-sm">
@@ -592,6 +548,50 @@
                 </div>
             </div>
         </div>
+        <!-- Status Bar -->
+        <div class="mb-6 flex items-center justify-center gap-4 text-sm">
+            <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full">
+                <i class="bi bi-palette2 mr-1"></i>
+                Draft ID: #{{ $customBouquet->id }}
+            </span>
+            <span class="bg-rose-100 text-rose-800 px-3 py-1 rounded-full font-semibold" id="totalPrice">
+                <i class="bi bi-currency-dollar mr-1"></i>
+                Rp {{ number_format($customBouquet->total_price, 0, ',', '.') }}
+            </span>
+        </div>
+        
+        <!-- Search and Filters -->
+        <div class="mb-8 flex flex-col items-center">
+            <!-- Enhanced Filter Chips -->
+            <div class="flex flex-wrap gap-3 justify-center">
+                <button
+                    class="category-tab chip-btn px-6 py-3 rounded-full border-2 border-rose-200 bg-white text-gray-700 text-sm font-semibold shadow-md hover:shadow-lg hover:bg-rose-50 transition-all duration-200 active"
+                    data-category="">
+                    <span class="mr-2">🌺</span>Semua Produk
+                </button>
+                <button type="button"
+                    class="category-tab chip-btn px-6 py-3 rounded-full border-2 border-rose-200 bg-white text-gray-700 text-sm font-semibold shadow-md hover:shadow-lg hover:bg-rose-50 transition-all duration-200"
+                    data-category="Fresh Flowers">
+                    <span class="mr-2">🌿</span>Fresh Flowers
+                </button>
+                <button type="button"
+                    class="category-tab chip-btn px-6 py-3 rounded-full border-2 border-rose-200 bg-white text-gray-700 text-sm font-semibold shadow-md hover:shadow-lg hover:bg-rose-50 transition-all duration-200"
+                    data-category="Artificial">
+                    <span class="mr-2">🍁</span>Artificial
+                </button>
+                <button type="button"
+                    class="category-tab chip-btn px-6 py-3 rounded-full border-2 border-rose-200 bg-white text-gray-700 text-sm font-semibold shadow-md hover:shadow-lg hover:bg-rose-50 transition-all duration-200"
+                    data-category="Daun">
+                    <span class="mr-2">🍃</span>Daun
+                </button>
+                <button type="button"
+                    class="category-tab chip-btn px-6 py-3 rounded-full border-2 border-rose-200 bg-white text-gray-700 text-sm font-semibold shadow-md hover:shadow-lg hover:bg-rose-50 transition-all duration-200"
+                    data-category="Aksesoris">
+                    <span class="mr-2">🎀</span>Aksesoris
+                </button>
+            </div>
+        </div>
+
 
         <!-- Product Selection -->
         <div class="bg-white rounded-xl shadow-lg overflow-hidden">
@@ -605,59 +605,58 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4"
                     id="productsGrid">
                     @foreach($products as $product)
-                        <div class="product-card bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-                            data-category="{{ $product->category->name ?? '' }}" data-product-id="{{ $product->id }}">
-
-                            <!-- Product Image -->
-                            <div class="aspect-w-1 aspect-h-1 bg-gray-100 rounded-t-lg overflow-hidden">
-                                @if($product->image)
-                                    <img src="{{ Storage::url($product->image) }}" alt="{{ $product->name }}"
-                                        class="w-full h-32 object-cover">
-                                @else
-                                    <div
-                                        class="w-full h-32 bg-gradient-to-br from-rose-100 to-pink-100 flex items-center justify-center">
-                                        <span class="text-4xl">🌸</span>
-                                    </div>
-                                @endif
-                            </div>
-
-                            <!-- Product Info -->
-                            <div class="p-4">
-                                <h3 class="font-semibold text-gray-900 text-sm mb-1">{{ $product->name }}</h3>
-                                <p class="text-xs text-gray-500 mb-2">
-                                    {{ $product->category->name ?? 'Uncategorized' }}
-                                </p>
-
-                                <!-- Stock Info -->
-                                <div class="flex items-center justify-between mb-3">
-                                    <span class="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full">
-                                        📦 {{ $product->current_stock }} {{ $product->base_unit }} tersedia
-                                    </span>
+                        @php
+                            $rangkaianPrices = $product->prices->filter(function ($price) {
+                                return in_array($price->type, ['custom_ikat', 'custom_tangkai', 'custom_khusus']);
+                            });
+                        @endphp
+                        @if($rangkaianPrices->count() > 0)
+                            <div class="product-card bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                                data-category="{{ $product->category->name ?? '' }}" data-product-id="{{ $product->id }}">
+                                <!-- Product Image -->
+                                <div class="aspect-w-1 aspect-h-1 bg-gray-100 rounded-t-lg overflow-hidden">
+                                    @if($product->image)
+                                        <img src="{{ Storage::url($product->image) }}" alt="{{ $product->name }}"
+                                            class="w-full h-32 object-cover">
+                                    @else
+                                        <div
+                                            class="w-full h-32 bg-gradient-to-br from-rose-100 to-pink-100 flex items-center justify-center">
+                                            <span class="text-4xl">🌸</span>
+                                        </div>
+                                    @endif
                                 </div>
-
-                                <!-- Price Preview (show default price) -->
-                                @php
-                                    $defaultPrice = $product->prices->where('is_default', true)->first() ?? $product->prices->first();
-                                @endphp
-                                @if($defaultPrice)
-                                    <div class="text-sm">
-                                        <span class="text-rose-600 font-semibold">
-                                            Rp {{ number_format($defaultPrice->price, 0, ',', '.') }}
-                                        </span>
-                                        <span class="text-gray-500 text-xs">
-                                            /{{ $defaultPrice->type === 'per_tangkai' ? 'tangkai' : $defaultPrice->type }}
+                                <!-- Product Info -->
+                                <div class="p-4">
+                                    <h3 class="font-semibold text-gray-900 text-sm mb-1">{{ $product->name }}</h3>
+                                    <p class="text-xs text-gray-500 mb-2">
+                                        {{ $product->category->name ?? 'Uncategorized' }}
+                                    </p>
+                                    <!-- Stock Info -->
+                                    <div class="flex items-center justify-between mb-3">
+                                        <span class="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full">
+                                            📦 {{ $product->current_stock }} {{ $product->base_unit }} tersedia
                                         </span>
                                     </div>
-                                @endif
-
-                                <!-- Add Button -->
-                                <button
-                                    class="w-full mt-3 bg-purple-500 hover:bg-purple-600 text-white text-sm py-2 px-3 rounded-md transition-colors add-product-btn"
-                                    data-product-id="{{ $product->id }}">
-                                    + Tambah ke Bouquet
-                                </button>
+                                    <!-- Price Preview (show only rangkaian prices) -->
+                                    @foreach($rangkaianPrices as $price)
+                                        <div class="text-sm mb-1">
+                                            <span class="text-rose-600 font-semibold">
+                                                Rp {{ number_format($price->price, 0, ',', '.') }}
+                                            </span>
+                                            <span class="text-gray-500 text-xs">
+                                                /{{ ucwords(str_replace('_', ' ', $price->type)) }}
+                                            </span>
+                                        </div>
+                                    @endforeach
+                                    <!-- Add Button -->
+                                    <button
+                                        class="w-full mt-3 bg-purple-500 hover:bg-purple-600 text-white text-sm py-2 px-3 rounded-md transition-colors add-product-btn"
+                                        data-product-id="{{ $product->id }}">
+                                        + Tambah ke Bouquet
+                                    </button>
+                                </div>
                             </div>
-                        </div>
+                        @endif
                     @endforeach
                 </div>
 
@@ -836,8 +835,14 @@
         }
 
         function initializeBuilderActions() {
-            document.getElementById('addToMainCartBtn').addEventListener('click', addToMainCart);
-            document.getElementById('clearBuilderBtn').addEventListener('click', clearBuilder);
+            document.getElementById('addToMainCartBtn').addEventListener('click', function (e) {
+                e.preventDefault();
+                addToMainCart();
+            });
+            document.getElementById('clearBuilderBtn').addEventListener('click', function (e) {
+                e.preventDefault();
+                clearBuilder();
+            });
         }
 
         async function openProductModal(productId) {
@@ -883,8 +888,10 @@
     `;
             document.getElementById('modalProductDetails').innerHTML = detailsHtml;
 
-            // Price options
-            const priceOptionsHtml = product.prices.map(price => `
+            // Price options: filter hanya tipe rangkaian
+            const priceOptionsHtml = product.prices
+                .filter(price => ['custom_ikat', 'custom_tangkai', 'custom_khusus'].includes(price.type))
+                .map(price => `
         <label class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
             <input type="radio" name="price_type" value="${price.type}" class="text-rose-500 focus:ring-rose-500" ${price.is_default ? 'checked' : ''}>
             <div class="ml-3 flex-1">
@@ -1048,7 +1055,7 @@
             <div class="flex justify-between items-start">
                 <div class="flex-1">
                     <h4 class="text-sm font-semibold text-gray-900">${item.product_name}</h4>
-                    <p class="text-xs text-purple-600 bg-purple-50 inline-block px-2 py-1 rounded-full mt-1">${item.price_type_display}</p>
+                    <p class="text-xs text-purple-600 bg-purple-50 inline-block px-2 py-1 rounded-full mt-1">${item.price_type_display ?? item.price_type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</p>
                     <div class="flex items-center mt-2 space-x-2 quantity-controls">
                         <button class="quantity-btn bg-gray-200 hover:bg-gray-300 text-gray-700 w-6 h-6 rounded-full text-xs flex items-center justify-center transition-colors" 
                                 onclick="updateItemQuantity(${item.id}, ${item.quantity - 1})">-</button>
@@ -1192,7 +1199,11 @@
             }
         }
 
-        async function addToMainCart() {
+        async function addToMainCart(e) {
+            if (e) e.preventDefault();
+
+            console.log('addToMainCart called'); // Debug log
+
             // Check if custom bouquet has items
             const selectedItems = document.querySelectorAll('#selectedItems .bg-gradient-to-r');
             if (selectedItems.length === 0) {
@@ -1230,14 +1241,14 @@
 
                 const cartData = await cartResponse.json();
                 if (cartData.success) {
+                    console.log('Cart success:', cartData); // Debug log
                     showNotification('Custom bouquet berhasil ditambahkan ke keranjang!', 'success');
                     updateCart(); // Update cart display
 
-                    // Optionally redirect to main flowers page after success
-                    setTimeout(() => {
-                        window.location.href = '/product-fellie';
-                    }, 2000);
+                    // Optional: Show success message with option to continue or go to cart
+                    // User stays on the current page to continue building or viewing their bouquet
                 } else {
+                    console.error('Cart error:', cartData); // Debug log
                     throw new Error(cartData.message || 'Gagal menambahkan ke keranjang');
                 }
             } catch (error) {
@@ -1317,10 +1328,7 @@
                         showNotification('Custom bouquet berhasil ditambahkan ke keranjang!', 'success');
                         updateCart(); // Update cart display
 
-                        // Optionally redirect to main cart or flowers page
-                        setTimeout(() => {
-                            window.location.href = '/product-fellie';
-                        }, 2000);
+                        // User stays on current page to continue building bouquet
                     } else {
                         throw new Error(data.message || 'Gagal menambahkan ke keranjang');
                     }

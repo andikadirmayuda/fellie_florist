@@ -107,7 +107,7 @@
         const resellerSection = document.getElementById('resellerSection');
 
         currentFlowerId = flowerId;
-        availablePrices = prices;
+        availablePrices = prices.filter(price => !['custom_ikat', 'custom_tangkai', 'custom_khusus'].includes(price.type));
         selectedPriceId = null;
         addBtn.disabled = true;
 

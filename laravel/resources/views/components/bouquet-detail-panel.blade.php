@@ -133,8 +133,18 @@
     function renderBouquetDetail(bouquet) {
         const content = document.getElementById('bouquetDetailContent');
 
-        // Calculate price range
-        const prices = bouquet.prices || [];
+        // Filter prices to only include sizes that have components
+        const allPrices = bouquet.prices || [];
+        const componentsBySize = bouquet.components_by_size || {};
+
+        // Only include prices for sizes that have components
+        const prices = allPrices.filter(price => {
+            const sizeKey = String(price.size_id);
+            const sizeComponents = componentsBySize[sizeKey] || [];
+            return sizeComponents.length > 0;
+        });
+
+        // Calculate price range from filtered prices
         const minPrice = prices.length > 0 ? Math.min(...prices.map(p => p.price)) : 0;
         const maxPrice = prices.length > 0 ? Math.max(...prices.map(p => p.price)) : 0;
 
@@ -181,7 +191,7 @@
         <div class="mb-6" data-section="sizes">
             <h3 class="text-lg font-semibold text-gray-800 mb-4">Ukuran & Harga Tersedia</h3>
             <div class="space-y-3">
-                ${prices.map((price, index) => `
+                ${prices.length > 0 ? prices.map((price, index) => `
                     <div class="border-2 border-gray-200 rounded-xl transition-all duration-200" id="size-card-${price.id}">
                         <div class="p-4 cursor-pointer"
                              onmouseenter="this.parentElement.classList.add('shadow-md')" 
@@ -219,7 +229,15 @@
                             </div>
                         </div>
                     </div>
-                `).join('')}
+                `).join('') : `
+                    <div class="text-center py-8 bg-gray-50 rounded-xl">
+                        <div class="w-16 h-16 bg-gray-200 rounded-full mx-auto mb-4 flex items-center justify-center">
+                            <i class="bi bi-flower3 text-2xl text-gray-400"></i>
+                        </div>
+                        <h4 class="text-lg font-semibold text-gray-600 mb-2">Belum Ada Komponen Bunga</h4>
+                        <p class="text-gray-500 text-sm">Bouquet ini belum memiliki komponen bunga yang tersedia.</p>
+                    </div>
+                `}
             </div>
         </div>
 
@@ -253,18 +271,18 @@
     `;
 
         // Update footer button
-        updateFooterButton(bouquet);
+        updateFooterButton(bouquet, prices);
     }
 
-    function updateFooterButton(bouquet) {
+    function updateFooterButton(bouquet, filteredPrices) {
         const addToCartBtn = document.getElementById('addBouquetToCart');
         const addToCartText = document.getElementById('addToCartText');
 
-        if (bouquet.prices && bouquet.prices.length === 1) {
+        if (filteredPrices && filteredPrices.length === 1) {
             addToCartText.textContent = 'Tambah ke Keranjang + Kartu Ucapan';
             addToCartBtn.onclick = () => {
                 // Auto-select the single size and show greeting card modal
-                const singlePrice = bouquet.prices[0];
+                const singlePrice = filteredPrices[0];
                 showGreetingCardModal(
                     bouquet.id,
                     bouquet.name,
@@ -273,7 +291,7 @@
                     singlePrice.price
                 );
             };
-        } else if (bouquet.prices && bouquet.prices.length > 1) {
+        } else if (filteredPrices && filteredPrices.length > 1) {
             addToCartText.textContent = 'Pilih Ukuran Terlebih Dahulu';
             addToCartBtn.onclick = () => {
                 // Scroll to sizes section

@@ -24,6 +24,22 @@ use Illuminate\Database\Eloquent\Model;
  */
 class PublicOrderItem extends Model
 {
+    public function getPriceTypeDisplayAttribute()
+    {
+        $priceTypeLabels = [
+            'per_tangkai' => 'Per Tangkai',
+            'ikat_5' => 'Ikat 5',
+            'ikat_10' => 'Ikat 10',
+            'ikat_20' => 'Ikat 20',
+            'reseller' => 'Reseller',
+            'normal' => 'Normal',
+            'promo' => 'Promo',
+            'custom_ikat' => 'Custom Ikat',
+            'custom_tangkai' => 'Custom Tangkai',
+            'custom_khusus' => 'Custom Khusus'
+        ];
+        return $priceTypeLabels[$this->price_type] ?? $this->price_type;
+    }
     protected $fillable = [
         'public_order_id',
         'product_id',

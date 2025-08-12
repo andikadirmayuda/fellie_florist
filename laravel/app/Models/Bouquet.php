@@ -5,15 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\DB;
 
 class Bouquet extends Model
 {
     use HasFactory, SoftDeletes;
-    
+
     protected $fillable = [
-        'name', 
-        'category_id', 
-        'description', 
+        'name',
+        'category_id',
+        'description',
         'image'
     ];
 
@@ -35,9 +36,9 @@ class Bouquet extends Model
     public function sizes()
     {
         return $this->belongsToMany(BouquetSize::class, 'bouquet_prices', 'bouquet_id', 'size_id')
-                    ->using(BouquetPrice::class)
-                    ->withPivot('price')
-                    ->withTimestamps();
+            ->using(BouquetPrice::class)
+            ->withPivot('price')
+            ->withTimestamps();
     }
 
     public function orderItems()
@@ -61,5 +62,15 @@ class Bouquet extends Model
     public function validComponents()
     {
         return $this->components()->whereHas('product');
+    }
+
+    // Helper method untuk mendapatkan ukuran yang memiliki komponen
+    public function getSizesWithComponentsAttribute()
+    {
+        return $this->sizes->filter(function ($size) {
+            return $this->components()->where('size_id', $size->id)
+                ->whereHas('product')
+                ->exists();
+        });
     }
 }

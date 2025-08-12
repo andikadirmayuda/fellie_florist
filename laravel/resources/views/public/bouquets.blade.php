@@ -311,20 +311,40 @@
     <div class="w-full max-w-6xl mx-auto px-4 py-6">
         <!-- Search and Filters -->
         <div class="mb-8 flex flex-col items-center">
-            <!-- Enhanced Search Bar -->
+            <!-- Enhanced Search Bar with Price Filter -->
             <div class="w-full max-w-2xl mb-4">
-                <div class="relative">
-                    <i
-                        class="bi bi-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg"></i>
-                    <input type="text" id="searchInput" placeholder="Cari bouquet impian Anda..."
-                        class="w-full pl-12 pr-4 py-4 text-lg border-2 border-rose-200 rounded-2xl focus:ring-2 focus:ring-rose-400 focus:border-rose-400 focus:outline-none shadow-lg transition-all duration-200 bg-white/90"
-                        onkeyup="searchBouquets()">
+                <div class="flex gap-3">
+                    <!-- Search Input -->
+                    <div class="flex-1 relative">
+                        <i
+                            class="bi bi-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg"></i>
+                        <input type="text" id="searchInput" placeholder="Cari bouquet impian Anda..."
+                            class="w-full pl-12 pr-4 py-4 text-lg border-2 border-rose-200 rounded-2xl focus:ring-2 focus:ring-rose-400 focus:border-rose-400 focus:outline-none shadow-lg transition-all duration-200 bg-white/90"
+                            onkeyup="searchBouquets()">
+                    </div>
+
+                    <!-- Price Filter Dropdown -->
+                    <div class="relative">
+                        <select id="priceFilterSelect"
+                            class="appearance-none bg-white/90 border-2 border-rose-200 rounded-2xl px-4 py-4 pr-10 text-gray-700 focus:ring-2 focus:ring-rose-400 focus:border-rose-400 focus:outline-none shadow-lg transition-all duration-200 cursor-pointer"
+                            onchange="filterByPriceRange()">
+                            <option value="">Semua Harga</option>
+                            <option value="0-100000">
+                                < Rp 100k</option>
+                            <option value="100000-300000">Rp 100k - 300k</option>
+                            <option value="300000-500000">Rp 300k - 500k</option>
+                            <option value="500000-1000000">Rp 500k - 1jt</option>
+                            <option value="1000000-999999999">> Rp 1jt</option>
+                        </select>
+                        <i
+                            class="bi bi-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+                    </div>
                 </div>
             </div>
 
             <!-- Enhanced Filter Chips -->
             @if($bouquetCategories->count() > 0)
-                <div class="flex flex-wrap gap-3 justify-center">
+                <div class="flex flex-wrap gap-3 justify-center mb-4">
                     <button type="button"
                         class="chip-btn px-6 py-3 rounded-full border-2 border-rose-200 bg-white text-gray-700 text-sm font-semibold shadow-md hover:shadow-lg hover:bg-rose-50 transition-all duration-200 active"
                         data-category="" onclick="selectBouquetCategory(this)">
@@ -344,117 +364,133 @@
         <!-- Bouquet Grid -->
         <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6" id="bouquetGrid">
             @forelse($bouquets as $bouquet)
-                <div class="bouquet-card group" data-name="{{ strtolower($bouquet->name) }}"
-                    data-bouquet-category="{{ $bouquet->category_id ?? '' }}">
-                    <div
-                        class="card-hover glass-effect rounded-2xl shadow-lg p-3 sm:p-4 h-full flex flex-col overflow-hidden">
-                        <!-- Image -->
-                        <div class="relative h-36 sm:h-40 mb-3 sm:mb-4 rounded-xl overflow-hidden">
-                            @if($bouquet->image)
-                                <img src="{{ asset('storage/' . $bouquet->image) }}" alt="{{ $bouquet->name }}"
-                                    class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
-                            @else
-                                <div
-                                    class="w-full h-full flex items-center justify-center bg-gradient-to-br from-rose-100 to-pink-100 rounded-xl">
-                                    <i class="bi bi-flower3 text-3xl text-rose-400"></i>
-                                </div>
-                            @endif
-                            <div
-                                class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                            </div>
-                            <!-- Wishlist Button -->
-                            <button
-                                class="absolute top-2 sm:top-3 right-2 sm:right-3 w-6 sm:w-8 h-6 sm:h-8 bg-white/90 hover:bg-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
-                                <i class="bi bi-heart text-rose-500 text-xs sm:text-sm"></i>
-                            </button>
-                        </div>
-
-                        <!-- Details -->
-                        <div class="flex-1 flex flex-col">
-                            <div class="flex items-start justify-between mb-2">
-                                <h3 class="font-bold text-sm sm:text-base text-gray-800 line-clamp-2 flex-1 leading-tight">
-                                    {{ $bouquet->name }}
-                                </h3>
-                                <span
-                                    class="ml-2 px-2 py-1 bg-rose-100 text-rose-700 rounded-full text-[10px] sm:text-xs font-medium whitespace-nowrap flex-shrink-0">
-                                    {{ $bouquet->category->name ?? 'Bouquet' }}
-                                </span>
-                            </div>
-
-                            <p class="text-xs sm:text-sm text-gray-600 mb-3 line-clamp-2 leading-relaxed">
-                                {{ $bouquet->description }}
-                            </p>
-
-                            <!-- Sizes -->
-                            <div class="mb-3">
-                                <span class="text-xs text-gray-500 text-center block mb-2">Ukuran Tersedia:</span>
-                                <div class="flex flex-wrap gap-1">
-                                    @php
-                                        // Define size order
-                                        $sizeOrder = ['Extra Small', 'Small', 'Medium', 'Large'];
-
-                                        // Sort sizes based on the defined order
-                                        $sortedSizes = $bouquet->sizes->sortBy(function ($size) use ($sizeOrder) {
-                                            $index = array_search($size->name, $sizeOrder);
-                                            return $index !== false ? $index : 999; // Put unknown sizes at the end
-                                        });
-                                    @endphp
-                                    @foreach($sortedSizes as $size)
-                                        <span
-                                            class="inline-block px-2 py-1 bg-gradient-to-r from-rose-100 to-pink-100 text-rose-700 rounded-full text-[10px] sm:text-xs font-medium">
-                                            {{ $size->name }}
-                                        </span>
-                                    @endforeach
-                                </div>
-                            </div>
-
-                            <!-- Price Range -->
-                            <div class="mb-3 sm:mb-4">
-                                @php
-                                    $minPrice = $bouquet->prices->min('price');
-                                    $maxPrice = $bouquet->prices->max('price');
-                                @endphp
-                                @if($minPrice && $maxPrice)
-                                    <div class="text-center">
-                                        @if($minPrice == $maxPrice)
-                                            <span class="text-price text-sm sm:text-lg font-bold text-rose-600">
-                                                Rp {{ number_format($minPrice, 0, ',', '.') }}
-                                            </span>
-                                        @else
-                                            <span class="text-price text-sm sm:text-lg font-bold text-rose-600">
-                                                Rp {{ number_format($minPrice, 0, ',', '.') }} -
-                                                {{ number_format($maxPrice, 0, ',', '.') }}
-                                            </span>
-                                        @endif
+                @php
+                    // Only show bouquets that have components
+                    $sizeIdsWithComponents = $bouquet->sizesWithComponents->pluck('id');
+                    $pricesWithComponents = $bouquet->prices->whereIn('size_id', $sizeIdsWithComponents);
+                    $minPrice = $pricesWithComponents->min('price') ?? 0;
+                    $maxPrice = $pricesWithComponents->max('price') ?? 0;
+                @endphp
+                @if($bouquet->sizesWithComponents->count() > 0)
+                    <div class="bouquet-card group" data-name="{{ strtolower($bouquet->name) }}"
+                        data-bouquet-category="{{ $bouquet->category_id ?? '' }}" data-min-price="{{ $minPrice }}"
+                        data-max-price="{{ $maxPrice }}">
+                        <div
+                            class="card-hover glass-effect rounded-2xl shadow-lg p-3 sm:p-4 h-full flex flex-col overflow-hidden">
+                            <!-- Image -->
+                            <div class="relative h-36 sm:h-40 mb-3 sm:mb-4 rounded-xl overflow-hidden">
+                                @if($bouquet->image)
+                                    <img src="{{ asset('storage/' . $bouquet->image) }}" alt="{{ $bouquet->name }}"
+                                        class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                                @else
+                                    <div
+                                        class="w-full h-full flex items-center justify-center bg-gradient-to-br from-rose-100 to-pink-100 rounded-xl">
+                                        <i class="bi bi-flower3 text-3xl text-rose-400"></i>
                                     </div>
                                 @endif
+                                <div
+                                    class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                </div>
+                                <!-- Wishlist Button -->
+                                <button
+                                    class="absolute top-2 sm:top-3 right-2 sm:right-3 w-6 sm:w-8 h-6 sm:h-8 bg-white/90 hover:bg-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
+                                    <i class="bi bi-heart text-rose-500 text-xs sm:text-sm"></i>
+                                </button>
                             </div>
 
-                            <!-- Action Buttons -->
-                            <div class="mt-auto space-y-1.5 sm:space-y-2">
-                                @if($bouquet->prices->count() == 1)
-                                    <button onclick="addToCartWithPrice('{{ $bouquet->id }}', 'bouquet')"
-                                        class="w-full bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white font-semibold py-1.5 sm:py-2 px-3 sm:px-4 rounded-xl transition-all duration-200 shadow-md hover:shadow-lg text-xs sm:text-sm">
-                                        <i class="bi bi-cart-plus mr-1 sm:mr-2"></i>Tambah ke Keranjang
-                                    </button>
-                                @else
-                                    <button
-                                        onclick="showBouquetPriceModal('{{ $bouquet->id }}', '{{ $bouquet->name }}', {{ json_encode($bouquet->prices) }})"
-                                        class="w-full bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white font-semibold py-1.5 sm:py-2 px-3 sm:px-4 rounded-xl transition-all duration-200 shadow-md hover:shadow-lg text-xs sm:text-sm"
-                                        data-bouquet-id="{{ $bouquet->id }}" data-bouquet-name="{{ $bouquet->name }}"
-                                        data-bouquet-prices="{{ htmlspecialchars(json_encode($bouquet->prices), ENT_QUOTES, 'UTF-8') }}">
-                                        <i class="bi bi-cart-plus mr-1 sm:mr-2"></i>Pilih Ukuran
-                                    </button>
-                                @endif
+                            <!-- Details -->
+                            <div class="flex-1 flex flex-col">
+                                <div class="flex items-start justify-between mb-2">
+                                    <h3 class="font-bold text-sm sm:text-base text-gray-800 line-clamp-2 flex-1 leading-tight">
+                                        {{ $bouquet->name }}
+                                    </h3>
+                                    <span
+                                        class="ml-2 px-2 py-1 bg-rose-100 text-rose-700 rounded-full text-[10px] sm:text-xs font-medium whitespace-nowrap flex-shrink-0">
+                                        {{ $bouquet->category->name ?? 'Bouquet' }}
+                                    </span>
+                                </div>
 
-                                <button onclick="showBouquetDetailPanel({{ $bouquet->id }})"
-                                    class="block w-full text-center border-2 border-rose-200 text-rose-600 hover:bg-rose-50 font-semibold py-1.5 sm:py-2 px-3 sm:px-4 rounded-xl transition-all duration-200 text-xs sm:text-sm">
-                                    <i class="bi bi-eye mr-1 sm:mr-2"></i>Lihat Detail
-                                </button>
+                                <p class="text-xs sm:text-sm text-gray-600 mb-3 line-clamp-2 leading-relaxed">
+                                    {{ $bouquet->description }}
+                                </p>
+
+                                <!-- Sizes -->
+                                <div class="mb-3">
+                                    <span class="text-xs text-gray-500 text-center block mb-2">Ukuran Tersedia:</span>
+                                    <div class="flex flex-wrap gap-1">
+                                        @php
+                                            // Define size order
+                                            $sizeOrder = ['Extra Small', 'Small', 'Medium', 'Large'];
+
+                                            // Sort sizes based on the defined order - only show sizes with components
+                                            $sortedSizes = $bouquet->sizesWithComponents->sortBy(function ($size) use ($sizeOrder) {
+                                                $index = array_search($size->name, $sizeOrder);
+                                                return $index !== false ? $index : 999; // Put unknown sizes at the end
+                                            });
+                                        @endphp
+                                        @foreach($sortedSizes as $size)
+                                            <span
+                                                class="inline-block px-2 py-1 bg-gradient-to-r from-rose-100 to-pink-100 text-rose-700 rounded-full text-[10px] sm:text-xs font-medium">
+                                                {{ $size->name }}
+                                            </span>
+                                        @endforeach
+                                    </div>
+                                </div>
+
+                                <!-- Price Range -->
+                                <div class="mb-3 sm:mb-4">
+                                    @php
+                                        // Only show prices for sizes that have components
+                                        $sizeIdsWithComponents = $bouquet->sizesWithComponents->pluck('id');
+                                        $pricesWithComponents = $bouquet->prices->whereIn('size_id', $sizeIdsWithComponents);
+                                        $minPrice = $pricesWithComponents->min('price');
+                                        $maxPrice = $pricesWithComponents->max('price');
+                                    @endphp
+                                    @if($minPrice && $maxPrice)
+                                        <div class="text-center">
+                                            @if($minPrice == $maxPrice)
+                                                <span class="text-price text-sm sm:text-lg font-bold text-rose-600">
+                                                    Rp {{ number_format($minPrice, 0, ',', '.') }}
+                                                </span>
+                                            @else
+                                                <span class="text-price text-sm sm:text-lg font-bold text-rose-600">
+                                                    Rp {{ number_format($minPrice, 0, ',', '.') }} -
+                                                    {{ number_format($maxPrice, 0, ',', '.') }}
+                                                </span>
+                                            @endif
+                                        </div>
+                                    @endif
+                                </div>
+
+                                <!-- Action Buttons -->
+                                <div class="mt-auto space-y-1.5 sm:space-y-2">
+                                    @php
+                                        $availablePrices = $bouquet->prices->whereIn('size_id', $sizeIdsWithComponents);
+                                    @endphp
+                                    @if($availablePrices->count() == 1)
+                                        <button onclick="addToCartWithPrice('{{ $bouquet->id }}', 'bouquet')"
+                                            class="w-full bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white font-semibold py-1.5 sm:py-2 px-3 sm:px-4 rounded-xl transition-all duration-200 shadow-md hover:shadow-lg text-xs sm:text-sm">
+                                            <i class="bi bi-cart-plus mr-1 sm:mr-2"></i>Tambah ke Keranjang
+                                        </button>
+                                    @elseif($availablePrices->count() > 1)
+                                        <button
+                                            onclick="showBouquetPriceModal('{{ $bouquet->id }}', '{{ $bouquet->name }}', {{ json_encode($availablePrices->values()) }})"
+                                            class="w-full bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white font-semibold py-1.5 sm:py-2 px-3 sm:px-4 rounded-xl transition-all duration-200 shadow-md hover:shadow-lg text-xs sm:text-sm"
+                                            data-bouquet-id="{{ $bouquet->id }}" data-bouquet-name="{{ $bouquet->name }}"
+                                            data-bouquet-prices="{{ htmlspecialchars(json_encode($availablePrices->values()), ENT_QUOTES, 'UTF-8') }}">
+                                            <i class="bi bi-cart-plus mr-1 sm:mr-2"></i>Pilih Ukuran
+                                        </button>
+                                    @endif
+
+                                    <button onclick="showBouquetDetailPanel({{ $bouquet->id }})"
+                                        class="block w-full text-center border-2 border-rose-200 text-rose-600 hover:bg-rose-50 font-semibold py-1.5 sm:py-2 px-3 sm:px-4 rounded-xl transition-all duration-200 text-xs sm:text-sm">
+                                        <i class="bi bi-eye mr-1 sm:mr-2"></i>Lihat Detail
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                @endif
             @empty
                 <div class="col-span-full text-center py-12">
                     <div class="w-20 h-20 bg-rose-100 rounded-full mx-auto mb-4 flex items-center justify-center">
@@ -517,14 +553,7 @@
 
         // Category filter
         function filterByCategory() {
-            const selectedCategory = document.getElementById('categoryFilter').value;
-            const bouquetCards = document.querySelectorAll('.bouquet-card');
-
-            bouquetCards.forEach(card => {
-                const cardCategory = card.dataset.bouquetCategory;
-                const isVisible = !selectedCategory || cardCategory === selectedCategory;
-                card.style.display = isVisible ? 'block' : 'none';
-            });
+            applyAllFilters();
         }
 
         // Category chips
@@ -541,16 +570,83 @@
 
             // Filter bouquets
             const selectedCategory = button.dataset.category;
+
+            // Apply all filters
+            applyAllFilters();
+        }
+
+        // Price range filter functions
+        function filterByPriceRange() {
+            applyAllFilters();
+        }
+
+        // Combined filter function
+        function applyAllFilters() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const priceFilter = document.getElementById('priceFilterSelect').value;
+
+            // Parse price range from dropdown
+            let minPrice = 0;
+            let maxPrice = Number.MAX_SAFE_INTEGER;
+
+            if (priceFilter) {
+                const [min, max] = priceFilter.split('-').map(p => parseInt(p));
+                minPrice = min;
+                maxPrice = max;
+            }
+
+            // Get selected category
+            const selectedCategoryBtn = document.querySelector('.chip-btn.active');
+            const selectedCategory = selectedCategoryBtn ? selectedCategoryBtn.dataset.category : '';
+
             const bouquetCards = document.querySelectorAll('.bouquet-card');
+            let visibleCount = 0;
 
             bouquetCards.forEach(card => {
+                const bouquetName = card.dataset.name;
                 const cardCategory = card.dataset.bouquetCategory;
-                const isVisible = !selectedCategory || cardCategory === selectedCategory;
+                const cardMinPrice = parseInt(card.dataset.minPrice) || 0;
+                const cardMaxPrice = parseInt(card.dataset.maxPrice) || 0;
+
+                // Check all filter conditions
+                const matchesSearch = bouquetName.includes(searchTerm);
+                const matchesCategory = !selectedCategory || cardCategory === selectedCategory;
+                const matchesPrice = (cardMinPrice <= maxPrice) && (cardMaxPrice >= minPrice);
+
+                const isVisible = matchesSearch && matchesCategory && matchesPrice;
                 card.style.display = isVisible ? 'block' : 'none';
+
+                if (isVisible) visibleCount++;
             });
 
-            // Update select dropdown
-            document.getElementById('categoryFilter').value = selectedCategory;
+            // Show/hide no results message
+            showNoResultsMessage(visibleCount === 0);
+        }
+
+        function showNoResultsMessage(show) {
+            let noResultsDiv = document.getElementById('noResultsMessage');
+
+            if (show && !noResultsDiv) {
+                // Create no results message
+                noResultsDiv = document.createElement('div');
+                noResultsDiv.id = 'noResultsMessage';
+                noResultsDiv.className = 'col-span-full text-center py-12';
+                noResultsDiv.innerHTML = `
+                    <div class="w-20 h-20 bg-rose-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                        <i class="bi bi-search text-2xl text-rose-400"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-600 mb-2">Tidak ada bouquet yang ditemukan</h3>
+                    <p class="text-gray-500">Coba ubah filter pencarian atau rentang harga Anda</p>
+                `;
+                document.getElementById('bouquetGrid').appendChild(noResultsDiv);
+            } else if (!show && noResultsDiv) {
+                noResultsDiv.remove();
+            }
+        }
+
+        // Update search function to use combined filter
+        function searchBouquets() {
+            applyAllFilters();
         }
 
         // Show bouquet price modal  

@@ -108,6 +108,86 @@
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
         }
 
+        /* Label Promo - Ribbon Style */
+        .flower-card .relative,
+        .bouquet-card .relative {
+            position: relative;
+        }
+
+        .promo-label {
+            position: absolute;
+            top: 10px;
+            left: -35px;
+            /* geser supaya miringnya pas */
+            background-color: rgb(255, 0, 132);
+            color: rgb(255, 255, 255);
+            font-weight: bold;
+            padding: 5px 40px;
+            transform: rotate(-45deg);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            font-size: 14px;
+            text-transform: uppercase;
+            z-index: 10;
+        }
+
+        /* Price Tag Animations */
+        @keyframes swing {
+
+            0%,
+            100% {
+                transform: rotate(0deg) translateX(-50%);
+            }
+
+            25% {
+                transform: rotate(2deg) translateX(-50%);
+            }
+
+            75% {
+                transform: rotate(-2deg) translateX(-50%);
+            }
+        }
+
+        .animate-swing {
+            animation: swing 3s ease-in-out infinite;
+        }
+
+        @keyframes bounce-slow {
+
+            0%,
+            100% {
+                transform: rotate(12deg) translateY(0px);
+                animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+            }
+
+            50% {
+                transform: rotate(12deg) translateY(-4px);
+                animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+            }
+        }
+
+        .animate-bounce-slow {
+            animation: bounce-slow 2s infinite;
+        }
+
+        @keyframes slide-shine {
+            0% {
+                transform: translateX(-100%) skewX(-12deg);
+            }
+
+            100% {
+                transform: translateX(200%) skewX(-12deg);
+            }
+        }
+
+        .animate-slide-shine {
+            animation: slide-shine 3s ease-in-out infinite;
+        }
+
+        /* Compact Price Tag */
+        /* Removed old compact tag styles */
+
+        /* Subtle animations - removed unused animations */
+
         /* Flexible card heights - auto-adjust based on content */
         .flower-card,
         .bouquet-card {
@@ -652,6 +732,14 @@
                                 <div
                                     class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                                 </div>
+
+                                <!-- Label Promo - Ribbon Style -->
+                                @if($flower->prices->where('type', 'promo')->isNotEmpty())
+                                    <div class="promo-label">
+                                        PROMO
+                                    </div>
+                                @endif
+
                                 <!-- Wishlist Button -->
                                 <button
                                     class="absolute top-2 sm:top-3 right-2 sm:right-3 w-6 sm:w-8 h-6 sm:h-8 bg-white/90 hover:bg-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
@@ -758,13 +846,15 @@
                                     window.flowerPrices = window.flowerPrices || {};
                                     try {
                                         const pricesData = @json($jsPrices);
-                                        // Validasi dan sanitasi data harga
-                                        const sanitizedPrices = pricesData.map(price => ({
-                                            id: parseInt(price.id) || 0,
-                                            type: price.type || '',
-                                            label: price.label || '',
-                                            price: parseFloat(String(price.price).replace(/[,.]/g, '')) || 0
-                                        }));
+                                        // Validasi dan sanitasi data harga, filter tipe rangkaian
+                                        const sanitizedPrices = pricesData
+                                            .filter(price => !['custom_ikat', 'custom_tangkai', 'custom_khusus'].includes(price.type))
+                                            .map(price => ({
+                                                id: parseInt(price.id) || 0,
+                                                type: price.type || '',
+                                                label: price.label || '',
+                                                price: parseFloat(String(price.price).replace(/[,.]/g, '')) || 0
+                                            }));
                                         window.flowerPrices[{{ (int) $flower->id }}] = sanitizedPrices;
                                     } catch (error) {
                                         console.error('Error parsing flower prices:', error);

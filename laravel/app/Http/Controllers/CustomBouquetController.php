@@ -346,17 +346,20 @@ class CustomBouquetController extends Controller
      */
     private function getPriceTypeDisplayName($type)
     {
-        $names = [
+        $labels = [
             'per_tangkai' => 'Per Tangkai',
             'ikat_5' => 'Ikat 5',
             'ikat_10' => 'Ikat 10',
             'ikat_20' => 'Ikat 20',
             'reseller' => 'Reseller',
             'normal' => 'Normal',
-            'promo' => 'Promo'
+            'promo' => 'Promo',
+            'custom_ikat' => 'Custom Ikat',
+            'custom_tangkai' => 'Custom Tangkai',
+            'custom_khusus' => 'Custom Khusus'
         ];
-
-        return $names[$type] ?? $type;
+        return $labels[$type] ?? ucfirst(str_replace('_', ' ', $type));
+        // return $names[$type] ?? $type;
     }
 
     /**

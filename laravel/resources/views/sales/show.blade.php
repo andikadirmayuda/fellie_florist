@@ -199,7 +199,7 @@
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <span
                                                 class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                                {{ ucfirst(str_replace('_', ' ', $item->price_type)) }}
+                                                {{ method_exists($item, 'getPriceTypeDisplayAttribute') ? $item->price_type_display : ucfirst(str_replace('_', ' ', $item->price_type)) }}
                                             </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-900">
@@ -296,16 +296,16 @@
                 // Pesan WhatsApp
                 const message = `Halo! Berikut adalah struk pembelian Anda:
 
-            📋 *No. Transaksi:* ${orderNumber}
-            📅 *Tanggal:* ${orderDate}
-            💰 *Total:* ${total}
+                        📋 *No. Transaksi:* ${orderNumber}
+                        📅 *Tanggal:* ${orderDate}
+                        💰 *Total:* ${total}
 
-            🔗 *Link Struk Digital:*
-            ${publicReceiptUrl}
+                        🔗 *Link Struk Digital:*
+                        ${publicReceiptUrl}
 
-            Klik link di atas untuk melihat detail struk pembelian Anda.
+                        Klik link di atas untuk melihat detail struk pembelian Anda.
 
-            Terima kasih telah berbelanja di Fellie Florist! 🌸`;
+                        Terima kasih telah berbelanja di Fellie Florist! 🌸`;
 
                 // Format nomor WhatsApp (hilangkan +, spasi, dan awalan 0)
                 let cleanWaNumber = waNumber.replace(/[\s\+\-\(\)]/g, '');
@@ -335,11 +335,11 @@
                 notification.className = `fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg transform transition-all duration-300 ${type === 'success' ? 'bg-green-100 text-green-800 border border-green-200' : 'bg-red-100 text-red-800 border border-red-200'
                     }`;
                 notification.innerHTML = `
-                            <div class="flex items-center">
-                                <i class="bi bi-check-circle-fill mr-2"></i>
-                                <span class="text-sm font-medium">${message}</span>
-                            </div>
-                        `;
+                                        <div class="flex items-center">
+                                            <i class="bi bi-check-circle-fill mr-2"></i>
+                                            <span class="text-sm font-medium">${message}</span>
+                                        </div>
+                                    `;
 
                 document.body.appendChild(notification);
 

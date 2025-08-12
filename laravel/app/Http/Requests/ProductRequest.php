@@ -16,7 +16,8 @@ class ProductRequest extends FormRequest
     {
         $productId = $this->route('product')?->id;
 
-        return [            'category_id' => ['required', 'exists:categories,id'],
+        return [
+            'category_id' => ['required', 'exists:categories,id'],
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'base_unit' => ['required', 'in:tangkai,item'],
@@ -63,7 +64,10 @@ class ProductRequest extends FormRequest
             'ikat_20',
             'reseller',
             'normal',
-            'promo'
+            'promo',
+            'custom_ikat',
+            'custom_tangkai',
+            'custom_khusus'
         ];
     }
 
@@ -76,7 +80,8 @@ class ProductRequest extends FormRequest
             'ikat_20' => 20,
             default => 1,
         };
-    }    protected function prepareForValidation()
+    }
+    protected function prepareForValidation()
     {
         // Get the selected default price type from the request
         $defaultPriceType = $this->input('default_price_type');
