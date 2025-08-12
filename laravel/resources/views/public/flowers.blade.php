@@ -640,10 +640,10 @@
                         </div>
                         <span class="text-sm md:text-base font-semibold hidden sm:block">Custom Bouquet</span>
                         <span class="text-xs md:text-sm font-medium sm:hidden nav-mobile-text">Custom</span>
-                        <span
+                        {{-- <span
                             class="absolute -top-1 -right-1 text-xs bg-gradient-to-r from-yellow-400 to-orange-400 text-orange-900 px-2 py-0.5 rounded-full font-bold shadow-md animate-pulse">
                             NEW
-                        </span>
+                        </span> --}}
                     </a>
                 </div>
             </nav>
@@ -674,7 +674,7 @@
                     <button type="button"
                         class="chip-btn px-6 py-3 rounded-full border-2 border-rose-200 bg-white text-gray-700 text-sm font-semibold shadow-md hover:shadow-lg hover:bg-rose-50 transition-all duration-200 active"
                         data-category="" onclick="selectCategory(this)">
-                        <span class="mr-2">🌺</span>Semua
+                        <span class="mr-2">🌸</span>Semua
                     </button>
                     <button type="button"
                         class="chip-btn px-6 py-3 rounded-full border-2 border-rose-200 bg-white text-gray-700 text-sm font-semibold shadow-md hover:shadow-lg hover:bg-rose-50 transition-all duration-200"
@@ -714,156 +714,157 @@
         <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
             @if($activeTab === 'flowers')
                 @forelse($flowers as $flower)
-                    <div class="flower-card group" data-category="{{ $flower->category->name ?? 'lainnya' }}"
-                        data-name="{{ strtolower($flower->name) }}" data-flower-id="{{ (int) $flower->id }}">
-                        <div
-                            class="card-hover glass-effect rounded-2xl shadow-lg p-3 sm:p-4 h-full flex flex-col overflow-hidden">
-                            <!-- Image -->
-                            <div class="relative h-36 sm:h-40 mb-3 sm:mb-4 rounded-xl overflow-hidden">
-                                @if($flower->image)
-                                    <img src="{{ asset('storage/' . $flower->image) }}" alt="{{ $flower->name }}"
-                                        class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
-                                @else
-                                    <div
-                                        class="w-full h-full flex items-center justify-center bg-gradient-to-br from-rose-100 to-pink-100 rounded-xl">
-                                        <i class="bi bi-flower1 text-3xl text-rose-400"></i>
-                                    </div>
-                                @endif
-                                <div
-                                    class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                </div>
+                                                        <div class="flower-card group" data-category="{{ $flower->category->name ?? 'lainnya' }}"
+                                                            data-name="{{ strtolower($flower->name) }}" data-flower-id="{{ (int) $flower->id }}">
+                                                            <div
+                                                                class="card-hover glass-effect rounded-2xl shadow-lg p-3 sm:p-4 h-full flex flex-col overflow-hidden">
+                                                                <!-- Image -->
+                                                                <div class="relative h-36 sm:h-40 mb-3 sm:mb-4 rounded-xl overflow-hidden">
+                                                                    @if($flower->image)
+                                                                        <img src="{{ asset('storage/' . $flower->image) }}" alt="{{ $flower->name }}"
+                                                                            class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                                                                    @else
+                                                                        <div
+                                                                            class="w-full h-full flex items-center justify-center bg-gradient-to-br from-rose-100 to-pink-100 rounded-xl">
+                                                                            {{-- <i class="bi bi-flower1 text-3xl text-rose-400">🌸</i> --}}
+                                                                            <span class="text-4xl">🌸</span>
+                                                                        </div>
+                                                                    @endif
+                                                                    <div
+                                                                        class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                                                    </div>
 
-                                <!-- Label Promo - Ribbon Style -->
-                                @if($flower->prices->where('type', 'promo')->isNotEmpty())
-                                    <div class="promo-label">
-                                        PROMO
-                                    </div>
-                                @endif
+                                                                    <!-- Label Promo - Ribbon Style -->
+                                                                    @if($flower->prices->where('type', 'promo')->isNotEmpty())
+                                                                        <div class="promo-label">
+                                                                            PROMO
+                                                                        </div>
+                                                                    @endif
 
-                                <!-- Wishlist Button -->
-                                <button
-                                    class="absolute top-2 sm:top-3 right-2 sm:right-3 w-6 sm:w-8 h-6 sm:h-8 bg-white/90 hover:bg-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
-                                    <i class="bi bi-heart text-rose-500 text-xs sm:text-sm"></i>
-                                </button>
-                            </div>
+                                                                    <!-- Wishlist Button -->
+                                                                    <button
+                                                                        class="absolute top-2 sm:top-3 right-2 sm:right-3 w-6 sm:w-8 h-6 sm:h-8 bg-white/90 hover:bg-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
+                                                                        <i class="bi bi-heart text-rose-500 text-xs sm:text-sm"></i>
+                                                                    </button>
+                                                                </div>
 
-                            <!-- Details -->
-                            <div class="product-content flex-1">
-                                <!-- Category Badge - Left Aligned -->
-                                <div class="flex justify-start mb-3">
-                                    <span
-                                        class="category-badge bg-rose-100 text-rose-700 rounded-full px-3 py-1 text-xs font-medium"
-                                        title="{{ $flower->category->name ?? 'Umum' }}">
-                                        {{ $flower->category->name ?? 'Umum' }}
-                                    </span>
-                                </div>
+                                                                <!-- Details -->
+                                                                <div class="product-content flex-1">
+                                                                    <!-- Category Badge - Left Aligned -->
+                                                                    <div class="flex justify-start mb-3">
+                                                                        <span
+                                                                            class="category-badge bg-rose-100 text-rose-700 rounded-full px-3 py-1 text-xs font-medium"
+                                                                            title="{{ $flower->category->name ?? 'Umum' }}">
+                                                                            {{ $flower->category->name ?? 'Umum' }}
+                                                                        </span>
+                                                                    </div>
 
-                                <!-- Product Title - Left Aligned -->
-                                <h3 class="product-title font-bold text-gray-800 text-left leading-none"
-                                    style="margin-bottom: -4px;">
-                                    {{ $flower->name }}
-                                </h3>
+                                                                    <!-- Product Title - Left Aligned -->
+                                                                    <h3 class="product-title font-bold text-gray-800 text-left leading-none"
+                                                                        style="margin-bottom: -4px;">
+                                                                        {{ $flower->name }}
+                                                                    </h3>
 
-                                <!-- Description - Left Aligned with no spacing from title -->
-                                <p class="text-xs sm:text-sm text-gray-600 text-left line-clamp-2 leading-none mb-3"
-                                    style="margin-top: -4px;">
-                                    {{ $flower->description }}
-                                </p>
+                                                                    <!-- Description - Left Aligned with no spacing from title -->
+                                                                    <p class="text-xs sm:text-sm text-gray-600 text-left line-clamp-2 leading-none mb-3"
+                                                                        style="margin-top: -4px;">
+                                                                        {{ $flower->description }}
+                                                                    </p>
 
-                                <!-- Price - Left Aligned -->
-                                <div class="mb-1">
-                                    @php
-                                        // Siapkan array harga untuk JS
-                                        $jsPrices = $flower->prices->map(function ($price) {
-                                            return [
-                                                'id' => $price->id,
-                                                'type' => $price->type,
-                                                'label' => __(ucwords(str_replace('_', ' ', $price->type))),
-                                                'price' => (int) $price->price // Pastikan price adalah integer
-                                            ];
-                                        });
-                                    @endphp
-                                    <div class="text-left">
-                                        <div class="text-price text-sm sm:text-lg font-bold text-rose-600">
-                                            @if($jsPrices->count() === 1)
-                                                Rp {{ number_format($jsPrices[0]['price'], 0, ',', '.') }}
-                                            @else
-                                                Pilih harga
-                                            @endif
-                                        </div>
-                                        <div class="text-xs text-gray-500">
-                                            @if($jsPrices->count() === 1)
-                                                {{ $jsPrices[0]['label'] }}
-                                            @else
-                                                Beberapa pilihan harga
-                                            @endif
-                                        </div>
-                                    </div>
-                                </div>
+                                                                    <!-- Price - Left Aligned -->
+                                                                    <div class="mb-1">
+                                                                        @php
+                    // Siapkan array harga untuk JS
+                    $jsPrices = $flower->prices->map(function ($price) {
+                        return [
+                            'id' => $price->id,
+                            'type' => $price->type,
+                            'label' => __(ucwords(str_replace('_', ' ', $price->type))),
+                            'price' => (int) $price->price // Pastikan price adalah integer
+                        ];
+                    });
+                                                                        @endphp
+                                                                        <div class="text-left">
+                                                                            <div class="text-price text-sm sm:text-lg font-bold text-rose-600">
+                                                                                @if($jsPrices->count() === 1)
+                                                                                    Rp {{ number_format($jsPrices[0]['price'], 0, ',', '.') }}
+                                                                                @else
+                                                                                    Pilih harga
+                                                                                @endif
+                                                                            </div>
+                                                                            <div class="text-xs text-gray-500">
+                                                                                @if($jsPrices->count() === 1)
+                                                                                    {{ $jsPrices[0]['label'] }}
+                                                                                @else
+                                                                                    Beberapa pilihan harga
+                                                                                @endif
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
 
-                                <!-- Stock -->
-                                <div class="mb-2">
-                                    <div class="flex items-center justify-between text-xs mb-1">
-                                        <span class="text-gray-500">Stok:</span>
-                                        <span
-                                            class="font-semibold {{ $flower->current_stock > 10 ? 'text-green-600' : ($flower->current_stock > 0 ? 'text-yellow-600' : 'text-red-600') }}">
-                                            @php
-                                                // Cari harga ikat yang tersedia, prioritas ikat 5
-                                                $ikatPrice = $flower->prices->firstWhere('type', 'ikat_5')
-                                                    ?: $flower->prices->firstWhere('type', 'ikat 5')
-                                                    ?: $flower->prices->firstWhere('type', 'ikat_10')
-                                                    ?: $flower->prices->firstWhere('type', 'ikat 10')
-                                                    ?: $flower->prices->firstWhere('type', 'ikat_20')
-                                                    ?: $flower->prices->firstWhere('type', 'ikat 20');
+                                                                    <!-- Stock -->
+                                                                    <div class="mb-2">
+                                                                        <div class="flex items-center justify-between text-xs mb-1">
+                                                                            <span class="text-gray-500">Stok:</span>
+                                                                            <span
+                                                                                class="font-semibold {{ $flower->current_stock > 10 ? 'text-green-600' : ($flower->current_stock > 0 ? 'text-yellow-600' : 'text-red-600') }}">
+                                                                                @php
+                    // Cari harga ikat yang tersedia, prioritas ikat 5
+                    $ikatPrice = $flower->prices->firstWhere('type', 'ikat_5')
+                        ?: $flower->prices->firstWhere('type', 'ikat 5')
+                        ?: $flower->prices->firstWhere('type', 'ikat_10')
+                        ?: $flower->prices->firstWhere('type', 'ikat 10')
+                        ?: $flower->prices->firstWhere('type', 'ikat_20')
+                        ?: $flower->prices->firstWhere('type', 'ikat 20');
 
-                                                $ikatCount = 0;
-                                                $ikatLabel = '';
+                    $ikatCount = 0;
+                    $ikatLabel = '';
 
-                                                if ($ikatPrice && $ikatPrice->unit_equivalent > 0) {
-                                                    $ikatCount = floor($flower->current_stock / $ikatPrice->unit_equivalent);
-                                                    $unitSize = $ikatPrice->unit_equivalent;
-                                                    $ikatLabel = " / {$ikatCount} ikat";
-                                                }
+                    if ($ikatPrice && $ikatPrice->unit_equivalent > 0) {
+                        $ikatCount = floor($flower->current_stock / $ikatPrice->unit_equivalent);
+                        $unitSize = $ikatPrice->unit_equivalent;
+                        $ikatLabel = " / {$ikatCount} ikat";
+                    }
 
-                                                // Gunakan base_unit dari database atau default ke 'tangkai'
-                                                $baseUnit = $flower->base_unit ?? 'tangkai';
-                                            @endphp
-                                            {{ $flower->current_stock }} {{ $baseUnit }}{{ $ikatLabel }}
-                                        </span>
-                                    </div>
-                                    <div class="w-full bg-gray-200 rounded-full h-1.5">
-                                        <div class="bg-gradient-to-r from-rose-400 to-pink-500 h-1.5 rounded-full transition-all duration-300"
-                                            style="width: {{ min(($flower->current_stock / 50) * 100, 100) }}%"></div>
-                                    </div>
-                                </div>
+                    // Gunakan base_unit dari database atau default ke 'tangkai'
+                    $baseUnit = $flower->base_unit ?? 'tangkai';
+                                                                                @endphp
+                                                                                {{ $flower->current_stock }} {{ $baseUnit }}{{ $ikatLabel }}
+                                                                            </span>
+                                                                        </div>
+                                                                        <div class="w-full bg-gray-200 rounded-full h-1.5">
+                                                                            <div class="bg-gradient-to-r from-rose-400 to-pink-500 h-1.5 rounded-full transition-all duration-300"
+                                                                                style="width: {{ min(($flower->current_stock / 50) * 100, 100) }}%"></div>
+                                                                        </div>
+                                                                    </div>
 
-                                <!-- Action Button -->
-                                <button onclick="handleAddToCart({{ (int) $flower->id }})"
-                                    class="mt-auto w-full bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white font-semibold py-1.5 sm:py-2 px-3 sm:px-4 rounded-xl transition-all duration-200 shadow-md hover:shadow-lg text-xs sm:text-sm">
-                                    <i class="bi bi-cart-plus mr-1 sm:mr-2"></i>Tambah ke Keranjang
-                                </button>
-                                <script>
-                                    window.flowerPrices = window.flowerPrices || {};
-                                    try {
-                                        const pricesData = @json($jsPrices);
-                                        // Validasi dan sanitasi data harga, filter tipe rangkaian
-                                        const sanitizedPrices = pricesData
-                                            .filter(price => !['custom_ikat', 'custom_tangkai', 'custom_khusus'].includes(price.type))
-                                            .map(price => ({
-                                                id: parseInt(price.id) || 0,
-                                                type: price.type || '',
-                                                label: price.label || '',
-                                                price: parseFloat(String(price.price).replace(/[,.]/g, '')) || 0
-                                            }));
-                                        window.flowerPrices[{{ (int) $flower->id }}] = sanitizedPrices;
-                                    } catch (error) {
-                                        console.error('Error parsing flower prices:', error);
-                                        window.flowerPrices[{{ (int) $flower->id }}] = [];
-                                    }
-                                </script>
-                            </div>
-                        </div>
-                    </div>
+                                                                    <!-- Action Button -->
+                                                                    <button onclick="handleAddToCart({{ (int) $flower->id }})"
+                                                                        class="mt-auto w-full bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white font-semibold py-1.5 sm:py-2 px-3 sm:px-4 rounded-xl transition-all duration-200 shadow-md hover:shadow-lg text-xs sm:text-sm">
+                                                                        <i class="bi bi-cart-plus mr-1 sm:mr-2"></i>Tambah ke Keranjang
+                                                                    </button>
+                                                                    <script>
+                                                                        window.flowerPrices = window.flowerPrices || {};
+                                                                        try {
+                                                                            const pricesData = @json($jsPrices);
+                                                                            // Validasi dan sanitasi data harga, filter tipe rangkaian
+                                                                            const sanitizedPrices = pricesData
+                                                                                .filter(price => !['custom_ikat', 'custom_tangkai', 'custom_khusus'].includes(price.type))
+                                                                                .map(price => ({
+                                                                                    id: parseInt(price.id) || 0,
+                                                                                    type: price.type || '',
+                                                                                    label: price.label || '',
+                                                                                    price: parseFloat(String(price.price).replace(/[,.]/g, '')) || 0
+                                                                                }));
+                                                                            window.flowerPrices[{{ (int) $flower->id }}] = sanitizedPrices;
+                                                                        } catch (error) {
+                                                                            console.error('Error parsing flower prices:', error);
+                                                                            window.flowerPrices[{{ (int) $flower->id }}] = [];
+                                                                        }
+                                                                    </script>
+                                                                </div>
+                                                            </div>
+                                                        </div>
                 @empty
                     <div class="col-span-full text-center py-12">
                         <div class="w-20 h-20 bg-rose-100 rounded-full mx-auto mb-4 flex items-center justify-center">
@@ -886,6 +887,7 @@
                                     <img src="{{ asset('storage/' . $bouquet->image) }}" alt="{{ $bouquet->name }}"
                                         class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
                                 @else
+                                    {{-- gradient placeholder --}}
                                     <div
                                         class="w-full h-full flex items-center justify-center bg-gradient-to-br from-rose-100 to-pink-100 rounded-xl">
                                         <i class="bi bi-flower3 text-3xl text-rose-400"></i>
@@ -938,8 +940,8 @@
                                 <!-- Price Range - Left Aligned -->
                                 <div class="mb-1">
                                     @php
-                                        $minPrice = $bouquet->prices->min('price');
-                                        $maxPrice = $bouquet->prices->max('price');
+        $minPrice = $bouquet->prices->min('price');
+        $maxPrice = $bouquet->prices->max('price');
                                     @endphp
                                     <div class="text-left">
                                         <div class="text-price text-sm sm:text-lg font-bold text-rose-600">

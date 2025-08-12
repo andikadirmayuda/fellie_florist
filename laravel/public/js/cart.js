@@ -256,40 +256,40 @@ function updateQuantity(cartKey, change) {
 }
 
 function removeFromCart(cartKey, itemName = 'produk ini') {
-    // Create custom confirmation modal
+    // Create custom confirmation modal with responsive design
     const modal = document.createElement('div');
     modal.id = 'deleteConfirmModal';
-    modal.className = 'fixed inset-0 bg-black bg-opacity-50 z-[100] flex items-center justify-center p-4';
+    modal.className = 'fixed inset-0 bg-black bg-opacity-40 z-[100] flex items-center justify-center p-3 backdrop-blur-sm';
     modal.style.opacity = '0';
     modal.style.transition = 'opacity 0.3s ease';
     
     modal.innerHTML = `
-        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full transform scale-95 transition-transform duration-300" id="modalContent">
-            <div class="p-6 text-center">
+        <div class="bg-white rounded-lg shadow-2xl w-10/12 max-w-64 sm:max-w-xs md:max-w-sm transform scale-95 transition-transform duration-300" id="modalContent">
+            <div class="p-3 sm:p-4 md:p-5 text-center">
                 <!-- Icon -->
-                <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4">
-                    <svg class="h-8 w-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div class="mx-auto flex items-center justify-center h-10 w-10 sm:h-12 sm:w-12 md:h-14 md:w-14 rounded-full bg-red-100 mb-2 sm:mb-3">
+                    <svg class="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                     </svg>
                 </div>
                 
                 <!-- Title -->
-                <h3 class="text-xl font-bold text-gray-900 mb-2">Hapus dari Keranjang?</h3>
+                <h3 class="text-sm sm:text-base md:text-lg font-bold text-gray-900 mb-1 sm:mb-2">Hapus dari Keranjang?</h3>
                 
                 <!-- Message -->
-                <p class="text-gray-500 mb-6">Apakah Anda yakin ingin menghapus <span class="font-semibold text-gray-700">${itemName}</span> dari keranjang belanja?</p>
+                <p class="text-xs sm:text-sm md:text-base text-gray-500 mb-3 sm:mb-4 md:mb-5 leading-relaxed px-1 sm:px-2">Apakah Anda yakin ingin menghapus <span class="font-semibold text-gray-700">${itemName}</span> dari keranjang belanja?</p>
                 
                 <!-- Buttons -->
-                <div class="flex space-x-3">
+                <div class="flex space-x-2">
                     <button type="button" 
-                            class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-3 px-4 rounded-xl transition-colors duration-200" 
+                            class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-1.5 sm:py-2 md:py-2.5 px-2 sm:px-3 rounded-lg text-xs sm:text-sm md:text-base transition-colors duration-200" 
                             onclick="closeDeleteModal()">
-                        <i class="bi bi-x-circle mr-2"></i>Batal
+                        <i class="bi bi-x-circle mr-1"></i>Batal
                     </button>
                     <button type="button" 
-                            class="flex-1 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-medium py-3 px-4 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl" 
+                            class="flex-1 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-medium py-1.5 sm:py-2 md:py-2.5 px-2 sm:px-3 rounded-lg text-xs sm:text-sm md:text-base transition-all duration-200 shadow-lg hover:shadow-xl" 
                             onclick="confirmRemoveFromCart('${cartKey}')">
-                        <i class="bi bi-trash3 mr-2"></i>Ya, Hapus
+                        <i class="bi bi-trash3 mr-1"></i>Ya, Hapus
                     </button>
                 </div>
             </div>
@@ -366,149 +366,77 @@ function showToast(message, type = 'info') {
     if (existingToast) existingToast.remove();
     if (existingOverlay) existingOverlay.remove();
     
-    // Define close function first
-    const closeToast = function() {
-        const toast = document.getElementById('cartToast');
-        const overlay = document.getElementById('toastOverlay');
-        
-        if (toast && toast.parentNode) {
-            // Add exit animation
-            toast.classList.add('notification-exit');
-            toast.classList.remove('opacity-100', 'scale-100');
-            toast.classList.add('opacity-0', 'scale-95');
-            
-            if (overlay) {
-                overlay.classList.add('opacity-0');
-            }
-            
-            setTimeout(() => {
-                if (toast && toast.parentNode) toast.remove();
-                if (overlay && overlay.parentNode) overlay.remove();
-            }, 300);
-        }
-    };
-    
-    // Make closeToast globally available
-    window.closeToast = closeToast;
-    
-    const toast = document.createElement('div');
-    toast.id = 'cartToast';
-    // Center positioning dengan responsive design
-    toast.className = 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[110] opacity-0 scale-95 transition-all duration-300 ease-out';
-    
-    const bgColors = {
-        success: 'bg-gradient-to-r from-green-500 to-emerald-600',
-        error: 'bg-gradient-to-r from-red-500 to-rose-600',
-        loading: 'bg-gradient-to-r from-blue-500 to-indigo-600',
-        info: 'bg-gradient-to-r from-gray-500 to-slate-600'
-    };
-    
-    const icons = {
-        success: '<i class="bi bi-check-circle-fill text-2xl"></i>',
-        error: '<i class="bi bi-x-circle-fill text-2xl"></i>',
-        loading: '<i class="bi bi-arrow-repeat animate-spin text-2xl"></i>',
-        info: '<i class="bi bi-info-circle-fill text-2xl"></i>'
-    };
+    // Create backdrop overlay
+    const backdrop = document.createElement('div');
+    backdrop.className = 'fixed inset-0 bg-black bg-opacity-40 z-40 backdrop-blur-sm';
 
-    const borderColors = {
-        success: 'border-green-300',
-        error: 'border-red-300',
-        loading: 'border-blue-300',
-        info: 'border-gray-300'
-    };
+    // Create notification element - much smaller for mobile
+    const notification = document.createElement('div');
+    notification.className = `fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-2 sm:p-3 md:p-4 rounded-lg shadow-2xl z-50 ${getNotificationColor(type)} w-10/12 max-w-64 sm:max-w-xs md:max-w-sm text-center border`;
 
-    const statusText = {
-        success: '✨ Berhasil!',
-        error: '⚠️ Terjadi kesalahan',
-        loading: '⏳ Memproses...',
-        info: 'ℹ️ Informasi'
-    };
-    
-    toast.innerHTML = `
-        <div class="notification-container ${bgColors[type]} text-white p-6 rounded-2xl shadow-2xl border-2 ${borderColors[type]} backdrop-blur-sm mx-4 relative overflow-hidden">
-            <!-- Background decoration -->
-            <div class="absolute top-0 left-0 w-full h-1 bg-white bg-opacity-30"></div>
-            <div class="absolute -top-2 -right-2 w-8 h-8 bg-white bg-opacity-10 rounded-full"></div>
-            <div class="absolute -bottom-1 -left-1 w-6 h-6 bg-white bg-opacity-10 rounded-full"></div>
-            
-            <!-- Content -->
-            <div class="flex items-center space-x-4 relative z-10">
-                <div class="flex-shrink-0 w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center ${type === 'loading' ? 'pulse-loading' : ''}">
-                    ${icons[type]}
-                </div>
-                <div class="flex-1 min-w-0">
-                    <p class="font-semibold text-lg leading-tight break-words">${message}</p>
-                    <div class="mt-1 text-sm text-white text-opacity-90">
-                        ${statusText[type]}
-                    </div>
-                </div>
+    // Add icon based on type - much smaller icons for mobile
+    const icon = getNotificationIcon(type);
+    notification.innerHTML = `
+        <div class="flex flex-col items-center space-y-1 sm:space-y-2">
+            <div class="text-sm sm:text-lg md:text-xl">${icon}</div>
+            <div class="text-xs sm:text-sm md:text-base font-semibold leading-tight px-1 sm:px-2">${message}</div>
+            <div class="w-full bg-white/20 rounded-full h-0.5 mt-1 sm:mt-2">
+                <div class="bg-white h-0.5 rounded-full transition-all duration-3000 notification-progress"></div>
             </div>
-            
-            <!-- Progress bar untuk loading -->
-            ${type === 'loading' ? `
-                <div class="mt-4 relative">
-                    <div class="w-full bg-white bg-opacity-30 rounded-full h-2">
-                        <div class="bg-white h-2 rounded-full progress-bar" style="width: 0%;"></div>
-                    </div>
-                </div>
-            ` : ''}
-            
-            <!-- Close button untuk non-loading -->
-            ${type !== 'loading' ? `
-                <button onclick="window.closeToast()" 
-                        class="absolute top-2 right-2 w-6 h-6 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-full flex items-center justify-center transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-50"
-                        aria-label="Tutup notifikasi">
-                    <i class="bi bi-x text-sm"></i>
-                </button>
-            ` : ''}
         </div>
     `;
-    
-    document.body.appendChild(toast);
-    
-    // Create overlay untuk better focus (hanya untuk non-loading)
+
+    // Add both backdrop and notification to body
+    document.body.appendChild(backdrop);
+    document.body.appendChild(notification);
+
+    // Add progress animation
+    const progressBar = notification.querySelector('.notification-progress');
+    setTimeout(() => {
+        progressBar.style.width = '100%';
+    }, 100);
+
+    // Auto remove after 3 seconds (except for loading)
     if (type !== 'loading') {
-        const overlay = document.createElement('div');
-        overlay.id = 'toastOverlay';
-        overlay.className = 'fixed inset-0 bg-black bg-opacity-20 z-[109] opacity-0 transition-opacity duration-300';
-        overlay.setAttribute('aria-hidden', 'true');
-        document.body.appendChild(overlay);
-        
-        // Remove overlay on click untuk manual close
-        overlay.addEventListener('click', closeToast);
-        
-        // Show overlay
-        requestAnimationFrame(() => {
-            overlay.classList.remove('opacity-0');
-        });
-    }
-    
-    // Animate toast appearance dengan staging
-    requestAnimationFrame(() => {
-        // Add entrance animation class
-        toast.classList.add('notification-enter');
-        
-        // Show toast
         setTimeout(() => {
-            toast.classList.remove('opacity-0', 'scale-95');
-            toast.classList.add('opacity-100', 'scale-100');
-        }, 100);
+            notification.style.opacity = '0';
+            notification.style.transform = 'translate(-50%, -50%) scale(0.9)';
+            backdrop.style.opacity = '0';
+            setTimeout(() => {
+                backdrop.remove();
+                notification.remove();
+            }, 300);
+        }, 3000);
+    }
+
+    // Click backdrop to close
+    backdrop.addEventListener('click', () => {
+        notification.style.opacity = '0';
+        notification.style.transform = 'translate(-50%, -50%) scale(0.9)';
+        backdrop.style.opacity = '0';
+        setTimeout(() => {
+            backdrop.remove();
+            notification.remove();
+        }, 300);
     });
-    
-    // Auto remove toast (except for loading)
-    if (type !== 'loading') {
-        setTimeout(() => {
-            closeToast();
-        }, 4500); // Increased duration untuk better UX
+}
+
+function getNotificationColor(type) {
+    switch (type) {
+        case 'success': return 'bg-gradient-to-br from-green-500 to-emerald-600 text-white';
+        case 'error': return 'bg-gradient-to-br from-red-500 to-rose-600 text-white';
+        case 'warning': return 'bg-gradient-to-br from-yellow-500 to-orange-600 text-white';
+        case 'loading': return 'bg-gradient-to-br from-blue-500 to-indigo-600 text-white';
+        default: return 'bg-gradient-to-br from-blue-500 to-indigo-600 text-white';
     }
-    
-    // Keyboard accessibility
-    const handleEscape = function(e) {
-        if (e.key === 'Escape' && document.getElementById('cartToast')) {
-            closeToast();
-            document.removeEventListener('keydown', handleEscape);
-        }
-    };
-    
-    document.addEventListener('keydown', handleEscape);
+}
+
+function getNotificationIcon(type) {
+    switch (type) {
+        case 'success': return '✅';
+        case 'error': return '❌';
+        case 'warning': return '⚠️';
+        case 'loading': return '⏳';
+        default: return 'ℹ️';
+    }
 }

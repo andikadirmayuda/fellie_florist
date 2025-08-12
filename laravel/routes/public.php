@@ -21,6 +21,7 @@ Route::get('/product/{product}/details', [CustomBouquetController::class, 'getPr
 Route::post('/custom-bouquet/add-item', [CustomBouquetController::class, 'addItem'])->name('custom.bouquet.add-item');
 Route::post('/custom-bouquet/remove-item', [CustomBouquetController::class, 'removeItem'])->name('custom.bouquet.remove-item');
 Route::post('/custom-bouquet/update-item', [CustomBouquetController::class, 'updateItem'])->name('custom.bouquet.update-item');
+Route::post('/custom-bouquet/clear', [CustomBouquetController::class, 'clear'])->name('custom.bouquet.clear');
 Route::post('/custom-bouquet/upload-reference', [CustomBouquetController::class, 'uploadReference'])->name('custom.bouquet.upload-reference');
 Route::post('/custom-bouquet/{id}/finalize', [CustomBouquetController::class, 'finalize'])->name('custom.bouquet.finalize');
 

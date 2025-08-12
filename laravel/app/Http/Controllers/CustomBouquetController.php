@@ -49,19 +49,19 @@ class CustomBouquetController extends Controller
         return response()->json([
             'success' => true,
             'product' => [
-                'id' => $product->id,
-                'name' => $product->name,
-                'description' => $product->description,
-                'current_stock' => $product->current_stock,
-                'base_unit' => $product->base_unit,
-                'category' => $product->category->name ?? 'Uncategorized',
+                'id' => $product->getAttribute('id'),
+                'name' => $product->getAttribute('name'),
+                'description' => $product->getAttribute('description'),
+                'current_stock' => $product->getAttribute('current_stock'),
+                'base_unit' => $product->getAttribute('base_unit'),
+                'category' => $product->category ? $product->category->getAttribute('name') : 'Uncategorized',
                 'prices' => $product->prices->map(function ($price) {
                     return [
-                        'type' => $price->type,
-                        'price' => $price->price,
-                        'unit_equivalent' => $price->unit_equivalent,
-                        'is_default' => $price->is_default,
-                        'display_name' => $this->getPriceTypeDisplayName($price->type)
+                        'type' => $price->getAttribute('type'),
+                        'price' => $price->getAttribute('price'),
+                        'unit_equivalent' => $price->getAttribute('unit_equivalent'),
+                        'is_default' => $price->getAttribute('is_default'),
+                        'display_name' => $this->getPriceTypeDisplayName($price->getAttribute('type'))
                     ];
                 })
             ]
@@ -101,10 +101,10 @@ class CustomBouquetController extends Controller
             $requiredStock = $this->calculateRequiredStock($validated['quantity'], $productPrice);
 
             // Check stock availability
-            if ($product->current_stock < $requiredStock) {
+            if ($product->getAttribute('current_stock') < $requiredStock) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Insufficient stock. Available: ' . $product->current_stock . ' ' . $product->base_unit
+                    'message' => 'Insufficient stock. Available: ' . $product->getAttribute('current_stock') . ' ' . $product->getAttribute('base_unit')
                 ]);
             }
 
@@ -127,7 +127,7 @@ class CustomBouquetController extends Controller
                     'product_id' => $validated['product_id'],
                     'price_type' => $validated['price_type'],
                     'quantity' => $validated['quantity'],
-                    'unit_price' => $productPrice->price,
+                    'unit_price' => $productPrice->getAttribute('price'),
                 ]);
             }
 
@@ -149,15 +149,15 @@ class CustomBouquetController extends Controller
                 'success' => true,
                 'message' => 'Berhasil Di Tambahkan.',
                 'item' => [
-                    'id' => $item->id,
-                    'product_name' => $product->name,
-                    'quantity' => $item->quantity,
-                    'price_type' => $item->price_type,
+                    'id' => $item->getAttribute('id'),
+                    'product_name' => $product->getAttribute('name'),
+                    'quantity' => $item->getAttribute('quantity'),
+                    'price_type' => $item->getAttribute('price_type'),
                     'price_type_display' => $item->price_type_display,
-                    'unit_price' => $item->unit_price,
-                    'subtotal' => $item->subtotal,
+                    'unit_price' => $item->getAttribute('unit_price'),
+                    'subtotal' => $item->getAttribute('subtotal'),
                 ],
-                'total_price' => $customBouquet->total_price
+                'total_price' => $customBouquet->getAttribute('total_price')
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -195,7 +195,7 @@ class CustomBouquetController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Item removed from custom bouquet successfully.',
-                'total_price' => $customBouquet->total_price
+                'total_price' => $customBouquet->getAttribute('total_price')
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -231,10 +231,10 @@ class CustomBouquetController extends Controller
             $requiredStock = $this->calculateRequiredStock($validated['quantity'], $productPrice);
 
             // Check stock availability
-            if ($item->product->current_stock < $requiredStock) {
+            if ($item->product->getAttribute('current_stock') < $requiredStock) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Insufficient stock. Available: ' . $item->product->current_stock . ' ' . $item->product->base_unit
+                    'message' => 'Insufficient stock. Available: ' . $item->product->getAttribute('current_stock') . ' ' . $item->product->getAttribute('base_unit')
                 ]);
             }
 
@@ -251,11 +251,11 @@ class CustomBouquetController extends Controller
                 'success' => true,
                 'message' => 'Item quantity updated successfully.',
                 'item' => [
-                    'id' => $item->id,
-                    'quantity' => $item->quantity,
-                    'subtotal' => $item->subtotal,
+                    'id' => $item->getAttribute('id'),
+                    'quantity' => $item->getAttribute('quantity'),
+                    'subtotal' => $item->getAttribute('subtotal'),
                 ],
-                'total_price' => $item->customBouquet->total_price
+                'total_price' => $item->customBouquet->getAttribute('total_price')
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -282,8 +282,8 @@ class CustomBouquetController extends Controller
             $customBouquet = CustomBouquet::find($validated['custom_bouquet_id']);
 
             // Delete old reference image if exists
-            if ($customBouquet->reference_image && Storage::disk('public')->exists($customBouquet->reference_image)) {
-                Storage::disk('public')->delete($customBouquet->reference_image);
+            if ($customBouquet->getAttribute('reference_image') && Storage::disk('public')->exists($customBouquet->getAttribute('reference_image'))) {
+                Storage::disk('public')->delete($customBouquet->getAttribute('reference_image'));
             }
 
             // Store new image
@@ -318,22 +318,22 @@ class CustomBouquetController extends Controller
         return response()->json([
             'success' => true,
             'custom_bouquet' => [
-                'id' => $customBouquet->id,
-                'name' => $customBouquet->name,
-                'total_price' => $customBouquet->total_price,
-                'reference_image' => $customBouquet->reference_image,
-                'reference_image_url' => $customBouquet->reference_image ? Storage::url($customBouquet->reference_image) : null,
-                'status' => $customBouquet->status,
+                'id' => $customBouquet->getAttribute('id'),
+                'name' => $customBouquet->getAttribute('name'),
+                'total_price' => $customBouquet->getAttribute('total_price'),
+                'reference_image' => $customBouquet->getAttribute('reference_image'),
+                'reference_image_url' => $customBouquet->getAttribute('reference_image') ? Storage::url($customBouquet->getAttribute('reference_image')) : null,
+                'status' => $customBouquet->getAttribute('status'),
                 'items' => $customBouquet->items->map(function ($item) {
                     return [
-                        'id' => $item->id,
-                        'product_id' => $item->product_id,
-                        'product_name' => $item->product->name,
-                        'quantity' => $item->quantity,
-                        'price_type' => $item->price_type,
+                        'id' => $item->getAttribute('id'),
+                        'product_id' => $item->getAttribute('product_id'),
+                        'product_name' => $item->product->getAttribute('name'),
+                        'quantity' => $item->getAttribute('quantity'),
+                        'price_type' => $item->getAttribute('price_type'),
                         'price_type_display' => $item->price_type_display,
-                        'unit_price' => $item->unit_price,
-                        'subtotal' => $item->subtotal,
+                        'unit_price' => $item->getAttribute('unit_price'),
+                        'subtotal' => $item->getAttribute('subtotal'),
                     ];
                 }),
                 'components_summary' => $customBouquet->getComponentsSummary()
@@ -367,7 +367,7 @@ class CustomBouquetController extends Controller
      */
     private function calculateRequiredStock($quantity, $productPrice)
     {
-        return $quantity * $productPrice->unit_equivalent;
+        return $quantity * $productPrice->getAttribute('unit_equivalent');
     }
 
     public function finalize($id)
@@ -385,7 +385,7 @@ class CustomBouquetController extends Controller
                 ], 404);
             }
 
-            Log::info('Found custom bouquet ID: ' . $customBouquet->id);
+            Log::info('Found custom bouquet ID: ' . $customBouquet->getAttribute('id'));
 
             // Check if custom bouquet has items
             $itemsCount = $customBouquet->items()->count();
@@ -415,6 +415,66 @@ class CustomBouquetController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Gagal menyelesaikan custom bouquet. Error: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Clear all items from custom bouquet
+     */
+    public function clear(Request $request)
+    {
+        try {
+            $customBouquetId = $request->input('custom_bouquet_id');
+
+            if (!$customBouquetId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Custom bouquet ID tidak ditemukan.'
+                ], 400);
+            }
+
+            $customBouquet = CustomBouquet::find($customBouquetId);
+
+            if (!$customBouquet) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Custom bouquet tidak ditemukan.'
+                ], 404);
+            }
+
+            DB::beginTransaction();
+
+            // Delete all items from this custom bouquet
+            CustomBouquetItem::where('custom_bouquet_id', $customBouquetId)->delete();
+
+            // Reset total price
+            $customBouquet->update([
+                'total_price' => 0,
+                'reference_image' => null
+            ]);
+
+            // Remove reference image file if exists
+            if ($customBouquet->getAttribute('reference_image') && Storage::disk('public')->exists($customBouquet->getAttribute('reference_image'))) {
+                Storage::disk('public')->delete($customBouquet->getAttribute('reference_image'));
+            }
+
+            DB::commit();
+
+            Log::info("Custom bouquet {$customBouquetId} cleared successfully");
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Builder berhasil dikosongkan.',
+                'total_price' => 0
+            ]);
+        } catch (\Exception $e) {
+            DB::rollback();
+            Log::error('Error clearing custom bouquet: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengosongkan builder. Silakan coba lagi.'
             ], 500);
         }
     }

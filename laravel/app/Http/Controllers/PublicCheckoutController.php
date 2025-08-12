@@ -127,10 +127,10 @@ class PublicCheckoutController extends Controller
                 // For custom bouquet, add the custom_bouquet_id and enhance product_name
                 if (isset($item['type']) && $item['type'] === 'custom_bouquet') {
                     $orderItemData['custom_bouquet_id'] = $item['custom_bouquet_id'] ?? null;
-                    
+
                     // Keep product name simple for custom bouquet
                     $orderItemData['product_name'] = 'Custom Bouquet';
-                    
+
                     // Add custom instructions if provided
                     if (!empty($validated['custom_instructions'])) {
                         $orderItemData['custom_instructions'] = $validated['custom_instructions'];

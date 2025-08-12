@@ -8,10 +8,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class CustomBouquet extends Model
 {
     use HasFactory;
-    
+
     protected $fillable = [
         'name',
-        'customer_name', 
+        'customer_name',
         'description',
         'total_price',
         'reference_image',
@@ -46,8 +46,8 @@ class CustomBouquet extends Model
             ->with('product')
             ->get()
             ->map(function ($item) {
-                return $item->product->name . ' ' . $item->quantity . ' ' . 
-                       ($item->price_type === 'per_tangkai' ? 'tangkai' : $item->price_type);
+                return $item->product->name . ' ' . $item->quantity . ' ' .
+                    ($item->price_type === 'per_tangkai' ? 'tangkai' : $item->price_type);
             })
             ->join(', ');
     }
@@ -58,8 +58,8 @@ class CustomBouquet extends Model
             ->with('product')
             ->get()
             ->map(function ($item) {
-                return $item->product->name . ' ' . $item->quantity . ' ' . 
-                       ($item->price_type === 'per_tangkai' ? 'tangkai' : $item->price_type);
+                return $item->product->name . ' ' . $item->quantity . ' ' .
+                    ($item->price_type === 'per_tangkai' ? 'tangkai' : $item->price_type);
             })
             ->toArray();
     }

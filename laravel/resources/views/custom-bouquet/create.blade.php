@@ -273,6 +273,85 @@
                 gap: 0.5rem;
             }
         }
+
+        /* Custom Notification Styles */
+        .notification-progress {
+            width: 0%;
+            transition: width 3000ms linear;
+        }
+
+        /* Notification entrance animation */
+        .fixed.top-1\/2 {
+            animation: notificationSlideIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        /* Backdrop animation */
+        .fixed.inset-0 {
+            animation: backdropFadeIn 0.3s ease;
+            transition: opacity 0.3s ease;
+        }
+
+        /* Mobile responsive notification */
+        @media (max-width: 640px) {
+            .notification-mobile {
+                max-width: 280px;
+                padding: 1rem;
+                border-radius: 0.5rem;
+            }
+
+            .notification-mobile .text-xl {
+                font-size: 1.25rem;
+            }
+
+            .notification-mobile .text-sm {
+                font-size: 0.875rem;
+                line-height: 1.25rem;
+            }
+        }
+
+        @keyframes notificationSlideIn {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.8);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        @keyframes backdropFadeIn {
+            0% {
+                opacity: 0;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        /* Confirm Dialog Styles */
+        .confirm-dialog-backdrop {
+            animation: backdropFadeIn 0.2s ease;
+        }
+
+        .confirm-dialog {
+            animation: confirmDialogSlideIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes confirmDialogSlideIn {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.8);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
     </style>
 </head>
 
@@ -389,10 +468,10 @@
                         </div>
                         <span class="text-sm md:text-base font-semibold hidden sm:block">Custom Bouquet</span>
                         <span class="text-xs md:text-sm font-medium sm:hidden nav-mobile-text">Custom</span>
-                        <span
+                        {{-- <span
                             class="absolute -top-1 -right-1 text-xs bg-gradient-to-r from-yellow-400 to-orange-400 text-orange-900 px-2 py-0.5 rounded-full font-bold shadow-md animate-pulse">
                             NEW
-                        </span>
+                        </span> --}}
                         <div
                             class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-6 h-1 bg-white rounded-full">
                         </div>
@@ -423,8 +502,9 @@
                                 <div>
                                     <h2 class="text-xl font-bold flex items-center">
                                         Custom Bouquet Impianmu
-                                        <span
-                                            class="ml-3 bg-white/20 rounded-full px-3 py-1 text-xs font-medium">v2.0</span>
+                                        {{-- <span
+                                            class="ml-3 bg-white/20 rounded-full px-3 py-1 text-xs font-medium">v2.0
+                                        </span> --}}
                                     </h2>
                                     <p class="text-sm opacity-90 font-medium">Komponen yang dipilih</p>
                                 </div>
@@ -438,14 +518,14 @@
                                 <div class="bg-white/10 rounded-lg px-4 py-2 text-center stats-card">
                                     <div class="text-xs opacity-80">Total Harga</div>
                                     <div class="text-lg font-bold" id="builderHeaderPrice">
-                                        Rp {{ number_format($customBouquet->total_price, 0, ',', '.') }}
+                                        Rp {{ number_format((float) ($customBouquet->total_price ?? 0), 0, ',', '.') }}
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-    
+
                 <!-- Builder Content -->
                 <div class="p-6">
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -478,7 +558,7 @@
                                 </div>
                             </div>
                         </div>
-    
+
                         <!-- Actions & Reference (Right) -->
                         <div class="lg:col-span-1">
                             <!-- Reference Upload -->
@@ -517,7 +597,7 @@
                                     </button>
                                 </div>
                             </div>
-    
+
                             <!-- Action Buttons -->
                             <div class="space-y-3">
                                 <button type="button" id="addToMainCartBtn"
@@ -531,15 +611,11 @@
                                         <span>Tambah ke Keranjang Utama</span>
                                     </div>
                                 </button>
-    
-                                <div class="flex space-x-2">
+
+                                <div class="flex justify-center">
                                     <button type="button" id="clearBuilderBtn"
-                                        class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-800 font-medium py-2 px-3 rounded-lg transition-all duration-200 text-sm">
-                                        🗑️ Kosongkan
-                                    </button>
-                                    <button type="button" id="saveBuilderBtn"
-                                        class="flex-1 bg-blue-100 hover:bg-blue-200 text-blue-600 hover:text-blue-800 font-medium py-2 px-3 rounded-lg transition-all duration-200 text-sm">
-                                        💾 Simpan Draft
+                                        class="bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-800 font-medium py-2 px-4 rounded-lg transition-all duration-200 text-sm">
+                                        🗑️ Kosongkan Item
                                     </button>
                                 </div>
                             </div>
@@ -556,10 +632,10 @@
             </span>
             <span class="bg-rose-100 text-rose-800 px-3 py-1 rounded-full font-semibold" id="totalPrice">
                 <i class="bi bi-currency-dollar mr-1"></i>
-                Rp {{ number_format($customBouquet->total_price, 0, ',', '.') }}
+                Rp {{ number_format((float) ($customBouquet->total_price ?? 0), 0, ',', '.') }}
             </span>
         </div>
-        
+
         <!-- Search and Filters -->
         <div class="mb-8 flex flex-col items-center">
             <!-- Enhanced Filter Chips -->
@@ -1111,7 +1187,15 @@
         }
 
         async function removeItem(itemId) {
-            if (!confirm('Hapus item ini dari bouquet?')) return;
+            // Show custom confirmation dialog
+            const confirmed = await showConfirmDialog(
+                '🗑️ Hapus Item?',
+                'Apakah Anda yakin ingin menghapus item ini dari bouquet?',
+                'Ya, Hapus',
+                'Batal'
+            );
+
+            if (!confirmed) return;
 
             try {
                 const response = await fetch('/custom-bouquet/remove-item', {
@@ -1207,7 +1291,7 @@
             // Check if custom bouquet has items
             const selectedItems = document.querySelectorAll('#selectedItems .bg-gradient-to-r');
             if (selectedItems.length === 0) {
-                showNotification('Bouquet masih kosong. Tambahkan beberapa bunga terlebih dahulu.', 'error');
+                showNotification('🌸 Bouquet masih kosong! Silakan pilih dan tambahkan beberapa bunga terlebih dahulu.', 'warning');
                 return;
             }
 
@@ -1258,32 +1342,193 @@
         }
 
         async function clearBuilder() {
-            if (!confirm('Kosongkan semua item dari builder?')) return;
+            // Show custom confirmation dialog
+            const confirmed = await showConfirmDialog(
+                '🗑️ Kosongkan Item?',
+                'Apakah Anda yakin ingin mengosongkan semua item dari Custom Bouquet? Semua item yang telah dipilih akan dihapus.',
+                'Ya, Kosongkan',
+                'Batal'
+            );
 
-            // This will be implemented - remove all items from the custom bouquet
-            showNotification('Builder dikosongkan (coming soon)', 'info');
+            if (!confirmed) return;
+
+            try {
+                const response = await fetch('/custom-bouquet/clear', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        custom_bouquet_id: currentCustomBouquetId
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showNotification('Builder berhasil dikosongkan!', 'success');
+
+                    // Reset display
+                    displaySelectedItems([]);
+                    updateTotalPrice(0);
+
+                    // Remove reference image if exists
+                    removeReferenceImage();
+
+                    // Reload custom bouquet details to ensure clean state
+                    loadCustomBouquetDetails();
+                } else {
+                    showNotification(data.message || 'Gagal mengosongkan builder', 'error');
+                }
+            } catch (error) {
+                console.error('Error clearing builder:', error);
+                showNotification('Terjadi kesalahan saat mengosongkan builder', 'error');
+            }
+        }
+
+        function showConfirmDialog(title, message, confirmText = 'Ya', cancelText = 'Batal') {
+            return new Promise((resolve) => {
+                // Create backdrop overlay
+                const backdrop = document.createElement('div');
+                backdrop.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 backdrop-blur-sm';
+
+                // Create confirmation dialog
+                const dialog = document.createElement('div');
+                dialog.className = 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-xl shadow-2xl z-50 w-11/12 max-w-md';
+
+                dialog.innerHTML = `
+                    <div class="p-6 text-center">
+                        <div class="mb-4">
+                            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+                                <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                            </div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">${title}</h3>
+                            <p class="text-sm text-gray-600 leading-relaxed">${message}</p>
+                        </div>
+                        <div class="flex space-x-3">
+                            <button id="cancelBtn" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 hover:text-gray-900 font-medium py-2 px-4 rounded-lg transition-all duration-200">
+                                ${cancelText}
+                            </button>
+                            <button id="confirmBtn" class="flex-1 bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-lg transition-all duration-200">
+                                ${confirmText}
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                // Add to body
+                document.body.appendChild(backdrop);
+                document.body.appendChild(dialog);
+
+                // Add animation
+                setTimeout(() => {
+                    backdrop.style.opacity = '1';
+                    dialog.style.transform = 'translate(-50%, -50%) scale(1)';
+                }, 10);
+
+                // Handle buttons
+                const confirmBtn = dialog.querySelector('#confirmBtn');
+                const cancelBtn = dialog.querySelector('#cancelBtn');
+
+                const cleanup = () => {
+                    backdrop.style.opacity = '0';
+                    dialog.style.transform = 'translate(-50%, -50%) scale(0.95)';
+                    setTimeout(() => {
+                        backdrop.remove();
+                        dialog.remove();
+                    }, 200);
+                };
+
+                confirmBtn.addEventListener('click', () => {
+                    cleanup();
+                    resolve(true);
+                });
+
+                cancelBtn.addEventListener('click', () => {
+                    cleanup();
+                    resolve(false);
+                });
+
+                backdrop.addEventListener('click', () => {
+                    cleanup();
+                    resolve(false);
+                });
+            });
         }
 
         function showNotification(message, type = 'info') {
-            // Create notification element
-            const notification = document.createElement('div');
-            notification.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 ${getNotificationColor(type)}`;
-            notification.textContent = message;
+            // Create backdrop overlay
+            const backdrop = document.createElement('div');
+            backdrop.className = 'fixed inset-0 bg-black bg-opacity-40 z-40 backdrop-blur-sm';
 
+            // Create notification element - more responsive sizing
+            const notification = document.createElement('div');
+            notification.className = `fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-3 sm:p-4 md:p-6 rounded-lg shadow-2xl z-50 ${getNotificationColor(type)} w-11/12 max-w-xs sm:max-w-sm md:max-w-md text-center border notification-mobile`;
+
+            // Add icon based on type - smaller icons for mobile
+            const icon = getNotificationIcon(type);
+            notification.innerHTML = `
+                <div class="flex flex-col items-center space-y-2 sm:space-y-3">
+                    <div class="text-lg sm:text-xl md:text-2xl">${icon}</div>
+                    <div class="text-xs sm:text-sm md:text-base font-semibold leading-tight px-2">${message}</div>
+                    <div class="w-full bg-white/20 rounded-full h-0.5 sm:h-1 mt-2 sm:mt-3">
+                        <div class="bg-white h-0.5 sm:h-1 rounded-full transition-all duration-3000 notification-progress"></div>
+                    </div>
+                </div>
+            `;
+
+            // Add both backdrop and notification to body
+            document.body.appendChild(backdrop);
             document.body.appendChild(notification);
+
+            // Add progress animation
+            const progressBar = notification.querySelector('.notification-progress');
+            setTimeout(() => {
+                progressBar.style.width = '100%';
+            }, 100);
 
             // Auto remove after 3 seconds
             setTimeout(() => {
-                notification.remove();
+                notification.style.opacity = '0';
+                notification.style.transform = 'translate(-50%, -50%) scale(0.9)';
+                backdrop.style.opacity = '0';
+                setTimeout(() => {
+                    backdrop.remove();
+                    notification.remove();
+                }, 300);
             }, 3000);
+
+            // Click backdrop to close
+            backdrop.addEventListener('click', () => {
+                notification.style.opacity = '0';
+                notification.style.transform = 'translate(-50%, -50%) scale(0.9)';
+                backdrop.style.opacity = '0';
+                setTimeout(() => {
+                    backdrop.remove();
+                    notification.remove();
+                }, 300);
+            });
         }
 
         function getNotificationColor(type) {
             switch (type) {
-                case 'success': return 'bg-green-500 text-white';
-                case 'error': return 'bg-red-500 text-white';
-                case 'warning': return 'bg-yellow-500 text-white';
-                default: return 'bg-blue-500 text-white';
+                case 'success': return 'bg-gradient-to-br from-green-500 to-emerald-600 text-white';
+                case 'error': return 'bg-gradient-to-br from-red-500 to-rose-600 text-white';
+                case 'warning': return 'bg-gradient-to-br from-yellow-500 to-orange-600 text-white';
+                default: return 'bg-gradient-to-br from-blue-500 to-indigo-600 text-white';
+            }
+        }
+
+        function getNotificationIcon(type) {
+            switch (type) {
+                case 'success': return '✅';
+                case 'error': return '❌';
+                case 'warning': return '⚠️';
+                default: return 'ℹ️';
             }
         }
 
@@ -1291,7 +1536,7 @@
             // Check if custom bouquet has items
             const selectedItems = document.querySelectorAll('#selectedItems .bg-gradient-to-r');
             if (selectedItems.length === 0) {
-                showNotification('Bouquet masih kosong. Tambahkan beberapa bunga terlebih dahulu.', 'error');
+                showNotification('🌸 Bouquet masih kosong! Silakan pilih dan tambahkan beberapa bunga terlebih dahulu.', 'warning');
                 return;
             }
 

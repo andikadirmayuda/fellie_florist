@@ -926,7 +926,7 @@
                         <!-- Custom Bouquet Components Section -->
                         @if($item->custom_bouquet_id)
                             @php
-                                $customBouquet = \App\Models\CustomBouquet::with(['items.product', 'items.size'])->find($item->custom_bouquet_id);
+                                $customBouquet = \App\Models\CustomBouquet::with(['items.product'])->find($item->custom_bouquet_id);
                             @endphp
                             
                             @if($customBouquet && $customBouquet->items->count() > 0)
@@ -951,9 +951,7 @@
                                                     @endif
                                                     <div>
                                                         <span class="font-medium text-purple-800">{{ $component->product->name }}</span>
-                                                        @if($component->size)
-                                                            <span class="text-sm text-purple-600 block">{{ $component->size->name }}</span>
-                                                        @endif
+                                                        <span class="text-sm text-purple-600 block">{{ $component->price_type_display }} - {{ $component->formatted_quantity }}</span>
                                                     </div>
                                                 </div>
                                                 <div class="text-right">
@@ -967,7 +965,7 @@
                                     <div class="mt-4 p-3 bg-purple-100 rounded-lg">
                                         <div class="flex justify-between items-center">
                                             <span class="font-semibold text-purple-800">Total Harga Custom Bouquet:</span>
-                                            <span class="font-bold text-lg text-purple-800">Rp {{ number_format($customBouquet->total_price, 0, ',', '.') }}</span>
+                                            <span class="font-bold text-lg text-purple-800">Rp {{ number_format((float)($customBouquet->total_price ?? 0), 0, ',', '.') }}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -1252,7 +1250,7 @@
                     </button>
 
                     <button onclick="shareOrderLinkToCustomer({{ $order->id }})"
-                        class="inline-flex items-center justify-center px-4 py-3 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-sm">
+                        class="inline-flex items-center justify-center px-4 py-3 bg-pink-600 hover:bg-pink-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-sm">
                         <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
                         </svg>

@@ -614,7 +614,7 @@
                                 <!-- Custom Bouquet Components Section -->
                                 @if($item->custom_bouquet_id)
                                     @php
-                                        $customBouquet = \App\Models\CustomBouquet::with(['items.product', 'items.size'])->find($item->custom_bouquet_id);
+                                        $customBouquet = \App\Models\CustomBouquet::with(['items.product'])->find($item->custom_bouquet_id);
                                     @endphp
                                     
                                     @if($customBouquet && $customBouquet->items->count() > 0)
@@ -641,9 +641,7 @@
                                                             @endif
                                                             <div>
                                                                 <span class="font-medium text-purple-800 text-sm sm:text-base">{{ $component->product->name }}</span>
-                                                                @if($component->size)
-                                                                    <span class="text-xs sm:text-sm text-purple-600 block">{{ $component->size->name }}</span>
-                                                                @endif
+                                                                <span class="text-xs sm:text-sm text-purple-600 block">{{ $component->price_type_display }} - {{ $component->formatted_quantity }}</span>
                                                             </div>
                                                         </div>
                                                         <div class="text-right">
@@ -657,7 +655,7 @@
                                             <div class="mt-4 p-3 bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-lg">
                                                 <div class="flex justify-between items-center">
                                                     <span class="font-semibold text-purple-800 text-sm sm:text-base">Total Harga:</span>
-                                                    <span class="font-bold text-lg text-purple-800">Rp {{ number_format($customBouquet->total_price, 0, ',', '.') }}</span>
+                                                    <span class="font-bold text-lg text-purple-800">Rp {{ number_format((float)($customBouquet->total_price ?? 0), 0, ',', '.') }}</span>
                                                 </div>
                                             </div>
                                             

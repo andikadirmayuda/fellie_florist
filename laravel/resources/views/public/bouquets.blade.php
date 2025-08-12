@@ -297,10 +297,10 @@
                         </div>
                         <span class="text-sm md:text-base font-semibold hidden sm:block">Custom Bouquet</span>
                         <span class="text-xs md:text-sm font-medium sm:hidden nav-mobile-text">Custom</span>
-                        <span
+                        {{-- <span
                             class="absolute -top-1 -right-1 text-xs bg-gradient-to-r from-yellow-400 to-orange-400 text-orange-900 px-2 py-0.5 rounded-full font-bold shadow-md animate-pulse">
                             NEW
-                        </span>
+                        </span> --}}
                     </a>
                 </div>
             </nav>
