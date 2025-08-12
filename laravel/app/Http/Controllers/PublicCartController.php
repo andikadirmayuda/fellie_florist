@@ -32,17 +32,24 @@ class PublicCartController extends Controller
             // Format image URL dengan benar
             $imageUrl = null;
             if (isset($item['image']) && $item['image']) {
-                $imageUrl = asset('storage/' . $item['image']);
+                if (isset($item['type']) && $item['type'] === 'custom_bouquet') {
+                    // For custom bouquet, image is already stored with path
+                    $imageUrl = asset('storage/' . $item['image']);
+                } else {
+                    $imageUrl = asset('storage/' . $item['image']);
+                }
             }
 
             // Format nama produk dengan price_type
             $productName = $item['name'];
             if (isset($item['price_type']) && $item['price_type']) {
                 $priceTypeLabel = $this->getPriceTypeLabel($item['price_type']);
-                $productName .= ' (' . $priceTypeLabel . ')';
+                if ($item['price_type'] !== 'Custom') { // Don't add Custom again for custom bouquet
+                    $productName .= ' (' . $priceTypeLabel . ')';
+                }
             }
 
-            $items[] = [
+            $formattedItem = [
                 'id' => $cartKey, // Gunakan cartKey sebagai ID unik
                 'product_id' => $item['id'], // ID produk asli
                 'name' => $productName,
@@ -52,6 +59,19 @@ class PublicCartController extends Controller
                 'type' => $item['type'] ?? 'product', // Tambahkan type identifier  
                 'image' => $imageUrl
             ];
+
+            // Add custom bouquet specific data
+            if (isset($item['type']) && $item['type'] === 'custom_bouquet') {
+                $formattedItem['components_summary'] = $item['components_summary'] ?? null;
+                $formattedItem['custom_bouquet_id'] = $item['custom_bouquet_id'] ?? null;
+            }
+
+            // Add greeting card if exists
+            if (isset($item['greeting_card']) && !empty($item['greeting_card'])) {
+                $formattedItem['greeting_card'] = $item['greeting_card'];
+            }
+
+            $items[] = $formattedItem;
         }
         return response()->json([
             'items' => $items,

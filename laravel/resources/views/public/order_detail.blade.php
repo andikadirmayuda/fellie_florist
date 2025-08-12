@@ -610,6 +610,64 @@
                                         </div>
                                     </div>
                                 @endif
+                                
+                                <!-- Custom Bouquet Components Section -->
+                                @if($item->custom_bouquet_id)
+                                    @php
+                                        $customBouquet = \App\Models\CustomBouquet::with(['items.product', 'items.size'])->find($item->custom_bouquet_id);
+                                    @endphp
+                                    
+                                    @if($customBouquet && $customBouquet->items->count() > 0)
+                                        <div class="bg-white rounded-xl border border-purple-200 p-4 sm:p-6 shadow-sm mt-4">
+                                            <div class="flex items-center mb-4">
+                                                <div class="bg-purple-100 p-2 rounded-lg mr-3">
+                                                    <i class="bi bi-flower1 text-purple-600 text-lg"></i>
+                                                </div>
+                                                <h4 class="font-bold text-purple-800 text-sm sm:text-base">Komponen Bouquet</h4>
+                                            </div>
+                                            
+                                            <div class="space-y-3">
+                                                @foreach($customBouquet->items as $component)
+                                                    <div class="flex items-center justify-between bg-purple-50 border border-purple-100 rounded-lg p-3">
+                                                        <div class="flex items-center">
+                                                            @if($component->product->image)
+                                                                <img src="{{ asset('storage/' . $component->product->image) }}" 
+                                                                     alt="{{ $component->product->name }}" 
+                                                                     class="w-8 h-8 sm:w-10 sm:h-10 object-cover rounded mr-3">
+                                                            @else
+                                                                <div class="w-8 h-8 sm:w-10 sm:h-10 bg-gray-200 rounded mr-3 flex items-center justify-center">
+                                                                    <i class="bi bi-flower1 text-gray-400 text-sm"></i>
+                                                                </div>
+                                                            @endif
+                                                            <div>
+                                                                <span class="font-medium text-purple-800 text-sm sm:text-base">{{ $component->product->name }}</span>
+                                                                @if($component->size)
+                                                                    <span class="text-xs sm:text-sm text-purple-600 block">{{ $component->size->name }}</span>
+                                                                @endif
+                                                            </div>
+                                                        </div>
+                                                        <div class="text-right">
+                                                            <span class="font-bold text-purple-800 text-sm sm:text-base">{{ $component->quantity }}</span>
+                                                            <span class="text-xs sm:text-sm text-purple-600 ml-1">{{ $component->product->base_unit ?? 'pcs' }}</span>
+                                                        </div>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                            
+                                            <div class="mt-4 p-3 bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-lg">
+                                                <div class="flex justify-between items-center">
+                                                    <span class="font-semibold text-purple-800 text-sm sm:text-base">Total Harga:</span>
+                                                    <span class="font-bold text-lg text-purple-800">Rp {{ number_format($customBouquet->total_price, 0, ',', '.') }}</span>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="mt-3 text-xs sm:text-sm text-purple-600">
+                                                <i class="bi bi-info-circle mr-1"></i>
+                                                Komponen-komponen yang Anda pilih untuk custom bouquet.
+                                            </div>
+                                        </div>
+                                    @endif
+                                @endif
                             </div>
                         </div>
                     @endforeach

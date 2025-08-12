@@ -21,7 +21,7 @@ class PublicCheckoutController extends Controller
         // Format cart data untuk view
         $cartData = [];
         foreach ($cart as $cartKey => $item) {
-            $cartData[] = [
+            $formattedItem = [
                 'product_name' => $item['name'],
                 'quantity' => $item['qty'],
                 'price' => $item['price'],
@@ -29,6 +29,15 @@ class PublicCheckoutController extends Controller
                 'type' => $item['type'] ?? 'product',
                 'greeting_card' => $item['greeting_card'] ?? null
             ];
+
+            // Add custom bouquet specific data
+            if (isset($item['type']) && $item['type'] === 'custom_bouquet') {
+                $formattedItem['components_summary'] = $item['components_summary'] ?? null;
+                $formattedItem['image'] = $item['image'] ?? null;
+                $formattedItem['custom_bouquet_id'] = $item['custom_bouquet_id'] ?? null;
+            }
+
+            $cartData[] = $formattedItem;
         }
 
         return view('public.checkout', compact('cartData'));
@@ -115,9 +124,13 @@ class PublicCheckoutController extends Controller
                     'item_type' => $item['type'] ?? 'product', // Store the item type
                 ];
 
-                // For custom bouquet, add the custom_bouquet_id
+                // For custom bouquet, add the custom_bouquet_id and enhance product_name
                 if (isset($item['type']) && $item['type'] === 'custom_bouquet') {
                     $orderItemData['custom_bouquet_id'] = $item['custom_bouquet_id'] ?? null;
+                    
+                    // Keep product name simple for custom bouquet
+                    $orderItemData['product_name'] = 'Custom Bouquet';
+                    
                     // Add custom instructions if provided
                     if (!empty($validated['custom_instructions'])) {
                         $orderItemData['custom_instructions'] = $validated['custom_instructions'];
