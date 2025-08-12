@@ -6,6 +6,11 @@
         html {
             scroll-behavior: smooth;
         }
+
+        /* Prevent sidebar flash before Alpine.js loads */
+        [x-cloak] {
+            display: none !important;
+        }
     </style>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -32,30 +37,31 @@
     <div class="min-h-screen bg-black" x-data="{
                 isSidebarOpen: false,
                 init() {
-                    // Inisialisasi state sidebar dari localStorage
-                    const savedState = localStorage.getItem('sidebarOpen');
-                    this.isSidebarOpen = savedState === 'true';
+                    // Ensure sidebar is closed immediately on initialization
+                    this.isSidebarOpen = false;
+                    // Clear any stored state to prevent conflicts
+                    if (typeof localStorage !== 'undefined') {
+                        localStorage.removeItem('sidebarOpen');
+                    }
                     console.log('Sidebar initialized with state:', this.isSidebarOpen);
                 },
                 toggleSidebar() {
                     console.log('Toggle sidebar clicked, current state:', this.isSidebarOpen);
                     this.isSidebarOpen = !this.isSidebarOpen;
-                    localStorage.setItem('sidebarOpen', this.isSidebarOpen.toString());
                     console.log('New sidebar state:', this.isSidebarOpen);
                 }
-            }">
+            }" x-init="init()">
         <!-- Sidebar -->
-        <div x-show="isSidebarOpen" x-transition:enter="transition ease-out duration-300 transform"
+        <div x-show="isSidebarOpen" x-cloak x-transition:enter="transition ease-out duration-300 transform"
             x-transition:enter-start="-translate-x-full" x-transition:enter-end="translate-x-0"
             x-transition:leave="transition ease-in duration-300 transform" x-transition:leave-start="translate-x-0"
             x-transition:leave-end="-translate-x-full"
-            class="fixed inset-y-0 left-0 z-30 w-64 bg-white dark:bg-gray-800 shadow-lg overflow-y-auto"
-            @click.away="isSidebarOpen = false">
+            class="fixed inset-y-0 left-0 z-30 w-64 bg-black shadow-lg overflow-y-auto">
             @include('layouts.sidebar')
         </div>
 
         <!-- Overlay -->
-        <div x-show="isSidebarOpen" x-transition:enter="transition-opacity ease-out duration-300"
+        <div x-show="isSidebarOpen" x-cloak x-transition:enter="transition-opacity ease-out duration-300"
             x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
             x-transition:leave="transition-opacity ease-in duration-300" x-transition:leave-start="opacity-100"
             x-transition:leave-end="opacity-0" @click="isSidebarOpen = false"
@@ -63,8 +69,8 @@
 
         <!-- Main Content -->
         <div class="flex-1 transition-all duration-300" :class="{ 'lg:ml-64': isSidebarOpen }">
-            <!-- Top Navigation -->
-            <div class="bg-black dark:bg-white-800 shadow">
+            <!-- Top Navigation - Sticky Header -->
+            <div class="sticky top-0 z-40 bg-black dark:bg-white-800 shadow-lg">
                 <div class="flex items-center h-16 px-4">
                     <button @click="toggleSidebar()"
                         class="text-white hover:text-gray-300 dark:text-gray-400 dark:hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 rounded p-1"
@@ -148,6 +154,29 @@
             <main>
                 {{ $slot }}
             </main>
+        </div>
+
+        <!-- Floating Menu Button for Mobile (appears when scrolled down) -->
+        <div x-data="{ 
+                showFab: false,
+                init() {
+                    // Show FAB when user scrolls down
+                    window.addEventListener('scroll', () => {
+                        this.showFab = window.scrollY > 200;
+                    });
+                }
+            }" x-init="init()">
+            <button x-show="showFab" x-transition:enter="transition ease-out duration-300 transform"
+                x-transition:enter-start="translate-y-16 opacity-0" x-transition:enter-end="translate-y-0 opacity-100"
+                x-transition:leave="transition ease-in duration-200 transform"
+                x-transition:leave-start="translate-y-0 opacity-100" x-transition:leave-end="translate-y-16 opacity-0"
+                @click="toggleSidebar()"
+                class="fixed bottom-6 right-6 z-50 lg:hidden bg-pink-500 hover:bg-pink-600 text-white p-4 rounded-full shadow-lg focus:outline-none focus:ring-4 focus:ring-pink-300"
+                title="Menu" style="display: none;">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </button>
         </div>
 
         <!-- SweetAlert2 -->
@@ -278,4 +307,4 @@
         @stack('scripts')
 </body>
 
-</html
+</html>
