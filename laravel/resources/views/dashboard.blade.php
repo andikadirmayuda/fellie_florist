@@ -21,33 +21,39 @@
     </x-slot> --}}
 
     <style>
-        .clean-bg {
-            background: #f8fafc;
+        .gradient-bg {
+            background: linear-gradient(135deg, #fdf2f8 0%, #ffffff 50%, #f3f4f6 100%);
         }
 
         .stats-card {
-            background: white;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            transition: all 0.2s ease;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.8) 100%);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 1.25rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
         }
 
         .stats-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px -5px rgba(0, 0, 0, 0.15);
         }
 
         .chart-card {
-            background: white;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            transition: all 0.2s ease;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.8) 100%);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 1.25rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
         }
 
         .notification-card {
-            background: white;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.8) 100%);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 1.25rem;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
         }
 
         .form-enter {
@@ -66,18 +72,21 @@
         }
 
         .modern-table {
-            border-radius: 12px;
+            border-radius: 1.25rem;
             overflow: hidden;
-            border: 1px solid #e2e8f0;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.8) 100%);
+            backdrop-filter: blur(20px);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
         }
 
         .modern-table thead {
-            background: #f1f5f9;
+            background: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 100%);
         }
 
         .modern-table thead th {
-            color: #475569;
-            font-weight: 600;
+            color: #be185d;
+            font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.05em;
             padding: 1rem;
@@ -85,20 +94,20 @@
         }
 
         .modern-table tbody tr {
-            transition: all 0.2s ease;
+            transition: all 0.3s ease;
         }
 
         .modern-table tbody tr:hover {
-            background-color: #f8fafc;
+            background-color: rgba(236, 72, 153, 0.05);
         }
 
         .modern-table tbody td {
             padding: 1rem;
-            border-bottom: 1px solid #f1f5f9;
+            border-bottom: 1px solid rgba(241, 245, 249, 0.8);
         }
     </style>
 
-    <div class="py-6 clean-bg min-h-screen">
+    <div class="py-6 gradient-bg min-h-screen">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <!-- Welcome Section -->
             {{-- <div class="text-center mb-8 form-enter">

@@ -26,15 +26,15 @@
 
     <!-- Scripts -->
 
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite(['resources/css/app.css', 'resources/css/modern-theme.css', 'resources/js/app.js'])
     @livewireStyles
 
     <!-- Bootstrap Icons CDN -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 
-<body class="font-sans antialiased">
-    <div class="min-h-screen bg-black" x-data="{
+<body class="font-sans antialiased bg-gray-50">
+    <div class="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100" x-data="{
                 isSidebarOpen: false,
                 init() {
                     // Ensure sidebar is closed immediately on initialization
@@ -56,7 +56,7 @@
             x-transition:enter-start="-translate-x-full" x-transition:enter-end="translate-x-0"
             x-transition:leave="transition ease-in duration-300 transform" x-transition:leave-start="translate-x-0"
             x-transition:leave-end="-translate-x-full"
-            class="fixed inset-y-0 left-0 z-30 w-64 bg-black shadow-lg overflow-y-auto">
+            class="fixed inset-y-0 left-0 z-30 w-64 bg-white shadow-2xl border-r border-gray-200 overflow-y-auto backdrop-blur-xl">
             @include('layouts.sidebar')
         </div>
 
@@ -65,15 +65,15 @@
             x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
             x-transition:leave="transition-opacity ease-in duration-300" x-transition:leave-start="opacity-100"
             x-transition:leave-end="opacity-0" @click="isSidebarOpen = false"
-            class="fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden"></div>
+            class="fixed inset-0 bg-gray-600 bg-opacity-50 backdrop-blur-sm z-20 lg:hidden"></div>
 
         <!-- Main Content -->
         <div class="flex-1 transition-all duration-300" :class="{ 'lg:ml-64': isSidebarOpen }">
             <!-- Top Navigation - Sticky Header -->
-            <div class="sticky top-0 z-40 bg-black dark:bg-white-800 shadow-lg">
+            <div class="sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-gray-200 shadow-sm">
                 <div class="flex items-center h-16 px-4">
                     <button @click="toggleSidebar()"
-                        class="text-white hover:text-gray-300 dark:text-gray-400 dark:hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 rounded p-1"
+                        class="text-gray-600 hover:text-pink-500 hover:bg-pink-50 focus:outline-none focus:ring-2 focus:ring-pink-500 rounded-lg p-2 transition-all duration-200"
                         title="Toggle Sidebar" type="button">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -90,7 +90,7 @@
                         <!-- Notification Bell -->
                         <div class="relative">
                             <button id="notification-bell"
-                                class="relative text-white hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 rounded p-2"
+                                class="relative text-gray-600 hover:text-pink-500 hover:bg-pink-50 focus:outline-none focus:ring-2 focus:ring-pink-500 rounded-lg p-2 transition-all duration-200"
                                 title="Notifikasi">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -107,10 +107,16 @@
                         <x-dropdown align="right" width="48">
                             <x-slot name="trigger">
                                 <button
-                                    class="flex items-center text-sm font-medium text-white-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
+                                    class="flex items-center text-sm font-medium text-gray-700 hover:text-pink-500 hover:bg-pink-50 rounded-lg px-3 py-2 transition-all duration-200">
 
-                                    <div>{{ Auth::user()->name }}</div>
-                                    <div class="ml-1">
+                                    <div class="flex items-center space-x-2">
+                                        <div
+                                            class="w-8 h-8 bg-gradient-to-br from-pink-400 to-pink-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                                            {{ substr(Auth::user()->name, 0, 1) }}
+                                        </div>
+                                        <div>{{ Auth::user()->name }}</div>
+                                    </div>
+                                    <div class="ml-2">
                                         <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg"
                                             viewBox="0 0 20 20">
                                             <path fill-rule="evenodd"
@@ -142,10 +148,14 @@
 
             <!-- Page Heading -->
             @isset($header)
-                <header class="bg-white shadow-lg rounded-sm mt-6 mb-6 mx-4 flex items-center px-6 py-4">
-                    <i class="bi bi-flower2 text-2xl text-pink-400 mr-4"></i>
+                <header
+                    class="bg-white/80 backdrop-blur-sm shadow-sm rounded-xl mt-6 mb-6 mx-4 flex items-center px-6 py-4 border border-gray-200">
+                    <div
+                        class="flex items-center justify-center w-10 h-10 bg-gradient-to-br from-pink-400 to-pink-600 rounded-lg mr-4">
+                        <i class="bi bi-flower2 text-lg text-white"></i>
+                    </div>
                     <div class="flex-1">
-                        <div class="text-xl font-bold text-black font-sans">{{ $header }}</div>
+                        <div class="text-xl font-bold text-gray-800 font-sans">{{ $header }}</div>
                     </div>
                 </header>
             @endisset
