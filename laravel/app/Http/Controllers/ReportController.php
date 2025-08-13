@@ -26,24 +26,24 @@ class ReportController extends Controller
         $totalTransaksi = $sales->count();
 
         // Produk terlaris dan terendah
-        $produkTerlaris = \App\Models\Product::select('products.*')
+        $produkTerlaris = \App\Models\Product::select('products.id', 'products.name', 'products.code', 'products.category_id', 'products.description', 'products.base_unit', 'products.current_stock', 'products.min_stock', 'products.is_active')
             ->join('sale_items', 'products.id', '=', 'sale_items.product_id')
             ->join('sales', 'sales.id', '=', 'sale_items.sale_id')
             ->whereBetween('sales.created_at', [$start, $end])
-            ->selectRaw('SUM(sale_items.quantity) as total_terjual')
-            ->groupBy('products.id')
+            ->selectRaw('products.*, SUM(sale_items.quantity) as total_terjual')
+            ->groupBy('products.id', 'products.name', 'products.code', 'products.category_id', 'products.description', 'products.base_unit', 'products.current_stock', 'products.min_stock', 'products.is_active')
             ->orderByDesc('total_terjual')
             ->first();
 
-        $produkKurangLaku = \App\Models\Product::select('products.*')
+        $produkKurangLaku = \App\Models\Product::select('products.id', 'products.name', 'products.code', 'products.category_id', 'products.description', 'products.base_unit', 'products.current_stock', 'products.min_stock', 'products.is_active')
             ->leftJoin('sale_items', 'products.id', '=', 'sale_items.product_id')
             ->leftJoin('sales', 'sales.id', '=', 'sale_items.sale_id')
             ->where(function ($q) use ($start, $end) {
                 $q->whereNull('sales.created_at')
                     ->orWhereBetween('sales.created_at', [$start, $end]);
             })
-            ->selectRaw('COALESCE(SUM(sale_items.quantity),0) as total_terjual')
-            ->groupBy('products.id')
+            ->selectRaw('products.*, COALESCE(SUM(sale_items.quantity),0) as total_terjual')
+            ->groupBy('products.id', 'products.name', 'products.code', 'products.category_id', 'products.description', 'products.base_unit', 'products.current_stock', 'products.min_stock', 'products.is_active')
             ->orderBy('total_terjual', 'asc')
             ->first();
 
