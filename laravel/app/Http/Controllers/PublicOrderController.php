@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\PublicOrder;
 use App\Models\PublicOrderItem;
+use App\Models\Product;
 use App\Services\PushNotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -79,7 +80,7 @@ class PublicOrderController extends Controller
             ]);
 
             foreach ($validated['items'] as $item) {
-                $product = \App\Models\Product::findOrFail($item['product_id']);
+                $product = Product::findOrFail($item['product_id']);
                 // Ambil harga sesuai tipe harga yang dipilih user
                 $selectedPrice = $product->prices()->where('type', $item['price_type'])->first();
                 $price = $selectedPrice ? $selectedPrice->price : 0;
@@ -148,7 +149,7 @@ class PublicOrderController extends Controller
             abort(403, 'Pesanan tidak dapat diedit.');
         }
         // Ambil semua produk beserta harga dan satuan
-        $products = \App\Models\Product::with(['prices' => function($q) {
+        $products = Product::with(['prices' => function ($q) {
             $q->orderBy('type');
         }])->where('is_active', 1)->get();
         return view('public.edit_order', compact('order', 'products'));
@@ -159,21 +160,99 @@ class PublicOrderController extends Controller
      */
     public function update(Request $request, $public_code)
     {
+        if (!config('public_order.enable_public_order_edit')) {
+            abort(403, 'Fitur edit pesanan publik sedang dinonaktifkan.');
+        }
+
         $order = PublicOrder::where('public_code', $public_code)->with('items')->firstOrFail();
         if ($order->status !== 'pending') {
-            abort(403, 'Pesanan tidak dapat diedit.');
+            abort(403, 'Pesanan tidak dapat diedit karena status sudah berubah.');
         }
+
         $validated = $request->validate([
             'customer_name' => 'required|string|max:100',
             'pickup_date' => 'required|date',
-            'pickup_time' => 'nullable',
+            'pickup_time' => 'nullable|string',
             'delivery_method' => 'required|string',
-            'destination' => 'nullable|string',
-            'wa_number' => 'nullable|string',
+            'destination' => 'nullable|string|max:500',
+            'wa_number' => 'nullable|string|max:20',
+            'notes' => 'nullable|string|max:1000',
+            'items' => 'required|array|min:1',
+            'items.*.id' => 'nullable|integer|exists:public_order_items,id',
+            'items.*.product_id' => 'required|integer|exists:products,id',
+            'items.*.price_type' => 'required|string',
+            'items.*.price' => 'required|numeric|min:0',
+            'items.*.unit_equivalent' => 'required|integer|min:1',
+            'items.*.quantity' => 'required|integer|min:1',
         ]);
-        $order->update($validated);
-        return redirect()->route('public.order.invoice', ['public_code' => $order->public_code])
-            ->with('success', 'Pesanan berhasil diperbarui.');
+
+        try {
+            DB::beginTransaction();
+
+            // Update order data
+            $order->update([
+                'customer_name' => $validated['customer_name'],
+                'pickup_date' => $validated['pickup_date'],
+                'pickup_time' => $validated['pickup_time'],
+                'delivery_method' => $validated['delivery_method'],
+                'destination' => $validated['destination'],
+                'wa_number' => $validated['wa_number'],
+                'notes' => $validated['notes'] ?? $order->notes,
+            ]);
+
+            // Track existing item IDs
+            $existingItemIds = $order->items->pluck('id')->toArray();
+            $updatedItemIds = [];
+
+            // Update or create items
+            foreach ($validated['items'] as $itemData) {
+                // Get product name
+                $product = Product::find($itemData['product_id']);
+                if (!$product) {
+                    throw new \Exception('Produk tidak ditemukan.');
+                }
+
+                $itemAttributes = [
+                    'public_order_id' => $order->id,
+                    'product_id' => $itemData['product_id'],
+                    'product_name' => $product->name,
+                    'price_type' => $itemData['price_type'],
+                    'price' => (int)str_replace(['.', ','], '', $itemData['price']),
+                    'unit_equivalent' => $itemData['unit_equivalent'],
+                    'quantity' => $itemData['quantity'],
+                    'item_type' => 'product', // default for regular products
+                ];
+
+                if (!empty($itemData['id']) && in_array($itemData['id'], $existingItemIds)) {
+                    // Update existing item
+                    $item = PublicOrderItem::find($itemData['id']);
+                    $item->update($itemAttributes);
+                    $updatedItemIds[] = $itemData['id'];
+                } else {
+                    // Create new item
+                    $newItem = PublicOrderItem::create($itemAttributes);
+                    $updatedItemIds[] = $newItem->id;
+                }
+            }
+
+            // Delete items that were not updated (removed items)
+            $itemsToDelete = array_diff($existingItemIds, $updatedItemIds);
+            if (!empty($itemsToDelete)) {
+                PublicOrderItem::whereIn('id', $itemsToDelete)->delete();
+            }
+
+            DB::commit();
+
+            return redirect()->route('public.order.invoice', ['public_code' => $order->public_code])
+                ->with('success', 'Pesanan berhasil diperbarui!');
+        } catch (\Exception $e) {
+            DB::rollback();
+            Log::error('Error updating public order: ' . $e->getMessage());
+
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['error' => 'Terjadi kesalahan saat memperbarui pesanan: ' . $e->getMessage()]);
+        }
     }
 
     /**
@@ -181,7 +260,7 @@ class PublicOrderController extends Controller
      */
     public function publicInvoice($public_code)
     {
-        $order = \App\Models\PublicOrder::where('public_code', $public_code)->with('items')->firstOrFail();
+        $order = PublicOrder::where('public_code', $public_code)->with('items')->firstOrFail();
         return view('public.invoice', compact('order'));
     }
 
@@ -190,7 +269,7 @@ class PublicOrderController extends Controller
      */
     public function publicOrderDetail($public_code)
     {
-        $order = \App\Models\PublicOrder::where('public_code', $public_code)
+        $order = PublicOrder::where('public_code', $public_code)
             ->with(['items', 'payments'])
             ->firstOrFail();
         return view('public.order_detail', compact('order'));
@@ -204,7 +283,7 @@ class PublicOrderController extends Controller
         $orders = collect();
         $wa_number = $request->get('wa_number');
         if ($wa_number) {
-            $orders = \App\Models\PublicOrder::where('wa_number', $wa_number)->with('items')->orderByDesc('created_at')->get();
+            $orders = PublicOrder::where('wa_number', $wa_number)->with('items')->orderByDesc('created_at')->get();
         }
         return view('public.track_order', compact('orders', 'wa_number'));
     }

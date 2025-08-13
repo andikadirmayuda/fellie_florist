@@ -1,8 +1,15 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-bold text-3xl text-gray-800 leading-tight mb-2">
-            {{ __('Tambah Komponen Bouquet') }}
-        </h2>
+        <div class="flex justify-between items-center">
+            <h2 class="text-2xl font-bold text-pink-700">Tambah Komponen Bouquet</h2>
+            <a href="{{ route('bouquet-components.index') }}"
+                class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg shadow-lg transition-all duration-200 flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+                Kembali
+            </a>
+        </div>
     </x-slot>
     <div class="py-8">
         <div class="max-w-xl mx-auto sm:px-6 lg:px-8">
@@ -178,12 +185,12 @@
                         let tbody = '';
                         productsData.forEach((p, i) => {
                             tbody += `<tr>
-                                                                <td>${p.bouquet_name || '-'}</td>
-                                                                <td>${p.size_name || '-'}</td>
-                                                                <td>${p.name}</td>
-                                                                <td>${p.quantity}</td>
-                                                                <td><a href="#" class="text-pink-600 font-bold remove-product" data-idx="${i}">Hapus</a></td>
-                                                            </tr>`;
+                                                                    <td>${p.bouquet_name || '-'}</td>
+                                                                    <td>${p.size_name || '-'}</td>
+                                                                    <td>${p.name}</td>
+                                                                    <td>${p.quantity}</td>
+                                                                    <td><a href="#" class="text-pink-600 font-bold remove-product" data-idx="${i}">Hapus</a></td>
+                                                                </tr>`;
                         });
                         $('#productTable tbody').html(tbody);
                         $('#productsInput').val(JSON.stringify(productsData));
