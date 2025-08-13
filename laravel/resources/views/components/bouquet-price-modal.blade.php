@@ -1,5 +1,21 @@
 <!-- Bouquet Price Selection Modal -->
-<div id="bouquetPriceModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 transition-opacity duration-300">
+<div id="bouquetPriceModal" class="fixed inset-0     function selectBouquetPrice(selectedPrice) {
+        // Close the price selection modal first
+        closeBouquetPriceModal();
+
+        // Pastikan data size tersedia dengan benar
+        const sizeId = selectedPrice.size_id || (selectedPrice.size ? selectedPrice.size.id : 'standard');
+        const sizeName = selectedPrice.size ? selectedPrice.size.name : 'Standard';
+
+        // Show greeting card modal with selected price data
+        showGreetingCardModal(
+            selectedBouquetData.id,
+            selectedBouquetData.name,
+            sizeId,
+            sizeName,
+            selectedPrice.price
+        );
+    }pacity-50 hidden z-50 transition-opacity duration-300">
     <div class="flex items-center justify-center min-h-screen p-4">
         <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full transform transition-all duration-300 scale-95"
             id="bouquetModalContent">

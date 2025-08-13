@@ -154,33 +154,16 @@
         }
     </style>
     <script>
-        // Fungsi untuk menambah ke keranjang dengan pilihan harga (global)
-        function addToCartWithPrice(flowerId, priceType) {
-            fetch('/cart/add', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                },
-                body: JSON.stringify({ product_id: flowerId, price_type: priceType })
-            })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Gagal menambah ke keranjang. Status: ' + response.status);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.success) {
-                        closeCartPriceModal();
-                        updateCart();
-                        toggleCart();
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Terjadi kesalahan saat menambah ke keranjang: ' + error.message);
-                });
+        // Fungsi telah diganti dengan panggilan langsung ke showGreetingCardModal
+        function debugShowGreetingCardModal(flowerId, bouquetName, sizeId, sizeName, price) {
+            console.log('Debug showGreetingCardModal params:', {
+                flowerId,
+                bouquetName,
+                sizeId,
+                sizeName,
+                price
+            });
+            showGreetingCardModal(flowerId, bouquetName, sizeId, sizeName, price);
         }
     </script>
 </head>
@@ -468,7 +451,16 @@
                                         $availablePrices = $bouquet->prices->whereIn('size_id', $sizeIdsWithComponents);
                                     @endphp
                                     @if($availablePrices->count() == 1)
-                                        <button onclick="addToCartWithPrice('{{ $bouquet->id }}', 'bouquet')"
+                                        @php
+                                            $firstPrice = $availablePrices->first();
+                                        @endphp
+                                        <button onclick="showGreetingCardModal(
+                                                            '{{ $bouquet->id }}',
+                                                            '{{ $bouquet->name }}',
+                                                            '{{ $firstPrice->size_id ?? 'standard' }}',
+                                                            '{{ $firstPrice->size->name ?? 'Standard' }}',
+                                                            {{ $firstPrice->price }}
+                                                        )"
                                             class="w-full bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white font-semibold py-1.5 sm:py-2 px-3 sm:px-4 rounded-xl transition-all duration-200 shadow-md hover:shadow-lg text-xs sm:text-sm">
                                             <i class="bi bi-cart-plus mr-1 sm:mr-2"></i>Tambah ke Keranjang
                                         </button>
