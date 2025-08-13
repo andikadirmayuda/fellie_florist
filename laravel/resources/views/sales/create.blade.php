@@ -147,23 +147,45 @@
                                     <label class="block text-sm font-medium text-gray-700 mb-3">
                                         <i class="bi bi-box mr-2 text-purple-600"></i>3. Pilih Produk
                                     </label>
-                                    <select
-                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-all duration-200"
-                                        id="productSelect">
-                                        <option value="">-- Pilih Produk --</option>
-                                        @foreach($products as $product)
-                                            <option value="{{ $product->id }}" data-category="{{ $product->category_id }}"
-                                                data-name="{{ strtolower($product->name ?? '') }}"
-                                                data-code="{{ strtolower($product->code ?? '') }}"
-                                                data-original-name="{{ $product->name ?? '' }}"
-                                                @if($product->current_stock == 0) disabled @endif>
-                                                {{ $product->name }}
-                                                @if($product->current_stock == 0)
-                                                    (Stok Habis)
-                                                @endif
-                                            </option>
-                                        @endforeach
-                                    </select>
+                                    <div class="relative">
+                                        <button type="button" 
+                                            class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-all duration-200 bg-white text-left"
+                                            id="productDropdownButton">
+                                            <span class="text-gray-500">-- Pilih Produk --</span>
+                                        </button>
+                                        <div id="productDropdownPanel" 
+                                            class="hidden absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg">
+                                            <div class="p-3">
+                                                <!-- Search input -->
+                                                <div class="mb-3">
+                                                    <input type="text" id="productSearch"
+                                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
+                                                        placeholder="Cari produk...">
+                                                </div>
+                                                <!-- Grid of products -->
+                                                <div class="max-h-60 overflow-y-auto">
+                                                    <div class="grid grid-cols-2 gap-2" id="productsGrid">
+                                                        @foreach($products as $product)
+                                                            <button type="button"
+                                                                class="product-option text-left px-3 py-2 rounded-md hover:bg-pink-50 transition-colors {{ $product->current_stock == 0 ? 'opacity-50 cursor-not-allowed' : '' }}"
+                                                                data-product-id="{{ $product->id }}"
+                                                                data-category="{{ $product->category_id }}"
+                                                                data-name="{{ strtolower($product->name ?? '') }}"
+                                                                data-code="{{ strtolower($product->code ?? '') }}"
+                                                                data-original-name="{{ $product->name ?? '' }}"
+                                                                {{ $product->current_stock == 0 ? 'disabled' : '' }}>
+                                                                {{ $product->name }}
+                                                                @if($product->current_stock == 0)
+                                                                    <span class="text-red-500 text-sm">(Stok Habis)</span>
+                                                                @endif
+                                                            </button>
+                                                        @endforeach
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <input type="hidden" id="productSelect" name="product_id" value="">
+                                    </div>
 
                                     <!-- Search Results Info -->
                                     <div id="searchResultsInfo" class="mt-3 hidden">
@@ -432,6 +454,58 @@
         </div>
     </div>
     <script>
+        // Custom Product Dropdown
+        document.addEventListener('DOMContentLoaded', function() {
+            const dropdownButton = document.getElementById('productDropdownButton');
+            const dropdownPanel = document.getElementById('productDropdownPanel');
+            const searchInput = document.getElementById('productSearch');
+            const productOptions = document.querySelectorAll('.product-option');
+            const hiddenInput = document.getElementById('productSelect');
+
+            // Toggle dropdown
+            dropdownButton.addEventListener('click', function() {
+                dropdownPanel.classList.toggle('hidden');
+                if (!dropdownPanel.classList.contains('hidden')) {
+                    searchInput.focus();
+                }
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!dropdownButton.contains(e.target) && !dropdownPanel.contains(e.target)) {
+                    dropdownPanel.classList.add('hidden');
+                }
+            });
+
+            // Handle product search
+            searchInput.addEventListener('input', function(e) {
+                const searchTerm = e.target.value.toLowerCase();
+                productOptions.forEach(option => {
+                    const productName = option.getAttribute('data-name');
+                    const productCode = option.getAttribute('data-code');
+                    if (productName.includes(searchTerm) || productCode.includes(searchTerm)) {
+                        option.parentElement.classList.remove('hidden');
+                    } else {
+                        option.parentElement.classList.add('hidden');
+                    }
+                });
+            });
+
+            // Handle product selection
+            productOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    if (!this.hasAttribute('disabled')) {
+                        const productId = this.getAttribute('data-product-id');
+                        const productName = this.getAttribute('data-original-name');
+                        dropdownButton.innerHTML = `<span class="text-gray-900">${productName}</span>`;
+                        hiddenInput.value = productId;
+                        hiddenInput.dispatchEvent(new Event('change')); // Trigger change event
+                        dropdownPanel.classList.add('hidden');
+                    }
+                });
+            });
+        });
+
         function formatPrice(price) {
             // Ensure price is a number, remove any existing separators
             const numPrice = parseFloat(String(price).replace(/[,.]/g, '')) || 0;

@@ -18,7 +18,7 @@ class BouquetController extends Controller
     {
         $bouquets = Bouquet::with(['category', 'sizes', 'components.product'])
             ->orderBy('category_id')
-            ->paginate(10);
+            ->get();
 
         $categories = \App\Models\BouquetCategory::orderBy('name')->get();
 
@@ -82,7 +82,7 @@ class BouquetController extends Controller
     public function show(Bouquet $bouquet)
     {
         $bouquet->load(['category', 'sizes', 'components.product']);
-        
+
         // Group components by size
         $componentsBySize = $bouquet->components
             ->groupBy('size_id')
@@ -107,7 +107,7 @@ class BouquetController extends Controller
         $categories = BouquetCategory::orderBy('name')->get();
         $sizes = BouquetSize::orderBy('name')->get();
         $bouquet->load(['prices']);
-        
+
         return view('bouquets.edit', compact('bouquet', 'categories', 'sizes'));
     }
 
@@ -182,11 +182,10 @@ class BouquetController extends Controller
 
             return redirect()->route('bouquets.index')
                 ->with('success', 'Buket berhasil dihapus.');
-
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error saat menghapus bouquet: ' . $e->getMessage());
-            
+
             return back()
                 ->with('error', 'Terjadi kesalahan saat menghapus buket. ' . $e->getMessage());
         }

@@ -13,42 +13,42 @@ class BouquetCategorySeeder extends Seeder
             [
                 'code' => 'WEDDING',
                 'name' => 'Wedding',
-                'description' => 'Bouquet untuk pernikahan'
+                // 'description' => 'Bouquet untuk pernikahan'
             ],
             [
                 'code' => 'BIRTH',
                 'name' => 'Birthday',
-                'description' => 'Bouquet untuk ulang tahun'
+                // 'description' => 'Bouquet untuk ulang tahun'
             ],
             [
                 'code' => 'GRAD',
                 'name' => 'Graduation',
-                'description' => 'Bouquet untuk wisuda'
+                // 'description' => 'Bouquet untuk wisuda'
             ],
             [
                 'code' => 'ANNIV',
                 'name' => 'Anniversary',
-                'description' => 'Bouquet untuk anniversary'
+                // 'description' => 'Bouquet untuk anniversary'
             ],
             [
                 'code' => 'CONG',
                 'name' => 'Congratulation',
-                'description' => 'Bouquet untuk ucapan selamat'
+                // 'description' => 'Bouquet untuk ucapan selamat'
             ],
             [
                 'code' => 'SYMPA',
                 'name' => 'Sympathy',
-                'description' => 'Bouquet untuk belasungkawa'
+                // 'description' => 'Bouquet untuk belasungkawa'
             ],
             [
                 'code' => 'VDAY',
                 'name' => 'Valentine',
-                'description' => 'Bouquet untuk Valentine'
+                // 'description' => 'Bouquet untuk Valentine'
             ],
             [
                 'code' => 'MOTHER',
                 'name' => 'Mother\'s Day',
-                'description' => 'Bouquet untuk Hari Ibu'
+                // 'description' => 'Bouquet untuk Hari Ibu'
             ]
         ];
 

@@ -28,23 +28,73 @@
                         @csrf
                         <div class="mb-4">
                             <label class="block text-sm font-medium text-gray-700 mb-1">Nama Bouquet</label>
-                            <select name="bouquet_id" id="bouquet_id"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>
-                                <option value="">- Pilih Buket -</option>
-                                @foreach($bouquets as $bouquet)
-                                    <option value="{{ $bouquet->id }}">{{ $bouquet->name }}</option>
-                                @endforeach
-                            </select>
+                            <div class="relative">
+                                <button type="button" id="bouquetDropdownButton"
+                                    class="w-full px-3 py-2.5 text-left bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-all duration-200">
+                                    <span class="text-gray-500">- Pilih Buket -</span>
+                                </button>
+                                <div id="bouquetDropdownPanel"
+                                    class="hidden absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg">
+                                    <div class="p-3">
+                                        <!-- Search input -->
+                                        <div class="mb-3">
+                                            <input type="text" id="bouquetSearch"
+                                                class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
+                                                placeholder="Cari bouquet...">
+                                        </div>
+                                        <!-- Grid of bouquets -->
+                                        <div class="max-h-60 overflow-y-auto">
+                                            <div class="grid grid-cols-2 gap-2" id="bouquetsGrid">
+                                                @foreach($bouquets as $bouquet)
+                                                    <button type="button"
+                                                        class="bouquet-option text-left px-3 py-2 rounded-md hover:bg-pink-50 transition-colors"
+                                                        data-bouquet-id="{{ $bouquet->id }}"
+                                                        data-name="{{ strtolower($bouquet->name) }}"
+                                                        data-original-name="{{ $bouquet->name }}">
+                                                        {{ $bouquet->name }}
+                                                    </button>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <input type="hidden" name="bouquet_id" id="bouquet_id" required>
+                            </div>
                         </div>
                         <div class="mb-4">
                             <label class="block text-sm font-medium text-gray-700 mb-1">Ukuran</label>
-                            <select name="size_id" id="size_id"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>
-                                <option value="">- Pilih ukuran Buket -</option>
-                                @foreach($sizes as $size)
-                                    <option value="{{ $size->id }}">{{ $size->name }}</option>
-                                @endforeach
-                            </select>
+                            <div class="relative">
+                                <button type="button" id="sizeDropdownButton"
+                                    class="w-full px-3 py-2.5 text-left bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-all duration-200">
+                                    <span class="text-gray-500">- Pilih ukuran Buket -</span>
+                                </button>
+                                <div id="sizeDropdownPanel"
+                                    class="hidden absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg">
+                                    <div class="p-3">
+                                        <!-- Search input -->
+                                        <div class="mb-3">
+                                            <input type="text" id="sizeSearch"
+                                                class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
+                                                placeholder="Cari ukuran...">
+                                        </div>
+                                        <!-- Grid of sizes -->
+                                        <div class="max-h-48 overflow-y-auto">
+                                            <div class="grid grid-cols-1 gap-1" id="sizesGrid">
+                                                @foreach($sizes as $size)
+                                                    <button type="button"
+                                                        class="size-option text-left px-3 py-2 rounded-md hover:bg-pink-50 transition-colors"
+                                                        data-size-id="{{ $size->id }}"
+                                                        data-name="{{ strtolower($size->name) }}"
+                                                        data-original-name="{{ $size->name }}">
+                                                        {{ $size->name }}
+                                                    </button>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <input type="hidden" name="size_id" id="size_id" required>
+                            </div>
                         </div>
                         <div class="mb-4">
                             <label class="block text-sm font-medium text-gray-700 mb-1">Kategori Produk</label>
@@ -58,16 +108,42 @@
                         </div>
                         <div class="mb-4 flex flex-col md:flex-row gap-4 items-end">
                             <div class="w-full md:w-1/2">
-                                <label class="block text-sm font-medium text-gray-700 mb-1"
-                                    for="product_id">Produk</label>
-                                <select id="product_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-                                    <option value="">- Pilih Produk -</option>
-                                    @foreach($products as $product)
-                                        <option value="{{ $product->id }}" data-category="{{ $product->category_id }}"
-                                            data-price="{{ $product->default_price ?? 0 }}"
-                                            data-type="{{ $product->price_type ?? '' }}">{{ $product->name }}</option>
-                                    @endforeach
-                                </select>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Produk</label>
+                                <div class="relative">
+                                    <button type="button" id="productDropdownButton"
+                                        class="w-full px-3 py-2.5 text-left bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-all duration-200">
+                                        <span class="text-gray-500">- Pilih Produk -</span>
+                                    </button>
+                                    <div id="productDropdownPanel"
+                                        class="hidden absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg">
+                                        <div class="p-3">
+                                            <!-- Search input -->
+                                            <div class="mb-3">
+                                                <input type="text" id="productSearch"
+                                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
+                                                    placeholder="Cari produk...">
+                                            </div>
+                                            <!-- Grid of products -->
+                                            <div class="max-h-60 overflow-y-auto">
+                                                <div class="grid grid-cols-2 gap-2" id="productsGrid">
+                                                    @foreach($products as $product)
+                                                        <button type="button"
+                                                            class="product-option text-left px-3 py-2 rounded-md hover:bg-pink-50 transition-colors"
+                                                            data-product-id="{{ $product->id }}"
+                                                            data-category="{{ $product->category_id }}"
+                                                            data-name="{{ strtolower($product->name) }}"
+                                                            data-price="{{ $product->default_price ?? 0 }}"
+                                                            data-price-type="{{ $product->price_type ?? '' }}"
+                                                            data-original-name="{{ $product->name }}">
+                                                            {{ $product->name }}
+                                                        </button>
+                                                    @endforeach
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <input type="hidden" id="product_id" value="">
+                                </div>
                             </div>
                             <div class="w-full md:w-1/4">
                                 <label class="block text-sm font-medium text-gray-700 mb-1"
@@ -185,12 +261,12 @@
                         let tbody = '';
                         productsData.forEach((p, i) => {
                             tbody += `<tr>
-                                                                    <td>${p.bouquet_name || '-'}</td>
-                                                                    <td>${p.size_name || '-'}</td>
-                                                                    <td>${p.name}</td>
-                                                                    <td>${p.quantity}</td>
-                                                                    <td><a href="#" class="text-pink-600 font-bold remove-product" data-idx="${i}">Hapus</a></td>
-                                                                </tr>`;
+                                                                            <td>${p.bouquet_name || '-'}</td>
+                                                                            <td>${p.size_name || '-'}</td>
+                                                                            <td>${p.name}</td>
+                                                                            <td>${p.quantity}</td>
+                                                                            <td><a href="#" class="text-pink-600 font-bold remove-product" data-idx="${i}">Hapus</a></td>
+                                                                        </tr>`;
                         });
                         $('#productTable tbody').html(tbody);
                         $('#productsInput').val(JSON.stringify(productsData));
@@ -206,6 +282,196 @@
 
                     // Set kategori tab pertama aktif saat load
                     $('.category-tab').first().trigger('click');
+
+                    // Custom Bouquet Dropdown
+                    const $dropdownButton = $('#bouquetDropdownButton');
+                    const $dropdownPanel = $('#bouquetDropdownPanel');
+                    const $searchInput = $('#bouquetSearch');
+                    const $bouquetOptions = $('.bouquet-option');
+                    const $hiddenInput = $('#bouquet_id');
+
+                    // Toggle dropdown
+                    $dropdownButton.on('click', function (e) {
+                        e.stopPropagation();
+                        $dropdownPanel.toggleClass('hidden');
+                        if (!$dropdownPanel.hasClass('hidden')) {
+                            $searchInput.focus();
+                        }
+                    });
+
+                    // Close dropdown when clicking outside
+                    $(document).on('click', function (e) {
+                        if (!$(e.target).closest($dropdownPanel).length && !$(e.target).closest($dropdownButton).length) {
+                            $dropdownPanel.addClass('hidden');
+                        }
+                    });
+
+                    // Prevent closing when clicking inside dropdown
+                    $dropdownPanel.on('click', function (e) {
+                        e.stopPropagation();
+                    });
+
+                    // Handle bouquet search
+                    $searchInput.on('input', function () {
+                        const searchTerm = $(this).val().toLowerCase();
+                        $bouquetOptions.each(function () {
+                            const $option = $(this);
+                            const bouquetName = $option.data('name').toLowerCase();
+                            if (bouquetName.includes(searchTerm)) {
+                                $option.removeClass('hidden');
+                            } else {
+                                $option.addClass('hidden');
+                            }
+                        });
+                    });
+
+                    // Handle bouquet selection
+                    $bouquetOptions.on('click', function (e) {
+                        e.preventDefault();
+                        const $selected = $(this);
+                        const bouquetId = $selected.data('bouquet-id');
+                        const bouquetName = $selected.data('original-name');
+
+                        $dropdownButton.html(`<span class="text-gray-900">${bouquetName}</span>`);
+                        $hiddenInput.val(bouquetId).trigger('change');
+                        $dropdownPanel.addClass('hidden');
+
+                        // Update global variables used by other functions
+                        window.bouquetId = $selected.data('bouquet-id');
+                        window.bouquetName = $selected.data('original-name');
+                    });
+
+                    // Custom Product Dropdown
+                    const $productDropdownButton = $('#productDropdownButton');
+                    const $productDropdownPanel = $('#productDropdownPanel');
+                    const $productSearch = $('#productSearch');
+                    const $productOptions = $('.product-option');
+                    const $productHiddenInput = $('#product_id');
+
+                    // Toggle product dropdown
+                    $productDropdownButton.on('click', function (e) {
+                        e.stopPropagation();
+                        $productDropdownPanel.toggleClass('hidden');
+                        if (!$productDropdownPanel.hasClass('hidden')) {
+                            $productSearch.focus();
+                        }
+                    });
+
+                    // Close product dropdown when clicking outside
+                    $(document).on('click', function (e) {
+                        if (!$(e.target).closest($productDropdownPanel).length && !$(e.target).closest($productDropdownButton).length) {
+                            $productDropdownPanel.addClass('hidden');
+                        }
+                    });
+
+                    // Prevent closing when clicking inside product dropdown
+                    $productDropdownPanel.on('click', function (e) {
+                        e.stopPropagation();
+                    });
+
+                    // Handle product search
+                    $productSearch.on('input', function () {
+                        const searchTerm = $(this).val().toLowerCase();
+                        $productOptions.each(function () {
+                            const $option = $(this);
+                            const productName = $option.data('name').toLowerCase();
+                            if (productName.includes(searchTerm)) {
+                                $option.removeClass('hidden');
+                            } else {
+                                $option.addClass('hidden');
+                            }
+                        });
+                    });
+
+                    // Filter products by category
+                    $('.category-tab').on('click', function () {
+                        const categoryId = $(this).data('category');
+                        $('.category-tab').removeClass('bg-pink-100');
+                        $(this).addClass('bg-pink-100');
+
+                        $productOptions.each(function () {
+                            const $option = $(this);
+                            if ($option.data('category') == categoryId) {
+                                $option.removeClass('hidden');
+                            } else {
+                                $option.addClass('hidden');
+                            }
+                        });
+                    });
+
+                    // Handle product selection
+                    $productOptions.on('click', function (e) {
+                        e.preventDefault();
+                        const $selected = $(this);
+                        const productId = $selected.data('product-id');
+                        const productName = $selected.data('original-name');
+
+                        $productDropdownButton.html(`<span class="text-gray-900">${productName}</span>`);
+                        $productHiddenInput.val(productId).trigger('change');
+                        $productDropdownPanel.addClass('hidden');
+
+                        // Update global variables used by other functions
+                        window.productId = productId;
+                        window.productName = productName;
+                    });
+
+                    // Custom Size Dropdown
+                    const $sizeDropdownButton = $('#sizeDropdownButton');
+                    const $sizeDropdownPanel = $('#sizeDropdownPanel');
+                    const $sizeSearch = $('#sizeSearch');
+                    const $sizeOptions = $('.size-option');
+                    const $sizeHiddenInput = $('#size_id');
+
+                    // Toggle size dropdown
+                    $sizeDropdownButton.on('click', function (e) {
+                        e.stopPropagation();
+                        $sizeDropdownPanel.toggleClass('hidden');
+                        if (!$sizeDropdownPanel.hasClass('hidden')) {
+                            $sizeSearch.focus();
+                        }
+                    });
+
+                    // Close size dropdown when clicking outside
+                    $(document).on('click', function (e) {
+                        if (!$(e.target).closest($sizeDropdownPanel).length && !$(e.target).closest($sizeDropdownButton).length) {
+                            $sizeDropdownPanel.addClass('hidden');
+                        }
+                    });
+
+                    // Prevent closing when clicking inside size dropdown
+                    $sizeDropdownPanel.on('click', function (e) {
+                        e.stopPropagation();
+                    });
+
+                    // Handle size search
+                    $sizeSearch.on('input', function () {
+                        const searchTerm = $(this).val().toLowerCase();
+                        $sizeOptions.each(function () {
+                            const $option = $(this);
+                            const sizeName = $option.data('name').toLowerCase();
+                            if (sizeName.includes(searchTerm)) {
+                                $option.removeClass('hidden');
+                            } else {
+                                $option.addClass('hidden');
+                            }
+                        });
+                    });
+
+                    // Handle size selection
+                    $sizeOptions.on('click', function (e) {
+                        e.preventDefault();
+                        const $selected = $(this);
+                        const sizeId = $selected.data('size-id');
+                        const sizeName = $selected.data('original-name');
+
+                        $sizeDropdownButton.html(`<span class="text-gray-900">${sizeName}</span>`);
+                        $sizeHiddenInput.val(sizeId).trigger('change');
+                        $sizeDropdownPanel.addClass('hidden');
+
+                        // Update global variables if needed
+                        window.sizeId = sizeId;
+                        window.sizeName = sizeName;
+                    });
                 });
             </script>
         @endpush

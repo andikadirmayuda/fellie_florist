@@ -18,12 +18,14 @@ use App\Http\Controllers\HistorySettingController;
 use App\Http\Controllers\PublicSaleController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\AdminPublicOrderController;
+use App\Http\Controllers\Admin\NotificationController as AdminNotificationController;
+use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\BouquetController;
 use App\Http\Controllers\BouquetCategoryController;
 use App\Http\Controllers\BouquetSizeController;
 use App\Http\Controllers\BouquetComponentController;
 use App\Http\Controllers\PublicCartController;
-use App\Http\Controllers\Api\NotificationController;
+use App\Http\Controllers\Api\NotificationController as ApiNotificationController;
 
 use Illuminate\Support\Facades\Route;
 
@@ -37,9 +39,10 @@ Route::post('/api/mark-reseller-code-used', [OnlineCustomerController::class, 'm
 
 // Push Notification API Routes
 Route::middleware('auth')->group(function () {
-    Route::get('/api/admin/notifications/pending', [NotificationController::class, 'getPendingNotifications'])->name('api.notifications.pending');
-    Route::post('/api/admin/notifications/{id}/delivered', [NotificationController::class, 'markAsDelivered'])->name('api.notifications.delivered');
-    Route::post('/api/admin/notifications/test', [NotificationController::class, 'testNotification'])->name('api.notifications.test');
+    // Existing notification endpoints
+    Route::get('/api/admin/notifications/pending', [ApiNotificationController::class, 'getPendingNotifications'])->name('api.notifications.pending');
+    Route::post('/api/admin/notifications/{id}/delivered', [ApiNotificationController::class, 'markAsDelivered'])->name('api.notifications.delivered');
+    Route::post('/api/admin/notifications/test', [ApiNotificationController::class, 'testNotification'])->name('api.notifications.test');
 });
 
 // Test route untuk debug notifikasi

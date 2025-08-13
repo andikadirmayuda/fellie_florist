@@ -18,6 +18,9 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             CategorySeeder::class,
             ProductSeeder::class,
+            BouquetCategorySeeder::class,
+            BouquetSizeSeeder::class,  // Harus dijalankan sebelum BouquetSeeder
+            BouquetSeeder::class,
         ]);
     }
 }

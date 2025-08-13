@@ -85,9 +85,7 @@
                                 @endforelse
                             </tbody>
                         </table>
-                        <div class="mt-4 px-4 py-2">
-                            {{ $bouquets->links() }}
-                        </div>
+
                     </div>
                 </div>
             </div>
