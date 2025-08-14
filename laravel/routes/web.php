@@ -175,7 +175,11 @@ Route::prefix('reports')->name('reports.')->group(function () {
 Route::middleware(['auth'])->group(function () {
     Route::get('/admin/public-orders', [AdminPublicOrderController::class, 'index'])->name('admin.public-orders.index');
     Route::get('/admin/public-orders/filter', [AdminPublicOrderController::class, 'filter'])->name('admin.public-orders.filter');
-    Route::get('/admin/public-orders/{id}', [AdminPublicOrderController::class, 'show'])->name('admin.public-orders.show');
+    Route::middleware(['auth', 'verified'])->group(function () {
+        Route::get('/admin/public-orders/{id}', [AdminPublicOrderController::class, 'show'])->name('admin.public-orders.show');
+        Route::get('/admin/public-orders/{id}/edit', [AdminPublicOrderController::class, 'edit'])->name('admin.public-orders.edit');
+        Route::put('/admin/public-orders/{id}', [AdminPublicOrderController::class, 'update'])->name('admin.public-orders.update');
+    });
     Route::post('/admin/public-orders/mass-delete', [AdminPublicOrderController::class, 'massDelete'])->name('admin.public-orders.mass-delete');
     Route::post('/admin/public-orders/bulk-delete', [AdminPublicOrderController::class, 'bulkDelete'])->name('admin.public-orders.bulk-delete');
 });

@@ -25,9 +25,8 @@ Route::post('/custom-bouquet/clear', [CustomBouquetController::class, 'clear'])-
 Route::post('/custom-bouquet/upload-reference', [CustomBouquetController::class, 'uploadReference'])->name('custom.bouquet.upload-reference');
 Route::post('/custom-bouquet/{id}/finalize', [CustomBouquetController::class, 'finalize'])->name('custom.bouquet.finalize');
 
-// Edit public order (form & update)
-Route::get('/public-order/{public_code}/edit', [PublicOrderController::class, 'edit'])->name('public.order.edit');
-Route::post('/public-order/{public_code}/edit', [PublicOrderController::class, 'update'])->name('public.order.update');
+// Public order detail only (view only)
+Route::get('/public-order/{public_code}', [PublicOrderController::class, 'show'])->name('public.order.show');
 
 // Checkout routes
 Route::get('/checkout', [PublicCheckoutController::class, 'show'])->name('public.checkout');

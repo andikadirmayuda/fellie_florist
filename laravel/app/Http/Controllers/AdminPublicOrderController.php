@@ -11,9 +11,144 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class AdminPublicOrderController extends Controller
 {
+    use AuthorizesRequests;
+    // No constructor needed, middleware will be handled in routes
+    /**
+     * Tampilkan form edit pesanan publik
+     */
+    public function edit($id)
+    {
+        // Authorization will be handled by middleware in routes
+
+        // Check if feature is enabled
+        if (!config('public_order.enable_public_order_edit')) {
+            abort(403, 'Fitur edit pesanan publik sedang dinonaktifkan.');
+        }
+
+        $order = PublicOrder::with(['items'])->findOrFail($id);
+
+        // Batasi edit hanya jika status masih pending
+        if ($order->status !== 'pending') {
+            return redirect()->route('admin.public-orders.show', $id)
+                ->with('error', 'Hanya pesanan dengan status pending yang dapat diedit.');
+        }
+
+        // Ambil semua produk aktif beserta harganya
+        $products = Product::with(['prices' => function ($q) {
+            $q->orderBy('type');
+        }])->where('is_active', 1)->get();
+
+        return view('admin.public_orders.edit', compact('order', 'products'));
+    }
+
+    /**
+     * Update pesanan publik
+     */
+    public function update(Request $request, $id)
+    {
+        if (!config('public_order.enable_public_order_edit')) {
+            abort(403, 'Fitur edit pesanan publik sedang dinonaktifkan.');
+        }
+
+        $order = PublicOrder::with('items')->findOrFail($id);
+
+        if ($order->status !== 'pending') {
+            return redirect()->route('admin.public-orders.show', $id)
+                ->with('error', 'Pesanan tidak dapat diedit karena status sudah berubah.');
+        }
+
+        $validated = $request->validate([
+            'customer_name' => 'required|string|max:100',
+            'pickup_date' => 'required|date',
+            'pickup_time' => 'nullable|string',
+            'delivery_method' => 'required|string',
+            'destination' => 'nullable|string|max:500',
+            'wa_number' => 'nullable|string|max:20',
+            'notes' => 'nullable|string|max:1000',
+            'items' => 'required|array|min:1',
+            'items.*.id' => 'nullable|integer|exists:public_order_items,id',
+            'items.*.product_id' => 'required|integer|exists:products,id',
+            'items.*.price_type' => 'required|string',
+            'items.*.price' => 'required|numeric|min:0|max:999999999',
+            'items.*.unit_equivalent' => 'required|integer|min:1',
+            'items.*.quantity' => 'required|integer|min:1|max:999',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            // Update order data
+            $order->update([
+                'customer_name' => $validated['customer_name'],
+                'pickup_date' => $validated['pickup_date'],
+                'pickup_time' => $validated['pickup_time'],
+                'delivery_method' => $validated['delivery_method'],
+                'destination' => $validated['destination'],
+                'wa_number' => $validated['wa_number'],
+                'notes' => $validated['notes'] ?? $order->notes,
+            ]);
+
+            // Track existing item IDs
+            $existingItemIds = $order->items->pluck('id')->toArray();
+            $updatedItemIds = [];
+
+            // Update or create items
+            foreach ($validated['items'] as $itemData) {
+                $product = Product::findOrFail($itemData['product_id']);
+
+                // Ambil harga dari product price berdasarkan tipe yang dipilih
+                $selectedPrice = $product->prices()->where('type', $itemData['price_type'])->first();
+                if (!$selectedPrice) {
+                    throw new \Exception("Tipe harga {$itemData['price_type']} tidak ditemukan untuk produk {$product->name}");
+                }
+
+                $itemAttributes = [
+                    'public_order_id' => $order->id,
+                    'product_id' => $itemData['product_id'],
+                    'product_name' => $product->name,
+                    'price_type' => $itemData['price_type'],
+                    'price' => $selectedPrice->price,
+                    'unit_equivalent' => $itemData['unit_equivalent'],
+                    'quantity' => $itemData['quantity'],
+                    'item_type' => 'product',
+                ];
+
+                if (!empty($itemData['id']) && in_array($itemData['id'], $existingItemIds)) {
+                    // Update existing item
+                    $item = $order->items()->find($itemData['id']);
+                    $item->update($itemAttributes);
+                    $updatedItemIds[] = $itemData['id'];
+                } else {
+                    // Create new item
+                    $newItem = $order->items()->create($itemAttributes);
+                    $updatedItemIds[] = $newItem->id;
+                }
+            }
+
+            // Delete items that were not updated (removed items)
+            $itemsToDelete = array_diff($existingItemIds, $updatedItemIds);
+            if (!empty($itemsToDelete)) {
+                $order->items()->whereIn('id', $itemsToDelete)->delete();
+            }
+
+            DB::commit();
+
+            return redirect()->route('admin.public-orders.show', $id)
+                ->with('success', 'Pesanan berhasil diperbarui!');
+        } catch (\Exception $e) {
+            DB::rollback();
+            Log::error('Error updating public order: ' . $e->getMessage());
+
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['error' => 'Terjadi kesalahan saat memperbarui pesanan: ' . $e->getMessage()]);
+        }
+    }
     /**
      * Hapus semua pesanan publik dengan status tertentu.
      */

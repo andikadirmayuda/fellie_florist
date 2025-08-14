@@ -1267,7 +1267,7 @@
                     </button>
                     @if(!auth()->user()->hasRole(['customer service', 'karyawan']))
                     @if(config('public_order.enable_public_order_edit') && $order->status === 'pending')
-                        <a href="{{ route('public.order.edit', ['public_code' => $order->public_code]) }}" target="_blank"
+                        <a href="{{ route('admin.public-orders.edit', $order->id) }}"
                             class="inline-flex items-center justify-center px-4 py-3 bg-yellow-600 hover:bg-yellow-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-sm">
                             <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
                                 <path
