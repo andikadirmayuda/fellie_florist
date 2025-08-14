@@ -143,8 +143,7 @@ class PublicCheckoutController extends Controller
 
                 // Add greeting card to product_name if it's a bouquet with greeting card
                 if (isset($item['type']) && $item['type'] === 'bouquet' && !empty($item['greeting_card'])) {
-                    $orderItemData['product_name'] .= ' (Kartu Ucapan: "' . substr($item['greeting_card'], 0, 50) .
-                        (strlen($item['greeting_card']) > 50 ? '...")' : '")');
+                    $orderItemData['product_name'] .= ' (Kartu Ucapan: "' . $item['greeting_card'] . '")';
                 }
 
                 // Note: Components info is already included in product_name for custom bouquet,

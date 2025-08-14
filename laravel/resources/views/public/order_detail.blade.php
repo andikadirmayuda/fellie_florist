@@ -325,7 +325,7 @@
                                 $cleanName = trim($cleanName) ?: $item->product_name;
                             @endphp
                             <tr>
-                                <td class="py-3 px-4 break-words whitespace-normal align-top">{{ $cleanName }}</td>
+                                <td class="py-3 px-4 break-words whitespace-pre-wrap align-top">{{ $cleanName }}</td>
                                 <td class="py-3 px-4 break-words whitespace-normal align-top">{{ $item->price_type ?? '-' }}</td>
                                 <td class="py-3 px-4 text-right align-top whitespace-nowrap">Rp{{ number_format($item->price ?? 0, 0, ',', '.') }}</td>
                                 <td class="py-3 px-4 text-right align-top whitespace-nowrap">{{ $item->unit_equivalent ?? '-' }}</td>

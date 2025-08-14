@@ -200,9 +200,7 @@ function getGreetingCardHTML(item) {
                 <i class="bi bi-card-text text-pink-600 mr-1"></i>
                 <span class="text-xs font-medium text-pink-700">Kartu Ucapan:</span>
             </div>
-            <p class="text-xs text-pink-800 italic">"${item.greeting_card.length > 50 ? 
-                item.greeting_card.substring(0, 50) + '...' : 
-                item.greeting_card}"</p>
+            <p class="text-xs text-pink-800 italic whitespace-pre-wrap">"${item.greeting_card}"</p>
         </div>
     `;
 }

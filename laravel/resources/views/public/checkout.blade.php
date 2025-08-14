@@ -347,7 +347,7 @@
                                                     <i class="bi bi-card-text mr-1 text-xs"></i>
                                                     <span class="font-medium text-xs">Kartu Ucapan:</span>
                                                 </div>
-                                                <p class="text-pink-800 italic text-xs">"{{ Str::limit($item['greeting_card'], 40) }}"</p>
+                                                <p class="text-pink-800 italic text-xs whitespace-pre-wrap">"{{ $item['greeting_card'] }}"</p>
                                             </div>
                                         @endif
                                         @if(isset($item['type']) && $item['type'] === 'custom_bouquet' && isset($item['components_summary']))

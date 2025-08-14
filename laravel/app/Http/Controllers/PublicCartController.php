@@ -256,7 +256,7 @@ class PublicCartController extends Controller
             'size_id' => $size->id,
             'image' => $bouquet->image,
             'type' => 'bouquet',
-            'greeting_card' => trim($greetingCard) // Store greeting card message
+            'greeting_card' => mb_convert_encoding(trim($greetingCard), 'UTF-8', 'UTF-8') // Store greeting card message with proper encoding
         ];
 
         $cart = session()->get('cart', []);
@@ -268,7 +268,7 @@ class PublicCartController extends Controller
         // Jika sudah ada item yang sama dan greeting card berbeda, buat key baru
         if (isset($cart[$cartKey])) {
             $existingGreeting = $cart[$cartKey]['greeting_card'] ?? '';
-            if ($existingGreeting !== trim($greetingCard)) {
+            if ($existingGreeting !== mb_convert_encoding(trim($greetingCard), 'UTF-8', 'UTF-8')) {
                 // Create unique key dengan timestamp untuk diferensiasi
                 $cartKey .= '_' . time();
             } else {
