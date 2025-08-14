@@ -210,7 +210,8 @@
                         <div class="mb-1 sm:mb-2"><span class="text-gray-500">Nama</span><br><span
                                 class="font-bold text-gray-800 break-words">{{ $order->customer_name }}</span></div>
                         <div class="mb-1 sm:mb-2"><span class="text-gray-500">Tanggal Ambil/Kirim</span><br><span
-                                class="font-bold text-gray-800 break-words">{{ \Carbon\Carbon::parse($order->pickup_date)->format('d-m-Y') }}</span></div>
+                                class="font-bold text-gray-800 break-words">{{ \Carbon\Carbon::parse($order->pickup_date)->format('d-m-Y') }}</span>
+                                <span class="text-sm text-red-600 ml-2">({{ \Carbon\Carbon::parse($order->pickup_date)->locale('id')->dayName }})</span></div>
                         <div class="mb-1 sm:mb-2"><span class="text-gray-500">Metode Pengiriman</span><br><span
                                 class="font-bold text-gray-800 break-words">{{ $order->delivery_method }}</span></div>
                     </div>
@@ -219,8 +220,19 @@
                         class="flex-1 min-w-0 max-w-full bg-gray-50 rounded-xl p-3 sm:p-4 flex flex-col justify-center items-start shadow-sm border border-gray-100 text-xs sm:text-sm mb-2 sm:mb-0">
                         <div class="mb-1 sm:mb-2"><span class="text-gray-500">No. WhatsApp</span><br><span
                                 class="font-bold text-gray-800 break-words">{{ $order->wa_number }}</span></div>
-                        <div class="mb-1 sm:mb-2"><span class="text-gray-500">Waktu Ambil/Pengiriman</span><br><span
-                                class="font-bold text-gray-800 break-words">{{ $order->pickup_time }}</span></div>
+                        <div class="mb-1 sm:mb-2"><span class="text-gray-500">Waktu Ambil/Pengiriman</span><br>
+                                <span class="font-bold text-gray-800 break-words">{{ $order->pickup_time }}</span>
+                                @php
+                                    $hour = (int)substr($order->pickup_time, 0, 2);
+                                    $timeOfDay = match(true) {
+                                        $hour >= 5 && $hour < 11 => 'Pagi',
+                                        $hour >= 11 && $hour < 15 => 'Siang',
+                                        $hour >= 15 && $hour < 18 => 'Sore',
+                                        default => 'Malam'
+                                    };
+                                @endphp
+                                <span class="text-sm text-blue-600 ml-2">({{ $timeOfDay }})</span>
+                            </div>
                         <div class="mb-1 sm:mb-2"><span class="text-gray-500">Tujuan Pengiriman</span><br><span
                                 class="font-bold text-gray-800 break-words">{{ $order->destination }}</span></div>
                     </div>

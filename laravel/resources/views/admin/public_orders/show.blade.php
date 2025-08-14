@@ -88,13 +88,28 @@
                     </div>
                     <div class="flex flex-col sm:flex-row sm:items-center">
                         <span class="text-sm font-medium text-gray-500 sm:w-32 mb-1 sm:mb-0">Tanggal:</span>
-                        <span class="text-sm font-semibold text-gray-900">{{ $order->pickup_date }}</span>
+                        <div>
+                            <span class="text-sm font-semibold text-gray-900">{{ \Carbon\Carbon::parse($order->pickup_date)->format('d-m-Y') }}</span>
+                            <span class="text-sm text-rose-600 ml-2">({{ \Carbon\Carbon::parse($order->pickup_date)->locale('id')->dayName }})</span>
+                        </div>
                     </div>
                 </div>
                 <div class="space-y-3">
                     <div class="flex flex-col sm:flex-row sm:items-center">
                         <span class="text-sm font-medium text-gray-500 sm:w-32 mb-1 sm:mb-0">Waktu:</span>
-                        <span class="text-sm font-semibold text-gray-900">{{ $order->pickup_time }}</span>
+                        <div>
+                            <span class="text-sm font-semibold text-gray-900">{{ $order->pickup_time }}</span>
+                            @php
+                                $hour = (int)substr($order->pickup_time, 0, 2);
+                                $timeOfDay = match(true) {
+                                    $hour >= 5 && $hour < 11 => 'Pagi',
+                                    $hour >= 11 && $hour < 15 => 'Siang',
+                                    $hour >= 15 && $hour < 18 => 'Sore',
+                                    default => 'Malam'
+                                };
+                            @endphp
+                            <span class="text-sm text-blue-600 ml-2">({{ $timeOfDay }})</span>
+                        </div>
                     </div>
                     <div class="flex flex-col sm:flex-row sm:items-center">
                         <span class="text-sm font-medium text-gray-500 sm:w-32 mb-1 sm:mb-0">Metode:</span>

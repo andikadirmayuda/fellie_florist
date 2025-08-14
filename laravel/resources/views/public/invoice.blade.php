@@ -129,6 +129,30 @@
                                 <i class="bi bi-calendar3 text-purple-600 text-sm"></i>
                             </div>
                             <div>
+                                <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal Ambil/Kirim</p>
+                                <p class="text-sm font-semibold text-gray-900">{{ \Carbon\Carbon::parse($order->pickup_date)->format('d/m/Y') }}</p>
+                                <p class="text-xs text-rose-600">{{ \Carbon\Carbon::parse($order->pickup_date)->locale('id')->dayName }}</p>
+                                @php
+                                    $hour = (int)substr($order->pickup_time, 0, 2);
+                                    $timeOfDay = match(true) {
+                                        $hour >= 5 && $hour < 11 => 'Pagi',
+                                        $hour >= 11 && $hour < 15 => 'Siang',
+                                        $hour >= 15 && $hour < 18 => 'Sore',
+                                        default => 'Malam'
+                                    };
+                                @endphp
+                                <p class="text-xs text-gray-600">
+                                    {{ $order->pickup_time }} WIB
+                                    <span class="text-blue-600 ml-1">({{ $timeOfDay }})</span>
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center p-3 bg-gray-50 rounded-lg">
+                            <div class="w-8 h-8 bg-pink-100 rounded-full flex items-center justify-center mr-3">
+                                <i class="bi bi-printer text-pink-600 text-sm"></i>
+                            </div>
+                            <div>
                                 <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal Cetak</p>
                                 <p class="text-sm font-semibold text-gray-900">{{ date('d/m/Y') }}</p>
                                 <p class="text-xs text-gray-600">{{ date('H:i') }} WIB</p>

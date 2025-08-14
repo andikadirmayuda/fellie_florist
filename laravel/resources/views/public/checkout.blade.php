@@ -196,8 +196,12 @@
                                         <i class="bi bi-calendar-event mr-1 text-rose-500"></i>
                                         Tanggal Ambil/Kirim
                                     </label>
-                                    <input type="date" name="pickup_date" 
+                                    <input type="date" name="pickup_date" id="pickup_date"
                                            class="w-full px-4 py-3 border border-rose-200 rounded-xl input-focus focus:outline-none" required>
+                                    <p class="text-xs text-gray-500 mt-1">
+                                        <i class="bi bi-clock-history mr-1"></i>
+                                        Hari: <span id="day_name" class="font-medium text-rose-600">-</span>
+                                    </p>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-700 mb-2">
@@ -407,6 +411,23 @@
     </div>
 
     <script>
+        // Fungsi untuk mendapatkan nama hari dalam Bahasa Indonesia
+        function getDayName(date) {
+            const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+            return days[date.getDay()];
+        }
+
+        // Event listener untuk input tanggal
+        document.getElementById('pickup_date').addEventListener('change', function() {
+            const dateValue = this.value;
+            if (dateValue) {
+                const selectedDate = new Date(dateValue);
+                const dayName = getDayName(selectedDate);
+                document.getElementById('day_name').textContent = dayName;
+            } else {
+                document.getElementById('day_name').textContent = '-';
+            }
+        });
     </script>
 </body>
 
