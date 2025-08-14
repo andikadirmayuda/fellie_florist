@@ -203,6 +203,9 @@
             <script>
                 $(document).ready(function () {
                     let productsData = [];
+                    let selectedBouquet = { id: '', name: '' };
+                    let selectedSize = { id: '', name: '' };
+                    let selectedProduct = { id: '', name: '' };
 
                     // Tab kategori produk
                     $(document).on('click', '.category-tab', function () {
@@ -223,29 +226,33 @@
                     // Tambah produk ke tabel
                     $('#addProductBtn').on('click', function () {
                         console.log('Tombol Tambah Komponen diklik');
-                        let productId = $('#product_id').val();
-                        let productName = $('#product_id option:selected').text();
+                        console.log('Selected Bouquet:', selectedBouquet);
+                        console.log('Selected Size:', selectedSize);
+                        console.log('Selected Product:', selectedProduct);
+
                         let quantity = parseInt($('#quantity').val()) || 1;
-                        let bouquetId = $('#bouquet_id').val();
-                        let bouquetName = $('#bouquet_id option:selected').text();
-                        let sizeId = $('#size_id').val();
-                        let sizeName = $('#size_id option:selected').text();
-                        if (!bouquetId) { alert('Pilih Nama Bouquet terlebih dahulu!'); return; }
-                        if (!sizeId) { alert('Pilih Ukuran terlebih dahulu!'); return; }
-                        if (!productId) { alert('Pilih produk terlebih dahulu!'); return; }
-                        if (productsData.find(p => p.product_id == productId && p.bouquet_id == bouquetId && p.size_id == sizeId)) {
-                            alert('Produk dengan kombinasi Nama Bouquet dan Ukuran ini sudah ditambahkan!'); return;
+
+                        if (!selectedBouquet.id) { alert('Pilih Nama Bouquet terlebih dahulu!'); return; }
+                        if (!selectedSize.id) { alert('Pilih Ukuran terlebih dahulu!'); return; }
+                        if (!selectedProduct.id) { alert('Pilih produk terlebih dahulu!'); return; }
+
+                        if (productsData.find(p => p.product_id == selectedProduct.id && p.bouquet_id == selectedBouquet.id && p.size_id == selectedSize.id)) {
+                            alert('Produk dengan kombinasi Nama Bouquet dan Ukuran ini sudah ditambahkan!');
+                            return;
                         }
-                        productsData.push({
-                            product_id: productId,
-                            name: productName,
+
+                        let newProduct = {
+                            product_id: selectedProduct.id,
+                            name: selectedProduct.name,
                             quantity: quantity,
-                            bouquet_id: bouquetId,
-                            bouquet_name: bouquetName,
-                            size_id: sizeId,
-                            size_name: sizeName
-                        });
-                        console.log('Data setelah tambah:', productsData);
+                            bouquet_id: selectedBouquet.id,
+                            bouquet_name: selectedBouquet.name,
+                            size_id: selectedSize.id,
+                            size_name: selectedSize.name
+                        };
+
+                        console.log('Menambahkan produk:', newProduct);
+                        productsData.push(newProduct);
                         renderTable();
                     });
 
@@ -261,13 +268,20 @@
                         let tbody = '';
                         productsData.forEach((p, i) => {
                             tbody += `<tr>
-                                                                            <td>${p.bouquet_name || '-'}</td>
-                                                                            <td>${p.size_name || '-'}</td>
-                                                                            <td>${p.name}</td>
-                                                                            <td>${p.quantity}</td>
-                                                                            <td><a href="#" class="text-pink-600 font-bold remove-product" data-idx="${i}">Hapus</a></td>
-                                                                        </tr>`;
+                                    <td class="px-3 py-2">${p.bouquet_name}</td>
+                                    <td class="px-3 py-2">${p.size_name}</td>
+                                    <td class="px-3 py-2">${p.name}</td>
+                                    <td class="px-3 py-2">${p.quantity}</td>
+                                    <td class="px-3 py-2">
+                                        <button type="button" class="text-pink-600 font-bold remove-product hover:text-pink-700" data-idx="${i}">Hapus</button>
+                                    </td>
+                                </tr>`;
                         });
+
+                        if (productsData.length === 0) {
+                            tbody = `<tr><td colspan="5" class="text-center py-4 text-gray-500">Belum ada komponen yang ditambahkan</td></tr>`;
+                        }
+
                         $('#productTable tbody').html(tbody);
                         $('#productsInput').val(JSON.stringify(productsData));
                     }
@@ -329,16 +343,12 @@
                     $bouquetOptions.on('click', function (e) {
                         e.preventDefault();
                         const $selected = $(this);
-                        const bouquetId = $selected.data('bouquet-id');
-                        const bouquetName = $selected.data('original-name');
+                        selectedBouquet.id = $selected.data('bouquet-id');
+                        selectedBouquet.name = $selected.data('original-name');
 
-                        $dropdownButton.html(`<span class="text-gray-900">${bouquetName}</span>`);
-                        $hiddenInput.val(bouquetId).trigger('change');
+                        $dropdownButton.html(`<span class="text-gray-900">${selectedBouquet.name}</span>`);
+                        $hiddenInput.val(selectedBouquet.id).trigger('change');
                         $dropdownPanel.addClass('hidden');
-
-                        // Update global variables used by other functions
-                        window.bouquetId = $selected.data('bouquet-id');
-                        window.bouquetName = $selected.data('original-name');
                     });
 
                     // Custom Product Dropdown
@@ -403,16 +413,21 @@
                     $productOptions.on('click', function (e) {
                         e.preventDefault();
                         const $selected = $(this);
-                        const productId = $selected.data('product-id');
-                        const productName = $selected.data('original-name');
 
-                        $productDropdownButton.html(`<span class="text-gray-900">${productName}</span>`);
-                        $productHiddenInput.val(productId).trigger('change');
+                        // Update selectedProduct object
+                        selectedProduct.id = $selected.data('product-id');
+                        selectedProduct.name = $selected.data('original-name');
+
+                        // Update UI
+                        $productDropdownButton.html(`<span class="text-gray-900">${selectedProduct.name}</span>`);
+                        $productHiddenInput.val(selectedProduct.id).trigger('change');
                         $productDropdownPanel.addClass('hidden');
 
-                        // Update global variables used by other functions
-                        window.productId = productId;
-                        window.productName = productName;
+                        // Remove selection class from other options and add to selected
+                        $productOptions.removeClass('selected');
+                        $selected.addClass('selected');
+
+                        console.log('Product selected:', selectedProduct);
                     });
 
                     // Custom Size Dropdown
@@ -461,16 +476,17 @@
                     $sizeOptions.on('click', function (e) {
                         e.preventDefault();
                         const $selected = $(this);
-                        const sizeId = $selected.data('size-id');
-                        const sizeName = $selected.data('original-name');
 
-                        $sizeDropdownButton.html(`<span class="text-gray-900">${sizeName}</span>`);
-                        $sizeHiddenInput.val(sizeId).trigger('change');
+                        // Update selectedSize object
+                        selectedSize.id = $selected.data('size-id');
+                        selectedSize.name = $selected.data('original-name');
+
+                        // Update UI
+                        $sizeDropdownButton.html(`<span class="text-gray-900">${selectedSize.name}</span>`);
+                        $sizeHiddenInput.val(selectedSize.id).trigger('change');
                         $sizeDropdownPanel.addClass('hidden');
 
-                        // Update global variables if needed
-                        window.sizeId = sizeId;
-                        window.sizeName = sizeName;
+                        console.log('Size selected:', selectedSize);
                     });
                 });
             </script>
