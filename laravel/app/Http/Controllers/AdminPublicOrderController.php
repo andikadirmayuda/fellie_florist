@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\PublicOrder;
+use App\Models\Order;
 use App\Models\Product;
 use App\Services\WhatsAppNotificationService;
 use App\Services\PushNotificationService;
@@ -69,6 +70,8 @@ class AdminPublicOrderController extends Controller
             'delivery_method' => 'required|string',
             'destination' => 'nullable|string|max:500',
             'wa_number' => 'nullable|string|max:20',
+            'receiver_name' => 'nullable|string|max:100',
+            'receiver_wa' => 'nullable|string|max:20',
             'notes' => 'nullable|string|max:1000',
             'items' => 'required|array|min:1',
             'items.*.id' => 'nullable|integer|exists:public_order_items,id',
@@ -90,6 +93,8 @@ class AdminPublicOrderController extends Controller
                 'delivery_method' => $validated['delivery_method'],
                 'destination' => $validated['destination'],
                 'wa_number' => $validated['wa_number'],
+                'receiver_name' => $validated['receiver_name'] ?? null,
+                'receiver_wa' => $validated['receiver_wa'] ?? null,
                 'notes' => $validated['notes'] ?? $order->notes,
             ]);
 

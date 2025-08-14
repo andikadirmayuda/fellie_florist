@@ -53,6 +53,8 @@ class PublicCheckoutController extends Controller
         $validated = $request->validate([
             'customer_name' => 'required|string|max:100',
             'wa_number' => 'required|string|max:20',
+            'receiver_name' => 'nullable|string|max:100',
+            'receiver_wa' => 'nullable|string|max:20',
             'pickup_date' => 'required|date',
             'pickup_time' => 'required',
             'delivery_method' => 'required|string',
@@ -61,26 +63,16 @@ class PublicCheckoutController extends Controller
             'custom_instructions' => 'nullable|string|max:500',
         ]);
 
+
+
         DB::beginTransaction();
         try {
             $publicCode = bin2hex(random_bytes(8));
 
-            // Debug: Log cart contents
-            Log::info('Checkout Cart Contents:', $cart);
+            // Debug input data
+            error_log('Debug input data: ' . json_encode($validated));
 
-            Log::info('Creating public order with data:', [
-                'public_code' => $publicCode,
-                'customer_name' => $validated['customer_name'],
-                'pickup_date' => $validated['pickup_date'],
-                'pickup_time' => $validated['pickup_time'],
-                'delivery_method' => $validated['delivery_method'],
-                'destination' => $validated['destination'],
-                'notes' => $validated['notes'],
-                'wa_number' => $validated['wa_number'],
-                'status' => 'pending',
-                'payment_status' => 'waiting_confirmation',
-            ]);
-
+            // Buat order baru
             $order = \App\Models\PublicOrder::create([
                 'public_code' => $publicCode,
                 'customer_name' => $validated['customer_name'],
@@ -88,11 +80,15 @@ class PublicCheckoutController extends Controller
                 'pickup_time' => $validated['pickup_time'],
                 'delivery_method' => $validated['delivery_method'],
                 'destination' => $validated['destination'],
-                'notes' => $validated['notes'],
+                'notes' => $validated['notes'] ?? null,
                 'wa_number' => $validated['wa_number'],
+                'receiver_name' => $validated['receiver_name'],
+                'receiver_wa' => $validated['receiver_wa'],
                 'status' => 'pending',
                 'payment_status' => 'waiting_confirmation',
             ]);
+
+
 
             Log::info('Public order created successfully:', ['order_id' => $order->id, 'public_code' => $publicCode]);
 

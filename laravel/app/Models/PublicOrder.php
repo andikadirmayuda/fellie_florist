@@ -35,6 +35,7 @@ class PublicOrder extends Model
     protected $fillable = [
         'public_code',
         'customer_name',
+        'receiver_name',
         'pickup_date',
         'pickup_time',
         'delivery_method',
@@ -45,6 +46,7 @@ class PublicOrder extends Model
         'amount_paid',
         'payment_proof',
         'wa_number',
+        'receiver_wa',
         'packing_photo',
         'packing_files',
         'shipping_fee',

@@ -189,6 +189,28 @@
                                        placeholder="Contoh: 08123456789" required>
                             </div>
 
+                            <!-- Nama Penerima (Opsional) -->
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                    <i class="bi bi-person-check mr-1 text-rose-500"></i>
+                                    Nama Penerima <span class="text-gray-400 font-normal">(Opsional)</span>
+                                </label>
+                                <input type="text" name="receiver_name" 
+                                       class="w-full px-4 py-3 border border-rose-200 rounded-xl input-focus focus:outline-none" 
+                                       placeholder="Masukkan nama penerima jika berbeda dengan pemesan">
+                            </div>
+
+                            <!-- No. WhatsApp Penerima (Opsional) -->
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                    <i class="bi bi-whatsapp mr-1 text-rose-500"></i>
+                                    No. WhatsApp Penerima <span class="text-gray-400 font-normal">(Opsional)</span>
+                                </label>
+                                <input type="text" name="receiver_wa" 
+                                       class="w-full px-4 py-3 border border-rose-200 rounded-xl input-focus focus:outline-none" 
+                                       placeholder="Masukkan nomor WA penerima jika berbeda dengan pemesan">
+                            </div>
+
                             <!-- Tanggal & Waktu -->
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>

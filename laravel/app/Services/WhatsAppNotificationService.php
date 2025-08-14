@@ -155,7 +155,7 @@ class WhatsAppNotificationService
             $orderDetails .= "• WhatsApp: " . ($order->wa_number ?? 'N/A') . "\n";
             $orderDetails .= "• Tanggal Pesan: {$createdAt}\n";
             $orderDetails .= "• Tanggal Ambil: {$pickupDate} " . ($order->pickup_time ?? '') . "\n";
-            $orderDetails .= "• Metode: " . self::translateDeliveryMethod($order->delivery_method ?? 'N/A') . "\n";
+            $orderDetails .= "• Metode: " . self::translateDeliveryMethod($order->delivery_method ?? 'N/A') . " " . ($order->delivery_method == 'gosend' ? '(Dipesan Pribadi)' : '') . "\n";
             if (!empty($order->destination)) {
                 $orderDetails .= "• Tujuan: {$order->destination}\n";
             }
@@ -171,10 +171,38 @@ class WhatsAppNotificationService
                     $price = $item->price ?? 0;
                     $quantity = $item->quantity ?? 0;
                     $productName = $item->product_name ?? 'Produk';
+                    $unit = $item->unit ?? 'tangkai'; // Default unit adalah tangkai
+
+                    // Tambah detail komponen jika custom bouquet
+                    if (strpos(strtolower($productName), 'custom bouquet') !== false) {
+                        // Ekstrak komponen dari product_name jika ada
+                        if (preg_match('/\(Komponen:(.*?)\)/', $productName, $matches)) {
+                            $components = $matches[1];
+                            $productName = "Custom Bouquet x{$quantity} = Rp " . number_format($price * $quantity, 0, ',', '.') . "\n";
+                            $productName .= "📝 Komposisi:" . $components . "\n";
+                        }
+                    } else {
+                        // Format normal untuk produk non-custom bouquet
+                        $unit = ($quantity > 1 || strtolower($unit) === 'ikat') ? 'ikat' : 'tangkai';
+                        $subtotal = $quantity * $price;
+                        $orderItems .= "• {$productName}, {$quantity} {$unit}, Rp" . number_format($price, 0, ',', '.') . "\n";
+                        $itemsTotal += $subtotal;
+                        continue;
+                    }
+
+                    // Tambah greeting card jika ada
+                    if (isset($item->greeting_card) && !empty($item->greeting_card)) {
+                        $productName .= "💌 Kartu Ucapan: {$item->greeting_card}\n";
+                    }
+
+                    // Tambah gambar referensi jika ada
+                    if (isset($item->reference_image) && !empty($item->reference_image)) {
+                        $productName .= "🖼️ Referensi: {$item->reference_image}\n";
+                    }
 
                     $subtotal = $quantity * $price;
                     $itemsTotal += $subtotal;
-                    $orderItems .= "• {$productName} x{$quantity} = Rp " . number_format($subtotal, 0, ',', '.') . "\n";
+                    $orderItems .= "• {$productName}";
                 }
             } else {
                 $orderItems = "• Tidak ada item\n";

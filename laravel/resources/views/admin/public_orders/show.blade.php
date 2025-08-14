@@ -79,12 +79,20 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                 <div class="space-y-3">
                     <div class="flex flex-col sm:flex-row sm:items-center">
-                        <span class="text-sm font-medium text-gray-500 sm:w-32 mb-1 sm:mb-0">Nama:</span>
+                        <span class="text-sm font-medium text-gray-500 sm:w-32 mb-1 sm:mb-0">Nama Pemesan:</span>
                         <span class="text-sm font-semibold text-gray-900">{{ $order->customer_name }}</span>
                     </div>
                     <div class="flex flex-col sm:flex-row sm:items-center">
-                        <span class="text-sm font-medium text-gray-500 sm:w-32 mb-1 sm:mb-0">WhatsApp:</span>
+                        <span class="text-sm font-medium text-gray-500 sm:w-32 mb-1 sm:mb-0">WA Pemesan:</span>
                         <span class="text-sm font-semibold text-gray-900">{{ $order->wa_number }}</span>
+                    </div>
+                    <div class="flex flex-col sm:flex-row sm:items-center">
+                        <span class="text-sm font-medium text-gray-500 sm:w-32 mb-1 sm:mb-0">Nama Penerima:</span>
+                        <span class="text-sm font-semibold text-gray-900">{{ $order->receiver_name ?: '-' }}</span>
+                    </div>
+                    <div class="flex flex-col sm:flex-row sm:items-center">
+                        <span class="text-sm font-medium text-gray-500 sm:w-32 mb-1 sm:mb-0">WA Penerima:</span>
+                        <span class="text-sm font-semibold text-gray-900">{{ $order->receiver_wa ?: '-' }}</span>
                     </div>
                     <div class="flex flex-col sm:flex-row sm:items-center">
                         <span class="text-sm font-medium text-gray-500 sm:w-32 mb-1 sm:mb-0">Tanggal:</span>
