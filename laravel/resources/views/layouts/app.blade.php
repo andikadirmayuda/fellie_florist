@@ -26,7 +26,7 @@
 
     <!-- Scripts -->
 
-    @vite(['resources/css/app.css', 'resources/css/modern-theme.css', 'resources/js/app.js'])
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
 
     <!-- Bootstrap Icons CDN -->
@@ -88,136 +88,20 @@
                     <!-- User Dropdown -->
                     <div class="ml-auto flex items-center space-x-4">
                         <!-- Notification Bell -->
-                        <div class="relative" x-data="notificationSystem">
-                            <script>
-                                function notificationSystem() {
-                                    return {
-                                        showNotifications: false,
-                                        notifications: [],
-                                        unreadCount: 0,
-                                        async init() {
-                                            await this.fetchNotifications();
-                                            setInterval(() => this.fetchNotifications(), 30000);
-                                        },
-                                        async fetchNotifications() {
-                                            try {
-                                                const response = await fetch('/api/admin/notifications/pending');
-                                                const data = await response.json();
-                                                this.notifications = data;
-                                                this.unreadCount = data.length;
-                                            } catch (error) {
-                                                console.error('Error fetching notifications:', error);
-                                            }
-                                        },
-                                        async markAsRead(id) {
-                                            try {
-                                                await fetch(`/api/admin/notifications/${id}/read`, {
-                                                    method: 'POST',
-                                                    headers: {
-                                                        'Content-Type': 'application/json',
-                                                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                                                    }
-                                                });
-                                                await this.fetchNotifications();
-                                            } catch (error) {
-                                                console.error('Error marking notification as read:', error);
-                                            }
-                                        },
-                                        toggleNotifications() {
-                                            this.showNotifications = !this.showNotifications;
-                                        }
-                                    }
-                                }
-                            </script>
-                            <button type="button" @click="toggleNotifications"
-                                class="relative text-gray-600 hover:text-pink-500 hover:bg-pink-50 focus:outline-none focus:ring-2 focus:ring-pink-500 rounded-lg p-2 transition-all duration-200 flex items-center"
+                        <div class="relative">
+                            <button id="notification-bell"
+                                class="relative text-gray-600 hover:text-pink-500 hover:bg-pink-50 focus:outline-none focus:ring-2 focus:ring-pink-500 rounded-lg p-2 transition-all duration-200"
                                 title="Notifikasi">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                                 </svg>
-                                <span x-show="unreadCount > 0" x-text="unreadCount > 99 ? '99+' : unreadCount"
-                                    class="absolute -top-1 -right-1 bg-pink-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                                <!-- Notification Badge -->
+                                <span id="notification-badge"
+                                    class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">
+                                    0
                                 </span>
                             </button>
-
-                            <!-- Notifications Dropdown Panel -->
-                            <div x-show="showNotifications" x-cloak
-                                x-transition:enter="transition ease-out duration-200"
-                                x-transition:enter-start="transform opacity-0 scale-95"
-                                x-transition:enter-end="transform opacity-100 scale-100"
-                                x-transition:leave="transition ease-in duration-75"
-                                x-transition:leave-start="transform opacity-100 scale-100"
-                                x-transition:leave-end="transform opacity-0 scale-95"
-                                class="fixed right-4 sm:right-auto sm:absolute mt-2 w-[calc(100vw-2rem)] sm:w-96 max-w-lg bg-white rounded-lg shadow-xl overflow-hidden z-[100] border border-gray-200"
-                                style="max-height: calc(100vh - 100px); top: 100%; left: 50%; transform: translateX(-50%); @media (min-width: 640px) { left: auto; transform: none; }">
-                                <!-- Panel Header -->
-                                <div class="sticky top-0 px-4 py-3 border-b border-gray-100 bg-gray-50">
-                                    <div class="flex justify-between items-center">
-                                        <h3 class="text-lg font-semibold text-gray-900">Notifikasi</h3>
-                                        <button x-show="unreadCount > 0"
-                                            @click="notifications.forEach(n => markAsRead(n.id))"
-                                            class="text-sm text-pink-600 hover:text-pink-800">
-                                            Tandai Semua Dibaca
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <!-- Notifications List -->
-                                <div class="overflow-y-auto max-h-[calc(100vh-200px)] overscroll-contain">
-                                    <template x-if="notifications.length === 0">
-                                        <div class="px-4 py-6 text-center text-gray-500">
-                                            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24"
-                                                stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-                                            </svg>
-                                            <p class="mt-2">Tidak ada notifikasi baru</p>
-                                        </div>
-                                    </template>
-
-                                    <template x-for="notification in notifications" :key="notification.id">
-                                        <div class="px-4 py-3 hover:bg-gray-50 border-b border-gray-100 last:border-0">
-                                            <div class="flex items-start gap-3">
-                                                <!-- Icon -->
-                                                <div
-                                                    class="flex-shrink-0 w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center">
-                                                    <span class="text-xl">🔔</span>
-                                                </div>
-                                                <!-- Content -->
-                                                <div class="flex-1 min-w-0">
-                                                    <div class="flex justify-between items-start">
-                                                        <p class="text-sm font-medium text-gray-900"
-                                                            x-text="notification.title || 'Notifikasi Baru'"></p>
-                                                        <p class="text-xs text-gray-400 ml-2" x-text="notification.created_at ? new Date(notification.created_at).toLocaleString('id-ID', {
-                                                                hour: '2-digit',
-                                                                minute: '2-digit',
-                                                                day: '2-digit',
-                                                                month: 'short'
-                                                            }) : ''">
-                                                        </p>
-                                                    </div>
-                                                    <p class="text-sm text-gray-500 line-clamp-2 mt-1"
-                                                        x-text="notification.message || (notification.data && typeof notification.data === 'object' ? 
-                                                            (notification.data.message || JSON.stringify(notification.data)) : 
-                                                            (typeof notification.data === 'string' ? notification.data : 'Tidak ada detail'))"></p>
-                                                    <div class="mt-2 flex justify-between items-center">
-                                                        <a x-show="notification.url || (notification.data && notification.data.url)"
-                                                            :href="notification.url || (notification.data && notification.data.url)"
-                                                            class="text-sm text-pink-600 hover:text-pink-800">
-                                                            Lihat Detail
-                                                        </a>
-                                                        <button @click.stop="markAsRead(notification.id)"
-                                                            class="text-sm text-gray-500 hover:text-gray-700">
-                                                            Tandai Dibaca
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </template>
-                                </div>
-                            </div>
                         </div>
 
                         <x-dropdown align="right" width="48">

@@ -24,7 +24,7 @@ class PushNotificationService
                 'icon' => '/logo-fellie-02.png',
                 'badge' => '/logo-fellie-02.png',
                 'tag' => 'new-order-' . $order->id,
-                'url' => route('admin.public-orders.show', $order->id),
+                'url' => route('admin.public-orders.index'),
                 'data' => [
                     'order_id' => $order->id,
                     'customer_name' => $order->customer_name,
@@ -60,7 +60,7 @@ class PushNotificationService
         try {
             $statusText = [
                 'pending' => 'Menunggu',
-                'processed' => 'Diproses', 
+                'processed' => 'Diproses',
                 'packing' => 'Dikemas',
                 'ready' => 'Siap',
                 'shipped' => 'Dikirim',
@@ -73,7 +73,7 @@ class PushNotificationService
                 'body' => "{$order->public_code} → " . ($statusText[$newStatus] ?? ucfirst($newStatus)),
                 'icon' => '/logo-fellie-02.png',
                 'tag' => 'status-update-' . $order->id,
-                'url' => route('admin.public-orders.show', $order->id),
+                'url' => route('admin.public-orders.index'),
                 'data' => [
                     'order_id' => $order->id,
                     'old_status' => $oldStatus,
@@ -101,7 +101,7 @@ class PushNotificationService
     {
         // Implementasi broadcasting (bisa menggunakan Pusher, WebSocket, atau Server-Sent Events)
         // Untuk saat ini, kita simpan di session/cache untuk pickup via polling
-        
+
         $notifications = cache()->get('admin_notifications', []);
         $newNotification = [
             'id' => uniqid(),
@@ -109,11 +109,11 @@ class PushNotificationService
             'timestamp' => now(),
             'delivered' => false
         ];
-        
+
         $notifications[] = $newNotification;
-        
-        cache()->put('admin_notifications', $notifications, now()->addHours(1));
-        
+
+        cache()->put('admin_notifications', $notifications, now()->addMinutes(30));
+
         Log::info('Notification added to cache', [
             'notification_id' => $newNotification['id'],
             'total_cached_notifications' => count($notifications),
@@ -127,9 +127,17 @@ class PushNotificationService
     public static function getPendingNotifications()
     {
         $notifications = cache()->get('admin_notifications', []);
-        $pending = array_filter($notifications, function($notification) {
-            return !$notification['delivered'] && 
-                   $notification['timestamp']->diffInMinutes(now()) < 60;
+
+        // Cleanup old notifications first
+        $notifications = array_filter($notifications, function ($notification) {
+            return $notification['timestamp']->diffInMinutes(now()) < 30;
+        });
+        cache()->put('admin_notifications', $notifications, now()->addMinutes(30));
+
+        // Get pending notifications
+        $pending = array_filter($notifications, function ($notification) {
+            return !$notification['delivered'] &&
+                $notification['timestamp']->diffInMinutes(now()) < 30;
         });
 
         // Debug logging
