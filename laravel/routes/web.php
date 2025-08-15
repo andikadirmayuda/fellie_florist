@@ -19,13 +19,12 @@ use App\Http\Controllers\PublicSaleController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\AdminPublicOrderController;
 use App\Http\Controllers\Admin\NotificationController as AdminNotificationController;
-use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\BouquetController;
 use App\Http\Controllers\BouquetCategoryController;
 use App\Http\Controllers\BouquetSizeController;
 use App\Http\Controllers\BouquetComponentController;
 use App\Http\Controllers\PublicCartController;
-use App\Http\Controllers\Api\NotificationController as ApiNotificationController;
+
 
 use Illuminate\Support\Facades\Route;
 
@@ -37,39 +36,19 @@ Route::get('/', function () {
 Route::post('/api/validate-reseller-code', [OnlineCustomerController::class, 'validateResellerCode'])->name('api.validate-reseller-code');
 Route::post('/api/mark-reseller-code-used', [OnlineCustomerController::class, 'markResellerCodeUsed'])->name('api.mark-reseller-code-used');
 
+use App\Http\Controllers\Api\NotificationController as ApiNotificationController;
+
 // Push Notification API Routes
-Route::middleware('auth')->group(function () {
-    // Existing notification endpoints
-    Route::get('/api/admin/notifications/pending', [ApiNotificationController::class, 'getPendingNotifications'])->name('api.notifications.pending');
-    Route::post('/api/admin/notifications/{id}/delivered', [ApiNotificationController::class, 'markAsDelivered'])->name('api.notifications.delivered');
-    Route::post('/api/admin/notifications/test', [ApiNotificationController::class, 'testNotification'])->name('api.notifications.test');
+Route::middleware(['web', 'auth'])->group(function () {
+    Route::get('/api/notifications/pending', [ApiNotificationController::class, 'getPendingNotifications'])
+        ->name('api.notifications.pending');
+    Route::post('/api/notifications/{id}/delivered', [ApiNotificationController::class, 'markAsDelivered'])
+        ->name('api.notifications.delivered');
+    Route::post('/api/notifications/test', [ApiNotificationController::class, 'testNotification'])
+        ->name('api.notifications.test');
 });
-
-// Test route untuk debug notifikasi
-Route::get('/test-notification', function () {
-    try {
-        $testOrder = (object) [
-            'id' => 999,
-            'customer_name' => 'Test Customer Debug',
-            'total' => 250000,
-            'public_code' => 'TEST' . now()->format('His')
-        ];
-
-        $success = \App\Services\PushNotificationService::sendNewOrderNotification($testOrder);
-
-        return response()->json([
-            'success' => $success,
-            'message' => 'Test notification sent',
-            'order' => $testOrder
-        ]);
-    } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'error' => $e->getMessage(),
-            'trace' => $e->getTraceAsString()
-        ]);
-    }
-})->middleware('auth')->name('test.notification');
+// Include notification routes
+require __DIR__ . '/notification.php';
 
 Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])

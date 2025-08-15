@@ -265,7 +265,12 @@ class PublicCheckoutController extends Controller
 
             // Trigger push notification untuk pesanan baru
             try {
-                PushNotificationService::sendNewOrderNotification($order);
+                $notificationData = [
+                    'customer_name' => $order->customer_name,
+                    'public_code' => $publicCode,
+                    'total' => $order->total_amount
+                ];
+                PushNotificationService::sendNewOrderNotification($notificationData);
                 Log::info('Push notification sent for new order:', ['order_id' => $order->id]);
             } catch (\Exception $e) {
                 Log::warning('Failed to send push notification for new order', [

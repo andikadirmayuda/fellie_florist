@@ -24,13 +24,16 @@
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
-    <!-- Scripts -->
-
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <!-- Styles -->
     @livewireStyles
+    @vite(['resources/css/app.css'])
 
     <!-- Bootstrap Icons CDN -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- Scripts -->
+    @livewireScripts
+    @vite(['resources/js/app.js'])
 </head>
 
 <body class="font-sans antialiased bg-gray-50">
@@ -98,8 +101,7 @@
                                 </svg>
                                 <!-- Notification Badge -->
                                 <span id="notification-badge"
-                                    class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">
-                                    0
+                                    class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden animate-bounce">
                                 </span>
                             </button>
                         </div>
@@ -250,67 +252,94 @@
         <!-- Fallback script untuk sidebar -->
         <script src="{{ asset('js/sidebar-fallback.js') }}"></script>
 
-        <!-- Push Notifications Component (hanya untuk authenticated users) -->
-        @auth
-            @include('components.push-notifications')
-        @endauth
+
 
         <!-- Notification Bell Script -->
         <script>
-            // Update notification badge
             function updateNotificationBadge(count) {
                 const badge = document.getElementById('notification-badge');
                 const bell = document.getElementById('notification-bell');
 
-                if (count > 0) {
-                    badge.textContent = count > 99 ? '99+' : count;
-                    badge.classList.remove('hidden');
-                    // Add visual indicator
-                    bell.classList.add('animate-pulse');
-                } else {
-                    badge.classList.add('hidden');
-                    bell.classList.remove('animate-pulse');
+                if (badge && bell) {
+                    if (count > 0) {
+                        badge.textContent = count > 99 ? '99+' : count;
+                        badge.classList.remove('hidden');
+                        bell.classList.add('animate-pulse');
+                    } else {
+                        badge.classList.add('hidden');
+                        bell.classList.remove('animate-pulse');
+                    }
                 }
             }
 
-            // Poll untuk notification count
             function checkNotifications() {
-                fetch('/api/admin/notifications/pending')
-                    .then(response => response.json())
+                fetch('/api/admin/notifications/pending', {
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json'
+                    },
+                    credentials: 'same-origin'
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
                     .then(notifications => {
+                        if (!Array.isArray(notifications)) {
+                            console.error('Unexpected response format:', notifications);
+                            return;
+                        }
+                        // Update badge dengan jumlah notifikasi
                         updateNotificationBadge(notifications.length);
 
-                        // Only update badge count, don't show notifications here
-                        // Notifications are handled by the push notification manager
-                        // to prevent duplicates
+                        // Jika ada notifikasi baru dan browser mendukung
+                        if (notifications.length > 0 && 'Notification' in window && Notification.permission === 'granted') {
+                            notifications.forEach(notification => {
+                                // Cek apakah notifikasi ini sudah ditampilkan sebelumnya
+                                const shown = localStorage.getItem(`notification-${notification.id}`);
+                                if (!shown) {
+                                    // Tampilkan notifikasi browser
+                                    new Notification(notification.message.title, {
+                                        body: notification.message.body,
+                                        icon: '/logo-fellie-02.png'
+                                    });
+                                    // Tandai notifikasi ini sudah ditampilkan
+                                    localStorage.setItem(`notification-${notification.id}`, 'true');
+                                    // Mark as delivered di server
+                                    fetch(`/api/admin/notifications/${notification.id}/delivered`, {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                                        }
+                                    });
+                                }
+                            });
+                        }
                     })
-                    .catch(error => {
-                        console.log('Error checking notifications:', error);
-                    });
+                    .catch(error => console.error('Error checking notifications:', error));
             }
 
-            // Check notifications setiap 10 detik
+            // Inisialisasi sistem notifikasi
             document.addEventListener('DOMContentLoaded', function () {
-                // Request notification permission if not granted
+                // Request permission untuk notifikasi browser
                 if ('Notification' in window && Notification.permission === 'default') {
-                    Notification.requestPermission().then(function (permission) {
-                        console.log('Notification permission:', permission);
-                    });
+                    Notification.requestPermission();
                 }
 
-                checkNotifications(); // Check immediately
-                setInterval(checkNotifications, 10000); // Then every 10 seconds
-            });
-
-            // Bell click handler
-            document.addEventListener('DOMContentLoaded', function () {
+                // Setup bell click handler
                 const bell = document.getElementById('notification-bell');
                 if (bell) {
                     bell.addEventListener('click', function () {
-                        // Navigate ke halaman orders
                         window.location.href = '{{ route("admin.public-orders.index") }}';
                     });
                 }
+
+                // Mulai checking notifications
+                checkNotifications();
+                setInterval(checkNotifications, 10000); // Check setiap 10 detik
             });
         </script>
 

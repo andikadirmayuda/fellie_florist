@@ -1,5 +1,7 @@
 <?php
-// Add these routes to web.php under the middleware('auth') group
+
+use App\Http\Controllers\Admin\AdminNotificationController;
+use Illuminate\Support\Facades\Route;
 
 // Notification Panel Routes
 Route::prefix('admin')->middleware('auth')->group(function () {

@@ -32,6 +32,15 @@ use Illuminate\Database\Eloquent\Model;
  */
 class PublicOrder extends Model
 {
+    /**
+     * Check if this is an online order
+     */
+    public function isOnlineOrder()
+    {
+        // Pesanan dianggap online jika memiliki public_code dan wa_number
+        return !empty($this->public_code) && !empty($this->wa_number);
+    }
+
     protected $fillable = [
         'public_code',
         'customer_name',
