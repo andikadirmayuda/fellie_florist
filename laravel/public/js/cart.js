@@ -314,19 +314,13 @@ function updateQuantity(cartKey, change) {
 
 function removeFromCart(cartKey, itemName = 'produk ini') {
     const itemElement = document.querySelector(`[data-cart-key="${cartKey}"]`);
+    
+    // Langsung sembunyikan item
     if (itemElement) {
-        itemElement.style.height = itemElement.offsetHeight + 'px';
-        itemElement.style.overflow = 'hidden';
-        itemElement.style.transition = 'all 0.2s ease-out';
-        
-        requestAnimationFrame(() => {
-            itemElement.style.height = '0';
-            itemElement.style.opacity = '0';
-            itemElement.style.padding = '0';
-            itemElement.style.margin = '0';
-        });
+        itemElement.style.display = 'none';
     }
 
+    // Kirim request ke server
     fetch(`/cart/remove/${cartKey}`, {
         method: 'POST',
         headers: {
@@ -340,14 +334,14 @@ function removeFromCart(cartKey, itemName = 'produk ini') {
     })
     .then(data => {
         if (data.success) {
-            setTimeout(() => {
-                if (itemElement) itemElement.remove();
-                updateCart();
-            }, 200);
+            if (itemElement) {
+                itemElement.remove();
+            }
+            updateCart();
             showToast('Item berhasil dihapus', 'success');
         } else {
             if (itemElement) {
-                itemElement.style.height = '';
+                itemElement.style.display = '';
                 itemElement.style.opacity = '';
                 itemElement.style.padding = '';
                 itemElement.style.margin = '';
@@ -383,16 +377,13 @@ function showToast(message, type = 'info') {
     // Create notification element
     const notification = document.createElement('div');
     notification.id = 'cartToast';
-    notification.className = `fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-4 rounded-lg shadow-2xl z-[60] ${getNotificationColor(type)} transition-all duration-300 scale-95 opacity-0`;
+    notification.className = `fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 py-3 px-6 rounded-lg shadow-xl z-[60] ${getNotificationColor(type)} transition-all duration-300 scale-95 opacity-0`;
     
     // Add content to notification
     notification.innerHTML = `
-        <div class="flex flex-col items-center space-y-2">
-            <div class="text-2xl">${getNotificationIcon(type)}</div>
-            <p class="text-sm font-medium text-white text-center">${message}</p>
-            <div class="w-full bg-white/20 rounded-full h-1">
-                <div class="bg-white h-1 rounded-full transition-all duration-3000 notification-progress"></div>
-            </div>
+        <div class="flex items-center space-x-3">
+            <div class="flex-shrink-0 text-xl">${getNotificationIcon(type)}</div>
+            <p class="text-sm font-medium text-white">${message}</p>
         </div>
     `;
 
@@ -406,12 +397,6 @@ function showToast(message, type = 'info') {
         notification.style.opacity = '1';
         notification.style.transform = 'translate(-50%, -50%) scale(1)';
     });
-
-    // Add progress animation
-    const progressBar = notification.querySelector('.notification-progress');
-    setTimeout(() => {
-        progressBar.style.width = '100%';
-    }, 100);
 
     // Auto remove after 2 seconds (except for loading)
     if (type !== 'loading') {
@@ -450,11 +435,11 @@ function getNotificationColor(type) {
 
 function getNotificationIcon(type) {
     switch (type) {
-        case 'success': return '✅';
-        case 'error': return '❌';
-        case 'warning': return '⚠️';
-        case 'loading': return '⏳';
-        default: return 'ℹ️';
+        case 'success': return '<i class="bi bi-check-circle-fill"></i>';
+        case 'error': return '<i class="bi bi-x-circle-fill"></i>';
+        case 'warning': return '<i class="bi bi-exclamation-triangle-fill"></i>';
+        case 'info': return '<i class="bi bi-info-circle-fill"></i>';
+        default: return '<i class="bi bi-info-circle-fill"></i>';
     }
 }
 

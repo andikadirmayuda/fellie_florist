@@ -310,6 +310,29 @@ class PushNotificationService
     }
 
     /**
+     * Send status update notification
+     */
+    public static function sendStatusUpdateNotification($orderData)
+    {
+        try {
+            $notificationData = [
+                'type' => 'status_update',
+                'public_code' => $orderData['public_code'],
+                'status' => $orderData['status'],
+                'old_status' => $orderData['old_status']
+            ];
+
+            return self::createNotification($notificationData);
+        } catch (\Exception $e) {
+            Log::error('Error sending status update notification: ' . $e->getMessage(), [
+                'order_data' => $orderData,
+                'exception' => $e
+            ]);
+            return false;
+        }
+    }
+
+    /**
      * Send new order notification
      */
     public static function sendNewOrderNotification($orderData)
