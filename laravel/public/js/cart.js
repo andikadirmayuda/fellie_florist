@@ -32,13 +32,14 @@ function toggleCart() {
     }
 }
 
-function updateCart() {
+function updateCart(silentMode = false) {
     const cartItemsContainer = document.getElementById('cartItems');
     const cartBadge = document.getElementById('cartBadge');
     const cartTotal = document.getElementById('cartTotal');
     const checkoutButton = document.querySelector('#sideCart a[href*="checkout"]');
     
-    if (cartItemsContainer) {
+    // Skip loading indicator in silent mode
+    if (cartItemsContainer && !silentMode) {
         cartItemsContainer.innerHTML = `
             <div class="flex items-center justify-center h-20">
                 <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-rose-500"></div>
@@ -313,51 +314,96 @@ function updateQuantity(cartKey, change) {
 }
 
 function removeFromCart(cartKey, itemName = 'produk ini') {
-    const itemElement = document.querySelector(`[data-cart-key="${cartKey}"]`);
+    // Create backdrop
+    const backdrop = document.createElement('div');
+    backdrop.className = 'fixed inset-0 bg-black bg-opacity-40 z-50 backdrop-blur-sm transition-opacity duration-200';
+    backdrop.style.opacity = '0';
     
-    // Langsung sembunyikan item
-    if (itemElement) {
-        itemElement.style.display = 'none';
-    }
+    // Create modal
+    const modal = document.createElement('div');
+    modal.className = 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-xl shadow-xl z-[60] transition-all duration-200 scale-95 opacity-0 w-[90%] max-w-sm p-6';
+    modal.innerHTML = `
+        <div class="text-center">
+            <div class="w-12 h-12 rounded-full bg-red-50 mx-auto mb-4 flex items-center justify-center">
+                <i class="bi bi-trash text-red-500 text-xl"></i>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900 mb-1">Hapus dari Keranjang?</h3>
+            <p class="text-gray-500 text-sm mb-6">Apakah Anda yakin ingin menghapus ${itemName} dari keranjang belanja?</p>
+            <div class="flex space-x-3">
+                <button class="flex-1 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors cancel-button">
+                    Batal
+                </button>
+                <button class="flex-1 px-4 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-medium transition-colors confirm-button">
+                    Ya, Hapus
+                </button>
+            </div>
+        </div>
+    `;
 
-    // Kirim request ke server
-    fetch(`/cart/remove/${cartKey}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+    // Add to DOM
+    document.body.appendChild(backdrop);
+    document.body.appendChild(modal);
+
+    // Animate in
+    requestAnimationFrame(() => {
+        backdrop.style.opacity = '1';
+        modal.style.opacity = '1';
+        modal.style.transform = 'translate(-50%, -50%) scale(1)';
+    });
+
+    // Handle confirmation
+    return new Promise((resolve) => {
+        function removeModal() {
+            modal.style.opacity = '0';
+            modal.style.transform = 'translate(-50%, -50%) scale(0.95)';
+            backdrop.style.opacity = '0';
+            setTimeout(() => {
+                backdrop.remove();
+                modal.remove();
+            }, 200);
         }
-    })
-    .then(response => {
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        return response.json();
-    })
-    .then(data => {
-        if (data.success) {
+
+        // Cancel button
+        modal.querySelector('.cancel-button').addEventListener('click', () => {
+            removeModal();
+            resolve(false);
+        });
+
+        // Confirm button
+        modal.querySelector('.confirm-button').addEventListener('click', () => {
+            removeModal();
+            resolve(true);
+
+            // Hapus item dari DOM
+            const itemElement = document.querySelector(`[data-cart-key="${cartKey}"]`);
             if (itemElement) {
                 itemElement.remove();
             }
-            updateCart();
-            showToast('Item berhasil dihapus', 'success');
-        } else {
-            if (itemElement) {
-                itemElement.style.display = '';
-                itemElement.style.opacity = '';
-                itemElement.style.padding = '';
-                itemElement.style.margin = '';
-            }
-            showToast(data.message || 'Gagal menghapus item', 'error');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        if (itemElement) {
-            itemElement.style.height = '';
-            itemElement.style.opacity = '';
-            itemElement.style.padding = '';
-            itemElement.style.margin = '';
-        }
-        showToast('Terjadi kesalahan saat menghapus item', 'error');
+
+            // Kirim request ke server
+            fetch(`/cart/remove/${cartKey}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateCart(true);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+
+        // Click backdrop to cancel
+        backdrop.addEventListener('click', () => {
+            removeModal();
+            resolve(false);
+        });
     });
 }
 
