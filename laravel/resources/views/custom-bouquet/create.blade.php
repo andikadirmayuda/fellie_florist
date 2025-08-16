@@ -39,6 +39,34 @@
             overflow: hidden;
         }
 
+        /* Ribbon Color Selection Styles */
+        .ribbon-color-btn {
+            position: relative;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .ribbon-color-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .ribbon-color-btn.selected-ribbon::after {
+            content: '✓';
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #10B981;
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
         .gradient-bg {
             background: linear-gradient(135deg, #fdf2f8 0%, #ffffff 50%, #f0fdf4 100%);
         }
@@ -595,6 +623,25 @@
                                         class="mt-2 w-full text-xs text-red-600 hover:text-red-800 bg-red-50 hover:bg-red-100 py-2 rounded-lg transition-colors">
                                         🗑️ Hapus gambar referensi
                                     </button>
+                                </div>
+                            </div>
+
+                            <!-- Ribbon Color Selection -->
+                            <div class="mb-6 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                                <h4 class="text-sm font-semibold text-gray-800 mb-3">🎀 Pilih Warna Pita</h4>
+                                <div class="grid grid-cols-4 gap-2 max-h-48 overflow-y-auto custom-scrollbar"
+                                    id="ribbonColorSelector">
+                                    @foreach(App\Enums\RibbonColor::cases() as $color)
+                                        <button type="button" data-color="{{ $color->value }}"
+                                            class="ribbon-color-btn flex flex-col items-center p-2 rounded-lg border-2 transition-all duration-200 hover:scale-105"
+                                            :class="{ 'border-2 border-gray-400 ring-2 ring-offset-1 ring-gray-400': selectedRibbonColor === '{{ $color->value }}', 'border-gray-200 hover:border-gray-300': selectedRibbonColor !== '{{ $color->value }}' }">
+                                            <div class="w-6 h-6 rounded-full mb-1"
+                                                style="background-color: {{ App\Enums\RibbonColor::getColorCode($color->value) }}">
+                                            </div>
+                                            <span
+                                                class="text-xs text-center">{{ App\Enums\RibbonColor::getColorName($color->value) }}</span>
+                                        </button>
+                                    @endforeach
                                 </div>
                             </div>
 
@@ -1338,6 +1385,66 @@
             } catch (error) {
                 console.error('Error adding to cart:', error);
                 showNotification('Terjadi kesalahan: ' + error.message, 'error');
+            }
+        }
+
+        // Ribbon Color Management
+        let selectedRibbonColor = '{{ $customBouquet->ribbon_color }}';
+
+        // Initialize ribbon color buttons
+        document.addEventListener('DOMContentLoaded', function () {
+            const ribbonButtons = document.querySelectorAll('.ribbon-color-btn');
+            ribbonButtons.forEach(btn => {
+                if (btn.dataset.color === selectedRibbonColor) {
+                    btn.classList.add('selected-ribbon');
+                }
+                btn.addEventListener('click', handleRibbonColorChange);
+            });
+        });
+
+        async function handleRibbonColorChange(e) {
+            const newColor = e.currentTarget.dataset.color;
+            const oldColor = selectedRibbonColor;
+
+            // Update UI first for responsiveness
+            document.querySelectorAll('.ribbon-color-btn').forEach(btn => {
+                btn.classList.remove('selected-ribbon');
+                if (btn.dataset.color === newColor) {
+                    btn.classList.add('selected-ribbon');
+                }
+            });
+
+            try {
+                const response = await fetch(`/custom-bouquet/${currentCustomBouquetId}/ribbon`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        ribbon_color: newColor
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    selectedRibbonColor = newColor;
+                    showNotification('✨ Warna pita berhasil diubah', 'success');
+                } else {
+                    // Revert UI if failed
+                    document.querySelectorAll('.ribbon-color-btn').forEach(btn => {
+                        btn.classList.remove('selected-ribbon');
+                        if (btn.dataset.color === oldColor) {
+                            btn.classList.add('selected-ribbon');
+                        }
+                    });
+                    showNotification('Gagal mengubah warna pita', 'error');
+                }
+            } catch (error) {
+                console.error('Error updating ribbon color:', error);
+                showNotification('Terjadi kesalahan saat mengubah warna pita', 'error');
             }
         }
 

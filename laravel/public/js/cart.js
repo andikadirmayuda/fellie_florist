@@ -3,10 +3,59 @@ function formatPrice(price) {
     return Math.round(price).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
 
-// Initialize cart when page loads
-document.addEventListener('DOMContentLoaded', function() {
-    updateCart();
-});
+function getRibbonColorClass(color) {
+    const classes = {
+        'pink': 'bg-pink-400',
+        'red': 'bg-red-500',
+        'purple': 'bg-purple-500',
+        'gold': 'bg-yellow-500',
+        'silver': 'bg-gray-400',
+        'white': 'bg-white border border-gray-300'
+    };
+    return classes[color] || 'bg-pink-400';
+}
+
+function getCustomBouquetDetails(item) {
+    let details = `
+        <div class="text-xs text-gray-600 mt-1">
+            ${item.components_summary}
+        </div>`;
+    
+    if (item.ribbon_color) {
+        details += `
+        <div class="flex items-center gap-2 mt-2">
+            <span class="text-xs text-purple-700">Pita:</span>
+            <div class="w-3 h-3 rounded-full ${getRibbonColorClass(item.ribbon_color)}"></div>
+            <span class="text-xs text-purple-800 capitalize">${item.ribbon_color}</span>
+        </div>`;
+    }
+    
+    return details;
+}
+
+function getCartHTML(items) {
+    let html = getCartInfoPanel();
+    
+    items.forEach(item => {
+        html += `
+        <div class="mb-4 p-3 bg-white rounded-lg border border-gray-200 hover:border-rose-200 transition-colors">
+            <div class="flex justify-between">
+                <div class="flex-1">
+                    <h4 class="font-semibold text-gray-800 text-sm">${item.name}</h4>
+                    ${item.type === 'custom_bouquet' ? getCustomBouquetDetails(item) : ''}
+                </div>
+                <div class="text-right ml-4">
+                    <div class="text-sm font-semibold text-gray-800">
+                        Rp ${formatPrice(item.price)}
+                    </div>
+                    <div class="text-xs text-gray-500">x ${item.qty}</div>
+                </div>
+            </div>
+        </div>`;
+    });
+    
+    return html;
+}
 
 function toggleCart() {
     const cart = document.getElementById('sideCart');

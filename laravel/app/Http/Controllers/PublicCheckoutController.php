@@ -35,6 +35,7 @@ class PublicCheckoutController extends Controller
                 $formattedItem['components_summary'] = $item['components_summary'] ?? null;
                 $formattedItem['image'] = $item['image'] ?? null;
                 $formattedItem['custom_bouquet_id'] = $item['custom_bouquet_id'] ?? null;
+                $formattedItem['ribbon_color'] = $item['ribbon_color'] ?? null;
             }
 
             $cartData[] = $formattedItem;
@@ -121,6 +122,15 @@ class PublicCheckoutController extends Controller
                 ];
 
                 // For custom bouquet, add the custom_bouquet_id and enhance product_name
+                if (isset($item['type']) && $item['type'] === 'custom_bouquet' && isset($item['custom_bouquet_id'])) {
+                    $customBouquet = \App\Models\CustomBouquet::find($item['custom_bouquet_id']);
+                    if ($customBouquet) {
+                        // Update custom bouquet with order reference
+                        $customBouquet->public_order_id = $order->id;
+                        $customBouquet->status = 'ordered';
+                        $customBouquet->save();
+                    }
+                }
                 if (isset($item['type']) && $item['type'] === 'custom_bouquet') {
                     $orderItemData['custom_bouquet_id'] = $item['custom_bouquet_id'] ?? null;
 
@@ -134,6 +144,10 @@ class PublicCheckoutController extends Controller
                     // Add reference image if exists
                     if (!empty($item['image'])) {
                         $orderItemData['reference_image'] = $item['image'];
+                    }
+                    // Add ribbon color
+                    if (isset($item['ribbon_color'])) {
+                        $orderItemData['ribbon_color'] = $item['ribbon_color'];
                     }
                 }
 

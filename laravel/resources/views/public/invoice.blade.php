@@ -65,12 +65,12 @@
 </head>
 <body class="bg-gradient-to-br from-gray-50 via-pink-50 to-rose-50 min-h-screen py-4 px-4 sm:py-8">
     <!-- Back Button (No Print) -->
-    <div class="no-print max-w-3xl mx-auto mb-4">
+    {{-- <div class="no-print max-w-3xl mx-auto mb-4">
         <button onclick="window.history.back()"
             class="inline-flex items-center px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors shadow-sm">
             <i class="bi bi-arrow-left mr-2"></i>Kembali
         </button>
-    </div>
+    </div> --}}
 
     <!-- Invoice Container -->
     <div class="max-w-3xl mx-auto">
@@ -325,34 +325,121 @@
                                 </td>
                                 <td class="px-6 py-4">
                                     <div class="text-sm font-medium text-gray-900">{{ $item->product_name }}</div>
-                                    @if(isset($item->item_type))
-                                        <div class="mt-1">
-                                            @if($item->item_type === 'bouquet')
-                                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-rose-500 to-pink-500 text-white">
-                                                    <i class="bi bi-flower1 mr-1"></i>Bouquet
-                                                </span>
-                                            @elseif($item->item_type === 'custom_bouquet')
-                                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-purple-500 to-indigo-500 text-white">
-                                                    <i class="bi bi-palette mr-1"></i>Custom Bouquet
-                                                </span>
-                                            @else
-                                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-green-500 to-teal-500 text-white">
-                                                    <i class="bi bi-flower2 mr-1"></i>Bunga
-                                                </span>
+                                    
+                                    <!-- Badge tipe produk -->
+                                    <div class="mt-1">
+                                        @if($item->item_type === 'custom_bouquet')
+                                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-purple-500 to-indigo-500 text-white">
+                                                <i class="bi bi-palette mr-1"></i>Custom Bouquet
+                                            </span>
+                                            
+                                            <!-- Detail Custom Bouquet -->
+                                            <div class="mt-3 space-y-2 bg-gray-50 p-3 rounded-lg">
+                                                @php
+                                                    $details = json_decode($item->details ?? '{}', true) ?? [];
+                                                @endphp
+                                                
+                                                @if(!empty($details['flowers']))
+                                                    <div class="flex items-start">
+                                                        <span class="flex-shrink-0 w-20 text-xs font-medium text-gray-500">Bunga:</span>
+                                                        <span class="text-xs text-gray-900">{{ is_array($details['flowers']) ? implode(', ', $details['flowers']) : $details['flowers'] }}</span>
+                                                    </div>
+                                                @endif
+                                                
+                                                @if(!empty($details['ribbon']))
+                                                    <div class="flex items-start">
+                                                        <span class="flex-shrink-0 w-20 text-xs font-medium text-gray-500">Pita:</span>
+                                                        <span class="text-xs text-gray-900">{{ $details['ribbon'] }}</span>
+                                                    </div>
+                                                @endif
+                                                
+                                                @if(!empty($details['wrapper']))
+                                                    <div class="flex items-start">
+                                                        <span class="flex-shrink-0 w-20 text-xs font-medium text-gray-500">Pembungkus:</span>
+                                                        <span class="text-xs text-gray-900">{{ $details['wrapper'] }}</span>
+                                                    </div>
+                                                @endif
+
+                                                @if(!empty($item->custom_instructions))
+                                                    <div class="flex items-start">
+                                                        <span class="flex-shrink-0 w-20 text-xs font-medium text-gray-500">Instruksi:</span>
+                                                        <span class="text-xs text-gray-900">{{ $item->custom_instructions }}</span>
+                                                    </div>
+                                                @endif
+
+                                                @if(!empty($details['reference_image']))
+                                                    <div class="flex items-center mt-1">
+                                                        <i class="bi bi-image text-pink-500 mr-1"></i>
+                                                        <span class="text-xs text-pink-600">Dengan referensi gambar</span>
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        @elseif($item->item_type === 'bouquet')
+                                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-rose-500 to-pink-500 text-white">
+                                                <i class="bi bi-flower1 mr-1"></i>Bouquet
+                                            </span>
+                                            @if(!empty($item->details))
+                                                @php
+                                                    $details = json_decode($item->details, true) ?? [];
+                                                @endphp
+                                                <div class="mt-2 space-y-1 bg-gray-50 p-3 rounded-lg">
+                                                    @foreach($details as $key => $value)
+                                                        @if(!empty($value))
+                                                            <div class="flex items-start">
+                                                                <span class="flex-shrink-0 w-20 text-xs font-medium text-gray-500">{{ ucfirst($key) }}:</span>
+                                                                <span class="text-xs text-gray-900">{{ is_array($value) ? implode(', ', $value) : $value }}</span>
+                                                            </div>
+                                                        @endif
+                                                    @endforeach
+                                                </div>
+                                            @endif
+                                        @endif
+                                    </div>
+
+                                    <!-- Detail untuk produk non-custom -->
+                                    @if($item->item_type === 'bouquet' || $item->item_type === 'flower')
+                                        <div class="mt-3 space-y-2">
+                                            @if(!empty($item->description))
+                                                <div class="flex items-start">
+                                                    <span class="flex-shrink-0 w-20 text-xs font-medium text-gray-500">Deskripsi:</span>
+                                                    <span class="text-xs text-gray-900">{{ $item->description }}</span>
+                                                </div>
+                                            @endif
+                                            @if(!empty($item->specifications))
+                                                <div class="flex items-start">
+                                                    <span class="flex-shrink-0 w-20 text-xs font-medium text-gray-500">Spesifikasi:</span>
+                                                    <span class="text-xs text-gray-900">{{ $item->specifications }}</span>
+                                                </div>
                                             @endif
                                         </div>
                                     @endif
-                                    @if($item->item_type === 'custom_bouquet' && !empty($item->custom_instructions))
-                                        <div class="mt-2 p-2 bg-purple-50 border border-purple-200 rounded text-xs">
-                                            <strong class="text-purple-700">Instruksi Khusus:</strong>
-                                            <p class="text-purple-600 mt-1">{{ $item->custom_instructions }}</p>
-                                        </div>
-                                    @endif
-                                    @if($item->item_type === 'custom_bouquet' && !empty($item->reference_image))
-                                        <div class="mt-2">
-                                            <span class="text-xs text-purple-600 font-medium">
-                                                <i class="bi bi-image mr-1"></i>Referensi gambar tersedia
-                                            </span>
+                                    @if($item->item_type === 'custom_bouquet')
+                                        <div class="mt-2 space-y-1">
+                                            @if(!empty($item->custom_flowers))
+                                                <p class="text-xs text-gray-600">
+                                                    <span class="font-medium text-pink-600">Bunga:</span>
+                                                    {{ $item->custom_flowers }}
+                                                </p>
+                                            @endif
+                                            @if(!empty($item->custom_ribbon))
+                                                <p class="text-xs text-gray-600">
+                                                    <span class="font-medium text-pink-600">Pita:</span>
+                                                    {{ $item->custom_ribbon }}
+                                                </p>
+                                            @endif
+                                            @if(!empty($item->custom_instructions))
+                                                <p class="text-xs text-gray-600">
+                                                    <span class="font-medium text-pink-600">Instruksi:</span>
+                                                    {{ $item->custom_instructions }}
+                                                </p>
+                                            @endif
+                                            @if(!empty($item->reference_image))
+                                                <p class="text-xs text-gray-600">
+                                                    <span class="font-medium text-pink-600">
+                                                        <i class="bi bi-image mr-1"></i>Referensi gambar tersedia
+                                                    </span>
+                                                </p>
+                                            @endif
                                         </div>
                                     @endif
                                 </td>
@@ -393,6 +480,73 @@
                                 </span>
                                 <div>
                                     <h4 class="text-sm font-semibold text-gray-900">{{ $item->product_name }}</h4>
+                                    
+                                    <!-- Badge tipe produk untuk mobile -->
+                                    @if(isset($item->item_type))
+                                        <div class="mt-1">
+                                            @if($item->item_type === 'bouquet')
+                                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-rose-500 to-pink-500 text-white">
+                                                    <i class="bi bi-flower1 mr-1"></i>Bouquet
+                                                </span>
+                                            @elseif($item->item_type === 'custom_bouquet')
+                                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-purple-500 to-indigo-500 text-white">
+                                                    <i class="bi bi-palette mr-1"></i>Custom Bouquet
+                                                </span>
+                                            @else
+                                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-green-500 to-teal-500 text-white">
+                                                    <i class="bi bi-flower2 mr-1"></i>Bunga
+                                                </span>
+                                            @endif
+                                        </div>
+                                    @endif
+
+                                    <!-- Detail Custom Bouquet untuk mobile -->
+                                    @if($item->item_type === 'custom_bouquet')
+                                        <div class="mt-3 space-y-2 bg-gray-50 p-3 rounded-lg">
+                                            @if(!empty($item->custom_flowers))
+                                                <div class="flex items-start">
+                                                    <span class="flex-shrink-0 w-20 text-xs font-medium text-gray-500">Bunga:</span>
+                                                    <span class="text-xs text-gray-900">{{ $item->custom_flowers }}</span>
+                                                </div>
+                                            @endif
+                                            @if(!empty($item->custom_ribbon))
+                                                <div class="flex items-start">
+                                                    <span class="flex-shrink-0 w-20 text-xs font-medium text-gray-500">Pita:</span>
+                                                    <span class="text-xs text-gray-900">{{ $item->custom_ribbon }}</span>
+                                                </div>
+                                            @endif
+                                            @if(!empty($item->custom_instructions))
+                                                <div class="flex items-start">
+                                                    <span class="flex-shrink-0 w-20 text-xs font-medium text-gray-500">Instruksi:</span>
+                                                    <span class="text-xs text-gray-900">{{ $item->custom_instructions }}</span>
+                                                </div>
+                                            @endif
+                                            @if(!empty($item->reference_image))
+                                                <div class="flex items-center mt-1">
+                                                    <i class="bi bi-image text-pink-500 mr-1"></i>
+                                                    <span class="text-xs text-pink-600">Dengan referensi gambar</span>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    @endif
+
+                                    <!-- Detail produk non-custom untuk mobile -->
+                                    @if($item->item_type === 'bouquet' || $item->item_type === 'flower')
+                                        <div class="mt-3 space-y-2 bg-gray-50 p-3 rounded-lg">
+                                            @if(!empty($item->description))
+                                                <div class="flex items-start">
+                                                    <span class="flex-shrink-0 w-20 text-xs font-medium text-gray-500">Deskripsi:</span>
+                                                    <span class="text-xs text-gray-900">{{ $item->description }}</span>
+                                                </div>
+                                            @endif
+                                            @if(!empty($item->specifications))
+                                                <div class="flex items-start">
+                                                    <span class="flex-shrink-0 w-20 text-xs font-medium text-gray-500">Spesifikasi:</span>
+                                                    <span class="text-xs text-gray-900">{{ $item->specifications }}</span>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
                         </div>

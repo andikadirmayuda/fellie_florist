@@ -455,12 +455,12 @@
                                             $firstPrice = $availablePrices->first();
                                         @endphp
                                         <button onclick="showGreetingCardModal(
-                                                            '{{ $bouquet->id }}',
-                                                            '{{ $bouquet->name }}',
-                                                            '{{ $firstPrice->size_id ?? 'standard' }}',
-                                                            '{{ $firstPrice->size->name ?? 'Standard' }}',
-                                                            {{ $firstPrice->price }}
-                                                        )"
+                                                                        '{{ $bouquet->id }}',
+                                                                        '{{ $bouquet->name }}',
+                                                                        '{{ $firstPrice->size_id ?? 'standard' }}',
+                                                                        '{{ $firstPrice->size->name ?? 'Standard' }}',
+                                                                        {{ $firstPrice->price }}
+                                                                    )"
                                             class="w-full bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white font-semibold py-1.5 sm:py-2 px-3 sm:px-4 rounded-xl transition-all duration-200 shadow-md hover:shadow-lg text-xs sm:text-sm">
                                             <i class="bi bi-cart-plus mr-1 sm:mr-2"></i>Tambah ke Keranjang
                                         </button>
@@ -529,7 +529,7 @@
     @include('components.bouquet-price-modal')
     @include('components.bouquet-detail-panel')
 
-    <script src="{{ asset('js/cart.js') }}"></script>
+    <script src="{{ asset('js/cart.js') }}?v={{ time() }}"></script>
     <script>
         // Search functionality
         function searchBouquets() {

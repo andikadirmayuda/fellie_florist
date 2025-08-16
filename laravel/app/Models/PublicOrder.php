@@ -79,6 +79,11 @@ class PublicOrder extends Model
         return $this->hasMany(PublicOrderPayment::class, 'public_order_id');
     }
 
+    public function customBouquet()
+    {
+        return $this->hasOne(CustomBouquet::class);
+    }
+
     // Calculate total from items
     public function getTotalAttribute()
     {

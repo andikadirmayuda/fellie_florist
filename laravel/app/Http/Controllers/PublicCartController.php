@@ -64,6 +64,7 @@ class PublicCartController extends Controller
             if (isset($item['type']) && $item['type'] === 'custom_bouquet') {
                 $formattedItem['components_summary'] = $item['components_summary'] ?? null;
                 $formattedItem['custom_bouquet_id'] = $item['custom_bouquet_id'] ?? null;
+                $formattedItem['ribbon_color'] = $item['ribbon_color'] ?? null;
             }
 
             // Add greeting card if exists
@@ -308,8 +309,15 @@ class PublicCartController extends Controller
         $customBouquetId = $validated['custom_bouquet_id'];
         $qty = $validated['quantity'] ?? 1;
 
-        // Ambil data custom bouquet beserta items-nya
+        // Ambil data custom bouquet beserta items-nya dan warna pita
         $customBouquet = \App\Models\CustomBouquet::with(['items.product'])->find($customBouquetId);
+
+        // Log untuk debugging
+        Log::info('Custom Bouquet Data:', [
+            'id' => $customBouquet->id,
+            'ribbon_color' => $customBouquet->ribbon_color,
+            'status' => $customBouquet->status
+        ]);
         if (!$customBouquet) {
             return response()->json([
                 'success' => false,
@@ -332,6 +340,17 @@ class PublicCartController extends Controller
         $componentsArray = $customBouquet->getComponentsArray();
         $cartName = "Custom Bouquet";
 
+        $ribbon_color = $customBouquet->ribbon_color;
+        if (empty($ribbon_color)) {
+            Log::warning('Custom Bouquet has no ribbon color selected', [
+                'custom_bouquet_id' => $customBouquet->id
+            ]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Silakan pilih warna pita terlebih dahulu.'
+            ], 400);
+        }
+
         $product = [
             'id' => 'custom_bouquet_' . $customBouquet->id,
             'name' => $cartName,
@@ -341,7 +360,8 @@ class PublicCartController extends Controller
             'type' => 'custom_bouquet',
             'custom_bouquet_id' => $customBouquet->id,
             'image' => $customBouquet->reference_image ?? null,
-            'components_summary' => $componentsArray
+            'components_summary' => $componentsArray,
+            'ribbon_color' => $ribbon_color
         ];
 
         $cart = session()->get('cart', []);

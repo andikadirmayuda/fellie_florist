@@ -7,6 +7,8 @@ use App\Models\CustomBouquetItem;
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\ProductPrice;
+use App\Models\Ribbon;
+use App\Enums\RibbonColor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -14,6 +16,40 @@ use Illuminate\Support\Facades\Log;
 
 class CustomBouquetController extends Controller
 {
+    /**
+     * Update ribbon color for custom bouquet
+     */
+    public function updateRibbon(Request $request, $id)
+    {
+        try {
+            Log::info('Ribbon update request:', $request->all());
+
+            $validated = $request->validate([
+                'ribbon_color' => ['required', 'string', 'in:' . implode(',', RibbonColor::values())]
+            ]);
+
+            $customBouquet = CustomBouquet::findOrFail($id);
+
+            Log::info('Updating ribbon color for bouquet:', [
+                'bouquet_id' => $customBouquet->id,
+                'old_color' => $customBouquet->ribbon_color,
+                'new_color' => $validated['ribbon_color']
+            ]);
+
+            $customBouquet->ribbon_color = $validated['ribbon_color'];
+            $customBouquet->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Warna pita berhasil diperbarui'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal memperbarui warna pita'
+            ], 500);
+        }
+    }
     /**
      * Show the custom bouquet builder
      */
@@ -71,6 +107,53 @@ class CustomBouquetController extends Controller
     /**
      * Add item to custom bouquet
      */
+    /**
+     * Add custom bouquet to cart
+     */
+    public function addToCart(Request $request, CustomBouquet $customBouquet)
+    {
+        $validated = $request->validate([
+            'ribbon_color' => 'required|string|in:' . implode(',', RibbonColor::values()),
+            'items' => 'required|array',
+            'items.*.id' => 'required|exists:products,id',
+            'items.*.quantity' => 'required|integer|min:1',
+            'items.*.price_type' => 'required|string'
+        ]);
+
+        DB::beginTransaction();
+        try {
+            // Update ribbon color
+            $customBouquet->update([
+                'ribbon_color' => $validated['ribbon_color'],
+                'status' => 'in_cart'
+            ]);
+
+            // Add to cart session
+            $cart = session()->get('cart', []);
+            $cart['custom_bouquet_' . $customBouquet->id] = [
+                'type' => 'custom_bouquet',
+                'id' => $customBouquet->id,
+                'items' => $validated['items'],
+                'ribbon_color' => $validated['ribbon_color'],
+                'created_at' => now()->timestamp
+            ];
+            session()->put('cart', $cart);
+
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'message' => 'Custom bouquet added to cart successfully',
+                'cartCount' => count($cart)
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to add custom bouquet to cart: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function addItem(Request $request)
     {
         $validated = $request->validate([
@@ -385,6 +468,15 @@ class CustomBouquetController extends Controller
                 ], 404);
             }
 
+            // Validate that ribbon color is selected
+            if (!$customBouquet->ribbon_color) {
+                Log::warning('Ribbon color not selected for bouquet ID: ' . $id);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Silakan pilih warna pita terlebih dahulu'
+                ], 400);
+            }
+
             Log::info('Found custom bouquet ID: ' . $customBouquet->getAttribute('id'));
 
             // Check if custom bouquet has items
@@ -396,6 +488,15 @@ class CustomBouquetController extends Controller
                 return response()->json([
                     'success' => false,
                     'message' => 'Custom bouquet tidak memiliki item. Tambahkan beberapa bunga terlebih dahulu.'
+                ], 400);
+            }
+
+            // Check if ribbon color is selected
+            if (!$customBouquet->ribbon_color) {
+                Log::warning('Custom bouquet has no ribbon color selected');
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Silakan pilih warna pita terlebih dahulu.'
                 ], 400);
             }
 

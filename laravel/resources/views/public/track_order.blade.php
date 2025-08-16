@@ -556,7 +556,7 @@
         </script>
 
         <!-- Cart JavaScript -->
-        <script src="{{ asset('js/cart.js') }}"></script>
+        <script src="{{ asset('js/cart.js') }}?v={{ time() }}"></script>
 
 </body>
 

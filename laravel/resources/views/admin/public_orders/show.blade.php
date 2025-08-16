@@ -14,43 +14,43 @@
         </div>
     </x-slot>
     @php
-        // Base steps untuk flow normal pesanan
-        $baseSteps = [
-            'pending' => 'Pesanan Diterima',
-            'processed' => 'Diproses',
-            'packing' => 'Dikemas',
-            'ready' => 'Pesanan Sudah Siap',
-            'shipped' => 'Dikirim',
-            'completed' => 'Selesai',
-        ];
+// Base steps untuk flow normal pesanan
+$baseSteps = [
+    'pending' => 'Pesanan Diterima',
+    'processed' => 'Diproses',
+    'packing' => 'Dikemas',
+    'ready' => 'Pesanan Sudah Siap',
+    'shipped' => 'Dikirim',
+    'completed' => 'Selesai',
+];
 
-        // Tambahkan status dibatalkan hanya jika pesanan dibatalkan
-        $steps = $baseSteps;
-        if (in_array(strtolower($order->status), ['cancelled', 'canceled'])) {
-            $steps['cancelled'] = 'Dibatalkan';
-        }
+// Tambahkan status dibatalkan hanya jika pesanan dibatalkan
+$steps = $baseSteps;
+if (in_array(strtolower($order->status), ['cancelled', 'canceled'])) {
+    $steps['cancelled'] = 'Dibatalkan';
+}
 
-        $statusMap = [
-            'pending' => 'pending',
-            'processed' => 'processed',
-            'processing' => 'processed', // alias lama ke baru
-            'packing' => 'packing',
-            'ready' => 'ready',
-            'shipped' => 'shipped',
-            'completed' => 'completed',
-            'done' => 'completed', // alias lama ke baru
-            'cancelled' => 'cancelled',
-            'canceled' => 'cancelled',
-        ];
-        $currentStatus = strtolower($order->status);
-        $currentStatus = $statusMap[$currentStatus] ?? $currentStatus;
-        $stepKeys = array_keys($steps);
-        $currentIndex = array_search($currentStatus, $stepKeys);
+$statusMap = [
+    'pending' => 'pending',
+    'processed' => 'processed',
+    'processing' => 'processed', // alias lama ke baru
+    'packing' => 'packing',
+    'ready' => 'ready',
+    'shipped' => 'shipped',
+    'completed' => 'completed',
+    'done' => 'completed', // alias lama ke baru
+    'cancelled' => 'cancelled',
+    'canceled' => 'cancelled',
+];
+$currentStatus = strtolower($order->status);
+$currentStatus = $statusMap[$currentStatus] ?? $currentStatus;
+$stepKeys = array_keys($steps);
+$currentIndex = array_search($currentStatus, $stepKeys);
 
-        // Handle untuk status dibatalkan
-        if (in_array(strtolower($order->status), ['cancelled', 'canceled'])) {
-            $currentIndex = count($baseSteps); // Set ke indeks terakhir setelah semua status normal
-        }
+// Handle untuk status dibatalkan
+if (in_array(strtolower($order->status), ['cancelled', 'canceled'])) {
+    $currentIndex = count($baseSteps); // Set ke indeks terakhir setelah semua status normal
+}
     @endphp
     <div class="max-w-full mx-auto py-4 px-3 sm:py-6 sm:px-6 lg:max-w-6xl lg:px-8">
         <!-- Navigation Back -->
@@ -108,13 +108,13 @@
                         <div>
                             <span class="text-sm font-semibold text-gray-900">{{ $order->pickup_time }}</span>
                             @php
-                                $hour = (int)substr($order->pickup_time, 0, 2);
-                                $timeOfDay = match(true) {
-                                    $hour >= 5 && $hour < 11 => 'Pagi',
-                                    $hour >= 11 && $hour < 15 => 'Siang',
-                                    $hour >= 15 && $hour < 18 => 'Sore',
-                                    default => 'Malam'
-                                };
+$hour = (int) substr($order->pickup_time, 0, 2);
+$timeOfDay = match (true) {
+    $hour >= 5 && $hour < 11 => 'Pagi',
+    $hour >= 11 && $hour < 15 => 'Siang',
+    $hour >= 15 && $hour < 18 => 'Sore',
+    default => 'Malam'
+};
                             @endphp
                             <span class="text-sm text-blue-600 ml-2">({{ $timeOfDay }})</span>
                         </div>
@@ -181,9 +181,9 @@
                 <div class="hidden sm:flex w-full justify-between mb-4 sm:mb-6 overflow-x-auto pb-2">
                     @foreach($baseSteps as $key => $label)
                         @php
-                            $index = array_search($key, array_keys($baseSteps));
-                            $isCompleted = $index <= $currentIndex;
-                            $isCurrent = $index == $currentIndex;
+        $index = array_search($key, array_keys($baseSteps));
+        $isCompleted = $index <= $currentIndex;
+        $isCurrent = $index == $currentIndex;
                         @endphp
                         <div class="flex-1 flex flex-col items-center min-w-0 px-1">
                             <div
@@ -216,22 +216,22 @@
                 <!-- Mobile: Layout grid 2 baris (1-2-3 di atas, 4-5-6 di bawah) -->
                 <div class="sm:hidden mb-4">
                     @php
-                        $stepsArray = array_keys($baseSteps);
-                        $labelsArray = array_values($baseSteps);
-                        $firstRow = array_slice($stepsArray, 0, 3);
-                        $secondRow = array_slice($stepsArray, 3, 3);
-                        $firstRowLabels = array_slice($labelsArray, 0, 3);
-                        $secondRowLabels = array_slice($labelsArray, 3, 3);
+    $stepsArray = array_keys($baseSteps);
+    $labelsArray = array_values($baseSteps);
+    $firstRow = array_slice($stepsArray, 0, 3);
+    $secondRow = array_slice($stepsArray, 3, 3);
+    $firstRowLabels = array_slice($labelsArray, 0, 3);
+    $secondRowLabels = array_slice($labelsArray, 3, 3);
                     @endphp
                     
                     <!-- Baris pertama: Step 1, 2, 3 -->
                     <div class="grid grid-cols-3 gap-2 mb-3">
                         @foreach($firstRow as $rowIndex => $key)
                             @php
-                                $index = array_search($key, $stepsArray);
-                                $isCompleted = $index <= $currentIndex;
-                                $isCurrent = $index == $currentIndex;
-                                $label = $firstRowLabels[$rowIndex];
+        $index = array_search($key, $stepsArray);
+        $isCompleted = $index <= $currentIndex;
+        $isCurrent = $index == $currentIndex;
+        $label = $firstRowLabels[$rowIndex];
                             @endphp
                             <div class="flex flex-col items-center">
                                 <div
@@ -259,10 +259,10 @@
                         <div class="grid grid-cols-3 gap-2">
                             @foreach($secondRow as $rowIndex => $key)
                                 @php
-                                    $index = array_search($key, $stepsArray);
-                                    $isCompleted = $index <= $currentIndex;
-                                    $isCurrent = $index == $currentIndex;
-                                    $label = $secondRowLabels[$rowIndex];
+            $index = array_search($key, $stepsArray);
+            $isCompleted = $index <= $currentIndex;
+            $isCurrent = $index == $currentIndex;
+            $label = $secondRowLabels[$rowIndex];
                                 @endphp
                                 <div class="flex flex-col items-center">
                                     <div
@@ -449,29 +449,29 @@
             </div>
             <div class="flex flex-col sm:flex-row sm:items-center gap-4">
                 @php
-                    $paymentStatusMap = [
-                        'waiting_confirmation' => 'Menunggu Konfirmasi Stok',
-                        'ready_to_pay' => 'Siap Dibayar',
-                        'waiting_payment' => 'Menunggu Pembayaran',
-                        'waiting_verification' => 'Menunggu Verifikasi Pembayaran',
-                        'dp_paid' => 'DP (Uang Muka)',
-                        'partial_paid' => 'Sebagian Terbayar',
-                        'paid' => 'Lunas',
-                        'rejected' => 'Pembayaran Ditolak',
-                        'cancelled' => 'Dibatalkan',
-                    ];
-                    $paymentBg = match ($order->payment_status) {
-                        'paid' => 'bg-green-100 text-green-800 border-green-200',
-                        'ready_to_pay' => 'bg-orange-100 text-orange-800 border-orange-200',
-                        'waiting_confirmation' => 'bg-gray-100 text-gray-800 border-gray-200',
-                        'waiting_payment' => 'bg-yellow-100 text-yellow-800 border-yellow-200',
-                        'waiting_verification' => 'bg-blue-100 text-blue-800 border-blue-200',
-                        'dp_paid' => 'bg-purple-100 text-purple-800 border-purple-200',
-                        'partial_paid' => 'bg-indigo-100 text-indigo-800 border-indigo-200',
-                        'rejected' => 'bg-red-100 text-red-800 border-red-200',
-                        'cancelled' => 'bg-gray-100 text-gray-800 border-gray-200',
-                        default => 'bg-gray-100 text-gray-800 border-gray-200',
-                    };
+$paymentStatusMap = [
+    'waiting_confirmation' => 'Menunggu Konfirmasi Stok',
+    'ready_to_pay' => 'Siap Dibayar',
+    'waiting_payment' => 'Menunggu Pembayaran',
+    'waiting_verification' => 'Menunggu Verifikasi Pembayaran',
+    'dp_paid' => 'DP (Uang Muka)',
+    'partial_paid' => 'Sebagian Terbayar',
+    'paid' => 'Lunas',
+    'rejected' => 'Pembayaran Ditolak',
+    'cancelled' => 'Dibatalkan',
+];
+$paymentBg = match ($order->payment_status) {
+    'paid' => 'bg-green-100 text-green-800 border-green-200',
+    'ready_to_pay' => 'bg-orange-100 text-orange-800 border-orange-200',
+    'waiting_confirmation' => 'bg-gray-100 text-gray-800 border-gray-200',
+    'waiting_payment' => 'bg-yellow-100 text-yellow-800 border-yellow-200',
+    'waiting_verification' => 'bg-blue-100 text-blue-800 border-blue-200',
+    'dp_paid' => 'bg-purple-100 text-purple-800 border-purple-200',
+    'partial_paid' => 'bg-indigo-100 text-indigo-800 border-indigo-200',
+    'rejected' => 'bg-red-100 text-red-800 border-red-200',
+    'cancelled' => 'bg-gray-100 text-gray-800 border-gray-200',
+    default => 'bg-gray-100 text-gray-800 border-gray-200',
+};
                 @endphp
                 <span
                     class="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold border {{ $paymentBg }}">
@@ -510,9 +510,9 @@
                             <small id="totalHelper" class="text-gray-600 text-sm block" style="display:none;">
                                 @php 
                                     $totalForHelper = $order->items->sum(function ($item) {
-                                        return ($item->price ?? 0) * ($item->quantity ?? 0); 
-                                    });
-                                    $totalWithShipping = $totalForHelper + ($order->shipping_fee ?? 0);
+        return ($item->price ?? 0) * ($item->quantity ?? 0);
+    });
+    $totalWithShipping = $totalForHelper + ($order->shipping_fee ?? 0);
                                 @endphp
                                 Total Produk: Rp{{ number_format($totalForHelper, 0, ',', '.') }}
                                 @if($order->shipping_fee > 0)
@@ -589,10 +589,10 @@
 
         <!-- Update Ongkir Card -->
         @php
-            $needsShippingFee = in_array($order->delivery_method, [
-                'Gosend (Pesan Dari Toko)',
-                'Gocar (Pesan Dari Toko)'
-            ]);
+$needsShippingFee = in_array($order->delivery_method, [
+    'Gosend (Pesan Dari Toko)',
+    'Gocar (Pesan Dari Toko)'
+]);
         @endphp
         @if($needsShippingFee)
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
@@ -671,9 +671,9 @@
                             <tr class="hover:bg-gray-50">
                                 <td class="px-6 py-4 text-sm font-medium text-gray-900">
                                     @php
-                                        // Clean product name dari duplikasi komponen
-                                        $cleanName = preg_replace('/\s*\(Komponen:.*?\)\s*/', '', $item->product_name);
-                                        $cleanName = trim($cleanName) ?: $item->product_name;
+    // Clean product name dari duplikasi komponen
+    $cleanName = preg_replace('/\s*\(Komponen:.*?\)\s*/', '', $item->product_name);
+    $cleanName = trim($cleanName) ?: $item->product_name;
                                     @endphp
                                     {{ $cleanName }}
                                 </td>
@@ -698,8 +698,8 @@
                 @foreach($order->items as $item)
                     @php 
                         $subtotal = ($item->price ?? 0) * ($item->quantity ?? 0);
-                        $cleanName = preg_replace('/\s*\(Komponen:.*?\)\s*/', '', $item->product_name);
-                        $cleanName = trim($cleanName) ?: $item->product_name;
+    $cleanName = preg_replace('/\s*\(Komponen:.*?\)\s*/', '', $item->product_name);
+    $cleanName = trim($cleanName) ?: $item->product_name;
                     @endphp
                     <div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
                         <!-- Product Header -->
@@ -749,13 +749,13 @@
             </div>
 
             @php
-                $totalOrder = $order->items->sum(function ($item) {
-                    return ($item->price ?? 0) * ($item->quantity ?? 0);
-                });
-                $shippingFee = $order->shipping_fee ?? 0;
-                $grandTotal = $totalOrder + $shippingFee;
-                $totalPaid = $order->amount_paid ?? 0;
-                $sisaPembayaran = $order->payment_status === 'paid' ? 0 : max($grandTotal - $totalPaid, 0);
+$totalOrder = $order->items->sum(function ($item) {
+    return ($item->price ?? 0) * ($item->quantity ?? 0);
+});
+$shippingFee = $order->shipping_fee ?? 0;
+$grandTotal = $totalOrder + $shippingFee;
+$totalPaid = $order->amount_paid ?? 0;
+$sisaPembayaran = $order->payment_status === 'paid' ? 0 : max($grandTotal - $totalPaid, 0);
             @endphp
 
             <!-- Mobile Payment Summary Card -->
@@ -862,9 +862,9 @@
 
         <!-- Custom Bouquet Information Card -->
         @php
-            $customBouquetItems = $order->items->filter(function($item) {
-                return $item->item_type === 'custom_bouquet' && (!empty($item->reference_image) || !empty($item->custom_instructions));
-            });
+$customBouquetItems = $order->items->filter(function ($item) {
+    return $item->item_type === 'custom_bouquet' && (!empty($item->reference_image) || !empty($item->custom_instructions));
+});
         @endphp
         
         @if($customBouquetItems->count() > 0)
@@ -880,121 +880,134 @@
                 </div>
 
                 @foreach($customBouquetItems as $item)
-                    <div class="border border-purple-200 rounded-lg p-6 mb-4 bg-purple-50">
-                        <h4 class="font-semibold text-purple-800 mb-4 text-lg">
-                            @php
-                                // Extract simple product name without components info
-                                $simpleName = preg_replace('/\s*\(.*?\)\s*/', '', $item->product_name);
-                                $simpleName = trim($simpleName) ?: 'Custom Bouquet';
-                            @endphp
-                            {{ $simpleName }}
-                        </h4>
-                        
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            <!-- Reference Image Section -->
-                            @if(!empty($item->reference_image))
-                                <div class="bg-white rounded-lg border border-purple-200 p-4">
-                                    <div class="flex items-center mb-3">
-                                        <i class="bi bi-image text-purple-600 text-lg mr-2"></i>
-                                        <h5 class="font-semibold text-purple-800">Upload Referensi</h5>
-                                    </div>
-                                    
-                                    <div class="space-y-3">
-                                        <div class="relative group cursor-pointer" onclick="openImageModal('{{ asset('storage/' . $item->reference_image) }}', 'Referensi - {{ $item->product_name }}')">
-                                            <img src="{{ asset('storage/' . $item->reference_image) }}" 
-                                                 alt="Referensi Custom Bouquet" 
-                                                 class="w-full h-48 object-cover rounded-lg border border-gray-200 transition-transform hover:scale-105">
-                                            <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-200 rounded-lg flex items-center justify-center">
-                                                <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                                                    <i class="bi bi-zoom-in text-white text-2xl"></i>
+                                <div class="border border-purple-200 rounded-lg p-6 mb-4 bg-purple-50">
+                                    <h4 class="font-semibold text-purple-800 mb-4 text-lg">
+                                        @php
+                    // Extract simple product name without components info
+                    $simpleName = preg_replace('/\s*\(.*?\)\s*/', '', $item->product_name);
+                    $simpleName = trim($simpleName) ?: 'Custom Bouquet';
+                                        @endphp
+                                        {{ $simpleName }}
+                                    </h4>
+
+                                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                        <!-- Reference Image Section -->
+                                        @if(!empty($item->reference_image))
+                                            <div class="bg-white rounded-lg border border-purple-200 p-4">
+                                                <div class="flex items-center mb-3">
+                                                    <i class="bi bi-image text-purple-600 text-lg mr-2"></i>
+                                                    <h5 class="font-semibold text-purple-800">Upload Referensi</h5>
                                                 </div>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="flex gap-2">
-                                            <button onclick="openImageModal('{{ asset('storage/' . $item->reference_image) }}', 'Referensi - {{ $item->product_name }}')"
-                                                    class="flex-1 bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded text-sm font-medium transition-colors">
-                                                <i class="bi bi-zoom-in mr-1"></i>Lihat
-                                            </button>
-                                            <a href="{{ asset('storage/' . $item->reference_image) }}" 
-                                               download="referensi-{{ Str::slug($item->product_name) }}.jpg"
-                                               class="flex-1 bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded text-sm font-medium transition-colors text-center">
-                                                <i class="bi bi-download mr-1"></i>Download
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                            @endif
-                            
-                            <!-- Custom Instructions Section -->
-                            @if(!empty($item->custom_instructions))
-                                <div class="bg-white rounded-lg border border-purple-200 p-4">
-                                    <div class="flex items-center mb-3">
-                                        <i class="bi bi-chat-left-text text-purple-600 text-lg mr-2"></i>
-                                        <h5 class="font-semibold text-purple-800">Instruksi Khusus</h5>
-                                    </div>
-                                    
-                                    <div class="bg-purple-50 border border-purple-200 rounded p-4">
-                                        <p class="text-purple-800 leading-relaxed">"{{ $item->custom_instructions }}"</p>
-                                    </div>
-                                    
-                                    <div class="mt-3 text-sm text-purple-600">
-                                        <i class="bi bi-info-circle mr-1"></i>
-                                        Instruksi dari customer untuk pembuatan bouquet
-                                    </div>
-                                </div>
-                            @endif
-                        </div>
-                        
-                        <!-- Custom Bouquet Components Section -->
-                        @if($item->custom_bouquet_id)
-                            @php
-                                $customBouquet = \App\Models\CustomBouquet::with(['items.product'])->find($item->custom_bouquet_id);
-                            @endphp
-                            
-                            @if($customBouquet && $customBouquet->items->count() > 0)
-                                <div class="bg-white rounded-lg border border-purple-200 p-4 mt-6">
-                                    <div class="flex items-center mb-4">
-                                        <i class="bi bi-flower1 text-purple-600 text-lg mr-2"></i>
-                                        <h5 class="font-semibold text-purple-800">Komponen Custom Bouquet</h5>
-                                    </div>
-                                    
-                                    <div class="space-y-3">
-                                        @foreach($customBouquet->items as $component)
-                                            <div class="flex items-center justify-between bg-purple-50 border border-purple-100 rounded-lg p-3">
-                                                <div class="flex items-center">
-                                                    @if($component->product->image)
-                                                        <img src="{{ asset('storage/' . $component->product->image) }}" 
-                                                             alt="{{ $component->product->name }}" 
-                                                             class="w-10 h-10 object-cover rounded mr-3">
-                                                    @else
-                                                        <div class="w-10 h-10 bg-gray-200 rounded mr-3 flex items-center justify-center">
-                                                            <i class="bi bi-flower1 text-gray-400"></i>
+
+                                                <div class="space-y-3">
+                                                    <div class="relative group cursor-pointer" onclick="openImageModal('{{ asset('storage/' . $item->reference_image) }}', 'Referensi - {{ $item->product_name }}')">
+                                                        <img src="{{ asset('storage/' . $item->reference_image) }}" 
+                                                             alt="Referensi Custom Bouquet" 
+                                                             class="w-full h-48 object-cover rounded-lg border border-gray-200 transition-transform hover:scale-105">
+                                                        <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-200 rounded-lg flex items-center justify-center">
+                                                            <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                                                <i class="bi bi-zoom-in text-white text-2xl"></i>
+                                                            </div>
                                                         </div>
-                                                    @endif
-                                                    <div>
-                                                        <span class="font-medium text-purple-800">{{ $component->product->name }}</span>
-                                                        <span class="text-sm text-purple-600 block">{{ $component->price_type_display }} - {{ $component->formatted_quantity }}</span>
+                                                    </div>
+
+                                                    <div class="flex gap-2">
+                                                        <button onclick="openImageModal('{{ asset('storage/' . $item->reference_image) }}', 'Referensi - {{ $item->product_name }}')"
+                                                                class="flex-1 bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded text-sm font-medium transition-colors">
+                                                            <i class="bi bi-zoom-in mr-1"></i>Lihat
+                                                        </button>
+                                                        <a href="{{ asset('storage/' . $item->reference_image) }}" 
+                                                           download="referensi-{{ Str::slug($item->product_name) }}.jpg"
+                                                           class="flex-1 bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded text-sm font-medium transition-colors text-center">
+                                                            <i class="bi bi-download mr-1"></i>Download
+                                                        </a>
                                                     </div>
                                                 </div>
-                                                <div class="text-right">
-                                                    <span class="font-bold text-purple-800">{{ $component->quantity }}</span>
-                                                    <span class="text-sm text-purple-600 ml-1">{{ $component->product->base_unit ?? 'pcs' }}</span>
+                                            </div>
+                                        @endif
+
+                                        <!-- Custom Instructions Section -->
+                                        @if(!empty($item->custom_instructions))
+                                            <div class="bg-white rounded-lg border border-purple-200 p-4">
+                                                <div class="flex items-center mb-3">
+                                                    <i class="bi bi-chat-left-text text-purple-600 text-lg mr-2"></i>
+                                                    <h5 class="font-semibold text-purple-800">Instruksi Khusus</h5>
+                                                </div>
+
+                                                <div class="bg-purple-50 border border-purple-200 rounded p-4">
+                                                    <p class="text-purple-800 leading-relaxed">"{{ $item->custom_instructions }}"</p>
+                                                </div>
+
+                                                <div class="mt-3 text-sm text-purple-600">
+                                                    <i class="bi bi-info-circle mr-1"></i>
+                                                    Instruksi dari customer untuk pembuatan bouquet
                                                 </div>
                                             </div>
-                                        @endforeach
+                                        @endif
                                     </div>
-                                    
-                                    <div class="mt-4 p-3 bg-purple-100 rounded-lg">
-                                        <div class="flex justify-between items-center">
-                                            <span class="font-semibold text-purple-800">Total Harga Custom Bouquet:</span>
-                                            <span class="font-bold text-lg text-purple-800">Rp {{ number_format((float)($customBouquet->total_price ?? 0), 0, ',', '.') }}</span>
-                                        </div>
-                                    </div>
+
+                                    <!-- Custom Bouquet Components Section -->
+                                    @if($item->custom_bouquet_id)
+                                                        @php
+                                        $customBouquet = \App\Models\CustomBouquet::with(['items.product'])->find($item->custom_bouquet_id);
+                                                        @endphp
+
+                                                        @if($customBouquet && $customBouquet->items->count() > 0)
+                                                            <div class="bg-white rounded-lg border border-purple-200 p-4 mt-6">
+                                                                <div class="flex items-center mb-4">
+                                                                    <i class="bi bi-flower1 text-purple-600 text-lg mr-2"></i>
+                                                                    <h5 class="font-semibold text-purple-800">Komponen Custom Bouquet</h5>
+                                                                </div>
+
+                                                                <!-- Ribbon Color Display -->
+                                                                        <div class="flex items-center gap-2 mb-4 pb-4 border-b border-purple-100">
+                                                                            <span class="text-sm font-medium text-purple-700">Warna Pita:</span>
+                                                                            <div class="flex items-center gap-2">
+                                                                                <div class="w-4 h-4 rounded-full"
+                                                                                    style="background-color: {{ App\Enums\RibbonColor::getColorCode($customBouquet->ribbon_color) }}">
+                                                                                </div>
+                                                                                <span class="text-sm text-purple-800">
+                                                                                    {{ App\Enums\RibbonColor::getColorName($customBouquet->ribbon_color) }}
+                                                                                </span>
+                                                                            </div>
+                                                                        </div>
+
+                                                                <div class="space-y-3">
+                                                                    @foreach($customBouquet->items as $component)
+                                                                        <div class="flex items-center justify-between bg-purple-50 border border-purple-100 rounded-lg p-3">
+                                                                            <div class="flex items-center">
+                                                                                @if($component->product->image)
+                                                                                    <img src="{{ asset('storage/' . $component->product->image) }}" 
+                                                                                         alt="{{ $component->product->name }}" 
+                                                                                         class="w-10 h-10 object-cover rounded mr-3">
+                                                                                @else
+                                                                                    <div class="w-10 h-10 bg-gray-200 rounded mr-3 flex items-center justify-center">
+                                                                                        <i class="bi bi-flower1 text-gray-400"></i>
+                                                                                    </div>
+                                                                                @endif
+                                                                                <div>
+                                                                                    <span class="font-medium text-purple-800">{{ $component->product->name }}</span>
+                                                                                    <span class="text-sm text-purple-600 block">{{ $component->price_type_display }} - {{ $component->formatted_quantity }}</span>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="text-right">
+                                                                                <span class="font-bold text-purple-800">{{ $component->quantity }}</span>
+                                                                                <span class="text-sm text-purple-600 ml-1">{{ $component->product->base_unit ?? 'pcs' }}</span>
+                                                                            </div>
+                                                                        </div>
+                                                                    @endforeach
+                                                                </div>
+
+                                                                <div class="mt-4 p-3 bg-purple-100 rounded-lg">
+                                                                    <div class="flex justify-between items-center">
+                                                                        <span class="font-semibold text-purple-800">Total Harga Custom Bouquet:</span>
+                                                                        <span class="font-bold text-lg text-purple-800">Rp {{ number_format((float) ($customBouquet->total_price ?? 0), 0, ',', '.') }}</span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        @endif
+                                    @endif
                                 </div>
-                            @endif
-                        @endif
-                    </div>
                 @endforeach
             </div>
         @endif
@@ -1013,7 +1026,7 @@
                     <h3 class="text-xl font-semibold text-gray-900">Bukti Pembayaran</h3>
                 </div>
                 @php
-                    $ext = pathinfo($order->payment_proof, PATHINFO_EXTENSION);
+    $ext = pathinfo($order->payment_proof, PATHINFO_EXTENSION);
                 @endphp
                 <div class="flex justify-center">
                     @if(in_array(strtolower($ext), ['jpg', 'jpeg', 'png', 'gif', 'webp']))
@@ -1064,29 +1077,29 @@
                 </div>
 
                 @php
-                    $packingFiles = [];
+    $packingFiles = [];
 
-                    // Prioritize new multiple files format
-                    if (!empty($order->packing_files)) {
-                        $files = is_string($order->packing_files) ? json_decode($order->packing_files, true) : $order->packing_files;
-                        if (is_array($files)) {
-                            $packingFiles = $files;
-                        }
-                    }
-                    // Fallback to old single photo format only if no packing_files
-                    elseif (!empty($order->packing_photo)) {
-                        $packingFiles[] = $order->packing_photo;
-                    }
+    // Prioritize new multiple files format
+    if (!empty($order->packing_files)) {
+        $files = is_string($order->packing_files) ? json_decode($order->packing_files, true) : $order->packing_files;
+        if (is_array($files)) {
+            $packingFiles = $files;
+        }
+    }
+    // Fallback to old single photo format only if no packing_files
+    elseif (!empty($order->packing_photo)) {
+        $packingFiles[] = $order->packing_photo;
+    }
                 @endphp
 
                 @if(count($packingFiles) > 0)
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         @foreach($packingFiles as $index => $file)
                             @php
-                                $filePath = asset('storage/' . $file);
-                                $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
-                                $isVideo = in_array($ext, ['mp4', 'mov', 'avi', 'wmv', 'flv', 'webm']);
-                                $isImage = in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp']);
+            $filePath = asset('storage/' . $file);
+            $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+            $isVideo = in_array($ext, ['mp4', 'mov', 'avi', 'wmv', 'flv', 'webm']);
+            $isImage = in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp']);
                             @endphp
 
                             <div class="bg-gray-50 rounded-lg p-3 border border-gray-200">

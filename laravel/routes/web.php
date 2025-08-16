@@ -1,6 +1,7 @@
 
 <?php
 
+use App\Http\Controllers\OrderCustomBouquetController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\DashboardController;
@@ -24,7 +25,6 @@ use App\Http\Controllers\BouquetCategoryController;
 use App\Http\Controllers\BouquetSizeController;
 use App\Http\Controllers\BouquetComponentController;
 use App\Http\Controllers\PublicCartController;
-
 
 use Illuminate\Support\Facades\Route;
 
@@ -85,6 +85,8 @@ Route::middleware('auth')->group(function () {
 
     // Product Management Routes
     Route::resource('categories', CategoryController::class);
+
+
     // Ekspor & Impor Produk Excel
     // Export/Import Produk via JSON
     Route::get('products/export-json', [App\Http\Controllers\ProductJsonController::class, 'export'])->name('products.export-json');

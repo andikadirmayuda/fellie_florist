@@ -656,6 +656,19 @@
                                                 </div>
                                                 <h4 class="font-bold text-purple-800 text-sm sm:text-base">Komponen Bouquet</h4>
                                             </div>
+
+                                            <!-- Ribbon Color Display -->
+                                            <div class="flex items-center gap-2 mb-4 pb-4 border-b border-purple-100">
+                                                <span class="text-sm font-medium text-purple-700">Warna Pita:</span>
+                                                <div class="flex items-center gap-2">
+                                                    <div class="w-4 h-4 rounded-full"
+                                                        style="background-color: {{ App\Enums\RibbonColor::getColorCode($customBouquet->ribbon_color) }}">
+                                                    </div>
+                                                    <span class="text-sm text-purple-800">
+                                                        {{ App\Enums\RibbonColor::getColorName($customBouquet->ribbon_color) }}
+                                                    </span>
+                                                </div>
+                                            </div>
                                             
                                             <div class="space-y-3">
                                                 @foreach($customBouquet->items as $component)
@@ -1191,7 +1204,7 @@
     </script>
     
     <!-- Include cart.js for toast notifications -->
-    <script src="{{ asset('js/cart.js') }}"></script>
+    <script src="{{ asset('js/cart.js') }}?v={{ time() }}"></script>
 </body>
 
 </html>

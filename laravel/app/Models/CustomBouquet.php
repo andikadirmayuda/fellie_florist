@@ -15,12 +15,17 @@ class CustomBouquet extends Model
         'description',
         'total_price',
         'reference_image',
+        'ribbon_color',
         'status',
         'special_instructions'
     ];
 
     protected $casts = [
         'total_price' => 'decimal:2',
+    ];
+
+    protected $attributes = [
+        'ribbon_color' => 'pink', // Default value untuk ribbon_color
     ];
 
     // Relationships

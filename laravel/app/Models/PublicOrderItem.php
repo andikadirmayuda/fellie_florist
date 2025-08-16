@@ -24,6 +24,9 @@ use Illuminate\Database\Eloquent\Model;
  */
 class PublicOrderItem extends Model
 {
+    protected $casts = [
+        'details' => 'json',
+    ];
     public function getPriceTypeDisplayAttribute()
     {
         $priceTypeLabels = [
@@ -48,6 +51,11 @@ class PublicOrderItem extends Model
         'unit_equivalent',
         'quantity',
         'price',
+        'item_type',
+        'custom_bouquet_id',
+        'reference_image',
+        'custom_instructions',
+        'details',
         'item_type',
         'custom_bouquet_id',
         'reference_image',

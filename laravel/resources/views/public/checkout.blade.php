@@ -137,7 +137,7 @@
                 <h3 class="text-xl font-bold text-gray-800 mb-2">Keranjang Belanja Kosong</h3>
                 <p class="text-gray-600 mb-6">Silakan tambahkan produk ke keranjang terlebih dahulu</p>
                 <a href="{{ route('public.flowers') }}" 
-                   class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-rose-500 to-pink-600 text-white font-semibold rounded-xl hover:from-rose-600 hover:to-pink-700 transition-all duration-200 shadow-lg hover:shadow-xl">
+                   class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-rose-500 to-pink-500 text-white font-semibold rounded-xl hover:from-rose-600 hover:to-pink-700 transition-all duration-200 shadow-lg hover:shadow-xl">
                     <i class="bi bi-shop mr-2"></i>
                     Mulai Berbelanja
                 </a>
@@ -391,6 +391,22 @@
                                                     @else
                                                         {{ $item['components_summary'] }}
                                                     @endif
+                                                </p>
+                                                <!-- Ribbon Color -->
+                                                @if(isset($item['type']) && $item['type'] === 'custom_bouquet' && !empty($item['ribbon_color']))
+                                                    <div class="flex items-center gap-2 mt-2 pt-2 border-t border-purple-200">
+                                                        <i class="bi bi-palette2 text-xs text-purple-600"></i>
+                                                        <span class="text-xs font-medium text-purple-700">Warna Pita:</span>
+                                                        <div class="flex items-center gap-2">
+                                                            <div class="w-4 h-4 rounded-full" 
+                                                                style="background-color: {{ App\Enums\RibbonColor::getColorCode($item['ribbon_color']) }}">
+                                                            </div>
+                                                            <span class="text-xs text-purple-800">
+                                                                {{ App\Enums\RibbonColor::getColorName($item['ribbon_color']) }}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                @endif
                                                 </p>
                                             </div>
                                         @endif
