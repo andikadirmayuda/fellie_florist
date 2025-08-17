@@ -87,7 +87,10 @@ class PublicCartController extends Controller
             'tangkai' => 'Per Tangkai',
             'ikat5' => 'Ikat 5',
             'reseller' => 'Reseller',
-            'promo' => 'Promo'
+            'promo' => 'Promo',
+            'custom_ikat' => 'Custom Ikat',
+            'custom_tangkai' => 'Custom Tangkai',
+            'custom_khusus' => 'Custom Khusus'
         ];
 
         return $labels[$priceType] ?? ucfirst($priceType);
@@ -336,6 +339,28 @@ class PublicCartController extends Controller
         // Hitung total harga
         $totalPrice = $customBouquet->calculateTotalPrice();
 
+        // Ambil komponen-komponen bouquet dan validasi price_type
+        $components = $customBouquet->items->map(function ($item) {
+            // Validate each component has the correct price type
+            $product = Product::with(['prices'])->find($item->product_id);
+            if (!$product) {
+                throw new \Exception("Product not found: {$item->product_id}");
+            }
+
+            // Validate price type exists for this product
+            $priceExists = $product->prices()->where('type', $item->price_type)->exists();
+            if (!$priceExists) {
+                throw new \Exception("Harga {$item->price_type} tidak ditemukan untuk {$product->name}");
+            }
+
+            return [
+                'product_id' => $item->product_id,
+                'quantity' => $item->quantity,
+                'price_type' => $item->price_type,
+                'product_name' => $product->name
+            ];
+        })->toArray();
+
         // Gunakan nama sederhana tanpa komponen untuk menghindari duplikasi
         $componentsArray = $customBouquet->getComponentsArray();
         $cartName = "Custom Bouquet";
@@ -361,6 +386,7 @@ class PublicCartController extends Controller
             'custom_bouquet_id' => $customBouquet->id,
             'image' => $customBouquet->reference_image ?? null,
             'components_summary' => $componentsArray,
+            'components' => $components, // Tambahkan komponen untuk stok management
             'ribbon_color' => $ribbon_color
         ];
 

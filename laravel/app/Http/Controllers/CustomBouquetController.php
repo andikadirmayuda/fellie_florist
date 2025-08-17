@@ -9,6 +9,7 @@ use App\Models\Category;
 use App\Models\ProductPrice;
 use App\Models\Ribbon;
 use App\Enums\RibbonColor;
+use App\Enums\CustomPriceType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -16,6 +17,25 @@ use Illuminate\Support\Facades\Log;
 
 class CustomBouquetController extends Controller
 {
+    /**
+     * Calculate total price for custom bouquet items
+     */
+    private function calculateTotalPrice($items)
+    {
+        $total = 0;
+        foreach ($items as $item) {
+            $product = Product::find($item['id']);
+            if ($product) {
+                $price = $product->prices()
+                    ->where('type', $item['price_type'])
+                    ->first();
+                if ($price) {
+                    $total += $price->price * $item['quantity'];
+                }
+            }
+        }
+        return $total;
+    }
     /**
      * Update ribbon color for custom bouquet
      */
@@ -55,12 +75,19 @@ class CustomBouquetController extends Controller
      */
     public function create()
     {
-        // Get all active products with their prices and current stock
+        // Get products that have valid custom prices
         $products = Product::with(['category', 'prices'])
             ->where('is_active', true)
             ->where('current_stock', '>', 0)
-            ->orderBy('name')
-            ->get();
+            ->whereHas('prices', function ($query) {
+                $query->whereIn('type', CustomPriceType::values());
+            })
+            ->get()
+            ->filter(function ($product) {
+                return $product->hasValidCustomPrices();
+            })
+            ->values()
+            ->sortBy('name');
 
         // Get all categories for filtering
         $categories = Category::orderBy('name')->get();
@@ -130,11 +157,30 @@ class CustomBouquetController extends Controller
 
             // Add to cart session
             $cart = session()->get('cart', []);
+
+            // Process items with complete product information
+            $processedItems = collect($validated['items'])->map(function ($item) {
+                $product = Product::find($item['id']);
+                return [
+                    'id' => $product->id,
+                    'name' => $product->name,
+                    'quantity' => $item['quantity'],
+                    'price_type' => $item['price_type'],
+                    'unit' => $product->base_unit,
+                    'product_type' => 'custom_item'
+                ];
+            })->toArray();
+
             $cart['custom_bouquet_' . $customBouquet->id] = [
                 'type' => 'custom_bouquet',
                 'id' => $customBouquet->id,
-                'items' => $validated['items'],
+                'name' => 'Custom Bouquet',
+                'items' => $processedItems,
+                'qty' => 1,
+                'price' => $this->calculateTotalPrice($validated['items']),
+                'price_type' => 'custom',
                 'ribbon_color' => $validated['ribbon_color'],
+                'reference_image' => $customBouquet->reference_image,
                 'created_at' => now()->timestamp
             ];
             session()->put('cart', $cart);
@@ -159,8 +205,8 @@ class CustomBouquetController extends Controller
         $validated = $request->validate([
             'custom_bouquet_id' => 'required|exists:custom_bouquets,id',
             'product_id' => 'required|exists:products,id',
-            'price_type' => 'required|string',
             'quantity' => 'required|integer|min:1',
+            'price_type' => 'required|string|in:custom_ikat,custom_tangkai,custom_khusus'
         ]);
 
         DB::beginTransaction();
@@ -168,17 +214,53 @@ class CustomBouquetController extends Controller
             $customBouquet = CustomBouquet::find($validated['custom_bouquet_id']);
             $product = Product::find($validated['product_id']);
 
-            // Get the price for this product and price type
+            // Cari harga berdasarkan price_type yang dipilih
             $productPrice = ProductPrice::where('product_id', $validated['product_id'])
                 ->where('type', $validated['price_type'])
                 ->first();
 
+            // Jika price_type yang dipilih tidak tersedia
+            if (!$productPrice) {
+                // Cari harga custom yang tersedia untuk produk ini
+                $availablePrices = ProductPrice::where('product_id', $validated['product_id'])
+                    ->whereIn('type', CustomPriceType::values())
+                    ->get();
+
+                if ($availablePrices->isEmpty()) {
+                    Log::warning('No custom prices found for product', [
+                        'product_id' => $validated['product_id'],
+                        'product_name' => $product->name
+                    ]);
+                    return response()->json([
+                        'success' => false,
+                        'message' => "Produk {$product->name} tidak memiliki konfigurasi harga untuk Custom Bouquet"
+                    ]);
+                }
+
+                // Beritahu user price_type apa saja yang tersedia
+                $availableTypes = $availablePrices->pluck('type')->toArray();
+                return response()->json([
+                    'success' => false,
+                    'message' => "Harga {$validated['price_type']} tidak tersedia untuk {$product->name}. Silakan pilih dari: " . implode(', ', $availableTypes)
+                ]);
+            }
+
+            Log::info('Found price for product', [
+                'product_id' => $product->id,
+                'product_name' => $product->name,
+                'price_type' => $productPrice->type,
+                'price' => $productPrice->price
+            ]);
+
             if (!$productPrice) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Price not found for selected product and price type.'
+                    'message' => "Konfigurasi harga tidak valid untuk {$product->name}"
                 ]);
             }
+
+            // Gunakan price_type dari harga yang ditemukan
+            $priceType = $productPrice->type;
 
             // Calculate required stock based on price type
             $requiredStock = $this->calculateRequiredStock($validated['quantity'], $productPrice);
@@ -194,7 +276,7 @@ class CustomBouquetController extends Controller
             // Check if item already exists in custom bouquet
             $existingItem = CustomBouquetItem::where('custom_bouquet_id', $validated['custom_bouquet_id'])
                 ->where('product_id', $validated['product_id'])
-                ->where('price_type', $validated['price_type'])
+                ->where('price_type', $priceType)
                 ->first();
 
             if ($existingItem) {
@@ -208,7 +290,7 @@ class CustomBouquetController extends Controller
                 $item = CustomBouquetItem::create([
                     'custom_bouquet_id' => $validated['custom_bouquet_id'],
                     'product_id' => $validated['product_id'],
-                    'price_type' => $validated['price_type'],
+                    'price_type' => $priceType, // Gunakan price_type dari harga yang ditemukan
                     'quantity' => $validated['quantity'],
                     'unit_price' => $productPrice->getAttribute('price'),
                 ]);
@@ -224,7 +306,7 @@ class CustomBouquetController extends Controller
                 'custom_bouquet_id' => $validated['custom_bouquet_id'],
                 'product_id' => $validated['product_id'],
                 'quantity' => $validated['quantity'],
-                'price_type' => $validated['price_type'],
+                'price_type' => $priceType,
                 'subtotal' => $item->subtotal
             ]);
 

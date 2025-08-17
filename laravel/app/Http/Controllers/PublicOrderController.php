@@ -61,6 +61,8 @@ class PublicOrderController extends Controller
             'items.*.price_type' => 'required|string',
             'items.*.unit_equivalent' => 'required|integer',
             'items.*.quantity' => 'required|integer|min:1',
+            'items.*.type' => 'nullable|string', // For identifying custom bouquets
+            'items.*.custom_bouquet_id' => 'nullable|integer|exists:custom_bouquets,id',
         ]);
 
         DB::beginTransaction();

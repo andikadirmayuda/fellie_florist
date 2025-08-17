@@ -28,7 +28,13 @@ class ProductRequest extends FormRequest
             // Validate prices            'prices' => ['array'],
             'prices.*.type' => ['nullable', 'string', Rule::in($this->getPriceTypes())],
             'prices.*.price' => ['nullable', 'numeric', 'min:0'],
-            'prices.*.unit_equivalent' => ['nullable', 'integer', 'min:1'],
+            'prices.*.unit_equivalent' => [
+                'required_if:prices.*.type,custom_ikat',
+                'nullable',
+                'integer',
+                Rule::when(fn($input) => $input->input('prices.*.type') === 'custom_ikat', ['in:5,10,20']),
+                'min:1'
+            ],
             'prices.*.is_default' => ['boolean'],
 
             // At least one price must be set if prices array exists
@@ -52,6 +58,8 @@ class ProductRequest extends FormRequest
             'prices.*.unit_equivalent.required' => 'Unit equivalent harus diisi',
             'prices.*.unit_equivalent.integer' => 'Unit equivalent harus berupa angka bulat',
             'prices.*.unit_equivalent.min' => 'Unit equivalent minimal 1',
+            'prices.*.unit_equivalent.required_if' => 'Unit equivalent harus diisi untuk tipe Custom Ikat',
+            'prices.*.unit_equivalent.in' => 'Unit equivalent untuk Custom Ikat hanya boleh 5, 10, atau 20',
         ];
     }
 
@@ -78,6 +86,9 @@ class ProductRequest extends FormRequest
             'ikat_5' => 5,
             'ikat_10' => 10,
             'ikat_20' => 20,
+            'custom_tangkai' => 1,  // Default untuk Custom Tangkai
+            'custom_khusus' => 1,   // Default untuk Custom Khusus
+            // custom_ikat tidak punya default karena bisa bervariasi (5/10/20)
             default => 1,
         };
     }

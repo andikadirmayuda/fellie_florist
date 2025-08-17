@@ -2,15 +2,30 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Product;
+use App\Models\Bouquet;
+use App\Models\PublicOrder;
+use App\Models\OrderItem;
+use App\Models\InventoryLog;
+use App\Models\ProductPrice;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Services\PushNotificationService;
+use App\Services\CartValidationService;
 
 class PublicCheckoutController extends Controller
 {
-    // Tampilkan form checkout
+    protected $cartValidationService;
+
+    public function __construct(CartValidationService $cartValidationService)
+    {
+        $this->cartValidationService = $cartValidationService;
+    }
+
+    /**
+     * Show checkout form
+     */
     public function show(Request $request)
     {
         $cart = session('cart', []);
@@ -20,290 +35,399 @@ class PublicCheckoutController extends Controller
 
         // Format cart data untuk view
         $cartData = [];
+        $totalAmount = 0;
+
         foreach ($cart as $cartKey => $item) {
-            $formattedItem = [
+            // Validasi item cart menggunakan service
+            if (!$this->cartValidationService->validateCustomBouquet($item)) {
+                // Jika validasi gagal, redirect dengan pesan error
+                return redirect()->back()->with('error', 'Terjadi kesalahan pada Custom Bouquet dalam keranjang Anda. Silakan coba lagi.');
+            }
+
+            $cartData[] = [
+                'id' => $item['id'] ?? null,
+                'product_id' => $item['id'] ?? null,
                 'product_name' => $item['name'],
                 'quantity' => $item['qty'],
                 'price' => $item['price'],
                 'price_type' => $item['price_type'] ?? 'default',
                 'type' => $item['type'] ?? 'product',
-                'greeting_card' => $item['greeting_card'] ?? null
+                'greeting_card' => $item['greeting_card'] ?? null,
+                'components_summary' => $item['components_summary'] ?? null,
+                'image' => $item['image'] ?? null,
+                'custom_bouquet_id' => $item['custom_bouquet_id'] ?? null,
+                'ribbon_color' => $item['ribbon_color'] ?? null,
+                'items' => $item['items'] ?? null,
+                'subtotal' => $item['price'] * $item['qty']
             ];
-
-            // Add custom bouquet specific data
-            if (isset($item['type']) && $item['type'] === 'custom_bouquet') {
-                $formattedItem['components_summary'] = $item['components_summary'] ?? null;
-                $formattedItem['image'] = $item['image'] ?? null;
-                $formattedItem['custom_bouquet_id'] = $item['custom_bouquet_id'] ?? null;
-                $formattedItem['ribbon_color'] = $item['ribbon_color'] ?? null;
-            }
-
-            $cartData[] = $formattedItem;
+            $totalAmount += $item['price'] * $item['qty'];
         }
 
-        return view('public.checkout', compact('cartData'));
+        return view('public.checkout', compact('cartData', 'totalAmount'));
     }
 
-    // Proses checkout
+    /**
+     * Process checkout
+     */
     public function process(Request $request)
     {
-        $cart = session('cart', []);
-        if (empty($cart)) {
-            return redirect()->route('public.flowers')->with('error', 'Keranjang kosong.');
-        }
-        $validated = $request->validate([
-            'customer_name' => 'required|string|max:100',
-            'wa_number' => 'required|string|max:20',
-            'receiver_name' => 'nullable|string|max:100',
-            'receiver_wa' => 'nullable|string|max:20',
-            'pickup_date' => 'required|date',
-            'pickup_time' => 'required',
-            'delivery_method' => 'required|string',
-            'destination' => 'required|string',
-            'notes' => 'nullable|string|max:1000',
-            'custom_instructions' => 'nullable|string|max:500',
-        ]);
-
-
-
-        DB::beginTransaction();
         try {
-            $publicCode = bin2hex(random_bytes(8));
+            DB::beginTransaction();
 
-            // Debug input data
-            error_log('Debug input data: ' . json_encode($validated));
+            $cart = session('cart', []);
+            if (empty($cart)) {
+                throw new \Exception('Keranjang kosong.');
+            }
+
+            // Log input data untuk debugging
+            Log::info('Checkout process input:', [
+                'all_input' => $request->all(),
+                'delivery_method' => $request->input('delivery_method'),
+                'cart_contents' => $cart
+            ]);
+
+            // Validasi input
+            $validated = $request->validate([
+                'customer_name' => 'required|string|max:100',
+                'wa_number' => 'required|string|max:20',
+                'receiver_name' => 'nullable|string|max:100',
+                'receiver_wa' => 'nullable|string|max:20',
+                'pickup_date' => 'required|date|after:today',
+                'pickup_time' => 'required',
+                'delivery_method' => 'required|string|in:Ambil Langsung Ke Toko,Gosend (Dipesan Pribadi),Gocar (Dipesan Pribadi),Gosend (Pesan Dari Toko),Gocar (Pesan Dari Toko),Travel (Di Pesan Sendiri - Khusus Luar Kota)',
+                'destination' => 'required|string',
+                'notes' => 'nullable|string|max:1000',
+                'custom_instructions' => 'nullable|string|max:500',
+            ]);
+
+            // Generate kode unik pesanan
+            $publicCode = $this->generateUniqueOrderCode();
+
+            // Hitung total amount
+            $totalAmount = collect($cart)->sum(function ($item) {
+                return $item['price'] * $item['qty'];
+            });
 
             // Buat order baru
-            $order = \App\Models\PublicOrder::create([
+            $order = PublicOrder::create([
                 'public_code' => $publicCode,
                 'customer_name' => $validated['customer_name'],
+                'wa_number' => $validated['wa_number'],
+                'receiver_name' => $validated['receiver_name'] ?? null,
+                'receiver_wa' => $validated['receiver_wa'] ?? null,
                 'pickup_date' => $validated['pickup_date'],
                 'pickup_time' => $validated['pickup_time'],
                 'delivery_method' => $validated['delivery_method'],
                 'destination' => $validated['destination'],
                 'notes' => $validated['notes'] ?? null,
-                'wa_number' => $validated['wa_number'],
-                'receiver_name' => $validated['receiver_name'],
-                'receiver_wa' => $validated['receiver_wa'],
+                'custom_instructions' => $validated['custom_instructions'] ?? null,
+                'total_amount' => $totalAmount,
                 'status' => 'pending',
-                'payment_status' => 'waiting_confirmation',
+                'payment_status' => 'waiting_confirmation'
             ]);
 
+            // Proses setiap item di cart
+            foreach ($cart as $item) {
+                // Cek stok sebelum proses
+                $this->checkAndReduceStock($item, $order->id);
 
+                // Hitung stok yang berkurang
+                $stockReduction = $this->calculateStockReduction($item);
 
-            Log::info('Public order created successfully:', ['order_id' => $order->id, 'public_code' => $publicCode]);
-
-            foreach ($cart as $cartKey => $item) {
-                // Handle different product types
-                $productId = null; // Default to null
-
-                // For bouquet items, extract the numeric ID
-                if (isset($item['type']) && $item['type'] === 'bouquet') {
-                    // product_id for bouquet is like 'bouquet_8', extract the number
-                    if (preg_match('/bouquet_(\d+)/', $item['id'], $matches)) {
-                        $productId = $matches[1]; // Get the numeric bouquet ID
-                    }
-                } elseif (isset($item['type']) && $item['type'] === 'custom_bouquet') {
-                    // For custom bouquet, set product_id to null since we use custom_bouquet_id
-                    $productId = null;
-                } else {
-                    // For regular products, use the id directly
-                    $productId = $item['id'];
-                }
-
-                $orderItemData = [
-                    'product_id' => $productId,
+                // Simpan item pesanan
+                $orderItem = $order->items()->create([
                     'product_name' => $item['name'],
-                    'price_type' => $item['price_type'] ?? 'default',
-                    'unit_equivalent' => 1,
                     'quantity' => $item['qty'],
-                    'price' => $item['price'] ?? 0,
-                    'item_type' => $item['type'] ?? 'product', // Store the item type
-                ];
-
-                // For custom bouquet, add the custom_bouquet_id and enhance product_name
-                if (isset($item['type']) && $item['type'] === 'custom_bouquet' && isset($item['custom_bouquet_id'])) {
-                    $customBouquet = \App\Models\CustomBouquet::find($item['custom_bouquet_id']);
-                    if ($customBouquet) {
-                        // Update custom bouquet with order reference
-                        $customBouquet->public_order_id = $order->id;
-                        $customBouquet->status = 'ordered';
-                        $customBouquet->save();
-                    }
-                }
-                if (isset($item['type']) && $item['type'] === 'custom_bouquet') {
-                    $orderItemData['custom_bouquet_id'] = $item['custom_bouquet_id'] ?? null;
-
-                    // Keep product name simple for custom bouquet
-                    $orderItemData['product_name'] = 'Custom Bouquet';
-
-                    // Add custom instructions if provided
-                    if (!empty($validated['custom_instructions'])) {
-                        $orderItemData['custom_instructions'] = $validated['custom_instructions'];
-                    }
-                    // Add reference image if exists
-                    if (!empty($item['image'])) {
-                        $orderItemData['reference_image'] = $item['image'];
-                    }
-                    // Add ribbon color
-                    if (isset($item['ribbon_color'])) {
-                        $orderItemData['ribbon_color'] = $item['ribbon_color'];
-                    }
-                }
-
-                // Add greeting card to product_name if it's a bouquet with greeting card
-                if (isset($item['type']) && $item['type'] === 'bouquet' && !empty($item['greeting_card'])) {
-                    $orderItemData['product_name'] .= ' (Kartu Ucapan: "' . $item['greeting_card'] . '")';
-                }
-
-                // Note: Components info is already included in product_name for custom bouquet,
-                // so we don't need to add it again to avoid duplication
-
-                // Debug: Log order item data
-                Log::info('Creating Order Item:', $orderItemData);
-
-                try {
-                    $orderItem = $order->items()->create($orderItemData);
-                    Log::info('Order Item Created Successfully:', ['id' => $orderItem->id]);
-                } catch (\Exception $e) {
-                    Log::error('Error creating order item:', [
-                        'error' => $e->getMessage(),
-                        'order_item_data' => $orderItemData
-                    ]);
-                    throw $e;
-                }
-
-                // Handle inventory deduction for bouquet components
-                if (isset($item['type']) && $item['type'] === 'bouquet') {
-                    $bouquet = \App\Models\Bouquet::find($productId);
-                    if ($bouquet) {
-                        // Get size_id from cart item to filter components correctly
-                        $sizeId = $item['size_id'] ?? null;
-
-                        // Get components for this bouquet filtered by size_id
-                        $componentsQuery = $bouquet->components()->with('product');
-
-                        if ($sizeId) {
-                            $componentsQuery->where('size_id', $sizeId);
-                        }
-
-                        $components = $componentsQuery->get();
-
-                        Log::info('Processing bouquet components:', [
-                            'bouquet_id' => $productId,
-                            'size_id' => $sizeId,
-                            'bouquet_quantity' => $item['qty'],
-                            'components_count' => $components->count(),
-                            'components' => $components->map(function ($c) {
-                                return [
-                                    'product_name' => $c->product->name ?? 'Unknown',
-                                    'quantity' => $c->quantity,
-                                    'size_id' => $c->size_id
-                                ];
-                            })
-                        ]);
-
-                        foreach ($components as $component) {
-                            if ($component->product) {
-                                $requiredAmount = $component->quantity * $item['qty'];
-
-                                Log::info('Reducing component stock:', [
-                                    'product_id' => $component->product->id,
-                                    'product_name' => $component->product->name,
-                                    'component_quantity' => $component->quantity,
-                                    'bouquet_quantity' => $item['qty'],
-                                    'total_required' => $requiredAmount,
-                                    'current_stock' => $component->product->current_stock,
-                                    'size_id' => $component->size_id
-                                ]);
-
-                                // Check if there's enough stock
-                                if (!$component->product->hasEnoughStock($requiredAmount)) {
-                                    throw new \Exception("Stok tidak mencukupi untuk {$component->product->name}. Dibutuhkan: {$requiredAmount}, Tersedia: {$component->product->current_stock}");
-                                }
-
-                                // Reduce the stock with proper inventory logging
-                                $component->product->reduceStock(
-                                    $requiredAmount,
-                                    'Public_order',
-                                    "order-{$order->id}",
-                                    "Pesanan publik diproses - Bouquet: {$item['name']} (Qty: {$item['qty']}) - Size: {$item['price_type']}"
-                                );
-
-                                Log::info('Stock reduced successfully:', [
-                                    'product_id' => $component->product->id,
-                                    'reduced_amount' => $requiredAmount,
-                                    'new_stock' => $component->product->fresh()->current_stock
-                                ]);
-                            }
-                        }
-                    }
-                } else {
-                    // Handle regular product inventory (if needed)
-                    $product = \App\Models\Product::find($productId);
-                    if ($product) {
-                        Log::info('Processing regular product:', [
-                            'product_id' => $productId,
-                            'quantity' => $item['qty'],
-                            'current_stock' => $product->current_stock
-                        ]);
-
-                        // Check if there's enough stock
-                        if (!$product->hasEnoughStock($item['qty'])) {
-                            throw new \Exception("Stok tidak mencukupi untuk {$product->name}. Dibutuhkan: {$item['qty']}, Tersedia: {$product->current_stock}");
-                        }
-
-                        // Reduce the stock with proper inventory logging
-                        $product->reduceStock(
-                            $item['qty'],
-                            'Public_order',
-                            "order-{$order->id}",
-                            "Pesanan publik diproses - Produk: {$item['name']} (Qty: {$item['qty']})"
-                        );
-
-                        Log::info('Regular product stock reduced:', [
-                            'product_id' => $productId,
-                            'reduced_amount' => $item['qty'],
-                            'new_stock' => $product->fresh()->current_stock
-                        ]);
-                    }
-                }
-            }
-
-            Log::info('About to commit transaction for order:', ['order_id' => $order->id]);
-            DB::commit();
-            Log::info('Transaction committed successfully for order:', ['order_id' => $order->id]);
-
-            // Debug: Log successful order creation
-            Log::info('Order created successfully:', ['public_code' => $publicCode, 'order_id' => $order->id]);
-
-            // Trigger push notification untuk pesanan baru
-            try {
-                $notificationData = [
-                    'customer_name' => $order->customer_name,
-                    'public_code' => $publicCode,
-                    'total' => $order->total_amount
-                ];
-                PushNotificationService::sendNewOrderNotification($notificationData);
-                Log::info('Push notification sent for new order:', ['order_id' => $order->id]);
-            } catch (\Exception $e) {
-                Log::warning('Failed to send push notification for new order', [
-                    'order_id' => $order->id,
-                    'error' => $e->getMessage()
+                    'price' => $item['price'],
+                    'price_type' => $item['price_type'] ?? 'default',
+                    'subtotal' => $item['price'] * $item['qty'],
+                    'type' => $item['type'] ?? 'product',
+                    'unit_type' => $item['type'] ?? 'per_tangkai', // tambah informasi satuan
+                    'stock_reduction' => $stockReduction, // tambah informasi pengurangan stok
+                    'greeting_card' => $item['greeting_card'] ?? null,
+                    'ribbon_color' => $item['ribbon_color'] ?? null,
+                    'components_summary' => $item['components_summary'] ?? null,
+                    'custom_bouquet_id' => $item['custom_bouquet_id'] ?? null,
+                    'reference_image' => $item['reference_image'] ?? null,
+                    'custom_instructions' => $item['custom_instructions'] ?? null,
+                    'details' => [
+                        'items' => isset($item['items']) ? $item['items'] : [],
+                        'ribbon_color' => $item['ribbon_color'] ?? null,
+                        'reference_image' => $item['reference_image'] ?? null,
+                        'type' => $item['type'] ?? 'product',
+                        'components' => isset($item['components']) ? $item['components'] : [],
+                        'custom_instructions' => $item['custom_instructions'] ?? null
+                    ]
                 ]);
             }
 
-            session()->forget('cart'); // Clear the cart
+            // Kirim notifikasi
+            try {
+                PushNotificationService::sendNewOrderNotification([
+                    'customer_name' => $order->customer_name,
+                    'public_code' => $publicCode,
+                    'total' => $totalAmount,
+                    'pickup_date' => $validated['pickup_date']
+                ]);
+            } catch (\Exception $e) {
+                Log::warning('Failed to send notification', [
+                    'error' => $e->getMessage(),
+                    'order_id' => $order->id
+                ]);
+            }
 
-            // Simpan kode pesanan ke session untuk menampilkan icon di top bar
+            DB::commit();
+
+            // Clear cart setelah transaksi sukses
+            session()->forget('cart');
             session(['last_public_order_code' => $publicCode]);
 
-            // Redirect ke halaman detail pesanan
-            return redirect()->route('public.order.detail', ['public_code' => $publicCode])
-                ->with('success', 'Pesanan berhasil dikirim! Anda dapat memantau status pesanan di halaman ini.');
+            return redirect()
+                ->to("/order/{$publicCode}")
+                ->with('success', 'Pesanan berhasil dibuat!');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->route('public.flowers')->with('error', 'Gagal menyimpan pesanan: ' . $e->getMessage());
+            Log::error('Checkout failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return redirect()
+                ->back()
+                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage())
+                ->withInput();
+        }
+    }
+
+    /**
+     * Generate unique order code
+     */
+    private function generateUniqueOrderCode()
+    {
+        do {
+            $code = strtoupper(bin2hex(random_bytes(4)));
+        } while (PublicOrder::where('public_code', $code)->exists());
+
+        return $code;
+    }
+
+    /**
+     * Get unit equivalent for an item
+     */
+    private function getUnitEquivalent($item)
+    {
+        // Jika item sudah memiliki unit_equivalent, gunakan itu
+        if (isset($item['unit_equivalent'])) {
+            return $item['unit_equivalent'];
+        }
+
+        // Jika tidak ada id produk, return 1
+        if (!isset($item['id'])) {
+            return 1;
+        }
+
+        // Cek price type spesifik
+        if (isset($item['price_type']) && $item['price_type'] !== 'default') {
+            $price = ProductPrice::where('product_id', $item['id'])
+                ->where('type', $item['price_type'])
+                ->first();
+
+            if ($price && $price->unit_equivalent > 0) {
+                return $price->unit_equivalent;
+            }
+        }
+
+        // Default fallback ke 1
+        return 1;
+    }
+
+    /**
+     * Hitung pengurangan stok berdasarkan unit equivalent
+     */
+    private function calculateStockReduction($item)
+    {
+        $qty = $item['qty'];
+
+        // Hanya hitung unit equivalent untuk produk reguler
+        if (($item['type'] ?? 'product') === 'product') {
+            // Ambil produk dan price type yang sesuai
+            $product = Product::with('prices')->findOrFail($item['id']);
+            $price = $product->prices->where('type', $item['price_type'])->first();
+
+            // Jika ada unit_equivalent, gunakan untuk menghitung pengurangan stok
+            if ($price && $price->unit_equivalent > 0) {
+                return $qty * $price->unit_equivalent;
+            }
+        }
+
+        // Fallback ke quantity biasa jika tidak ada unit_equivalent atau bukan produk reguler
+        return $qty;
+    }
+    /**
+     * Check and reduce stock for an item
+     */
+    private function checkAndReduceStock($item, $orderId)
+    {
+        switch ($item['type'] ?? 'product') {
+            case 'bouquet':
+                $this->handleBouquetStock($item, $orderId);
+                break;
+
+            case 'custom_bouquet':
+                $this->handleCustomBouquetStock($item, $orderId);
+                break;
+
+            default:
+                $this->handleRegularProductStock($item, $orderId);
+                break;
+        }
+    }
+
+    /**
+     * Handle regular product stock
+     */
+    /**
+     * Handle regular product stock (hanya hold)
+     */
+    private function handleRegularProductStock($item, $orderId)
+    {
+        if (!isset($item['id'])) {
+            throw new \Exception("ID produk tidak ditemukan untuk " . ($item['name'] ?? 'Unknown Product'));
+        }
+
+        $product = Product::findOrFail($item['id']);
+
+        // Hitung pengurangan stok berdasarkan satuan dan price type
+        $priceType = $item['price_type'] ?? 'default';
+        $price = $product->prices()->where('type', $priceType)->first();
+
+        // Hitung quantity dengan unit equivalent
+        $requiredQty = $item['qty'] * ($price ? $price->unit_equivalent : 1);
+
+        if ($product->current_stock < $requiredQty) {
+            throw new \Exception("Stok tidak mencukupi untuk {$product->name}");
+        }
+
+        // Buat stock hold untuk pesanan baru
+        $product->stockHolds()->create([
+            'order_id' => $orderId,
+            'quantity' => $requiredQty,
+            'status' => 'held',
+            'price_type' => $priceType
+        ]);
+
+        // Log inventory sebagai hold
+        InventoryLog::create([
+            'product_id' => $product->id,
+            'qty' => 0, // Tidak mengurangi stok, hanya hold
+            'source' => 'public_order_hold',
+            'reference_id' => $orderId,
+            'notes' => "Penahanan stok - Pesanan publik: {$product->name} ({$item['qty']} {$priceType})",
+            'current_stock' => $product->current_stock
+        ]);
+    }
+
+    /**
+     * Handle bouquet stock (hanya hold)
+     */
+    private function handleBouquetStock($item, $orderId)
+    {
+        if (!isset($item['id'])) {
+            throw new \Exception("ID bouquet tidak ditemukan untuk " . ($item['name'] ?? 'Unknown Bouquet'));
+        }
+
+        $bouquet = Bouquet::with(['components.product'])->findOrFail($item['id']);
+
+        // Cek stok untuk semua komponen terlebih dahulu
+        foreach ($bouquet->components as $component) {
+            if (!$component->product) continue;
+
+            // Hitung dengan unit equivalent dari komponen
+            $requiredQty = $component->quantity * $item['qty'] * $component->unit_equivalent;
+
+            if ($component->product->current_stock < $requiredQty) {
+                throw new \Exception("Stok tidak mencukupi untuk komponen {$component->product->name} pada bouquet {$bouquet->name}");
+            }
+
+            // Buat stock hold untuk setiap komponen
+            $component->product->stockHolds()->create([
+                'order_id' => $orderId,
+                'quantity' => $requiredQty,
+                'status' => 'held',
+                'price_type' => 'bouquet_component'
+            ]);
+
+            // Log inventory hold untuk setiap komponen
+            InventoryLog::create([
+                'product_id' => $component->product_id,
+                'qty' => 0, // Tidak mengurangi stok, hanya hold
+                'source' => 'public_order_bouquet_hold',
+                'reference_id' => $orderId,
+                'notes' => "Penahanan stok - Komponen bouquet: {$bouquet->name}",
+                'current_stock' => $component->product->current_stock
+            ]);
+        }
+    }
+
+    /**
+     * Handle custom bouquet stock (hanya hold)
+     */
+    private function handleCustomBouquetStock($item, $orderId)
+    {
+        if (empty($item['components'])) {
+            throw new \Exception('Custom bouquet tidak memiliki komponen');
+        }
+
+        // Cek stok dan buat hold untuk setiap komponen
+        foreach ($item['components'] as $component) {
+            $product = Product::findOrFail($component['product_id']);
+            $price = null;
+            $priceType = null;
+
+            // Cek price type dari komponen
+            if (isset($component['price_type'])) {
+                $price = $product->prices()->where('type', $component['price_type'])->first();
+                if ($price) {
+                    $priceType = $component['price_type'];
+                }
+            }
+
+            // Jika tidak ada price type atau harga tidak ditemukan, cari harga custom yang tersedia
+            if (!$price) {
+                $price = $product->prices()
+                    ->whereIn('type', ['custom_ikat', 'custom_tangkai', 'custom_khusus'])
+                    ->first();
+
+                if (!$price) {
+                    throw new \Exception("Tidak ada konfigurasi harga custom yang valid untuk {$product->name}");
+                }
+                $priceType = $price->type;
+            }
+
+            // Hitung quantity dengan unit equivalent
+            $requiredQty = $component['quantity'] * $item['qty'] * $price->unit_equivalent;
+
+            if ($product->current_stock < $requiredQty) {
+                throw new \Exception("Stok tidak mencukupi untuk {$product->name} pada custom bouquet");
+            }
+
+            // Buat stock hold
+            $product->stockHolds()->create([
+                'order_id' => $orderId,
+                'quantity' => $requiredQty,
+                'status' => 'held',
+                'price_type' => $priceType
+            ]);
+
+            // Log inventory sebagai hold
+            InventoryLog::create([
+                'product_id' => $product->id,
+                'qty' => 0, // Tidak mengurangi stok, hanya hold
+                'source' => 'public_order_custom_hold',
+                'reference_id' => $orderId,
+                'notes' => "Penahanan stok - Custom Bouquet ({$priceType})",
+                'current_stock' => $product->current_stock
+            ]);
         }
     }
 }

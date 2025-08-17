@@ -7,10 +7,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Models\Traits\HasCustomPrices;
 
 class Product extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, HasCustomPrices;
 
     protected $fillable = [
         'category_id',
@@ -70,12 +71,12 @@ class Product extends Model
 
     public function scopeSearch($query, $search)
     {
-        return $query->where(function($q) use ($search) {
+        return $query->where(function ($q) use ($search) {
             $q->where('code', 'like', "%{$search}%")
-              ->orWhere('name', 'like', "%{$search}%")
-              ->orWhereHas('category', function($q) use ($search) {
-                  $q->where('name', 'like', "%{$search}%");
-              });
+                ->orWhere('name', 'like', "%{$search}%")
+                ->orWhereHas('category', function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%");
+                });
         });
     }
 
@@ -97,7 +98,7 @@ class Product extends Model
     public function getNeedsRestockAttribute()
     {
         return $this->current_stock < $this->min_stock;
-    }   
+    }
 
     // Relasi Inventaris
     public function inventoryTransactions()
@@ -123,9 +124,9 @@ class Product extends Model
             ->sum('quantity');
 
         $availableStock = $this->current_stock - $activeHolds;
-        
-        return number_format($availableStock) . ' ' . $this->base_unit . 
-               ($activeHolds > 0 ? " (Hold: {$activeHolds})" : '');
+
+        return number_format($availableStock) . ' ' . $this->base_unit .
+            ($activeHolds > 0 ? " (Hold: {$activeHolds})" : '');
     }
 
     // Method untuk riwayat stok 30 hari terakhir

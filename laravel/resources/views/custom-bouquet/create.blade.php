@@ -729,11 +729,22 @@
                     id="productsGrid">
                     @foreach($products as $product)
                         @php
-                            $rangkaianPrices = $product->prices->filter(function ($price) {
+                            $customPrices = $product->prices->filter(function ($price) {
                                 return in_array($price->type, ['custom_ikat', 'custom_tangkai', 'custom_khusus']);
                             });
+
+                            // Prioritaskan tipe harga dalam urutan tertentu
+                            $priceTypes = ['custom_ikat', 'custom_tangkai', 'custom_khusus'];
+                            $defaultPrice = null;
+                            foreach ($priceTypes as $type) {
+                                $price = $customPrices->firstWhere('type', $type);
+                                if ($price) {
+                                    $defaultPrice = $price;
+                                    break;
+                                }
+                            }
                         @endphp
-                        @if($rangkaianPrices->count() > 0)
+                        @if($defaultPrice && $product->current_stock > 0)
                             <div class="product-card bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer"
                                 data-category="{{ $product->category->name ?? '' }}" data-product-id="{{ $product->id }}">
                                 <!-- Product Image -->
@@ -760,8 +771,8 @@
                                             📦 {{ $product->current_stock }} {{ $product->base_unit }} tersedia
                                         </span>
                                     </div>
-                                    <!-- Price Preview (show only rangkaian prices) -->
-                                    @foreach($rangkaianPrices as $price)
+                                    <!-- Price Preview (show only custom prices) -->
+                                    @foreach($customPrices as $price)
                                         <div class="text-sm mb-1">
                                             <span class="text-rose-600 font-semibold">
                                                 Rp {{ number_format($price->price, 0, ',', '.') }}
@@ -1011,12 +1022,24 @@
     `;
             document.getElementById('modalProductDetails').innerHTML = detailsHtml;
 
-            // Price options: filter hanya tipe rangkaian
-            const priceOptionsHtml = product.prices
-                .filter(price => ['custom_ikat', 'custom_tangkai', 'custom_khusus'].includes(price.type))
-                .map(price => `
+            // Filter dan urutkan harga berdasarkan prioritas
+            const priceTypes = ['custom_ikat', 'custom_tangkai', 'custom_khusus'];
+            const customPrices = product.prices.filter(price => priceTypes.includes(price.type))
+                .sort((a, b) => {
+                    return priceTypes.indexOf(a.type) - priceTypes.indexOf(b.type);
+                });
+
+            if (customPrices.length === 0) {
+                showNotification('Produk ini tidak memiliki harga custom yang valid', 'error');
+                closeProductModal();
+                return;
+            }
+
+            // Generate HTML untuk opsi harga
+            const priceOptionsHtml = customPrices.map((price, index) => `
         <label class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
-            <input type="radio" name="price_type" value="${price.type}" class="text-rose-500 focus:ring-rose-500" ${price.is_default ? 'checked' : ''}>
+            <input type="radio" name="price_type" value="${price.type}" class="text-rose-500 focus:ring-rose-500" 
+                   ${index === 0 ? 'checked' : ''}>
             <div class="ml-3 flex-1">
                 <div class="flex justify-between items-center">
                     <span class="text-sm font-medium text-gray-900">${price.display_name}</span>
@@ -1029,9 +1052,8 @@
 
             document.getElementById('priceOptions').innerHTML = priceOptionsHtml;
 
-            // Set default price type
-            const defaultPrice = product.prices.find(p => p.is_default) || product.prices[0];
-            selectedPriceType = defaultPrice.type;
+            // Selalu gunakan harga pertama yang tersedia sebagai default
+            selectedPriceType = customPrices[0].type;
 
             // Price selection listeners
             document.querySelectorAll('input[name="price_type"]').forEach(radio => {
@@ -1081,11 +1103,26 @@
         }
 
         async function addToBuilder() {
-            if (!selectedProduct || !selectedPriceType) return;
+            if (!selectedProduct || !selectedPriceType) {
+                showNotification('Silakan pilih tipe harga terlebih dahulu', 'warning');
+                return;
+            }
+
+            // Validasi tipe harga
+            if (!['custom_ikat', 'custom_tangkai', 'custom_khusus'].includes(selectedPriceType)) {
+                showNotification('Tipe harga tidak valid untuk custom bouquet', 'error');
+                return;
+            }
 
             const quantity = parseInt(document.getElementById('quantity').value) || 1;
 
             try {
+                console.log('Adding item to builder:', {
+                    productId: selectedProduct.id,
+                    priceType: selectedPriceType,
+                    quantity: quantity
+                });
+
                 const response = await fetch('/custom-bouquet/add-item', {
                     method: 'POST',
                     headers: {

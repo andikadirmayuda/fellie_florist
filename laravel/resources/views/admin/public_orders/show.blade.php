@@ -748,6 +748,13 @@ $needsShippingFee = in_array($order->delivery_method, [
                 @endforeach
             </div>
 
+            <!-- Custom Bouquet Detail Section -->
+            @foreach($order->items as $item)
+                @if($item->custom_bouquet_id)
+                    <x-custom-bouquet-order-detail :item="$item" />
+                @endif
+            @endforeach
+
             @php
 $totalOrder = $order->items->sum(function ($item) {
     return ($item->price ?? 0) * ($item->quantity ?? 0);

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\PublicOrder;
 use App\Models\Order;
 use App\Models\Product;
+use App\Models\InventoryLog;
 use App\Services\WhatsAppNotificationService;
 use App\Services\PushNotificationService;
 use Illuminate\Support\Facades\Log;
@@ -18,6 +19,34 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 class AdminPublicOrderController extends Controller
 {
     use AuthorizesRequests;
+
+    /**
+     * Helper method to reduce product stock and create inventory log
+     */
+    private function reduceProductStock($product, $stockReduction, $orderId, $itemType = '')
+    {
+        $product->decrement('current_stock', $stockReduction);
+
+        // Catat di log inventory
+        InventoryLog::create([
+            'product_id' => $product->id,
+            'qty' => -$stockReduction,
+            'source' => InventoryLog::SOURCE_PUBLIC_ORDER_PRODUCT,
+            'reference_id' => $orderId,
+            'notes' => "Pengurangan stok - {$itemType} Pesanan #{$orderId}: {$stockReduction} unit",
+            'current_stock' => $product->current_stock
+        ]);
+
+        // Log untuk debugging
+        Log::info('Stok dikurangi', [
+            'product' => $product->name,
+            'amount' => $stockReduction,
+            'order_id' => $orderId,
+            'old_stock' => $product->current_stock + $stockReduction,
+            'new_stock' => $product->current_stock,
+            'item_type' => $itemType
+        ]);
+    }
     // No constructor needed, middleware will be handled in routes
     /**
      * Tampilkan form edit pesanan publik
@@ -246,20 +275,145 @@ class AdminPublicOrderController extends Controller
         if ($oldStatus === 'ready' && !in_array($newStatus, ['shipped', 'completed', 'cancelled'])) {
             return back()->with('error', 'Status Pesanan Sudah Siap hanya bisa diubah ke Dikirim, Selesai, atau Dibatalkan.');
         }
-        if ($oldStatus === 'pending') {
-            if ($newStatus === 'processed') {
-                foreach ($order->items as $item) {
-                    $product = Product::find($item->product_id);
-                    if ($product) {
-                        $product->reduceStock($item->quantity * $item->unit_equivalent, 'public_order', 'public_order:' . $order->id, 'Pesanan publik diproses');
+        // Handle stok ketika status berubah
+        // Debug log untuk melihat status yang diterima
+        Log::info('Status Update:', [
+            'oldStatus' => $oldStatus,
+            'newStatus' => $newStatus,
+            'order_id' => $order->id
+        ]);
+
+        if ($newStatus === 'processed' && $oldStatus === 'pending') {
+            // Saat pesanan diproses, tahan stok
+            foreach ($order->items as $item) {
+                // Khusus untuk custom bouquet
+                if ($item->type === 'custom') {
+                    // Parse custom bouquet items dari metadata jika ada
+                    $customItems = json_decode($item->metadata ?? '[]', true);
+                    if (!empty($customItems)) {
+                        foreach ($customItems as $customItem) {
+                            $product = Product::find($customItem['product_id']);
+                            if ($product) {
+                                $price = $product->prices()->where('type', $customItem['price_type'])->first();
+                                $stockReduction = $customItem['quantity'] * ($price ? $price->unit_equivalent : 1);
+                                $this->reduceProductStock($product, $stockReduction, $order->id, "Custom Bouquet Item");
+                            }
+                        }
+                        continue;
                     }
                 }
-                $order->stock_holded = true;
-            } elseif ($newStatus === 'cancelled') {
+
+                // Untuk produk normal
+                $product = $item->product_id ?
+                    Product::find($item->product_id) :
+                    Product::where('name', $item->product_name)->first();
+
+                if ($product) {
+                    // Ambil unit_equivalent dari product_prices jika tidak ada di item
+                    if (!$item->unit_equivalent) {
+                        $price = $product->prices()->where('type', $item->price_type)->first();
+                        $item->unit_equivalent = $price ? $price->unit_equivalent : 1;
+                        $item->save();
+                    }
+
+                    $stockReduction = $item->quantity * $item->unit_equivalent;
+
+                    // Debug log untuk item yang diproses
+                    Log::info('Processing item:', [
+                        'product_id' => $product->id,
+                        'name' => $product->name,
+                        'quantity' => $item->quantity,
+                        'unit_equivalent' => $item->unit_equivalent,
+                        'total_reduction' => $stockReduction
+                    ]);
+
+                    // Kurangi stok langsung
+                    $product->decrement('current_stock', $stockReduction);
+
+                    // Catat di log inventory
+                    InventoryLog::create([
+                        'product_id' => $product->id,
+                        'qty' => -$stockReduction,
+                        'source' => InventoryLog::SOURCE_PUBLIC_ORDER_PRODUCT,
+                        'reference_id' => $order->id,
+                        'notes' => "Pengurangan stok - Pesanan #{$order->id}: {$item->quantity} {$item->price_type}",
+                        'current_stock' => $product->current_stock
+                    ]);
+
+                    // Log untuk debugging
+                    Log::info('Stok dikurangi', [
+                        'product' => $product->name,
+                        'amount' => $stockReduction,
+                        'order_id' => $order->id,
+                        'old_stock' => $product->current_stock + $stockReduction,
+                        'new_stock' => $product->current_stock
+                    ]);
+                }
+            }
+            $order->stock_holded = true;
+        } elseif ($newStatus === 'cancelled') {
+            // Kembalikan stok jika pesanan dibatalkan dan sebelumnya sudah mengurangi stok
+            if ($order->stock_holded || in_array($oldStatus, ['processed', 'packing', 'ready'])) {
                 foreach ($order->items as $item) {
+                    if ($item->type === 'custom') {
+                        // Parse custom bouquet items dari metadata
+                        $customItems = json_decode($item->metadata ?? '[]', true);
+                        if (!empty($customItems)) {
+                            foreach ($customItems as $customItem) {
+                                $product = Product::find($customItem['product_id']);
+                                if ($product) {
+                                    $price = $product->prices()->where('type', $customItem['price_type'])->first();
+                                    $stockReturn = $customItem['quantity'] * ($price ? $price->unit_equivalent : 1);
+
+                                    $notes = sprintf(
+                                        'Pengembalian stok - Custom Bouquet Item Pesanan #%s dibatalkan: %s unit [Status: %s → %s]',
+                                        $order->id,
+                                        $stockReturn,
+                                        $oldStatus,
+                                        $newStatus
+                                    );
+
+                                    $product->addStock(
+                                        $stockReturn,
+                                        'public_order_cancel',
+                                        sprintf('order:%d,custom_item:%d,cancel', $order->id, $customItem['product_id']),
+                                        $notes
+                                    );
+                                }
+                            }
+                            continue;
+                        }
+                    }
+
+                    // Untuk produk normal
                     $product = Product::find($item->product_id);
                     if ($product) {
-                        $product->addStock($item->quantity * $item->unit_equivalent, 'public_order_cancel', 'public_order:' . $order->id, 'Pesanan publik dibatalkan');
+                        // Log pengembalian stok dengan detail status
+                        $notes = sprintf(
+                            'Pengembalian stok - Pesanan #%s dibatalkan: %s %s [Status: %s → %s]',
+                            $order->id,
+                            $item->quantity,
+                            $item->price_type ?? 'pcs',
+                            $oldStatus,
+                            $newStatus
+                        );
+
+                        $stockReturn = $item->quantity * $item->unit_equivalent;
+                        $product->addStock(
+                            $stockReturn,
+                            'public_order_cancel',
+                            sprintf('order:%d,item:%d,cancel', $order->id, $item->id),
+                            $notes
+                        );
+
+                        // Log untuk debugging
+                        Log::info('Stok dikembalikan', [
+                            'product' => $product->name,
+                            'amount' => $stockReturn,
+                            'order_id' => $order->id,
+                            'old_status' => $oldStatus,
+                            'new_status' => $newStatus
+                        ]);
                     }
                 }
                 $order->stock_holded = false;
@@ -362,7 +516,7 @@ class AdminPublicOrderController extends Controller
 
         // Trigger push notification untuk status update
         try {
-            PushNotificationService::sendStatusUpdateNotification($order, $oldStatus, $newStatus);
+            PushNotificationService::sendStatusUpdateNotification($order);
         } catch (\Exception $e) {
             Log::warning('Failed to send push notification for status update', [
                 'order_id' => $order->id,

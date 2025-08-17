@@ -52,7 +52,7 @@ class SaleController extends Controller
             $count = Sale::whereDate('order_time', Carbon::today())->count() + 1;
             $order_number = 'SALE-' . $today . str_pad($count, 3, '0', STR_PAD_LEFT);
 
-            $subtotal = collect($request->items)->sum(function($item) {
+            $subtotal = collect($request->items)->sum(function ($item) {
                 return $item['price'] * $item['quantity'];
             });
             $total = $subtotal; // Bisa ditambah diskon/pajak jika perlu
@@ -87,22 +87,26 @@ class SaleController extends Controller
                     'price' => $item['price'],
                     'subtotal' => $item['price'] * $item['quantity'],
                 ]);
-                // Update stok produk sesuai tipe harga
+                // Update stok
                 $product = Product::find($item['product_id']);
+
+                // Hitung quantity berdasarkan unit_equivalent
                 $qtyToReduce = $item['quantity'];
-                // Cek jika ada unit_equivalent di product_prices
                 $price = $product->prices->where('type', $item['price_type'])->first();
-                if ($price && $price->unit_equivalent && $price->unit_equivalent > 0) {
+                if ($price && $price->unit_equivalent > 0) {
                     $qtyToReduce = $item['quantity'] * $price->unit_equivalent;
                 }
-                $product->decrementStock($qtyToReduce);
-                // Catat log inventaris
+
+                // Kurangi stok produk
+                $product->decrement('current_stock', $qtyToReduce);
+
+                // Catat di log inventaris
                 \App\Models\InventoryLog::create([
                     'product_id' => $item['product_id'],
                     'qty' => -abs($qtyToReduce),
-                    'source' => 'sale',
-                    'reference_id' => $sale->id,
-                    'notes' => 'Pengurangan stok karena penjualan',
+                    'source' => \App\Models\InventoryLog::SOURCE_SALE,
+                    'reference_id' => "sale:{$sale->id}",
+                    'notes' => "Penjualan langsung #{$sale->order_number} - {$item['price_type']}"
                 ]);
             }
 
@@ -117,19 +121,19 @@ class SaleController extends Controller
     public function show($id)
     {
         $sale = Sale::with('items.product')->findOrFail($id);
-        
+
         // Log any missing product references for maintenance
-        $missingProducts = $sale->items->filter(function($item) {
+        $missingProducts = $sale->items->filter(function ($item) {
             return $item->product === null;
         });
-        
+
         if ($missingProducts->count() > 0) {
             Log::warning("Sale {$sale->id} has {$missingProducts->count()} items with deleted products", [
                 'sale_id' => $sale->id,
                 'missing_product_ids' => $missingProducts->pluck('product_id')->toArray()
             ]);
         }
-        
+
         if (request('print') == 1) {
             return view('sales.receipt', compact('sale'));
         }
@@ -139,19 +143,19 @@ class SaleController extends Controller
     public function downloadPdf($id)
     {
         $sale = \App\Models\Sale::with('items.product')->findOrFail($id);
-        
+
         // Log any missing product references for maintenance
-        $missingProducts = $sale->items->filter(function($item) {
+        $missingProducts = $sale->items->filter(function ($item) {
             return $item->product === null;
         });
-        
+
         if ($missingProducts->count() > 0) {
             Log::warning("PDF generation for sale {$sale->id} has {$missingProducts->count()} items with deleted products", [
                 'sale_id' => $sale->id,
                 'missing_product_ids' => $missingProducts->pluck('product_id')->toArray()
             ]);
         }
-        
+
         $pdf = Pdf::loadView('sales.receipt', compact('sale'));
         $filename = 'Struk-Penjualan-' . $sale->order_number . '.pdf';
         return $pdf->download($filename);
@@ -162,7 +166,7 @@ class SaleController extends Controller
         // Validasi: hanya transaksi hari ini yang bisa dihapus
         $today = now()->format('Y-m-d');
         $saleDate = \Carbon\Carbon::parse($sale->order_time)->format('Y-m-d');
-        
+
         if ($saleDate !== $today) {
             return back()->withErrors(['error' => 'Hanya transaksi hari ini yang dapat dihapus!']);
         }
@@ -196,7 +200,6 @@ class SaleController extends Controller
             DB::commit();
 
             return redirect()->route('sales.index')->with('success', 'Transaksi berhasil dibatalkan dan stok telah dikembalikan.');
-
         } catch (\Exception $e) {
             DB::rollback();
             return back()->withErrors(['error' => 'Gagal membatalkan transaksi: ' . $e->getMessage()]);

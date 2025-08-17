@@ -363,8 +363,8 @@
                                 <td class="py-3 px-4 text-right align-top whitespace-nowrap">{{ $item->quantity }}</td>
                                 <td class="py-3 px-4 text-right align-top whitespace-nowrap">Rp{{ number_format($subtotal, 0, ',', '.') }}</td>
                             </tr>
-                        @endforeach
-                    </tbody>
+                            @endforeach
+                        </tbody>
                     <tfoot class="bg-gray-50">
                         <tr>
                             <th colspan="5" class="text-right px-4 py-3 font-semibold">Total Produk</th>
@@ -406,17 +406,24 @@
                                 <th class="px-4 py-3 text-right font-bold text-blue-600">Rp{{ number_format($displayTotalPaid, 0, ',', '.') }}</th>
                             </tr>
                             @if($sisa > 0)
-                                <tr>
-                                    <th colspan="5" class="text-right px-4 py-3 font-semibold">Sisa Pembayaran</th>
-                                    <th class="px-4 py-3 text-right font-bold text-red-600">Rp{{ number_format($sisa, 0, ',', '.') }}</th>
-                                </tr>
+                            <tr>
+                                <th colspan="5" class="text-right px-4 py-3 font-semibold">Sisa Pembayaran</th>
+                                <th class="px-4 py-3 text-right font-bold text-red-600">Rp{{ number_format($sisa, 0, ',', '.') }}</th>
+                            </tr>
                             @endif
-                        @endif
-                    </tfoot>
-                </table>
-            </div>
-
-            <!-- Mobile: Card Layout -->
+                            @endif
+                        </tfoot>
+                    </table>
+                </div>
+                
+                @if($item->price_type === 'Custom')
+                    <tr>
+                        <td colspan="6" class="px-4 py-2">
+                            <x-custom-bouquet-order-detail :item="$item" />
+                        </td>
+                    </tr>
+                @endif
+                <!-- Mobile: Card Layout -->
             <div class="sm:hidden space-y-3 mb-6">
                 @foreach($order->items as $item)
                     @php 
@@ -538,33 +545,14 @@
             <!-- Custom Bouquet Information Card -->
             @php
                 $customBouquetItems = $order->items->filter(function($item) {
-                    return $item->item_type === 'custom_bouquet' && (!empty($item->reference_image) || !empty($item->custom_instructions));
+                    return $item->type === 'custom_bouquet';
                 });
             @endphp
             
             @if($customBouquetItems->count() > 0)
                 <div class="my-6 sm:my-8">
                     @foreach($customBouquetItems as $item)
-                        <div class="bg-gradient-to-br from-purple-50 via-purple-50 to-indigo-50 border-2 border-purple-200 rounded-2xl shadow-lg overflow-hidden mb-6">
-                            <!-- Header -->
-                            <div class="bg-gradient-to-r from-purple-600 to-indigo-600 px-4 sm:px-6 py-3 sm:py-4">
-                                <div class="flex items-center">
-                                    <div class="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-white bg-opacity-20 rounded-full mr-3 sm:mr-4">
-                                        <i class="bi bi-palette text-white text-lg sm:text-xl"></i>
-                                    </div>
-                                    <div>
-                                        <h3 class="font-bold text-white text-base sm:text-lg">Custom Bouquet</h3>
-                                        <p class="text-purple-100 text-xs sm:text-sm">
-                                            @php
-                                                // Extract simple product name without components info
-                                                $simpleName = preg_replace('/\s*\(.*?\)\s*/', '', $item->product_name);
-                                                $simpleName = trim($simpleName) ?: 'Custom Bouquet';
-                                            @endphp
-                                            {{ $simpleName }}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
+                        <x-custom-bouquet-order-detail :item="$item" />
                             
                             <!-- Content -->
                             <div class="p-4 sm:p-6 space-y-6">
@@ -642,33 +630,9 @@
                                     </div>
                                 @endif
                                 
-                                <!-- Custom Bouquet Components Section -->
-                                @if($item->custom_bouquet_id)
-                                    @php
-                                        $customBouquet = \App\Models\CustomBouquet::with(['items.product'])->find($item->custom_bouquet_id);
-                                    @endphp
-                                    
-                                    @if($customBouquet && $customBouquet->items->count() > 0)
-                                        <div class="bg-white rounded-xl border border-purple-200 p-4 sm:p-6 shadow-sm mt-4">
-                                            <div class="flex items-center mb-4">
-                                                <div class="bg-purple-100 p-2 rounded-lg mr-3">
-                                                    <i class="bi bi-flower1 text-purple-600 text-lg"></i>
-                                                </div>
-                                                <h4 class="font-bold text-purple-800 text-sm sm:text-base">Komponen Bouquet</h4>
-                                            </div>
-
-                                            <!-- Ribbon Color Display -->
-                                            <div class="flex items-center gap-2 mb-4 pb-4 border-b border-purple-100">
-                                                <span class="text-sm font-medium text-purple-700">Warna Pita:</span>
-                                                <div class="flex items-center gap-2">
-                                                    <div class="w-4 h-4 rounded-full"
-                                                        style="background-color: {{ App\Enums\RibbonColor::getColorCode($customBouquet->ribbon_color) }}">
-                                                    </div>
-                                                    <span class="text-sm text-purple-800">
-                                                        {{ App\Enums\RibbonColor::getColorName($customBouquet->ribbon_color) }}
-                                                    </span>
-                                                </div>
-                                            </div>
+                                <!-- Custom Bouquet Details Section -->
+                                @if($item->type === 'custom_bouquet')
+                                    <x-custom-bouquet-order-detail :item="$item" />
                                             
                                             <div class="space-y-3">
                                                 @foreach($customBouquet->items as $component)
@@ -709,7 +673,6 @@
                                             </div>
                                         </div>
                                     @endif
-                                @endif
                             </div>
                         </div>
                     @endforeach
