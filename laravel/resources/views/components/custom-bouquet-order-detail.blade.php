@@ -142,40 +142,6 @@
                         </div>
                     </div>
 
-                    <!-- Reference Image if exists -->
-                    @if($customBouquet->reference_image)
-                        <div class="bg-white rounded-xl shadow-sm border border-purple-100 p-3 sm:p-4 mb-4">
-                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 mb-3">
-                                <div class="flex items-center">
-                                    <div class="bg-purple-100 p-1.5 sm:p-2 rounded-lg mr-2 sm:mr-3">
-                                        <i class="bi bi-image text-purple-600 text-base sm:text-lg"></i>
-                                    </div>
-                                    <h5 class="font-semibold text-purple-800 text-sm sm:text-base">Gambar Referensi</h5>
-                                </div>
-                                <div class="flex gap-2 self-end sm:self-auto">
-                                    <button onclick="openImageModal('{{ Storage::url($customBouquet->reference_image) }}')"
-                                        class="bg-purple-100 hover:bg-purple-200 text-purple-600 p-1.5 sm:p-2 rounded-lg transition-colors">
-                                        <i class="bi bi-zoom-in text-base sm:text-lg"></i>
-                                    </button>
-                                    <a href="{{ Storage::url($customBouquet->reference_image) }}"
-                                        download="referensi-custom-bouquet.jpg"
-                                        class="bg-purple-100 hover:bg-purple-200 text-purple-600 p-1.5 sm:p-2 rounded-lg transition-colors">
-                                        <i class="bi bi-download text-base sm:text-lg"></i>
-                                    </a>
-                                </div>
-                            </div>
-                            <div class="relative group cursor-pointer"
-                                onclick="openImageModal('{{ Storage::url($customBouquet->reference_image) }}')">
-                                <img src="{{ Storage::url($customBouquet->reference_image) }}" alt="Referensi Custom Bouquet"
-                                    class="w-full h-36 sm:h-48 md:h-64 object-cover rounded-lg shadow-sm border border-purple-100">
-                                <div
-                                    class="absolute inset-0 bg-black opacity-0 group-hover:opacity-40 rounded-lg transition-opacity flex items-center justify-center">
-                                    <i class="bi bi-zoom-in text-white text-2xl sm:text-3xl opacity-0 group-hover:opacity-100"></i>
-                                </div>
-                            </div>
-                        </div>
-                    @endif
-
                     <div class="space-y-3">
                         @foreach($customBouquet->items as $component)
                             <div

@@ -252,7 +252,7 @@ class PublicCartController extends Controller
         $price = $bouquetPrice->price;
 
         $product = [
-            'id' => 'bouquet_' . $bouquet->id,
+            'id' => $bouquet->id,
             'name' => $bouquet->name,
             'price' => $price,
             'qty' => $qty,
