@@ -127,4 +127,42 @@ class PublicBouquetController extends Controller
 
         return response()->json($bouquetData);
     }
+
+    public function getComponentsBySize($bouquetId, $sizeId)
+    {
+        $bouquet = Bouquet::with([
+            'validComponents.product.category',
+            'validComponents.size'
+        ])->findOrFail($bouquetId);
+
+        // Bersihkan komponen yang tidak valid
+        $bouquet->cleanupInvalidComponents();
+
+        // Ambil komponen untuk size tertentu
+        $components = $bouquet->validComponents()
+            ->where('size_id', $sizeId)
+            ->with('product.category')
+            ->get();
+
+        // Format data untuk response
+        $formattedComponents = $components->map(function ($component) {
+            return [
+                'id' => $component->id,
+                'product_id' => $component->product_id,
+                'product_name' => $component->product->name,
+                'product_category' => $component->product->category->name ?? 'Tanpa Kategori',
+                'quantity' => $component->quantity,
+                'unit' => $component->product->base_unit ?? 'pcs',
+                'current_stock' => $component->product->current_stock,
+                'price' => $component->product->price,
+                'total_price' => $component->quantity * $component->product->price
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'components' => $formattedComponents,
+            'total_components' => $formattedComponents->count()
+        ]);
+    }
 }

@@ -130,6 +130,26 @@
             });
     }
 
+    // Helper untuk generate button HTML berdasarkan ketersediaan stok
+    function generateSizeButton(price) {
+        const isAvailable = checkComponentsAvailability(price.size_id);
+        const outOfStockComponents = getOutOfStockComponents(price.size_id);
+        const componentNames = outOfStockComponents.map(c => c.product?.name || 'Bunga').join(', ');
+        
+        if (isAvailable) {
+            return `<button onclick="handleSizeSelection(${price.id}, ${price.size_id}, '${price.size?.name || 'Standard'}', ${price.price})"
+                class="bg-gradient-to-r from-rose-500 to-pink-500 text-white py-2 px-4 rounded-lg text-sm font-medium hover:from-rose-600 hover:to-pink-600 transition-all duration-200">
+                <i class="bi bi-cart-plus mr-1"></i>Pilih
+            </button>`;
+        } else {
+            return `<button disabled
+                class="bg-gray-300 text-gray-500 py-2 px-4 rounded-lg text-sm font-medium cursor-not-allowed"
+                title="Stok habis: ${componentNames}">
+                <i class="bi bi-x-circle mr-1"></i>Stok Habis
+            </button>`;
+        }
+    }
+
     function renderBouquetDetail(bouquet) {
         const content = document.getElementById('bouquetDetailContent');
 
@@ -212,10 +232,9 @@
                                     <i class="bi bi-flower1 mr-2"></i>
                                     <span id="components-btn-text-${price.id}">Lihat Komponen Bunga</span>
                                 </button>
-                                <button onclick="selectBouquetSize(${price.id}, ${price.size_id}, '${price.size?.name || 'Standard'}', ${price.price})"
-                                    class="bg-gradient-to-r from-rose-500 to-pink-500 text-white py-2 px-4 rounded-lg text-sm font-medium hover:from-rose-600 hover:to-pink-600 transition-all duration-200">
-                                    <i class="bi bi-cart-plus mr-1"></i>Pilih
-                                </button>
+                                <div id="size-button-${price.id}">
+                                    <!-- Button will be populated by JavaScript -->
+                                </div>
                             </div>
                         </div>
                         
@@ -270,6 +289,14 @@
         </div>
     `;
 
+        // Populate size buttons after rendering
+        prices.forEach(price => {
+            const buttonContainer = document.getElementById(`size-button-${price.id}`);
+            if (buttonContainer) {
+                buttonContainer.innerHTML = generateSizeButton(price);
+            }
+        });
+
         // Update footer button
         updateFooterButton(bouquet, prices);
     }
@@ -306,15 +333,73 @@
         `;
     }
 
+    // Helper untuk cek apakah semua komponen untuk ukuran tertentu tersedia stoknya
+    function checkComponentsAvailability(sizeId) {
+        if (!currentBouquetDetail || !currentBouquetDetail.components_by_size) {
+            return false;
+        }
+        
+        const sizeKey = String(sizeId);
+        const components = currentBouquetDetail.components_by_size[sizeKey] || [];
+        
+        // Cek apakah semua komponen memiliki stok > 0
+        return components.every(component => {
+            const stock = typeof component.product?.current_stock === 'number' ? component.product.current_stock : 0;
+            return stock > 0;
+        });
+    }
+
+    // Helper untuk dapatkan komponen yang stoknya habis
+    function getOutOfStockComponents(sizeId) {
+        if (!currentBouquetDetail || !currentBouquetDetail.components_by_size) {
+            return [];
+        }
+        
+        const sizeKey = String(sizeId);
+        const components = currentBouquetDetail.components_by_size[sizeKey] || [];
+        
+        return components.filter(component => {
+            const stock = typeof component.product?.current_stock === 'number' ? component.product.current_stock : 0;
+            return stock <= 0;
+        });
+    }
+
+    // Handler untuk pemilihan ukuran dengan validasi stok
+    function handleSizeSelection(priceId, sizeId, sizeName, price) {
+        const isAvailable = checkComponentsAvailability(sizeId);
+        
+        if (!isAvailable) {
+            const outOfStockComponents = getOutOfStockComponents(sizeId);
+            const componentNames = outOfStockComponents.map(c => c.product?.name || 'Bunga').join(', ');
+            alert(`Maaf, ukuran ${sizeName} tidak tersedia karena komponen berikut stoknya habis:\n${componentNames}`);
+            return;
+        }
+        
+        // Jika stok tersedia, lanjutkan dengan pemilihan normal
+        selectBouquetSize(priceId, sizeId, sizeName, price);
+    }
+
     function updateFooterButton(bouquet, filteredPrices) {
         const addToCartBtn = document.getElementById('addBouquetToCart');
         const addToCartText = document.getElementById('addToCartText');
 
-        if (filteredPrices && filteredPrices.length === 1) {
+        // Filter prices to only include sizes with available stock
+        const availablePrices = filteredPrices.filter(price => checkComponentsAvailability(price.size_id));
+
+        if (availablePrices.length === 0) {
+            // Semua ukuran stok habis
+            addToCartText.textContent = 'Stok Semua Ukuran Habis';
+            addToCartBtn.onclick = () => {
+                alert('Maaf, semua ukuran bouquet ini sedang stok habis. Silakan coba lagi nanti atau hubungi kami untuk informasi lebih lanjut.');
+            };
+            addToCartBtn.classList.remove('bg-gradient-to-r', 'from-rose-500', 'to-pink-500', 'hover:from-rose-600', 'hover:to-pink-600');
+            addToCartBtn.classList.add('bg-gray-300', 'cursor-not-allowed');
+        } else if (availablePrices.length === 1) {
+            // Hanya satu ukuran tersedia
             addToCartText.textContent = 'Tambah ke Keranjang + Kartu Ucapan';
             addToCartBtn.onclick = () => {
-                // Auto-select the single size and show greeting card modal
-                const singlePrice = filteredPrices[0];
+                // Auto-select the single available size and show greeting card modal
+                const singlePrice = availablePrices[0];
                 showGreetingCardModal(
                     bouquet.id,
                     bouquet.name,
@@ -323,7 +408,10 @@
                     singlePrice.price
                 );
             };
-        } else if (filteredPrices && filteredPrices.length > 1) {
+            addToCartBtn.classList.remove('bg-gray-300', 'cursor-not-allowed');
+            addToCartBtn.classList.add('bg-gradient-to-r', 'from-rose-500', 'to-pink-500', 'hover:from-rose-600', 'hover:to-pink-600');
+        } else if (availablePrices.length > 1) {
+            // Beberapa ukuran tersedia
             addToCartText.textContent = 'Pilih Ukuran Terlebih Dahulu';
             addToCartBtn.onclick = () => {
                 // Scroll to sizes section
@@ -334,11 +422,16 @@
                 // Show alert
                 alert('Silakan pilih ukuran bouquet terlebih dahulu dengan klik tombol "Pilih"');
             };
+            addToCartBtn.classList.remove('bg-gray-300', 'cursor-not-allowed');
+            addToCartBtn.classList.add('bg-gradient-to-r', 'from-rose-500', 'to-pink-500', 'hover:from-rose-600', 'hover:to-pink-600');
         } else {
+            // Tidak ada harga tersedia
             addToCartText.textContent = 'Hubungi Kami';
             addToCartBtn.onclick = () => {
                 window.open('https://wa.me/6282177929879?text=Halo, saya tertarik dengan bouquet ' + encodeURIComponent(bouquet.name), '_blank');
             };
+            addToCartBtn.classList.remove('bg-gray-300', 'cursor-not-allowed');
+            addToCartBtn.classList.add('bg-gradient-to-r', 'from-rose-500', 'to-pink-500', 'hover:from-rose-600', 'hover:to-pink-600');
         }
     } let selectedBouquetSize = null;
 

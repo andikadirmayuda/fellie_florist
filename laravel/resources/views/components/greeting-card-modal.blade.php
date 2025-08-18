@@ -1,27 +1,66 @@
 <!-- Greeting Card Modal Component -->
+<style>
+    .greeting-modal-scroll {
+        scrollbar-width: thin;
+        scrollbar-color: #e5e7eb #f3f4f6;
+    }
+    
+    .greeting-modal-scroll::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    .greeting-modal-scroll::-webkit-scrollbar-track {
+        background: #f3f4f6;
+        border-radius: 3px;
+    }
+    
+    .greeting-modal-scroll::-webkit-scrollbar-thumb {
+        background: #e5e7eb;
+        border-radius: 3px;
+    }
+    
+    .greeting-modal-scroll::-webkit-scrollbar-thumb:hover {
+        background: #d1d5db;
+    }
+    
+    @media (max-height: 600px) {
+        .greeting-modal-compact {
+            max-height: calc(100vh - 1rem) !important;
+        }
+        
+        .greeting-modal-compact .modal-body {
+            max-height: calc(100vh - 120px) !important;
+        }
+        
+        .greeting-modal-compact .components-section {
+            max-height: 80px !important;
+        }
+    }
+</style>
+
 <div id="greetingCardModal"
     class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl transform transition-all">
+    <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl transform transition-all max-h-[90vh] flex flex-col greeting-modal-compact" style="max-height: calc(100vh - 2rem);">
         <!-- Modal Header -->
-        <div class="flex items-center justify-between p-6 border-b border-gray-100">
+        <div class="flex items-center justify-between p-4 sm:p-6 border-b border-gray-100 flex-shrink-0">
             <div class="flex items-center gap-3">
                 <div
-                    class="w-12 h-12 bg-gradient-to-r from-rose-500 to-pink-500 rounded-full flex items-center justify-center">
-                    <i class="bi bi-card-text text-white text-xl"></i>
+                    class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-rose-500 to-pink-500 rounded-full flex items-center justify-center">
+                    <i class="bi bi-card-text text-white text-lg sm:text-xl"></i>
                 </div>
                 <div>
-                    <h3 class="text-lg font-semibold text-gray-900">Kartu Ucapan</h3>
-                    <p class="text-sm text-gray-500">Tambahkan pesan spesial untuk bouquet Anda</p>
+                    <h3 class="text-base sm:text-lg font-semibold text-gray-900">Kartu Ucapan</h3>
+                    <p class="text-xs sm:text-sm text-gray-500">Tambahkan pesan spesial untuk bouquet Anda</p>
                 </div>
             </div>
             <button onclick="closeGreetingCardModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
-                <i class="bi bi-x-lg text-xl"></i>
+                <i class="bi bi-x-lg text-lg sm:text-xl"></i>
             </button>
         </div>
 
-        <!-- Modal Body -->
-        <div class="p-6">
-            <div class="mb-4">
+        <!-- Modal Body - Scrollable -->
+        <div class="p-4 sm:p-6 overflow-y-auto flex-1 greeting-modal-scroll modal-body" style="max-height: calc(90vh - 140px);">
+            <div class="mb-3 sm:mb-4">
                 <label class="block text-sm font-medium text-gray-700 mb-2">
                     <i class="bi bi-flower1 mr-1 text-rose-500"></i>
                     Bouquet: <span id="modalBouquetName" class="font-semibold text-rose-600"></span>
@@ -32,12 +71,35 @@
                 </div>
             </div>
 
-            <div class="mb-4">
+            <!-- Komponen Bouquet Section -->
+            <div class="mb-3 sm:mb-4" id="bouquetComponentsSection" style="display: none;">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="bi bi-list-ul mr-1 text-blue-500"></i>
+                    Komponen Bouquet
+                </label>
+                <div class="bg-blue-50 p-2 sm:p-3 rounded-lg greeting-modal-scroll components-section" style="max-height: 120px; overflow-y: auto;">
+                    <div id="bouquetComponentsList" class="space-y-1.5 sm:space-y-2">
+                        <!-- Components will be loaded here -->
+                    </div>
+                    <div id="componentsLoading" class="text-center py-2">
+                        <div class="inline-flex items-center text-xs sm:text-sm text-blue-600">
+                            <i class="bi bi-arrow-clockwise animate-spin mr-2"></i>
+                            Memuat komponen...
+                        </div>
+                    </div>
+                    <div id="noComponentsMessage" class="text-center py-2 text-xs sm:text-sm text-gray-500" style="display: none;">
+                        <i class="bi bi-info-circle mr-1"></i>
+                        Tidak ada komponen tersedia untuk ukuran ini
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3 sm:mb-4">
                 <label for="greetingCardMessage" class="block text-sm font-medium text-gray-700 mb-2">
                     💌 Pesan Kartu Ucapan <span class="text-gray-400">(Opsional)</span>
                 </label>
-                <textarea id="greetingCardMessage" rows="4" maxlength="200"
-                    class="w-full border-2 border-gray-200 rounded-xl p-3 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 transition-all resize-none"
+                <textarea id="greetingCardMessage" rows="3" maxlength="200"
+                    class="w-full border-2 border-gray-200 rounded-xl p-3 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 transition-all resize-none text-sm"
                     placeholder="Tulis pesan khusus Anda di sini... &#10;Contoh: &#10;• Happy Anniversary! ❤️&#10;• Selamat Ulang Tahun!&#10;• Semoga cepat sembuh 🌸"></textarea>
                 <div class="flex justify-between items-center mt-2">
                     <div class="text-xs text-gray-500">
@@ -51,29 +113,29 @@
             </div>
 
             <!-- Quick Templates -->
-            <div class="mb-6">
+            <div class="mb-4 sm:mb-6">
                 <label class="block text-sm font-medium text-gray-700 mb-2">
                     ✨ Template Cepat
                 </label>
                 <div class="grid grid-cols-2 gap-2">
                     <button type="button"
                         onclick="setGreetingTemplate('Happy Anniversary! Wishing you both all the happiness in the world. ❤️')"
-                        class="text-xs bg-rose-50 hover:bg-rose-100 text-rose-700 px-3 py-2 rounded-lg transition-colors">
+                        class="text-xs bg-rose-50 hover:bg-rose-100 text-rose-700 px-2 sm:px-3 py-2 rounded-lg transition-colors">
                         💕 Anniversary
                     </button>
                     <button type="button"
                         onclick="setGreetingTemplate('Selamat Ulang Tahun! Semoga semua impian Anda terwujud. 🎉')"
-                        class="text-xs bg-pink-50 hover:bg-pink-100 text-pink-700 px-3 py-2 rounded-lg transition-colors">
+                        class="text-xs bg-pink-50 hover:bg-pink-100 text-pink-700 px-2 sm:px-3 py-2 rounded-lg transition-colors">
                         🎂 Ulang Tahun
                     </button>
                     <button type="button"
                         onclick="setGreetingTemplate('Semoga lekas sembuh dan sehat selalu. Get well soon! 🌸')"
-                        class="text-xs bg-green-50 hover:bg-green-100 text-green-700 px-3 py-2 rounded-lg transition-colors">
+                        class="text-xs bg-green-50 hover:bg-green-100 text-green-700 px-2 sm:px-3 py-2 rounded-lg transition-colors">
                         🌸 Get Well
                     </button>
                     <button type="button"
                         onclick="setGreetingTemplate('Congratulations! Wishing you success and happiness ahead. ✨')"
-                        class="text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 px-3 py-2 rounded-lg transition-colors">
+                        class="text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 px-2 sm:px-3 py-2 rounded-lg transition-colors">
                         🎉 Congratulations
                     </button>
                 </div>
@@ -81,13 +143,13 @@
         </div>
 
         <!-- Modal Footer -->
-        <div class="flex gap-3 p-6 border-t border-gray-100 bg-gray-50 rounded-b-2xl">
+        <div class="flex gap-3 p-4 sm:p-6 border-t border-gray-100 bg-gray-50 rounded-b-2xl flex-shrink-0">
             <button onclick="closeGreetingCardModal()"
-                class="flex-1 px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors font-medium">
+                class="flex-1 px-3 sm:px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors font-medium text-sm">
                 <i class="bi bi-x-circle mr-2"></i>Batal
             </button>
             <button onclick="addBouquetWithGreeting()"
-                class="flex-1 px-4 py-2 bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white rounded-xl transition-all shadow-md hover:shadow-lg font-medium">
+                class="flex-1 px-3 sm:px-4 py-2 bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white rounded-xl transition-all shadow-md hover:shadow-lg font-medium text-sm">
                 <i class="bi bi-cart-plus mr-2"></i>Tambah ke Keranjang
             </button>
         </div>
@@ -116,6 +178,9 @@
         document.getElementById('greetingCardMessage').value = '';
         updateCharacterCount();
 
+        // Load bouquet components
+        loadBouquetComponents(bouquetId, sizeId);
+
         // Show modal
         document.getElementById('greetingCardModal').classList.remove('hidden');
 
@@ -125,9 +190,69 @@
         }, 100);
     }
 
+    // Load bouquet components for specific size
+    function loadBouquetComponents(bouquetId, sizeId) {
+        // Show components section and loading
+        document.getElementById('bouquetComponentsSection').style.display = 'block';
+        document.getElementById('componentsLoading').style.display = 'block';
+        document.getElementById('bouquetComponentsList').innerHTML = '';
+        document.getElementById('noComponentsMessage').style.display = 'none';
+
+        // Fetch components from API
+        fetch(`/bouquet/${bouquetId}/components/${sizeId}`)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('componentsLoading').style.display = 'none';
+                
+                if (data.success && data.components && data.components.length > 0) {
+                    displayBouquetComponents(data.components);
+                } else {
+                    document.getElementById('noComponentsMessage').style.display = 'block';
+                }
+            })
+            .catch(error => {
+                console.error('Error loading bouquet components:', error);
+                document.getElementById('componentsLoading').style.display = 'none';
+                document.getElementById('noComponentsMessage').style.display = 'block';
+                document.getElementById('noComponentsMessage').innerHTML = `
+                    <i class="bi bi-exclamation-triangle mr-1"></i>
+                    Gagal memuat komponen bouquet
+                `;
+            });
+    }
+
+    // Display bouquet components in the modal
+    function displayBouquetComponents(components) {
+        const componentsList = document.getElementById('bouquetComponentsList');
+        
+        const componentsHtml = components.map(component => {
+            const stockStatus = component.current_stock > 0 ? 
+                `<span class="text-green-600 font-medium text-xs">Stok: ${component.current_stock} ${component.unit}</span>` :
+                `<span class="text-red-600 font-medium text-xs">Stok Habis</span>`;
+            
+            return `
+                <div class="flex items-center justify-between p-2 bg-white rounded-lg border border-blue-100">
+                    <div class="flex-1 min-w-0">
+                        <div class="font-medium text-xs sm:text-sm text-gray-800 truncate">${component.product_name}</div>
+                        <div class="text-xs text-gray-500">${component.product_category}</div>
+                        <div class="text-xs text-blue-600">Jumlah: ${component.quantity} ${component.unit}</div>
+                    </div>
+                    <div class="text-right ml-2 flex-shrink-0">
+                        <div class="text-xs text-gray-600">Rp ${new Intl.NumberFormat('id-ID').format(component.price)}/${component.unit}</div>
+                        <div class="text-xs ${component.current_stock > 0 ? 'text-green-600' : 'text-red-600'}">${stockStatus}</div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        componentsList.innerHTML = componentsHtml;
+    }
+
     // Close greeting card modal
     function closeGreetingCardModal() {
         document.getElementById('greetingCardModal').classList.add('hidden');
+        // Hide components section
+        document.getElementById('bouquetComponentsSection').style.display = 'none';
         currentGreetingData = null;
     }
 

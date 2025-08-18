@@ -12,6 +12,7 @@ Route::get('/product-fellie', [PublicFlowerController::class, 'index'])->name('p
 Route::get('/bouquet-fellie', [PublicBouquetController::class, 'index'])->name('public.bouquets');
 Route::get('/bouquet/{id}', [PublicBouquetController::class, 'detail'])->name('public.bouquet.detail');
 Route::get('/bouquet/{id}/detail-json', [PublicBouquetController::class, 'detailJson'])->name('public.bouquet.detail.json');
+Route::get('/bouquet/{bouquetId}/components/{sizeId}', [PublicBouquetController::class, 'getComponentsBySize'])->name('public.bouquet.components.by.size');
 Route::post('/public-order', [PublicOrderController::class, 'store'])->name('public.order.store');
 
 // Custom Bouquet routes
