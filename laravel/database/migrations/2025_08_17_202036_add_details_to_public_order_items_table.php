@@ -4,15 +4,15 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddRibbonColorToCustomBouquetsTable extends Migration
+return new class extends Migration
 {
     /**
      * Run the migrations.
      */
     public function up(): void
     {
-        Schema::table('custom_bouquets', function (Blueprint $table) {
-            $table->string('ribbon_color')->nullable();
+        Schema::table('public_order_items', function (Blueprint $table) {
+            $table->json('details')->nullable()->after('custom_instructions');
         });
     }
 
@@ -21,8 +21,8 @@ class AddRibbonColorToCustomBouquetsTable extends Migration
      */
     public function down(): void
     {
-        Schema::table('custom_bouquets', function (Blueprint $table) {
-            $table->dropColumn('ribbon_color');
+        Schema::table('public_order_items', function (Blueprint $table) {
+            $table->dropColumn('details');
         });
     }
-}
+};

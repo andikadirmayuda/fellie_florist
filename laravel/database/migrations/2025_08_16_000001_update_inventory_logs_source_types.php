@@ -18,13 +18,18 @@ return new class extends Migration
 
             // Buat kolom source yang baru dengan enum yang diperbarui
             $table->enum('source', [
-                'sale',                     // Penjualan langsung di toko
-                'public_order_product',     // Pesanan publik - produk normal
-                'public_order_bouquet',     // Pesanan publik - bouquet
-                'public_order_custom',      // Pesanan publik - custom bouquet
+                'sale',                           // Penjualan langsung di toko
+                'public_order',                   // Pesanan publik - umum
+                'public_order_hold',              // Penahanan stok pesanan publik
+                'public_order_product',           // Pesanan publik - produk normal
+                'public_order_bouquet',           // Pesanan publik - bouquet
+                'public_order_bouquet_hold',      // Penahanan stok komponen bouquet
+                'public_order_custom',            // Pesanan publik - custom bouquet
+                'public_order_custom_hold',       // Penahanan stok custom bouquet
                 'purchase',                 // Pembelian stok
                 'return',                  // Pengembalian barang
-                'adjustment'               // Penyesuaian manual
+                'adjustment',              // Penyesuaian manual
+                'correction'               // Koreksi kesalahan
             ])->after('qty');
 
             // Restore data lama

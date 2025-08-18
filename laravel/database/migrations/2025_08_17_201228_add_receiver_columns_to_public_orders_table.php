@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('inventory_logs', function (Blueprint $table) {
-            // Ubah kolom source menjadi lebih panjang
-            $table->string('source', 50)->change();
+        Schema::table('public_orders', function (Blueprint $table) {
+            $table->string('receiver_name')->nullable()->after('wa_number');
+            $table->string('receiver_wa')->nullable()->after('receiver_name');
         });
     }
 
@@ -22,8 +22,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('inventory_logs', function (Blueprint $table) {
-            $table->string('source', 20)->change(); // Kembalikan ke ukuran semula
+        Schema::table('public_orders', function (Blueprint $table) {
+            $table->dropColumn(['receiver_name', 'receiver_wa']);
         });
     }
 };

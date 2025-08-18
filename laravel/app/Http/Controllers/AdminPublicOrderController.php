@@ -6,6 +6,7 @@ use App\Models\PublicOrder;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\InventoryLog;
+use App\Models\StockHold;
 use App\Services\WhatsAppNotificationService;
 use App\Services\PushNotificationService;
 use Illuminate\Support\Facades\Log;
@@ -23,8 +24,13 @@ class AdminPublicOrderController extends Controller
     /**
      * Helper method to reduce product stock and create inventory log
      */
-    private function reduceProductStock($product, $stockReduction, $orderId, $itemType = '')
+    private function reduceProductStock($product, $stockReduction, $orderId, $notes = null)
     {
+        if (!$product || $stockReduction <= 0) {
+            return;
+        }
+
+        // Kurangi stok langsung
         $product->decrement('current_stock', $stockReduction);
 
         // Catat di log inventory
@@ -33,19 +39,78 @@ class AdminPublicOrderController extends Controller
             'qty' => -$stockReduction,
             'source' => InventoryLog::SOURCE_PUBLIC_ORDER_PRODUCT,
             'reference_id' => $orderId,
-            'notes' => "Pengurangan stok - {$itemType} Pesanan #{$orderId}: {$stockReduction} unit",
+            'notes' => $notes ?? "Pengurangan stok - Pesanan #{$orderId}",
             'current_stock' => $product->current_stock
         ]);
 
         // Log untuk debugging
-        Log::info('Stok dikurangi', [
+        Log::info('Stok dikurangi (reduceProductStock)', [
             'product' => $product->name,
             'amount' => $stockReduction,
             'order_id' => $orderId,
-            'old_stock' => $product->current_stock + $stockReduction,
-            'new_stock' => $product->current_stock,
-            'item_type' => $itemType
+            'new_stock' => $product->current_stock
         ]);
+    }
+
+    /**
+     * Helper method to reduce product stock and create inventory log
+     */
+    /**
+     * Handle custom bouquet stock return when order is cancelled
+     */
+    private function handleCustomBouquetStockReturn($item, $order, $oldStatus, $newStatus)
+    {
+        $customItems = json_decode($item->metadata ?? '[]', true);
+        if (empty($customItems)) return;
+
+        foreach ($customItems as $customItem) {
+            $product = Product::find($customItem['product_id']);
+            if (!$product) continue;
+
+            $price = $product->prices()->where('type', $customItem['price_type'])->first();
+            $stockReturn = $customItem['quantity'] * ($price ? $price->unit_equivalent : 1);
+
+            $notes = sprintf(
+                'Pengembalian stok - Custom Bouquet Item Pesanan #%s dibatalkan: %s unit [Status: %s → %s]',
+                $order->id,
+                $stockReturn,
+                $oldStatus,
+                $newStatus
+            );
+
+            $product->addStock(
+                $stockReturn,
+                'public_order_cancel',
+                sprintf('order:%d,custom_item:%d,cancel', $order->id, $customItem['product_id']),
+                $notes
+            );
+        }
+    }
+
+    /**
+     * Handle regular product stock return when order is cancelled
+     */
+    private function handleRegularProductStockReturn($item, $order, $oldStatus, $newStatus)
+    {
+        $product = Product::find($item->product_id);
+        if (!$product) return;
+
+        $stockReturn = $item->quantity * ($item->unit_equivalent ?? 1);
+        $notes = sprintf(
+            'Pengembalian stok - Pesanan #%s dibatalkan: %s %s [Status: %s → %s]',
+            $order->id,
+            $item->quantity,
+            $item->price_type ?? 'pcs',
+            $oldStatus,
+            $newStatus
+        );
+
+        $product->addStock(
+            $stockReturn,
+            'public_order_cancel',
+            sprintf('order:%d,product:%d,cancel', $order->id, $product->id),
+            $notes
+        );
     }
     // No constructor needed, middleware will be handled in routes
     /**
@@ -286,10 +351,32 @@ class AdminPublicOrderController extends Controller
         if ($newStatus === 'processed' && $oldStatus === 'pending') {
             // Saat pesanan diproses, tahan stok
             foreach ($order->items as $item) {
-                // Khusus untuk custom bouquet
-                if ($item->type === 'custom') {
-                    // Parse custom bouquet items dari metadata jika ada
+                // Bouquet regular: kurangi stok komponen via model (dukung item_type/type)
+                if (($item->item_type ?? null) === 'bouquet' || ($item->type ?? null) === 'bouquet') {
+                    try {
+                        $item->reduceStock();
+                    } catch (\Exception $e) {
+                        Log::error('Gagal mengurangi stok komponen bouquet', [
+                            'order_id' => $order->id,
+                            'item_id' => $item->id,
+                            'error' => $e->getMessage()
+                        ]);
+                        return back()->with('error', $e->getMessage());
+                    }
+                    continue;
+                }
+                // Khusus untuk custom bouquet (dukung item_type/type dan penamaan custom/custom_bouquet)
+                if (($item->item_type ?? null) === 'custom' || ($item->item_type ?? null) === 'custom_bouquet' || ($item->type ?? null) === 'custom') {
+                    // Ambil komponen dari metadata atau fallback ke details.components
                     $customItems = json_decode($item->metadata ?? '[]', true);
+                    if (empty($customItems)) {
+                        $details = $item->details ?? [];
+                        if (is_array($details) && !empty($details['components'])) {
+                            $customItems = $details['components'];
+                        } elseif (is_object($details) && !empty($details->components)) {
+                            $customItems = $details->components;
+                        }
+                    }
                     if (!empty($customItems)) {
                         foreach ($customItems as $customItem) {
                             $product = Product::find($customItem['product_id']);
@@ -351,11 +438,24 @@ class AdminPublicOrderController extends Controller
                 }
             }
             $order->stock_holded = true;
+            $order->stock_processed = true;
+
+            // Tandai semua stock holds untuk order ini sebagai released (agar tidak dihitung sebagai hold aktif)
+            try {
+                StockHold::where('order_id', $order->id)
+                    ->where('status', StockHold::STATUS_HELD)
+                    ->update(['status' => StockHold::STATUS_RELEASED]);
+            } catch (\Throwable $e) {
+                Log::warning('Gagal mengupdate status stock holds ke released saat processed', [
+                    'order_id' => $order->id,
+                    'error' => $e->getMessage()
+                ]);
+            }
         } elseif ($newStatus === 'cancelled') {
             // Kembalikan stok jika pesanan dibatalkan dan sebelumnya sudah mengurangi stok
             if ($order->stock_holded || in_array($oldStatus, ['processed', 'packing', 'ready'])) {
                 foreach ($order->items as $item) {
-                    if ($item->type === 'custom') {
+                    if (($item->item_type ?? null) === 'custom' || ($item->item_type ?? null) === 'custom_bouquet' || ($item->type ?? null) === 'custom') {
                         // Parse custom bouquet items dari metadata
                         $customItems = json_decode($item->metadata ?? '[]', true);
                         if (!empty($customItems)) {
@@ -383,6 +483,29 @@ class AdminPublicOrderController extends Controller
                             }
                             continue;
                         }
+                    } elseif (($item->item_type ?? null) === 'bouquet' || ($item->type ?? null) === 'bouquet') {
+                        // Kembalikan stok komponen bouquet
+                        $components = $item->bouquetComponents();
+                        foreach ($components as $component) {
+                            if (!$component->product) {
+                                continue;
+                            }
+                            $stockReturn = ($component->quantity ?? 1) * ($item->quantity ?? 1);
+                            $notes = sprintf(
+                                'Pengembalian stok - Komponen bouquet Pesanan #%s dibatalkan: %s unit [Status: %s → %s]',
+                                $order->id,
+                                $stockReturn,
+                                $oldStatus,
+                                $newStatus
+                            );
+                            $component->product->addStock(
+                                $stockReturn,
+                                'public_order_cancel',
+                                sprintf('order:%d,bouquet:%d,cancel', $order->id, $item->bouquet_id),
+                                $notes
+                            );
+                        }
+                        continue;
                     }
 
                     // Untuk produk normal
@@ -417,6 +540,19 @@ class AdminPublicOrderController extends Controller
                     }
                 }
                 $order->stock_holded = false;
+                $order->stock_processed = false;
+
+                // Pastikan semua hold dinonaktifkan
+                try {
+                    StockHold::where('order_id', $order->id)
+                        ->where('status', StockHold::STATUS_HELD)
+                        ->update(['status' => StockHold::STATUS_RELEASED]);
+                } catch (\Throwable $e) {
+                    Log::warning('Gagal mengupdate status stock holds ke released saat cancelled', [
+                        'order_id' => $order->id,
+                        'error' => $e->getMessage()
+                    ]);
+                }
             }
         }
 

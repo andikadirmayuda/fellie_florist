@@ -134,16 +134,17 @@ class PublicCheckoutController extends Controller
                 // Hitung stok yang berkurang
                 $stockReduction = $this->calculateStockReduction($item);
 
-                // Simpan item pesanan
-                $orderItem = $order->items()->create([
+                // Simpan item pesanan dengan skema yang konsisten untuk bouquet/custom
+                $cartType = $item["type"] ?? 'product';
+                $normalizedType = $cartType; // gunakan nilai asli; enum menerima 'product', 'bouquet', 'custom_bouquet'
+
+                $attributes = [
                     'product_name' => $item['name'],
                     'quantity' => $item['qty'],
                     'price' => $item['price'],
                     'price_type' => $item['price_type'] ?? 'default',
                     'subtotal' => $item['price'] * $item['qty'],
-                    'type' => $item['type'] ?? 'product',
-                    'unit_type' => $item['type'] ?? 'per_tangkai', // tambah informasi satuan
-                    'stock_reduction' => $stockReduction, // tambah informasi pengurangan stok
+                    'item_type' => $normalizedType,
                     'greeting_card' => $item['greeting_card'] ?? null,
                     'ribbon_color' => $item['ribbon_color'] ?? null,
                     'components_summary' => $item['components_summary'] ?? null,
@@ -154,11 +155,25 @@ class PublicCheckoutController extends Controller
                         'items' => isset($item['items']) ? $item['items'] : [],
                         'ribbon_color' => $item['ribbon_color'] ?? null,
                         'reference_image' => $item['reference_image'] ?? null,
-                        'type' => $item['type'] ?? 'product',
+                        'type' => $cartType,
                         'components' => isset($item['components']) ? $item['components'] : [],
-                        'custom_instructions' => $item['custom_instructions'] ?? null
+                        'custom_instructions' => $item['custom_instructions'] ?? null,
+                        'size_id' => $item['size_id'] ?? null
                     ]
-                ]);
+                ];
+
+                // Metadata kolom tidak tersedia di DB; gunakan details.components dan fallback di proses status
+
+                if ($normalizedType === 'product') {
+                    $attributes['product_id'] = $item['id'];
+                } elseif ($normalizedType === 'bouquet') {
+                    $attributes['bouquet_id'] = $item['id'];
+                    $attributes['product_id'] = null;
+                } else { // custom
+                    $attributes['product_id'] = null;
+                }
+
+                $orderItem = $order->items()->create($attributes);
             }
 
             // Kirim notifikasi
@@ -336,14 +351,22 @@ class PublicCheckoutController extends Controller
             throw new \Exception("ID bouquet tidak ditemukan untuk " . ($item['name'] ?? 'Unknown Bouquet'));
         }
 
-        $bouquet = Bouquet::with(['components.product'])->findOrFail($item['id']);
+        $bouquet = Bouquet::findOrFail($item['id']);
 
-        // Cek stok untuk semua komponen terlebih dahulu
-        foreach ($bouquet->components as $component) {
+        // Filter komponen berdasarkan size yang dipilih
+        $selectedSizeId = $item['size_id'] ?? null;
+        $componentsQuery = $bouquet->components()->with('product');
+        if ($selectedSizeId) {
+            $componentsQuery->where('size_id', (int)$selectedSizeId);
+        }
+        $components = $componentsQuery->get();
+
+        // Cek stok untuk komponen sesuai size
+        foreach ($components as $component) {
             if (!$component->product) continue;
 
-            // Hitung dengan unit equivalent dari komponen
-            $requiredQty = $component->quantity * $item['qty'] * $component->unit_equivalent;
+            // Hitung jumlah kebutuhan per komponen sesuai quantity di bouquet dan qty pesanan
+            $requiredQty = (int)($component->quantity ?? 1) * (int)($item['qty'] ?? 1);
 
             if ($component->product->current_stock < $requiredQty) {
                 throw new \Exception("Stok tidak mencukupi untuk komponen {$component->product->name} pada bouquet {$bouquet->name}");

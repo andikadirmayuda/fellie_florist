@@ -16,14 +16,11 @@ return new class extends Migration
             $table->foreignId('order_id')->constrained('public_orders')->onDelete('cascade');
             $table->foreignId('product_id')->constrained('products')->onDelete('cascade');
             $table->integer('quantity');
-            $table->enum('status', ['held', 'completed', 'released'])->default('held');
-            $table->string('price_type')->nullable();
-            $table->timestamp('released_at')->nullable();
+            $table->enum('status', ['held', 'released'])->default('held');
             $table->timestamps();
 
-            // Index untuk mempercepat query
-            $table->index(['order_id', 'status']);
-            $table->index(['product_id', 'status']);
+            $table->index(['order_id', 'product_id']);
+            $table->index('status');
         });
     }
 

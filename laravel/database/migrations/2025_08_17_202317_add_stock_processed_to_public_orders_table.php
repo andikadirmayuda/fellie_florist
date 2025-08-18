@@ -12,8 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('public_orders', function (Blueprint $table) {
-            $table->string('receiver_name')->nullable()->after('customer_name');
-            $table->string('receiver_wa')->nullable()->after('wa_number');
+            $table->boolean('stock_processed')->default(false)->after('stock_holded');
         });
     }
 
@@ -23,7 +22,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('public_orders', function (Blueprint $table) {
-            $table->dropColumn(['receiver_name', 'receiver_wa']);
+            $table->dropColumn('stock_processed');
         });
     }
 };

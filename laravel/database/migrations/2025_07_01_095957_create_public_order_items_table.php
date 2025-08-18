@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('public_order_id')->constrained('public_orders')->onDelete('cascade');
             // Relasi ke produk, wajib terisi
             $table->foreignId('product_id')->constrained('products')->onDelete('restrict');
+            $table->unsignedBigInteger('bouquet_id')->nullable()->comment('ID bouquet jika item ini adalah bouquet');
             // Nama produk disimpan untuk histori, tapi tetap ambil data utama dari tabel products
             $table->string('product_name');
             $table->integer('quantity');

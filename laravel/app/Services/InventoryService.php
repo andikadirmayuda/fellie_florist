@@ -136,8 +136,7 @@ class InventoryService
 
                 // Update status hold
                 $hold->update([
-                    'status' => 'released',
-                    'released_at' => now()
+                    'status' => 'released'
                 ]);
             }
         }
@@ -147,8 +146,8 @@ class InventoryService
     {
         foreach ($order->stockHolds as $hold) {
             if ($hold->status === 'held') {
-                // Update status hold menjadi completed
-                $hold->update(['status' => 'completed']);
+                // Tanda released karena stok sudah dikurangi final oleh proses penjualan
+                $hold->update(['status' => 'released']);
 
                 // Catat di inventory log sebagai penjualan final
                 InventoryLog::create([

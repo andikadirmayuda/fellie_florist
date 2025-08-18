@@ -42,30 +42,15 @@ class StockHold extends Model
     // Scope untuk hold yang masih aktif
     public function scopeActive($query)
     {
-        return $query->where('status', 'hold')
-                    ->whereNull('released_at');
+        return $query->where('status', self::STATUS_HELD);
     }
 
-    // Accessor untuk durasi hold dalam jam
+    // Accessor untuk durasi hold dalam jam (tanpa kolom released_at)
     public function getDurationAttribute(): float
     {
         $start = Carbon::parse($this->created_at);
-        $end = $this->released_at ?? Carbon::now();
-        
+        // Jika status sudah released, gunakan updated_at sebagai akhir; jika masih held, gunakan sekarang
+        $end = $this->status === self::STATUS_HELD ? Carbon::now() : Carbon::parse($this->updated_at);
         return round($start->diffInHours($end, true), 2);
-    }
-
-    // Boot method untuk memastikan released_at sesuai dengan status
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::saving(function ($stockHold) {
-            if ($stockHold->status === 'hold') {
-                $stockHold->released_at = null;
-            } elseif ($stockHold->status === 'released' && !$stockHold->released_at) {
-                $stockHold->released_at = now();
-            }
-        });
     }
 }
