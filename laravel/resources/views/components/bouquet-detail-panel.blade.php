@@ -274,6 +274,38 @@
         updateFooterButton(bouquet, prices);
     }
 
+    // Helper untuk render satu baris komponen dengan badge stok
+    function renderComponentRow(component) {
+        const name = component.product?.name || 'Bunga';
+        const qty = component.quantity || 1;
+        const baseUnit = component.product?.base_unit || 'tangkai';
+        const stock = typeof component.product?.current_stock === 'number' ? component.product.current_stock : 0;
+        const isOut = stock <= 0;
+        const isLow = !isOut && stock < 10;
+
+        const badgeClass = isOut
+            ? 'bg-red-100 text-red-700'
+            : (isLow ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700');
+        const badgeText = isOut
+            ? 'Stok Habis'
+            : `Stok: ${stock} ${baseUnit}`;
+
+        return `
+            <div class="flex items-center p-3 bg-white rounded-lg border border-gray-200">
+                <div class="w-8 h-8 bg-rose-100 rounded-full flex items-center justify-center mr-3">
+                    <i class="bi bi-flower1 text-rose-500 text-sm"></i>
+                </div>
+                <div class="flex-1">
+                    <div class="font-medium text-gray-800">${name}</div>
+                    <div class="text-sm text-gray-600">Jumlah: ${qty} ${baseUnit}</div>
+                </div>
+                <div class="ml-3">
+                    <span class="px-2 py-1 rounded-full text-xs font-medium ${badgeClass}">${badgeText}</span>
+                </div>
+            </div>
+        `;
+    }
+
     function updateFooterButton(bouquet, filteredPrices) {
         const addToCartBtn = document.getElementById('addBouquetToCart');
         const addToCartText = document.getElementById('addToCartText');
@@ -361,17 +393,7 @@
                     );
 
                     if (validComponents.length > 0) {
-                        componentsList.innerHTML = validComponents.map(component => `
-                        <div class="flex items-center p-3 bg-white rounded-lg border border-gray-200">
-                            <div class="w-8 h-8 bg-rose-100 rounded-full flex items-center justify-center mr-3">
-                                <i class="bi bi-flower1 text-rose-500 text-sm"></i>
-                            </div>
-                            <div class="flex-1">
-                                <div class="font-medium text-gray-800">${component.product.name}</div>
-                                <div class="text-sm text-gray-600">Jumlah: ${component.quantity || 1} tangkai</div>
-                            </div>
-                        </div>
-                    `).join('');
+                        componentsList.innerHTML = validComponents.map(renderComponentRow).join('');
                     } else {
                         componentsList.innerHTML = `
                             <div class="text-orange-600 text-sm bg-orange-50 p-3 rounded-lg border border-orange-200">
@@ -418,17 +440,7 @@
         if (components.length > 0) {
             console.log('✅ Showing components section');
             componentsSectionTitle.textContent = `Komponen Bunga - Ukuran ${sizeName}`;
-            componentsContainer.innerHTML = components.map(component => `
-            <div class="flex items-center p-3 bg-gray-50 rounded-lg">
-                <div class="w-10 h-10 bg-rose-100 rounded-full flex items-center justify-center mr-3">
-                    <i class="bi bi-flower1 text-rose-500"></i>
-                </div>
-                <div class="flex-1">
-                    <div class="font-medium text-gray-800">${component.product?.name || 'Bunga'}</div>
-                    <div class="text-sm text-gray-600">Jumlah: ${component.quantity || 1} tangkai</div>
-                </div>
-            </div>
-        `).join('');
+            componentsContainer.innerHTML = components.map(renderComponentRow).join('');
             componentsSection.style.display = 'block';
             console.log('✅ Components section displayed with', components.length, 'components');
         } else {
