@@ -839,9 +839,15 @@
                                 </div>
 
                                 <!-- Action Button -->
-                                <button onclick="handleAddToCart({{ (int) $flower->id }})"
-                                    class="mt-auto w-full bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white font-semibold py-1.5 sm:py-2 px-3 sm:px-4 rounded-xl transition-all duration-200 shadow-md hover:shadow-lg text-xs sm:text-sm">
-                                    <i class="bi bi-cart-plus mr-1 sm:mr-2"></i>Tambah ke Keranjang
+                                @php $isOut = (int) $flower->current_stock <= 0; @endphp
+                                <button onclick="{{ $isOut ? 'return false' : 'handleAddToCart('.(int)$flower->id.')' }}"
+                                    class="mt-auto w-full {{ $isOut ? 'bg-gray-300 text-gray-600 cursor-not-allowed' : 'bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white shadow-md hover:shadow-lg' }} font-semibold py-1.5 sm:py-2 px-3 sm:px-4 rounded-xl transition-all duration-200 text-xs sm:text-sm"
+                                    {{ $isOut ? 'disabled' : '' }}>
+                                    @if($isOut)
+                                        <i class="bi bi-x-circle mr-1 sm:mr-2"></i>Stok Habis
+                                    @else
+                                        <i class="bi bi-cart-plus mr-1 sm:mr-2"></i>Tambah ke Keranjang
+                                    @endif
                                 </button>
                                 <script>
                                     window.flowerPrices = window.flowerPrices || {};

@@ -13,9 +13,10 @@ class PublicFlowerController extends Controller
 {
     public function index()
     {
-        // Ambil semua produk bunga yang stoknya > 0
+        // Tampilkan semua produk bunga, termasuk yang stoknya 0.
+        // Urutkan: yang ada stok dulu, lalu habis, kemudian berdasarkan nama.
         $flowers = Product::with(['category', 'prices'])
-            ->where('current_stock', '>', 0)
+            ->orderByRaw('(current_stock > 0) desc')
             ->orderBy('name')
             ->get();
 
@@ -42,8 +43,9 @@ class PublicFlowerController extends Controller
     public function getFlowerData()
     {
         // Method untuk mendapatkan data flowers yang bisa dipanggil dari controller lain
+        // Sertakan juga produk dengan stok 0 agar UI bisa menandai "Habis".
         $flowers = Product::with(['category', 'prices'])
-            ->where('current_stock', '>', 0)
+            ->orderByRaw('(current_stock > 0) desc')
             ->orderBy('name')
             ->get();
 
