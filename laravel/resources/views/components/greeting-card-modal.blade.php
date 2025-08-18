@@ -36,6 +36,46 @@
             max-height: 80px !important;
         }
     }
+    
+    /* Styling for out of stock components */
+    .component-out-of-stock {
+        background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%) !important;
+        border-color: #fecaca !important;
+        position: relative;
+    }
+    
+    .component-out-of-stock::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: repeating-linear-gradient(
+            45deg,
+            transparent,
+            transparent 2px,
+            rgba(239, 68, 68, 0.1) 2px,
+            rgba(239, 68, 68, 0.1) 4px
+        );
+        pointer-events: none;
+        border-radius: 0.5rem;
+    }
+    
+    /* Button state transitions */
+    .add-to-cart-button {
+        transition: all 0.3s ease;
+    }
+    
+    .add-to-cart-button:disabled {
+        transform: none !important;
+        box-shadow: none !important;
+    }
+    
+    .add-to-cart-button:not(:disabled):hover {
+        transform: translateY(-1px);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
 </style>
 
 <div id="greetingCardModal"
@@ -148,10 +188,19 @@
                 class="flex-1 px-3 sm:px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors font-medium text-sm">
                 <i class="bi bi-x-circle mr-2"></i>Batal
             </button>
-            <button onclick="addBouquetWithGreeting()"
-                class="flex-1 px-3 sm:px-4 py-2 bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white rounded-xl transition-all shadow-md hover:shadow-lg font-medium text-sm">
-                <i class="bi bi-cart-plus mr-2"></i>Tambah ke Keranjang
-            </button>
+            <div class="flex-1 relative">
+                <button id="addToCartButton" onclick="addBouquetWithGreeting()"
+                    class="w-full px-3 sm:px-4 py-2 bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white rounded-xl transition-all shadow-md hover:shadow-lg font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-400 disabled:hover:bg-gray-400 add-to-cart-button"
+                    disabled>
+                    <i class="bi bi-cart-plus mr-2"></i>
+                    <span id="addToCartText">Memeriksa Stok...</span>
+                </button>
+                <!-- Tooltip for disabled state -->
+                <div id="buttonTooltip" class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg opacity-0 pointer-events-none transition-opacity duration-200 whitespace-nowrap z-10" style="display: none;">
+                    <span id="tooltipText">Memeriksa ketersediaan stok...</span>
+                    <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"></div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -198,6 +247,9 @@
         document.getElementById('bouquetComponentsList').innerHTML = '';
         document.getElementById('noComponentsMessage').style.display = 'none';
 
+        // Update button state to loading
+        updateAddToCartButtonState('loading');
+
         // Fetch components from API
         fetch(`/bouquet/${bouquetId}/components/${sizeId}`)
             .then(response => response.json())
@@ -208,6 +260,7 @@
                     displayBouquetComponents(data.components);
                 } else {
                     document.getElementById('noComponentsMessage').style.display = 'block';
+                    updateAddToCartButtonState('no-components');
                 }
             })
             .catch(error => {
@@ -218,6 +271,7 @@
                     <i class="bi bi-exclamation-triangle mr-1"></i>
                     Gagal memuat komponen bouquet
                 `;
+                updateAddToCartButtonState('error');
             });
     }
 
@@ -225,13 +279,24 @@
     function displayBouquetComponents(components) {
         const componentsList = document.getElementById('bouquetComponentsList');
         
+        // Check if all components have sufficient stock
+        let allComponentsInStock = true;
+        let outOfStockComponents = [];
+        
         const componentsHtml = components.map(component => {
-            const stockStatus = component.current_stock > 0 ? 
+            const hasStock = component.current_stock > 0;
+            const stockStatus = hasStock ? 
                 `<span class="text-green-600 font-medium text-xs">Stok: ${component.current_stock} ${component.unit}</span>` :
                 `<span class="text-red-600 font-medium text-xs">Stok Habis</span>`;
             
+            // Track out of stock components
+            if (!hasStock) {
+                allComponentsInStock = false;
+                outOfStockComponents.push(component.product_name);
+            }
+            
             return `
-                <div class="flex items-center justify-between p-2 bg-white rounded-lg border border-blue-100">
+                <div class="flex items-center justify-between p-2 bg-white rounded-lg border border-blue-100 ${!hasStock ? 'component-out-of-stock' : ''}">
                     <div class="flex-1 min-w-0">
                         <div class="font-medium text-xs sm:text-sm text-gray-800 truncate">${component.product_name}</div>
                         <div class="text-xs text-gray-500">${component.product_category}</div>
@@ -239,13 +304,85 @@
                     </div>
                     <div class="text-right ml-2 flex-shrink-0">
                         <div class="text-xs text-gray-600">Rp ${new Intl.NumberFormat('id-ID').format(component.price)}/${component.unit}</div>
-                        <div class="text-xs ${component.current_stock > 0 ? 'text-green-600' : 'text-red-600'}">${stockStatus}</div>
+                        <div class="text-xs ${hasStock ? 'text-green-600' : 'text-red-600'}">${stockStatus}</div>
                     </div>
                 </div>
             `;
         }).join('');
 
         componentsList.innerHTML = componentsHtml;
+        
+        // Update button state based on stock availability
+        if (allComponentsInStock) {
+            updateAddToCartButtonState('available');
+        } else {
+            updateAddToCartButtonState('out-of-stock', outOfStockComponents);
+        }
+    }
+
+    // Update add to cart button state
+    function updateAddToCartButtonState(state, outOfStockItems = []) {
+        const button = document.getElementById('addToCartButton');
+        const buttonText = document.getElementById('addToCartText');
+        const tooltip = document.getElementById('buttonTooltip');
+        const tooltipText = document.getElementById('tooltipText');
+        
+        switch (state) {
+            case 'loading':
+                button.disabled = true;
+                buttonText.textContent = 'Memeriksa Stok...';
+                tooltip.style.display = 'block';
+                tooltip.style.opacity = '0';
+                tooltipText.textContent = 'Memeriksa ketersediaan stok...';
+                button.className = button.className.replace(/bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600/, 'bg-gray-400');
+                break;
+                
+            case 'available':
+                button.disabled = false;
+                buttonText.textContent = 'Tambah ke Keranjang';
+                tooltip.style.display = 'none';
+                button.className = button.className.replace(/bg-gray-400/, 'bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600');
+                break;
+                
+            case 'out-of-stock':
+                button.disabled = true;
+                if (outOfStockItems.length === 1) {
+                    buttonText.textContent = `Stok ${outOfStockItems[0]} Habis`;
+                    tooltip.style.display = 'block';
+                    tooltip.style.opacity = '0';
+                    tooltipText.textContent = `Stok ${outOfStockItems[0]} Habis`;
+                } else if (outOfStockItems.length > 1) {
+                    buttonText.textContent = `${outOfStockItems.length} Item Stok Habis`;
+                    tooltip.style.display = 'block';
+                    tooltip.style.opacity = '0';
+                    tooltipText.textContent = `${outOfStockItems.length} Item Stok Habis`;
+                } else {
+                    buttonText.textContent = 'Stok Tidak Tersedia';
+                    tooltip.style.display = 'block';
+                    tooltip.style.opacity = '0';
+                    tooltipText.textContent = 'Stok Tidak Tersedia';
+                }
+                button.className = button.className.replace(/bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600/, 'bg-gray-400');
+                break;
+                
+            case 'no-components':
+                button.disabled = true;
+                buttonText.textContent = 'Tidak Ada Komponen';
+                tooltip.style.display = 'block';
+                tooltip.style.opacity = '0';
+                tooltipText.textContent = 'Tidak Ada Komponen';
+                button.className = button.className.replace(/bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600/, 'bg-gray-400');
+                break;
+                
+            case 'error':
+                button.disabled = true;
+                buttonText.textContent = 'Error Memuat Data';
+                tooltip.style.display = 'block';
+                tooltip.style.opacity = '0';
+                tooltipText.textContent = 'Error Memuat Data';
+                button.className = button.className.replace(/bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600/, 'bg-gray-400');
+                break;
+        }
     }
 
     // Close greeting card modal
@@ -253,6 +390,8 @@
         document.getElementById('greetingCardModal').classList.add('hidden');
         // Hide components section
         document.getElementById('bouquetComponentsSection').style.display = 'none';
+        // Reset button state
+        updateAddToCartButtonState('loading');
         currentGreetingData = null;
     }
 
@@ -283,7 +422,13 @@
     function addBouquetWithGreeting() {
         if (!currentGreetingData) return;
 
+        const button = document.getElementById('addToCartButton');
+        if (button.disabled) return; // Prevent action if button is disabled
+
         const greetingMessage = document.getElementById('greetingCardMessage').value.trim();
+
+        // Show loading state
+        updateAddToCartButtonState('loading');
 
         // Add to cart via AJAX
         fetch('/cart/add-bouquet', {
@@ -331,6 +476,9 @@
                     } else {
                         alert('Gagal menambahkan ke keranjang: ' + (data.message || 'Unknown error'));
                     }
+                    
+                    // Reset button to available state
+                    updateAddToCartButtonState('available');
                 }
             })
             .catch(error => {
@@ -341,6 +489,9 @@
                 } else {
                     alert('Terjadi kesalahan saat menambahkan ke keranjang');
                 }
+                
+                // Reset button to available state
+                updateAddToCartButtonState('available');
             });
     }
 
@@ -349,6 +500,22 @@
         const textarea = document.getElementById('greetingCardMessage');
         if (textarea) {
             textarea.addEventListener('input', updateCharacterCount);
+        }
+
+        // Add tooltip functionality for disabled button
+        const addToCartButton = document.getElementById('addToCartButton');
+        const tooltip = document.getElementById('buttonTooltip');
+        
+        if (addToCartButton && tooltip) {
+            addToCartButton.addEventListener('mouseenter', function() {
+                if (this.disabled && tooltip.style.display !== 'none') {
+                    tooltip.style.opacity = '1';
+                }
+            });
+            
+            addToCartButton.addEventListener('mouseleave', function() {
+                tooltip.style.opacity = '0';
+            });
         }
     });
 
