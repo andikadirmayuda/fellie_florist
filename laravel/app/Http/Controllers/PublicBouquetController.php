@@ -7,6 +7,7 @@ use App\Models\BouquetCategory;
 use App\Models\BouquetSize;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Models\BouquetComponent; // Added this import
 
 class PublicBouquetController extends Controller
 {
@@ -130,18 +131,24 @@ class PublicBouquetController extends Controller
 
     public function getComponentsBySize($bouquetId, $sizeId)
     {
-        $bouquet = Bouquet::with([
-            'validComponents.product.category',
-            'validComponents.size'
-        ])->findOrFail($bouquetId);
+        // Add simple server-side caching
+        $cacheKey = "bouquet_components_{$bouquetId}_{$sizeId}";
+        
+        // Try to get from cache first
+        if (cache()->has($cacheKey)) {
+            return response()->json(cache()->get($cacheKey));
+        }
 
-        // Bersihkan komponen yang tidak valid
-        $bouquet->cleanupInvalidComponents();
-
-        // Ambil komponen untuk size tertentu
-        $components = $bouquet->validComponents()
+        // Optimized query - langsung ambil komponen yang valid untuk size tertentu
+        $components = BouquetComponent::where('bouquet_id', $bouquetId)
             ->where('size_id', $sizeId)
-            ->with('product.category')
+            ->whereHas('product') // Hanya komponen dengan produk yang masih ada
+            ->with(['product' => function($query) {
+                $query->select('id', 'name', 'category_id', 'base_unit', 'current_stock', 'price');
+            }, 'product.category' => function($query) {
+                $query->select('id', 'name');
+            }])
+            ->select('id', 'bouquet_id', 'size_id', 'product_id', 'quantity')
             ->get();
 
         // Format data untuk response
@@ -159,10 +166,15 @@ class PublicBouquetController extends Controller
             ];
         });
 
-        return response()->json([
+        $response = [
             'success' => true,
             'components' => $formattedComponents,
             'total_components' => $formattedComponents->count()
-        ]);
+        ];
+
+        // Cache the response for 5 minutes
+        cache()->put($cacheKey, $response, 300);
+
+        return response()->json($response);
     }
 }

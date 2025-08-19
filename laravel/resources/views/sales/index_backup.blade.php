@@ -129,7 +129,7 @@
                                         @endif
 
                                         <!-- Stats Cards (optional) -->
-                                        <div class="mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                        <div class="mb-6 grid grid-cols-1 sm:grid-cols-2 w-full gap-4">
                                             <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
                                                 <div class="flex items-center">
                                                     <div class="flex-shrink-0">
@@ -207,54 +207,54 @@
                                                         </thead>
                                                         <tbody class="bg-white divide-y divide-gray-100">
                                                             @forelse($sales as $sale)
-                                                                                <tr class="hover:bg-pink-25 transition-colors duration-150">
-                                                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                                                {{ ($sales->currentPage() - 1) * $sales->perPage() + $loop->iteration }}
-                                                                                    </td>
-                                                                                    <td class="px-6 py-4 whitespace-nowrap">
-                                                                                        <div class="text-sm font-semibold text-gray-900">{{ $sale->order_number }}</div>
-                                                                                    </td>
-                                                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                                                {{ \Carbon\Carbon::parse($sale->order_time)->format('d/m/Y H:i') }}
-                                                                                    </td>
-                                                                                    <td class="px-6 py-4 whitespace-nowrap">
-                                                                                        <div class="text-sm font-semibold text-gray-900">
-                                                                                            Rp {{ number_format($sale->total, 0, ',', '.') }}
-                                                                                        </div>
-                                                                                    </td>
-                                                                                    <td class="px-6 py-4 whitespace-nowrap">
-                                                                                        <span
-                                                                                            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                                                        {{ $sale->payment_method === 'transfer' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800' }}">
-                                                                    {{ ucfirst($sale->payment_method) }}
-                                                                                        </span>
-                                                                                    </td>
-                                                                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                                                        <div class="flex items-center space-x-2">
-                                                                                            <a href="{{ route('sales.show', $sale->id) }}"
-                                                                                                class="inline-flex items-center px-3 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-md transition-colors duration-150"
-                                                                                                title="Detail">
-                                                                                                <i class="bi bi-eye mr-1"></i>
-                                                                                                <span class="hidden xl:inline">Detail</span>
-                                                                                            </a>
-                                                                                            <a href="{{ route('sales.show', $sale->id) }}?print=1"
-                                                                                                class="inline-flex items-center px-3 py-1.5 bg-green-50 text-green-700 hover:bg-green-100 rounded-md transition-colors duration-150"
-                                                                                                title="Print">
-                                                                                                <i class="bi bi-printer mr-1"></i>
-                                                                                                <span class="hidden xl:inline">Print</span>
-                                                                                            </a>
+                                                                <tr class="hover:bg-pink-25 transition-colors duration-150">
+                                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                                                                {{ ($sales->currentPage() - 1) * $sales->perPage() + $loop->iteration }}
+                                                                    </td>
+                                                                    <td class="px-6 py-4 whitespace-nowrap">
+                                                                        <div class="text-sm font-semibold text-gray-900">{{ $sale->order_number }}</div>
+                                                                    </td>
+                                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                                                                {{ \Carbon\Carbon::parse($sale->order_time)->format('d/m/Y H:i') }}
+                                                                    </td>
+                                                                    <td class="px-6 py-4 whitespace-nowrap">
+                                                                        <div class="text-sm font-semibold text-gray-900">
+                                                                            Rp {{ number_format($sale->total, 0, ',', '.') }}
+                                                                        </div>
+                                                                    </td>
+                                                                    <td class="px-6 py-4 whitespace-nowrap">
+                                                                        <span
+                                                                            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                                                                        {{ $sale->payment_method === 'transfer' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800' }}">
+                                                                                    {{ ucfirst($sale->payment_method) }}
+                                                                        </span>
+                                                                    </td>
+                                                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                                        <div class="flex items-center space-x-2">
+                                                                            <a href="{{ route('sales.show', $sale->id) }}"
+                                                                                class="inline-flex items-center px-3 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-md transition-colors duration-150"
+                                                                                title="Detail">
+                                                                                <i class="bi bi-eye mr-1"></i>
+                                                                                <span class="hidden xl:inline">Detail</span>
+                                                                            </a>
+                                                                            <a href="{{ route('sales.show', $sale->id) }}?print=1"
+                                                                                class="inline-flex items-center px-3 py-1.5 bg-green-50 text-green-700 hover:bg-green-100 rounded-md transition-colors duration-150"
+                                                                                title="Print">
+                                                                                <i class="bi bi-printer mr-1"></i>
+                                                                                <span class="hidden xl:inline">Print</span>
+                                                                            </a>
 
-                                                                                            @if(\Carbon\Carbon::parse($sale->order_time)->format('Y-m-d') === now()->format('Y-m-d'))
-                                                                                                <button onclick="openDeleteModal({{ $sale->id }}, '{{ $sale->order_number }}')"
-                                                                                                    class="inline-flex items-center px-3 py-1.5 bg-red-50 text-red-700 hover:bg-red-100 rounded-md transition-colors duration-150"
-                                                                                                    title="Batalkan">
-                                                                                                    <i class="bi bi-trash mr-1"></i>
-                                                                                                    <span class="hidden xl:inline">Hapus</span>
-                                                                                                </button>
-                                                                                            @endif
-                                                                                        </div>
-                                                                                    </td>
-                                                                                </tr>
+                                                                            @if(\Carbon\Carbon::parse($sale->order_time)->format('Y-m-d') === now()->format('Y-m-d'))
+                                                                                <button onclick="openDeleteModal({{ $sale->id }}, '{{ $sale->order_number }}')"
+                                                                                    class="inline-flex items-center px-3 py-1.5 bg-red-50 text-red-700 hover:bg-red-100 rounded-md transition-colors duration-150"
+                                                                                    title="Batalkan">
+                                                                                    <i class="bi bi-trash mr-1"></i>
+                                                                                    <span class="hidden xl:inline">Hapus</span>
+                                                                                </button>
+                                                                            @endif
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
                                                             @empty
                                                                 <tr>
                                                                     <td colspan="6" class="px-6 py-12 text-center">
@@ -279,60 +279,60 @@
                                                 <!-- Mobile Cards -->
                                                 <div class="lg:hidden">
                                                     @forelse($sales as $sale)
-                                                                <div class="border-b border-gray-200 last:border-b-0">
-                                                                    <div class="p-4 hover:bg-pink-25 transition-colors duration-150">
-                                                                        <!-- Header Row -->
-                                                                        <div class="flex items-center justify-between mb-3">
-                                                                            <div class="flex items-center">
-                                                                                <div
-                                                                                    class="w-8 h-8 bg-pink-100 rounded-full flex items-center justify-center mr-3">
-                                                                                    <i class="bi bi-receipt text-pink-600 text-sm"></i>
-                                                                                </div>
-                                                                                <div>
-                                                                                    <p class="text-sm font-semibold text-gray-900">{{ $sale->order_number }}</p>
-                                                                                    <p class="text-xs text-gray-500">
-                                                                {{ \Carbon\Carbon::parse($sale->order_time)->format('d/m/Y H:i') }}
-                                                                                    </p>
-                                                                                </div>
-                                                                            </div>
-                                                                            <span
-                                                                                class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
-                                                            {{ $sale->payment_method === 'transfer' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800' }}">
-                                                        {{ ucfirst($sale->payment_method) }}
-                                                                            </span>
+                                                        <div class="border-b border-gray-200 last:border-b-0">
+                                                            <div class="p-4 hover:bg-pink-25 transition-colors duration-150">
+                                                                <!-- Header Row -->
+                                                                <div class="flex items-center justify-between mb-3">
+                                                                    <div class="flex items-center">
+                                                                        <div
+                                                                            class="w-8 h-8 bg-pink-100 rounded-full flex items-center justify-center mr-3">
+                                                                            <i class="bi bi-receipt text-pink-600 text-sm"></i>
                                                                         </div>
-
-                                                                        <!-- Content Row -->
-                                                                        <div class="flex items-center justify-between">
-                                                                            <div>
-                                                                                <p class="text-lg font-bold text-gray-900">
-                                                                                    Rp {{ number_format($sale->total, 0, ',', '.') }}
-                                                                                </p>
-                                                                                <p class="text-xs text-gray-500">Total Transaksi</p>
-                                                                            </div>
-                                                                            <div class="flex items-center space-x-2">
-                                                                                <a href="{{ route('sales.show', $sale->id) }}"
-                                                                                    class="inline-flex items-center justify-center w-9 h-9 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-full transition-colors duration-150"
-                                                                                    title="Detail">
-                                                                                    <i class="bi bi-eye text-sm"></i>
-                                                                                </a>
-                                                                                <a href="{{ route('sales.show', $sale->id) }}?print=1"
-                                                                                    class="inline-flex items-center justify-center w-9 h-9 bg-green-50 text-green-700 hover:bg-green-100 rounded-full transition-colors duration-150"
-                                                                                    title="Print">
-                                                                                    <i class="bi bi-printer text-sm"></i>
-                                                                                </a>
-
-                                                                                @if(\Carbon\Carbon::parse($sale->order_time)->format('Y-m-d') === now()->format('Y-m-d'))
-                                                                                    <button onclick="openDeleteModal({{ $sale->id }}, '{{ $sale->order_number }}')"
-                                                                                        class="inline-flex items-center justify-center w-9 h-9 bg-red-50 text-red-700 hover:bg-red-100 rounded-full transition-colors duration-150"
-                                                                                        title="Batalkan">
-                                                                                        <i class="bi bi-trash text-sm"></i>
-                                                                                    </button>
-                                                                                @endif
-                                                                            </div>
+                                                                        <div>
+                                                                            <p class="text-sm font-semibold text-gray-900">{{ $sale->order_number }}</p>
+                                                                            <p class="text-xs text-gray-500">
+                                                                                {{ \Carbon\Carbon::parse($sale->order_time)->format('d/m/Y H:i') }}
+                                                                            </p>
                                                                         </div>
                                                                     </div>
+                                                                    <span
+                                                                        class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
+                                                                            {{ $sale->payment_method === 'transfer' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800' }}">
+                                                                        {{ ucfirst($sale->payment_method) }}
+                                                                    </span>
                                                                 </div>
+
+                                                                <!-- Content Row -->
+                                                                <div class="flex items-center justify-between">
+                                                                    <div>
+                                                                        <p class="text-lg font-bold text-gray-900">
+                                                                            Rp {{ number_format($sale->total, 0, ',', '.') }}
+                                                                        </p>
+                                                                        <p class="text-xs text-gray-500">Total Transaksi</p>
+                                                                    </div>
+                                                                    <div class="flex items-center space-x-2">
+                                                                        <a href="{{ route('sales.show', $sale->id) }}"
+                                                                            class="inline-flex items-center justify-center w-9 h-9 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-full transition-colors duration-150"
+                                                                            title="Detail">
+                                                                            <i class="bi bi-eye text-sm"></i>
+                                                                        </a>
+                                                                        <a href="{{ route('sales.show', $sale->id) }}?print=1"
+                                                                            class="inline-flex items-center justify-center w-9 h-9 bg-green-50 text-green-700 hover:bg-green-100 rounded-full transition-colors duration-150"
+                                                                            title="Print">
+                                                                            <i class="bi bi-printer text-sm"></i>
+                                                                        </a>
+
+                                                                        @if(\Carbon\Carbon::parse($sale->order_time)->format('Y-m-d') === now()->format('Y-m-d'))
+                                                                            <button onclick="openDeleteModal({{ $sale->id }}, '{{ $sale->order_number }}')"
+                                                                                class="inline-flex items-center justify-center w-9 h-9 bg-red-50 text-red-700 hover:bg-red-100 rounded-full transition-colors duration-150"
+                                                                                title="Batalkan">
+                                                                                <i class="bi bi-trash text-sm"></i>
+                                                                            </button>
+                                                                        @endif
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
                                                     @empty
                                                         <div class="p-8 text-center">
                                                             <div class="flex flex-col items-center justify-center">
@@ -353,17 +353,17 @@
 
                                             <!-- Pagination -->
                                             @if($sales->hasPages())
-                                                            <div class="px-4 py-4 sm:px-6 border-t border-gray-200 bg-gray-50">
-                                                                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                                                                    <div class="text-sm text-gray-700">
-                                                                        Menampilkan {{ $sales->firstItem() ?? 0 }} sampai {{ $sales->lastItem() ?? 0 }}
-                                                                        dari {{ $sales->total() }} transaksi
-                                                                    </div>
-                                                                    <div class="flex justify-center sm:justify-end">
-                                                {{ $sales->links('pagination::tailwind') }}
-                                                                    </div>
-                                                                </div>
-                                                            </div>
+                                                <div class="px-4 py-4 sm:px-6 border-t border-gray-200 bg-gray-50">
+                                                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                                                        <div class="text-sm text-gray-700">
+                                                            Menampilkan {{ $sales->firstItem() ?? 0 }} sampai {{ $sales->lastItem() ?? 0 }}
+                                                            dari {{ $sales->total() }} transaksi
+                                                        </div>
+                                                        <div class="flex justify-center sm:justify-end">
+                                                                {{ $sales->links('pagination::tailwind') }}
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             @endif
                                         </div>
                                     </div>

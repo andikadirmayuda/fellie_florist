@@ -169,7 +169,7 @@
                     Laporan Pelanggan
                 </x-sidebar-link>
             @endif
-            @if(auth()->user()->hasRole('owner') || auth()->user()->hasRole('admin'))
+            @if(auth()->user()->hasRole('owner'))
                 <x-sidebar-link :href="route('reports.income')" :active="request()->routeIs('reports.income')">
                     <x-slot name="icon">
                         <i class="bi bi-cash-stack text-lg mr-1"></i>

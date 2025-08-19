@@ -91,25 +91,27 @@
     <div class="py-8 gradient-bg min-h-screen">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <!-- Cards Statistik -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <div class="stats-card p-6 relative overflow-hidden">
-                    <div class="absolute right-0 top-0 w-32 h-32 opacity-10">
-                        <i class="bi bi-cash-coin text-8xl text-green-500 transform translate-x-8 -translate-y-8"></i>
+            @if(auth()->user()->hasRole(['owner']))
+            <div class="stats-card p-6 relative overflow-hidden mb-6">
+                <div class="absolute right-0 top-0 w-32 h-32 opacity-10">
+                    <i class="bi bi-cash-coin text-8xl text-green-500 transform translate-x-8 -translate-y-8"></i>
+                </div>
+                <div class="relative">
+                    <div class="flex items-center mb-4">
+                        <div class="p-3 bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg">
+                            <i class="bi bi-cash-coin text-xl text-white"></i>
+                        </div>
+                        <p class="ml-3 text-sm font-medium text-gray-500">Total Pendapatan</p>
                     </div>
-                    <div class="relative">
-                        <div class="flex items-center mb-4">
-                            <div class="p-3 bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg">
-                                <i class="bi bi-cash-coin text-xl text-white"></i>
-                            </div>
-                            <p class="ml-3 text-sm font-medium text-gray-500">Total Pendapatan</p>
-                        </div>
-                        <p class="text-2xl font-bold text-gray-800">Rp{{ number_format($totalPendapatan,0,',','.') }}</p>
-                        <div class="flex items-center mt-2">
-                            <i class="bi bi-calendar3 text-xs text-gray-400 mr-1"></i>
-                            <p class="text-xs text-gray-500">{{ date('d M Y', strtotime($start)) }} - {{ date('d M Y', strtotime($end)) }}</p>
-                        </div>
+                    <p class="text-2xl font-bold text-gray-800">Rp{{ number_format($totalPendapatan,0,',','.') }}</p>
+                    <div class="flex items-center mt-2">
+                        <i class="bi bi-calendar3 text-xs text-gray-400 mr-1"></i>
+                        <p class="text-xs text-gray-500">{{ date('d M Y', strtotime($start)) }} - {{ date('d M Y', strtotime($end)) }}</p>
                     </div>
                 </div>
+            </div>
+            @endif
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
 
                 <div class="stats-card p-6 relative overflow-hidden">
                     <div class="absolute right-0 top-0 w-32 h-32 opacity-10">
@@ -155,7 +157,7 @@
                             </div>
                         @else
                             <p class="text-gray-400">Tidak ada data</p>
-                        @endif
+                        {{-- @endif --}}
                     </div>
                 </div>
 
@@ -188,6 +190,7 @@
                     </div>
                 </div>
             </div>
+            @endif
 
             <!-- Tabel Transaksi -->
             <div class="section-card">

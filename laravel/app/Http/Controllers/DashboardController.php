@@ -30,20 +30,20 @@ class DashboardController extends Controller
             ->where('wa_number', '!=', '-')
             ->distinct()
             ->count();
-            
+
         $totalProducts = Product::count();
         $totalOrders = PublicOrder::whereIn('status', ['pending', 'confirmed', 'processing', 'ready', 'completed'])->count();
         $totalSales = Sale::count(); // Sales menggunakan SoftDeletes, count() otomatis exclude yang deleted
-        
+
         // Total pendapatan dari Sales dan PublicOrder 
         $salesRevenue = Sale::sum('total'); // Ambil semua sales yang tidak di-soft delete
-        
+
         // Hitung pendapatan dari PublicOrder melalui items (quantity * price)
         $ordersRevenue = DB::table('public_orders')
             ->join('public_order_items', 'public_orders.id', '=', 'public_order_items.public_order_id')
             ->whereIn('public_orders.status', ['confirmed', 'processing', 'ready', 'completed'])
             ->sum(DB::raw('public_order_items.quantity * public_order_items.price'));
-            
+
         $totalRevenue = $salesRevenue + $ordersRevenue;
 
         // Produk stok menipis
@@ -59,7 +59,7 @@ class DashboardController extends Controller
             ->groupBy('date')
             ->orderBy('date')
             ->get();
-            
+
         // Buat array 7 hari terakhir untuk memastikan semua tanggal tampil
         $last7DaysSales = collect();
         for ($i = 6; $i >= 0; $i--) {
@@ -68,14 +68,14 @@ class DashboardController extends Controller
             $saleData = $sales->where('date', $date)->first();
             $count = $saleData->count ?? 0;
             $total = $saleData->total ?? 0;
-            
+
             $last7DaysSales->push([
                 'date' => $dateFormatted,
                 'count' => $count,
                 'total' => $total
             ]);
         }
-        
+
         $salesChartData = [
             'labels' => $last7DaysSales->pluck('date')->toArray(),
             'datasets' => [[
@@ -112,15 +112,15 @@ class DashboardController extends Controller
         for ($i = 6; $i >= 0; $i--) {
             $date = now()->subDays($i)->format('Y-m-d');
             $dateFormatted = now()->subDays($i)->format('d M');
-            
+
             // Ambil data count dari ordersQuery (gunakan order_count, bukan total)
             $orderData = $ordersQuery->where('date', $date)->first();
             $count = $orderData->order_count ?? 0;
-            
+
             // Ambil data revenue dari revenueQuery  
             $revenueData = $revenueQuery->where('date', $date)->first();
             $revenue = $revenueData->revenue ?? 0;
-            
+
             $last7DaysOrders->push([
                 'date' => $dateFormatted,
                 'count' => $count,
@@ -143,7 +143,7 @@ class DashboardController extends Controller
             'labels' => $last7DaysOrders->pluck('date')->toArray(),
             'datasets' => [[
                 'label' => 'Pendapatan Harian',
-                'data' => $last7DaysOrders->map(function($orderDay) use ($last7DaysSales) {
+                'data' => $last7DaysOrders->map(function ($orderDay) use ($last7DaysSales) {
                     $salesRevenue = $last7DaysSales->where('date', $orderDay['date'])->first()['total'] ?? 0;
                     return $salesRevenue + $orderDay['revenue'];
                 })->toArray(),
@@ -191,7 +191,7 @@ class DashboardController extends Controller
             $allCategories = BouquetCategory::with('bouquets')->get();
             $bouquetChartData = [
                 'labels' => $allCategories->pluck('name')->take(5)->toArray(),
-                'data' => $allCategories->map(function($category) {
+                'data' => $allCategories->map(function ($category) {
                     return $category->bouquets->count(); // Jumlah bouquet per kategori
                 })->take(5)->toArray()
             ];

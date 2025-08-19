@@ -39,7 +39,7 @@
                     </div>
 
                     <!-- Stats Cards -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                         <div class="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-4 rounded-lg">
                             <div class="flex items-center">
                                 <div class="flex-1">
@@ -59,8 +59,10 @@
                                 <i class="bi bi-bag-check text-3xl text-green-200"></i>
                             </div>
                         </div>
-
-                        <div class="bg-gradient-to-r from-purple-500 to-purple-600 text-white p-4 rounded-lg">
+                    </div>
+                    @if(auth()->user()->hasRole(['owner']))
+                        <div
+                            class="bg-gradient-to-r from-purple-500 to-purple-600 text-white p-4 rounded-lg form-enter mb-6 w-full">
                             <div class="flex items-center">
                                 <div class="flex-1">
                                     <p class="text-purple-100">Total Penjualan</p>
@@ -71,7 +73,7 @@
                                 <i class="bi bi-currency-dollar text-3xl text-purple-200"></i>
                             </div>
                         </div>
-                    </div>
+                    @endif
 
                     <!-- Customers Table -->
                     @if($onlineCustomers->count() > 0)
@@ -138,7 +140,7 @@
                                                                     @foreach($customer->all_names as $name)
                                                                         <span
                                                                             class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium 
-                                                                                                                                            {{ $name === $customer->customer_name ? 'bg-pink-100 text-pink-700' : 'bg-gray-100 text-gray-600' }}">
+                                                                                                                                                                                                                                                                                                                                                                            {{ $name === $customer->customer_name ? 'bg-pink-100 text-pink-700' : 'bg-gray-100 text-gray-600' }}">
                                                                             {{ $name }}
                                                                             @if($name === $customer->customer_name)
                                                                                 <i class="bi bi-star-fill ml-1 text-xs"></i>

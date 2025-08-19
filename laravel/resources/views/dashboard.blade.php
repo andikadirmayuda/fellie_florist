@@ -117,9 +117,9 @@
                 <p class="text-4xl text-gray-600">❤️</p>
             </div> --}}
             <!-- Dashboard Stats -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8 form-enter">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mb-8 form-enter">
                 <!-- Total Customers Card -->
-                <div class="stats-card p-6">
+                <div class="stats-card p-4">
                     <div class="flex items-center">
                         <div class="p-3 bg-blue-100 rounded-lg mr-4">
                             <i class="bi bi-people text-2xl text-blue-600"></i>
@@ -133,7 +133,7 @@
                 </div>
 
                 <!-- Total Products Card -->
-                <div class="stats-card p-6">
+                <div class="stats-card p-4">
                     <div class="flex items-center">
                         <div class="p-3 bg-green-100 rounded-lg mr-4">
                             <i class="bi bi-box-seam text-2xl text-green-600"></i>
@@ -147,7 +147,7 @@
                 </div>
 
                 <!-- Total Orders Card -->
-                <div class="stats-card p-6">
+                <div class="stats-card p-4">
                     <div class="flex items-center">
                         <div class="p-3 bg-purple-100 rounded-lg mr-4">
                             <i class="bi bi-cart text-2xl text-purple-600"></i>
@@ -161,7 +161,7 @@
                 </div>
 
                 <!-- Total Sale Card -->
-                <div class="stats-card p-6">
+                <div class="stats-card p-4">
                     <div class="flex items-center">
                         <div class="p-3 bg-indigo-100 rounded-lg mr-4">
                             <i class="bi bi-receipt text-2xl text-indigo-600"></i>
@@ -173,101 +173,107 @@
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Total Revenue Card -->
-                <div class="stats-card p-6">
-                    <div class="flex items-center">
-                        <div class="p-3 bg-orange-100 rounded-lg mr-4">
-                            <i class="bi bi-cash-stack text-2xl text-orange-600"></i>
+            @if(auth()->user()->hasRole(['owner']))
+            <!-- Total Revenue Card -->
+            <div class="stats-card p-6 mb-6 form-enter">
+                <div class="flex items-center">
+                    <div class="p-3 bg-orange-100 rounded-lg mr-4">
+                        <i class="bi bi-cash-stack text-2xl text-orange-600"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Total Pendapatan</p>
+                        <p class="text-m font-bold text-gray-800">Rp {{ number_format($totalRevenue ?? 0, 0, ',', '.') }}</p>
+                        <p class="text-xs text-orange-600 mt-1">Revenue</p>
+                    </div>
+                </div>
+            </div>
+            @endif
+
+            @if(auth()->user()->hasRole(['owner']))
+            <!-- Dashboard Performance Section -->
+                <!-- Performance Charts -->
+                <!-- Baris 1: Performa Penjualan & Pesanan -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 form-enter">
+                    <!-- Sales Performance Chart -->
+                    <div class="chart-card p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+                                <i class="bi bi-graph-up-arrow mr-2 text-blue-600"></i>
+                                Performa Penjualan
+                            </h3>
+                            <span class="text-xs text-green-600 bg-green-50 px-2 py-1 rounded">7 Hari</span>
                         </div>
-                        <div>
-                            <p class="text-sm font-medium text-gray-500">Total Pendapatan</p>
-                            <p class="text-m font-bold text-gray-800">Rp {{ number_format($totalRevenue ?? 0, 0, ',', '.') }}</p>
-                            <p class="text-xs text-orange-600 mt-1">Revenue</p>
+                        <div class="relative">
+                            <canvas id="salesChart" class="w-full h-48"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Orders Performance Chart -->
+                    <div class="chart-card p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+                                <i class="bi bi-bar-chart mr-2 text-purple-600"></i>
+                                Performa Pesanan
+                            </h3>
+                            <span class="text-xs text-purple-600 bg-purple-50 px-2 py-1 rounded">Trending</span>
+                        </div>
+                        <div class="relative">
+                            <canvas id="ordersChart" class="w-full h-48"></canvas>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Performance Charts -->
-            <!-- Baris 1: Performa Penjualan & Pesanan -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 form-enter">
-                <!-- Sales Performance Chart -->
-                <div class="chart-card p-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-lg font-semibold text-gray-800 flex items-center">
-                            <i class="bi bi-graph-up-arrow mr-2 text-blue-600"></i>
-                            Performa Penjualan
-                        </h3>
-                        <span class="text-xs text-green-600 bg-green-50 px-2 py-1 rounded">7 Hari</span>
+                <!-- Baris 2: Performa Produk & Bouquet -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 form-enter">
+                    <!-- Product Performance Chart (Doughnut) -->
+                    <div class="chart-card p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+                                <i class="bi bi-pie-chart mr-2 text-rose-600"></i>
+                                Performa Produk
+                            </h3>
+                            <span class="text-xs text-rose-600 bg-rose-50 px-2 py-1 rounded">Top Categories</span>
+                        </div>
+                        <div class="relative">
+                            <canvas id="productChart" class="w-full h-48"></canvas>
+                        </div>
                     </div>
-                    <div class="relative">
-                        <canvas id="salesChart" class="w-full h-48"></canvas>
+
+                    <!-- Bouquet Performance Chart (Bar) -->
+                    <div class="chart-card p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+                                <i class="bi bi-flower2 mr-2 text-pink-600"></i>
+                                Performa Bouquet
+                            </h3>
+                            <span class="text-xs text-pink-600 bg-pink-50 px-2 py-1 rounded">Best Sellers</span>
+                        </div>
+                        <div class="relative">
+                            <canvas id="bouquetChart" class="w-full h-48"></canvas>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Orders Performance Chart -->
-                <div class="chart-card p-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-lg font-semibold text-gray-800 flex items-center">
-                            <i class="bi bi-bar-chart mr-2 text-purple-600"></i>
-                            Performa Pesanan
-                        </h3>
-                        <span class="text-xs text-purple-600 bg-purple-50 px-2 py-1 rounded">Trending</span>
-                    </div>
-                    <div class="relative">
-                        <canvas id="ordersChart" class="w-full h-48"></canvas>
-                    </div>
-                </div>
-            </div>
+                <!-- Baris 3: Performa Pendapatan (Full Width) -->
+                <div class="grid grid-cols-1 gap-6 mb-8 form-enter">
+                    <!-- Revenue Performance Chart -->
+                    <div class="chart-card p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+                                <i class="bi bi-currency-dollar mr-2 text-green-600"></i>
+                                Performa Pendapatan
+                            </h3>
+                            <span class="text-xs text-green-600 bg-green-50 px-2 py-1 rounded">Monthly</span>
+                        </div>
+                        <div class="relative">
+                            <canvas id="revenueChart" class="w-full h-64"></canvas>
+                        </div>
 
-            <!-- Baris 2: Performa Produk & Bouquet -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 form-enter">
-                <!-- Product Performance Chart (Doughnut) -->
-                <div class="chart-card p-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-lg font-semibold text-gray-800 flex items-center">
-                            <i class="bi bi-pie-chart mr-2 text-rose-600"></i>
-                            Performa Produk
-                        </h3>
-                        <span class="text-xs text-rose-600 bg-rose-50 px-2 py-1 rounded">Top Categories</span>
-                    </div>
-                    <div class="relative">
-                        <canvas id="productChart" class="w-full h-48"></canvas>
                     </div>
                 </div>
-
-                <!-- Bouquet Performance Chart (Bar) -->
-                <div class="chart-card p-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-lg font-semibold text-gray-800 flex items-center">
-                            <i class="bi bi-flower2 mr-2 text-pink-600"></i>
-                            Performa Bouquet
-                        </h3>
-                        <span class="text-xs text-pink-600 bg-pink-50 px-2 py-1 rounded">Best Sellers</span>
-                    </div>
-                    <div class="relative">
-                        <canvas id="bouquetChart" class="w-full h-48"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Baris 3: Performa Pendapatan (Full Width) -->
-            <div class="grid grid-cols-1 gap-6 mb-8 form-enter">
-                <!-- Revenue Performance Chart -->
-                <div class="chart-card p-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-lg font-semibold text-gray-800 flex items-center">
-                            <i class="bi bi-currency-dollar mr-2 text-green-600"></i>
-                            Performa Pendapatan
-                        </h3>
-                        <span class="text-xs text-green-600 bg-green-50 px-2 py-1 rounded">Monthly</span>
-                    </div>
-                    <div class="relative">
-                        <canvas id="revenueChart" class="w-full h-64"></canvas>
-                    </div>
-                </div>
-            </div>
+            @endif
 
             <!-- Business Intelligence Section -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 form-enter">
@@ -297,7 +303,7 @@
                                         </p>
                                     </div>
                                     <a href="{{ route('inventory.adjust.form', $product) }}" 
-                                       class="text-xs bg-red-600 text-white px-2 py-1 rounded hover:bg-red-700">
+                                    class="text-xs bg-red-600 text-white px-2 py-1 rounded hover:bg-red-700">
                                         Sesuaikan
                                     </a>
                                 </div>
@@ -352,17 +358,23 @@
                                 <i class="bi bi-plus-circle mr-2"></i>
                                 Tambah Produk
                             </a>
-                            
+
                             <a href="{{ route('inventory.index') }}" 
                                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg flex items-center justify-center transition-colors">
                                 <i class="bi bi-box-seam mr-2"></i>
                                 Kelola Inventaris
                             </a>
-                            
+
                             <a href="{{ route('admin.public-orders.index') }}" 
                                class="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-3 px-4 rounded-lg flex items-center justify-center transition-colors">
                                 <i class="bi bi-globe2 mr-2"></i>
                                 Pesanan Online
+                            </a>
+
+                            <a href="{{ route('sales.index') }}"
+                                class="w-full bg-orange-600 hover:bg-orange-700 text-white font-medium py-3 px-4 rounded-lg flex items-center justify-center transition-colors">
+                                <i class="bi bi-cash-coin mr-2"></i>
+                                Penjualan
                             </a>
 
                             <a href="{{ route('reports.sales') }}" 
@@ -538,8 +550,8 @@
                                         </td>
                                         <td class="text-center">
                                             @php
-                                                $stock = data_get($product, 'current_stock', 0);
-                                                $minStock = data_get($product, 'min_stock', 5);
+        $stock = data_get($product, 'current_stock', 0);
+        $minStock = data_get($product, 'min_stock', 5);
                                             @endphp
                                             @if($stock > $minStock * 2)
                                                 <span class="inline-flex items-center px-2 py-1 bg-green-100 text-green-700 rounded text-xs">
@@ -561,8 +573,8 @@
                                         <td class="text-center">
                                             <div class="flex flex-col items-center">
                                                 @php
-                                                    // Simulasi performance berdasarkan stok (produk dengan stok tinggi dianggap laris)
-                                                    $performance = $stock > 50 ? 'laris' : ($stock > 20 ? 'normal' : 'kurang laris');
+        // Simulasi performance berdasarkan stok (produk dengan stok tinggi dianggap laris)
+        $performance = $stock > 50 ? 'laris' : ($stock > 20 ? 'normal' : 'kurang laris');
                                                 @endphp
                                                 @if($performance === 'laris')
                                                     <span class="text-xs text-green-600 font-medium">
