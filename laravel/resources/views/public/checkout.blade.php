@@ -247,7 +247,7 @@
                                     <option value="Ambil Langsung Ke Toko">🏪 (1) Ambil Langsung Ke Toko</option>
                                     <option value="Gosend (Dipesan Pribadi)">🚗 (2) Gosend (Dipesan Pribadi)</option>
                                     <option value="Gocar (Dipesan Pribadi)">🚕 (3) Gocar (Dipesan Pribadi)</option>
-                                    <option value="Gosend (Pesan Dari Toko)">� (4) Gosend (Pesan Dari Toko)</option>
+                                    <option value="Gosend (Pesan Dari Toko)">🛻 (4) Gosend (Pesan Dari Toko)</option>
                                     <option value="Gocar (Pesan Dari Toko)">🚕 (5) Gocar (Pesan Dari Toko)</option>
                                     <option value="Travel (Di Pesan Sendiri)">🚌 (6) Travel (Di Pesan Sendiri - Khusus Luar Kota)</option>
                                 </select>

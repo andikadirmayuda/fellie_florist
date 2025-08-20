@@ -75,11 +75,173 @@
                 }
             }
         }
+
+        // Fungsi untuk toggle menu mobile
+        function toggleMobileMenu() {
+            const mobileMenu = document.getElementById('mobileMenu');
+            if (mobileMenu.classList.contains('hidden')) {
+                // Tampilkan menu
+                mobileMenu.classList.remove('hidden');
+                mobileMenu.classList.add('animate-fade-in-down');
+            } else {
+                // Sembunyikan menu
+                mobileMenu.classList.add('hidden');
+                mobileMenu.classList.remove('animate-fade-in-down');
+            }
+        }
+
+        // Tutup menu mobile ketika user klik di luar menu
+        document.addEventListener('click', function(event) {
+            const mobileMenu = document.getElementById('mobileMenu');
+            const hamburgerButton = event.target.closest('[onclick="toggleMobileMenu()"]');
+            
+            if (!hamburgerButton && !mobileMenu.contains(event.target) && !mobileMenu.classList.contains('hidden')) {
+                mobileMenu.classList.add('hidden');
+            }
+        });
+
+        // Sinkronkan badge cart mobile dengan desktop
+        const updateCartBadges = () => {
+            const desktopBadge = document.getElementById('cartBadge');
+            const mobileBadge = document.getElementById('cartBadgeMobile');
+            if (desktopBadge && mobileBadge) {
+                mobileBadge.textContent = desktopBadge.textContent;
+                mobileBadge.classList.toggle('hidden', desktopBadge.classList.contains('hidden'));
+            }
+        };
+
+        // Observer untuk memantau perubahan pada badge desktop
+        const observer = new MutationObserver(updateCartBadges);
+        const desktopBadge = document.getElementById('cartBadge');
+        if (desktopBadge) {
+            observer.observe(desktopBadge, { 
+                attributes: true, 
+                childList: true, 
+                characterData: true 
+            });
+        }
     </script>
     <style>
         body,
         .font-sans {
             font-family: 'Figtree', sans-serif;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-in-down {
+            animation: fadeInDown 0.2s ease-out;
+        }
+
+        /* Navigation Styles */
+        .nav-tab {
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+            white-space: nowrap;
+            letter-spacing: 0.3px;
+            backdrop-filter: blur(8px);
+            font-size: 0.8125rem;
+            padding: 0.5rem 0.75rem;
+        }
+
+        @media (max-width: 360px) {
+            .nav-tab {
+                min-width: 80px !important;
+                padding: 0.5rem !important;
+                font-size: 0.75rem !important;
+            }
+        }
+
+        @media (min-width: 361px) and (max-width: 639px) {
+            .nav-tab {
+                min-width: 90px !important;
+                padding: 0.5rem 0.75rem !important;
+                font-size: 0.8125rem !important;
+            }
+        }
+
+        @media (min-width: 640px) and (max-width: 767px) {
+            .nav-tab {
+                min-width: 100px !important;
+                padding: 0.625rem 1rem !important;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .nav-tab {
+                min-width: 120px;
+                padding: 0.75rem 1.25rem;
+                font-size: 0.875rem;
+            }
+        }
+
+        .nav-tab::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+
+        .nav-tab:hover::before {
+            transform: translateX(100%);
+        }
+
+        /* Active tab indicator animation */
+        @keyframes dotPulse {
+            0% {
+                transform: translate(-50%, -50%) scale(0.8);
+                opacity: 0.5;
+            }
+
+            50% {
+                transform: translate(-50%, -50%) scale(1.2);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translate(-50%, -50%) scale(0.8);
+                opacity: 0.5;
+            }
+        }
+
+        .nav-tab span.absolute {
+            animation: dotPulse 2s infinite;
+        }
+
+        /* Responsive navigation adjustments */
+        @media (max-width: 640px) {
+            .nav-tab {
+                min-width: 100px;
+            }
+
+            .nav-tab span {
+                font-size: 0.8125rem;
+            }
+        }
+
+        @media (min-width: 641px) {
+            .nav-tab {
+                min-width: 120px;
+            }
+
+            .nav-tab:hover {
+                transform: translateY(-1px);
+            }
         }
 
         .line-clamp-2 {
@@ -514,141 +676,131 @@
     <!-- Header -->
     <header class="w-full glass-effect border-b border-gray-100 sticky top-0 z-40">
         <div class="max-w-7xl mx-auto px-4">
-            <!-- Top Bar -->
-            <div class="flex items-center justify-between h-16">
-                <!-- Brand Section -->
-                <div class="flex items-center space-x-3">
-                    <a href="{{ route('public.flowers') }}" class="flex items-center space-x-3">
-                        <img src="{{ asset('logo-fellie-02.png') }}" alt="Logo"
-                            class="brand-logo w-10 h-10 rounded-full">
-                        <div>
-                            <h1 class="text-lg font-bold text-gray-800">Fellie Florist</h1>
-                            <p class="text-xs text-gray-500">Supplier Bunga</p>
-                        </div>
-                    </a>
-                </div>
-
-
-                <!-- Search Bar -->
-                {{-- <div class="flex-1 max-w-md mx-8">
-                    <div class="relative">
-                        <input type="text" placeholder="Cari bunga impian Anda..."
-                            class="w-full h-10 pl-4 pr-10 text-sm bg-gray-50 border border-gray-200 rounded-full focus:outline-none focus:border-rose-300 focus:ring-1 focus:ring-rose-300">
-                        <button class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-rose-500">
-                            <i class="bi bi-search"></i>
-                        </button>
-                    </div>
-                </div> --}}
-
-                <!-- Action Buttons -->
-                <div class="flex items-center space-x-4">
-                    <!-- Track Order -->
-                    <a href="{{ route('public.order.track') }}"
-                        class="text-gray-600 hover:text-rose-600 p-2 rounded-full hover:bg-rose-50 transition-all duration-200"
-                        title="Lacak Pesanan">
-                        <i class="bi bi-truck text-xl"></i>
-                    </a>
-
-                    <!-- Order Detail - Muncul setelah checkout -->
-                    @if(session('last_public_order_code'))
-                        <a href="{{ route('public.order.detail', ['public_code' => session('last_public_order_code')]) }}"
-                            class="relative text-white bg-rose-500 hover:bg-rose-600 p-2 rounded-full hover:shadow-lg transition-all duration-200 order-detail-pulse"
-                            title="Lihat Detail Pesanan Terbaru - Kode: {{ session('last_public_order_code') }}">
-                            <i class="bi bi-receipt-cutoff text-xl"></i>
-                            <span
-                                class="absolute -top-1 -right-1 bg-green-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold notification-badge">
-                                ✓
-                            </span>
+            <div class="flex flex-col items-center">
+                <!-- Top Bar -->
+                <div class="w-full flex items-center justify-between h-28 md:h-32">
+                    <!-- Brand Text - Left -->
+                    <div class="flex items-center">
+                        <a href="{{ route('public.flowers') }}" class="flex items-center">
+                            <div>
+                                <h1 class="text-xl md:text-2xl lg:text-3xl font-bold text-gray-800">Fellie Florist</h1>
+                                <p class="text-[10px] sm:text-xs text-gray-500">Suplier Bunga Palembang</p>
+                            </div>
                         </a>
-                    @endif
+                    </div>
+    
+                    <!-- Logo - Center -->
+                    <div class="absolute left-1/2 transform -translate-x-1/2">
+                        <img src="{{ asset('logo-fellie-02.png') }}" alt="Logo"
+                            class="brand-logo w-24 h-24 md:w-28 md:h-28 lg:w-32 lg:h-32 rounded-full shadow-lg hover:shadow-xl transition-all duration-300">
+                    </div>
+    
+                    <!-- Action Buttons -->
+                    <div class="flex items-center">
+                        <!-- Desktop Menu -->
+                        <div class="hidden md:flex items-center space-x-3">
+                            <!-- Track Order -->
+                            <a href="{{ route('public.order.track') }}"
+                                class="text-gray-600 hover:text-rose-600 p-2 rounded-full hover:bg-rose-50 transition-all duration-200"
+                                title="Lacak Pesanan">
+                                <i class="bi bi-truck text-xl"></i>
+                            </a>
+        
+                            @if(session('last_public_order_code'))
+                                <a href="{{ route('public.order.detail', ['public_code' => session('last_public_order_code')]) }}"
+                                    class="relative text-white bg-rose-500 hover:bg-rose-600 p-1.5 rounded-full hover:shadow-lg transition-all duration-200">
+                                    <i class="bi bi-receipt-cutoff text-xl"></i>
+                                    <span
+                                        class="absolute -top-1 -right-1 bg-green-500 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-bold">✓</span>
+                                </a>
+                            @endif
+        
+                            <!-- Cart -->
+                            <button onclick="toggleCart()"
+                                class="text-gray-600 hover:text-rose-600 relative p-2 rounded-full hover:bg-rose-50 transition-all duration-200"
+                                title="Keranjang Belanja">
+                                <i class="bi bi-bag text-xl"></i>
+                                <span id="cartBadge"
+                                    class="absolute -top-1 -right-1 w-4 h-4 bg-rose-500 text-white text-[10px] rounded-full flex items-center justify-center hidden">0</span>
+                            </button>
+        
+                            <a href="{{ route('login') }}"
+                                class="text-gray-600 hover:text-rose-600 p-2 rounded-full hover:bg-rose-50 transition-all duration-200">
+                                <i class="bi bi-person-circle text-xl"></i>
+                            </a>
+                        </div>
 
-                    <!-- Cart -->
-                    <button onclick="toggleCart()"
-                        class="text-gray-600 hover:text-rose-600 relative p-2 rounded-full hover:bg-rose-50 transition-all duration-200"
-                        title="Keranjang Belanja">
-                        <i class="bi bi-bag text-xl"></i>
-                        <span id="cartBadge"
-                            class="absolute -top-1 -right-1 w-5 h-5 bg-rose-500 text-white text-xs rounded-full flex items-center justify-center hidden">0</span>
-                    </button>
-                    <a href="{{ route('login') }}"
-                        class="text-gray-600 hover:text-rose-600 p-2 rounded-full hover:bg-rose-50 transition-all duration-200"
-                        title="Login">
-                        <i class="bi bi-person-circle text-xl"></i>
-                    </a>
+                        <!-- Mobile Menu Button -->
+                        <div class="md:hidden flex items-center space-x-2">
+                            <!-- Cart Button - Always Visible -->
+                            <button onclick="toggleCart()"
+                                class="text-gray-600 hover:text-rose-600 relative p-2 rounded-full hover:bg-rose-50 transition-all duration-200"
+                                title="Keranjang Belanja">
+                                <i class="bi bi-bag text-xl"></i>
+                                <span id="cartBadgeMobile"
+                                    class="absolute -top-1 -right-1 w-4 h-4 bg-rose-500 text-white text-[10px] rounded-full flex items-center justify-center hidden">0</span>
+                            </button>
+
+                            <!-- Hamburger Button -->
+                            <button onclick="toggleMobileMenu()"
+                                class="text-gray-600 hover:text-rose-600 p-2 rounded-full hover:bg-rose-50 transition-all duration-200">
+                                <i class="bi bi-list text-2xl"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Mobile Menu Dropdown -->
+                    <div id="mobileMenu" class="hidden fixed top-[80px] right-0 w-48 bg-white shadow-lg rounded-bl-lg z-50">
+                        <div class="py-2">
+                            <a href="{{ route('public.order.track') }}"
+                                class="flex items-center px-4 py-2 text-gray-600 hover:bg-rose-50 hover:text-rose-600">
+                                <i class="bi bi-truck mr-2"></i>
+                                <span>Lacak Pesanan</span>
+                            </a>
+                            
+                            @if(session('last_public_order_code'))
+                                <a href="{{ route('public.order.detail', ['public_code' => session('last_public_order_code')]) }}"
+                                    class="flex items-center px-4 py-2 text-gray-600 hover:bg-rose-50 hover:text-rose-600">
+                                    <i class="bi bi-receipt-cutoff mr-2"></i>
+                                    <span>Pesanan Terakhir</span>
+                                </a>
+                            @endif
+
+                            <a href="{{ route('login') }}"
+                                class="flex items-center px-4 py-2 text-gray-600 hover:bg-rose-50 hover:text-rose-600">
+                                <i class="bi bi-person-circle mr-2"></i>
+                                <span>Login</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+    
+                <!-- Main Navigation -->
+                <div class="w-full mt-4">
+                    <nav class="flex items-center justify-center">
+                        <div class="flex items-center justify-center space-x-2 sm:space-x-4 md:space-x-8">
+                            <a href="{{ route('public.flowers') }}"
+                                class="px-3 sm:px-6 py-2 text-center {{ $activeTab === 'flowers' ? 'nav-tab nav-hover-effect group relative items-center space-x-2 px-4 py-3 rounded-xl transition-all duration-300 bg-gradient-to-r from-rose-500 to-red-500 text-white shadow-lg nav-active-gradient' : '' }}">
+                                <span class="text-sm font-medium">BUNGA</span>
+                            </a>
+
+                            <a href="{{ route('public.bouquets') }}"
+                                class="px-3 sm:px-6 py-2 text-center {{ $activeTab === 'bouquets' ? 'bg-gray-100 rounded-lg' : '' }}">
+                                <span class="text-sm font-medium">BOUQUET</span>
+                            </a>
+
+                            <a href="{{ route('custom.bouquet.create') }}" class="px-3 sm:px-6 py-2 text-center">
+                                <span class="text-sm font-medium">CUSTOM</span>
+                            </a>
+                        </div>
+                    </nav>
+                    </div>
+                    <!-- Add spacing below main navigation -->
+                    <div class="mb-6"></div>
                 </div>
             </div>
         </div>
     </header>
-
-    <!-- Hero Section -->
-    <div class="bg-white">
-        <div class="max-w-4xl mx-auto px-4 py-8 text-center">
-            <h2 class="text-3xl font-bold text-gray-800 mb-2">Koleksi Bunga Premium</h2>
-            <p class="text-gray-600 mb-2">Temukan bunga segar berkualitas tinggi untuk setiap momen spesial</p>
-            <p class="text-sm text-gray-500 flex items-center justify-center gap-2">
-                <i class="bi bi-clock text-rose-400"></i>
-                Terakhir diperbarui:
-                {{ $lastUpdated ? \Carbon\Carbon::parse($lastUpdated)->translatedFormat('d F Y H:i') : '-' }}
-            </p>
-        </div>
-    </div>
-    <!-- Main Navigation -->
-    <div class="bg-white/80 backdrop-blur-md border-t border-gray-100 sticky top-16 z-30">
-        <div class="max-w-7xl mx-auto px-4">
-            <nav class="flex items-center justify-center py-4">
-                <div class="flex items-center space-x-2 md:space-x-6 lg:space-x-8">
-                    <!-- Bunga Tab -->
-                    <a href="{{ route('public.flowers') }}"
-                        class="nav-tab nav-hover-effect group relative flex items-center space-x-2 px-4 py-3 rounded-xl transition-all duration-300 {{ $activeTab === 'flowers' ? 'bg-gradient-to-r from-rose-500 to-pink-500 text-white shadow-lg nav-active-gradient' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50' }}">
-                        <div
-                            class="flex items-center justify-center w-8 h-8 rounded-lg {{ $activeTab === 'flowers' ? 'bg-white/20' : 'bg-rose-50 group-hover:bg-rose-100' }} transition-colors duration-300">
-                            <i
-                                class="bi bi-flower3 text-lg {{ $activeTab === 'flowers' ? 'text-white' : 'text-rose-500' }}"></i>
-                        </div>
-                        <span class="text-sm md:text-base font-semibold hidden sm:block">Bunga</span>
-                        <span class="text-xs md:text-sm font-medium sm:hidden nav-mobile-text">Bunga</span>
-                        @if($activeTab === 'flowers')
-                            <div
-                                class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-6 h-1 bg-white rounded-full">
-                            </div>
-                        @endif
-                    </a>
-
-                    <!-- Bouquet Tab -->
-                    <a href="{{ route('public.bouquets') }}"
-                        class="nav-tab nav-hover-effect group relative flex items-center space-x-2 px-4 py-3 rounded-xl transition-all duration-300 {{ $activeTab === 'bouquets' ? 'bg-gradient-to-r from-rose-500 to-pink-500 text-white shadow-lg nav-active-gradient' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50' }}">
-                        <div
-                            class="flex items-center justify-center w-8 h-8 rounded-lg {{ $activeTab === 'bouquets' ? 'bg-white/20' : 'bg-rose-50 group-hover:bg-rose-100' }} transition-colors duration-300">
-                            <i
-                                class="bi bi-flower2 text-lg {{ $activeTab === 'bouquets' ? 'text-white' : 'text-rose-500' }}"></i>
-                        </div>
-                        <span class="text-sm md:text-base font-semibold hidden sm:block">Bouquet</span>
-                        <span class="text-xs md:text-sm font-medium sm:hidden nav-mobile-text">Bouquet</span>
-                        @if($activeTab === 'bouquets')
-                            <div
-                                class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-6 h-1 bg-white rounded-full">
-                            </div>
-                        @endif
-                    </a>
-
-                    <!-- Custom Bouquet Tab -->
-                    <a href="{{ route('custom.bouquet.create') }}"
-                        class="nav-tab nav-hover-effect group relative flex items-center space-x-2 px-4 py-3 rounded-xl transition-all duration-300 text-gray-600 hover:text-gray-800 hover:bg-gray-50">
-                        <div
-                            class="flex items-center justify-center w-8 h-8 rounded-lg bg-purple-50 group-hover:bg-purple-100 transition-colors duration-300">
-                            <i class="bi bi-palette text-lg text-purple-500"></i>
-                        </div>
-                        <span class="text-sm md:text-base font-semibold hidden sm:block">Custom Bouquet</span>
-                        <span class="text-xs md:text-sm font-medium sm:hidden nav-mobile-text">Custom</span>
-                        {{-- <span
-                            class="absolute -top-1 -right-1 text-xs bg-gradient-to-r from-yellow-400 to-orange-400 text-orange-900 px-2 py-0.5 rounded-full font-bold shadow-md animate-pulse">
-                            NEW
-                        </span> --}}
-                    </a>
-                </div>
-            </nav>
-        </div>
-    </div>
 
     <!-- Main Content -->
     <div class="w-full max-w-6xl mx-auto px-4 py-6">
@@ -750,8 +902,8 @@
 
                             <!-- Details -->
                             <div class="product-content flex-1">
-                                <!-- Category Badge - Left Aligned -->
-                                <div class="flex justify-start mb-3">
+                                <!-- Category Badge - Centered -->
+                                <div class="flex justify-center mb-2">
                                     <span
                                         class="category-badge bg-rose-100 text-rose-700 rounded-full px-3 py-1 text-xs font-medium"
                                         title="{{ $flower->category->name ?? 'Umum' }}">
@@ -759,45 +911,39 @@
                                     </span>
                                 </div>
 
-                                <!-- Product Title - Left Aligned -->
-                                <h3 class="product-title font-bold text-gray-800 text-left leading-none"
-                                    style="margin-bottom: -4px;">
+                                <!-- Product Title - Centered -->
+                                <h3 class="product-title font-bold text-gray-800 text-center leading-none mt-5">
                                     {{ $flower->name }}
                                 </h3>
 
-                                <!-- Description - Left Aligned with no spacing from title -->
-                                <p class="text-xs sm:text-sm text-gray-600 text-left line-clamp-2 leading-none mb-3"
-                                    style="margin-top: -4px;">
-                                    {{ $flower->description }}
-                                </p>
-
-                                <!-- Price - Left Aligned -->
-                                <div class="mb-1">
+                                <!-- Price - Centered -->
+                                <div>
                                     @php
-                                        // Siapkan array harga untuk JS
-                                        $jsPrices = $flower->prices->map(function ($price) {
-                                            return [
-                                                'id' => $price->id,
-                                                'type' => $price->type,
-                                                'label' => __(ucwords(str_replace('_', ' ', $price->type))),
-                                                'price' => (int) $price->price // Pastikan price adalah integer
-                                            ];
-                                        });
+        // Siapkan array harga untuk JS
+        $jsPrices = $flower->prices->map(function ($price) {
+            return [
+                'id' => $price->id,
+                'type' => $price->type,
+                'label' => __(ucwords(str_replace('_', ' ', $price->type))),
+                'price' => (int) $price->price // Pastikan price adalah integer
+            ];
+        });
                                     @endphp
-                                    <div class="text-left">
-                                        <div class="text-price text-sm sm:text-lg font-bold text-rose-600">
-                                            @if($jsPrices->count() === 1)
-                                                Rp {{ number_format($jsPrices[0]['price'], 0, ',', '.') }}
+                                    <div class="text-center">
+                                        <div class="text-price text-sm sm:text-lg font-bold text-rose-600 text-center">
+                                            @php
+        $minPrice = $jsPrices->min('price');
+        $maxPrice = $jsPrices->max('price');
+                                            @endphp
+                                            @if($minPrice === $maxPrice)
+                                                Rp {{ number_format($minPrice, 0, ',', '.') }}
                                             @else
-                                                Pilih harga
+                                                Rp {{ number_format($minPrice, 0, ',', '.') }} -
+                                                {{ number_format($maxPrice, 0, ',', '.') }}
                                             @endif
                                         </div>
-                                        <div class="text-xs text-gray-500">
-                                            @if($jsPrices->count() === 1)
-                                                {{ $jsPrices[0]['label'] }}
-                                            @else
-                                                Beberapa pilihan harga
-                                            @endif
+                                        <div class="text-xs text-gray-500 text-center">
+                                            {{ $jsPrices->count() }} pilihan harga
                                         </div>
                                     </div>
                                 </div>
@@ -809,25 +955,25 @@
                                         <span
                                             class="font-semibold {{ $flower->current_stock > 10 ? 'text-green-600' : ($flower->current_stock > 0 ? 'text-yellow-600' : 'text-red-600') }}">
                                             @php
-                                                // Cari harga ikat yang tersedia, prioritas ikat 5
-                                                $ikatPrice = $flower->prices->firstWhere('type', 'ikat_5')
-                                                    ?: $flower->prices->firstWhere('type', 'ikat 5')
-                                                    ?: $flower->prices->firstWhere('type', 'ikat_10')
-                                                    ?: $flower->prices->firstWhere('type', 'ikat 10')
-                                                    ?: $flower->prices->firstWhere('type', 'ikat_20')
-                                                    ?: $flower->prices->firstWhere('type', 'ikat 20');
+        // Cari harga ikat yang tersedia, prioritas ikat 5
+        $ikatPrice = $flower->prices->firstWhere('type', 'ikat_5')
+            ?: $flower->prices->firstWhere('type', 'ikat 5')
+            ?: $flower->prices->firstWhere('type', 'ikat_10')
+            ?: $flower->prices->firstWhere('type', 'ikat 10')
+            ?: $flower->prices->firstWhere('type', 'ikat_20')
+            ?: $flower->prices->firstWhere('type', 'ikat 20');
 
-                                                $ikatCount = 0;
-                                                $ikatLabel = '';
+        $ikatCount = 0;
+        $ikatLabel = '';
 
-                                                if ($ikatPrice && $ikatPrice->unit_equivalent > 0) {
-                                                    $ikatCount = floor($flower->current_stock / $ikatPrice->unit_equivalent);
-                                                    $unitSize = $ikatPrice->unit_equivalent;
-                                                    $ikatLabel = " / {$ikatCount} ikat";
-                                                }
+        if ($ikatPrice && $ikatPrice->unit_equivalent > 0) {
+            $ikatCount = floor($flower->current_stock / $ikatPrice->unit_equivalent);
+            $unitSize = $ikatPrice->unit_equivalent;
+            $ikatLabel = " / {$ikatCount} ikat";
+        }
 
-                                                // Gunakan base_unit dari database atau default ke 'tangkai'
-                                                $baseUnit = $flower->base_unit ?? 'tangkai';
+        // Gunakan base_unit dari database atau default ke 'tangkai'
+        $baseUnit = $flower->base_unit ?? 'tangkai';
                                             @endphp
                                             {{ $flower->current_stock }} {{ $baseUnit }}{{ $ikatLabel }}
                                         </span>
@@ -840,7 +986,7 @@
 
                                 <!-- Action Button -->
                                 @php $isOut = (int) $flower->current_stock <= 0; @endphp
-                                <button onclick="{{ $isOut ? 'return false' : 'handleAddToCart('.(int)$flower->id.')' }}"
+                                <button onclick="{{ $isOut ? 'return false' : 'handleAddToCart(' . (int) $flower->id . ')' }}"
                                     class="mt-auto w-full {{ $isOut ? 'bg-gray-300 text-gray-600 cursor-not-allowed' : 'bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white shadow-md hover:shadow-lg' }} font-semibold py-1.5 sm:py-2 px-3 sm:px-4 rounded-xl transition-all duration-200 text-xs sm:text-sm"
                                     {{ $isOut ? 'disabled' : '' }}>
                                     @if($isOut)
@@ -946,8 +1092,8 @@
                                 <!-- Price Range - Left Aligned -->
                                 <div class="mb-1">
                                     @php
-                                        $minPrice = $bouquet->prices->min('price');
-                                        $maxPrice = $bouquet->prices->max('price');
+        $minPrice = $bouquet->prices->min('price');
+        $maxPrice = $bouquet->prices->max('price');
                                     @endphp
                                     <div class="text-left">
                                         <div class="text-price text-sm sm:text-lg font-bold text-rose-600">

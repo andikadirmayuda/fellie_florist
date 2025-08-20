@@ -25,6 +25,51 @@
                 }
             }
         }
+
+        // Fungsi untuk toggle menu mobile
+        function toggleMobileMenu() {
+            const mobileMenu = document.getElementById('mobileMenu');
+            if (mobileMenu.classList.contains('hidden')) {
+                // Tampilkan menu
+                mobileMenu.classList.remove('hidden');
+                mobileMenu.classList.add('animate-fade-in-down');
+            } else {
+                // Sembunyikan menu
+                mobileMenu.classList.add('hidden');
+                mobileMenu.classList.remove('animate-fade-in-down');
+            }
+        }
+
+        // Tutup menu mobile ketika user klik di luar menu
+        document.addEventListener('click', function (event) {
+            const mobileMenu = document.getElementById('mobileMenu');
+            const hamburgerButton = event.target.closest('[onclick="toggleMobileMenu()"]');
+
+            if (!hamburgerButton && !mobileMenu.contains(event.target) && !mobileMenu.classList.contains('hidden')) {
+                mobileMenu.classList.add('hidden');
+            }
+        });
+
+        // Sinkronkan badge cart mobile dengan desktop
+        const updateCartBadges = () => {
+            const desktopBadge = document.getElementById('cartBadge');
+            const mobileBadge = document.getElementById('cartBadgeMobile');
+            if (desktopBadge && mobileBadge) {
+                mobileBadge.textContent = desktopBadge.textContent;
+                mobileBadge.classList.toggle('hidden', desktopBadge.classList.contains('hidden'));
+            }
+        };
+
+        // Observer untuk memantau perubahan pada badge desktop
+        const observer = new MutationObserver(updateCartBadges);
+        const desktopBadge = document.getElementById('cartBadge');
+        if (desktopBadge) {
+            observer.observe(desktopBadge, {
+                attributes: true,
+                childList: true,
+                characterData: true
+            });
+        }
     </script>
     <style>
         body,
@@ -380,6 +425,23 @@
                 transform: translate(-50%, -50%) scale(1);
             }
         }
+
+        /* Fade in animation untuk mobile menu */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-in-down {
+            animation: fadeInDown 0.2s ease-out;
+        }
     </style>
 </head>
 
@@ -390,124 +452,132 @@
     <!-- Header -->
     <header class="w-full glass-effect border-b border-gray-100 sticky top-0 z-40">
         <div class="max-w-7xl mx-auto px-4">
-            <!-- Top Bar -->
-            <div class="flex items-center justify-between h-16">
-                <!-- Brand Section -->
-                <div class="flex items-center space-x-3">
-                    <a href="{{ route('public.flowers') }}" class="flex items-center space-x-3">
-                        <img src="{{ asset('logo-fellie-02.png') }}" alt="Logo"
-                            class="brand-logo w-10 h-10 rounded-full">
-                        <div>
-                            <h1 class="text-lg font-bold text-gray-800">Fellie Florist</h1>
-                            <p class="text-xs text-gray-500">Custom Bouquet Builder</p>
-                        </div>
-                    </a>
-                </div>
-
-                <!-- Action Buttons -->
-                <div class="flex items-center space-x-4">
-                    <!-- Track Order -->
-                    <a href="{{ route('public.order.track') }}"
-                        class="text-gray-600 hover:text-rose-600 p-2 rounded-full hover:bg-rose-50 transition-all duration-200"
-                        title="Lacak Pesanan">
-                        <i class="bi bi-truck text-xl"></i>
-                    </a>
-
-                    <!-- Order Detail - Muncul setelah checkout -->
-                    @if(session('last_public_order_code'))
-                        <a href="{{ route('public.order.detail', ['public_code' => session('last_public_order_code')]) }}"
-                            class="relative text-white bg-rose-500 hover:bg-rose-600 p-2 rounded-full hover:shadow-lg transition-all duration-200 order-detail-pulse"
-                            title="Lihat Detail Pesanan Terbaru - Kode: {{ session('last_public_order_code') }}">
-                            <i class="bi bi-receipt-cutoff text-xl"></i>
-                            <span
-                                class="absolute -top-1 -right-1 bg-green-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold notification-badge">
-                                ✓
-                            </span>
+            <div class="flex flex-col items-center">
+                <!-- Top Bar -->
+                <div class="w-full flex items-center justify-between h-28 md:h-32">
+                    <!-- Brand Text - Left -->
+                    <div class="flex items-center">
+                        <a href="{{ route('public.flowers') }}" class="flex items-center">
+                            <div>
+                                <h1 class="text-xl md:text-2xl lg:text-3xl font-bold text-gray-800">Fellie Florist</h1>
+                                <p class="text-[10px] sm:text-xs text-gray-500">Suplier Bunga Palembang</p>
+                            </div>
                         </a>
-                    @endif
+                    </div>
 
-                    <!-- Cart -->
-                    <button onclick="toggleCart()"
-                        class="text-gray-600 hover:text-rose-600 relative p-2 rounded-full hover:bg-rose-50 transition-all duration-200"
-                        title="Keranjang Belanja">
-                        <i class="bi bi-bag text-xl"></i>
-                        <span id="cartBadge"
-                            class="absolute -top-1 -right-1 w-5 h-5 bg-rose-500 text-white text-xs rounded-full flex items-center justify-center hidden">0</span>
-                    </button>
-                    <a href="{{ route('login') }}"
-                        class="text-gray-600 hover:text-rose-600 p-2 rounded-full hover:bg-rose-50 transition-all duration-200"
-                        title="Login">
-                        <i class="bi bi-person-circle text-xl"></i>
-                    </a>
+                    <!-- Logo - Center -->
+                    <div class="absolute left-1/2 transform -translate-x-1/2">
+                        <img src="{{ asset('logo-fellie-02.png') }}" alt="Logo"
+                            class="brand-logo w-24 h-24 md:w-28 md:h-28 lg:w-32 lg:h-32 rounded-full shadow-lg hover:shadow-xl transition-all duration-300">
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex items-center">
+                        <!-- Desktop Menu -->
+                        <div class="hidden md:flex items-center space-x-3">
+                            <!-- Track Order -->
+                            <a href="{{ route('public.order.track') }}"
+                                class="text-gray-600 hover:text-rose-600 p-2 rounded-full hover:bg-rose-50 transition-all duration-200"
+                                title="Lacak Pesanan">
+                                <i class="bi bi-truck text-xl"></i>
+                            </a>
+
+                            @if(session('last_public_order_code'))
+                                <a href="{{ route('public.order.detail', ['public_code' => session('last_public_order_code')]) }}"
+                                    class="relative text-white bg-rose-500 hover:bg-rose-600 p-1.5 rounded-full hover:shadow-lg transition-all duration-200">
+                                    <i class="bi bi-receipt-cutoff text-xl"></i>
+                                    <span
+                                        class="absolute -top-1 -right-1 bg-green-500 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-bold">✓</span>
+                                </a>
+                            @endif
+
+                            <!-- Cart -->
+                            <button onclick="toggleCart()"
+                                class="text-gray-600 hover:text-rose-600 relative p-2 rounded-full hover:bg-rose-50 transition-all duration-200"
+                                title="Keranjang Belanja">
+                                <i class="bi bi-bag text-xl"></i>
+                                <span id="cartBadge"
+                                    class="absolute -top-1 -right-1 w-4 h-4 bg-rose-500 text-white text-[10px] rounded-full flex items-center justify-center hidden">0</span>
+                            </button>
+
+                            <a href="{{ route('login') }}"
+                                class="text-gray-600 hover:text-rose-600 p-2 rounded-full hover:bg-rose-50 transition-all duration-200">
+                                <i class="bi bi-person-circle text-xl"></i>
+                            </a>
+                        </div>
+
+                        <!-- Mobile Menu Button -->
+                        <div class="md:hidden flex items-center space-x-2">
+                            <!-- Cart Button - Always Visible -->
+                            <button onclick="toggleCart()"
+                                class="text-gray-600 hover:text-rose-600 relative p-2 rounded-full hover:bg-rose-50 transition-all duration-200"
+                                title="Keranjang Belanja">
+                                <i class="bi bi-bag text-xl"></i>
+                                <span id="cartBadgeMobile"
+                                    class="absolute -top-1 -right-1 w-4 h-4 bg-rose-500 text-white text-[10px] rounded-full flex items-center justify-center hidden">0</span>
+                            </button>
+
+                            <!-- Hamburger Button -->
+                            <button onclick="toggleMobileMenu()"
+                                class="text-gray-600 hover:text-rose-600 p-2 rounded-full hover:bg-rose-50 transition-all duration-200">
+                                <i class="bi bi-list text-2xl"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Mobile Menu Dropdown -->
+                    <div id="mobileMenu"
+                        class="hidden fixed top-[80px] right-0 w-48 bg-white shadow-lg rounded-bl-lg z-50">
+                        <div class="py-2">
+                            <a href="{{ route('public.order.track') }}"
+                                class="flex items-center px-4 py-2 text-gray-600 hover:bg-rose-50 hover:text-rose-600">
+                                <i class="bi bi-truck mr-2"></i>
+                                <span>Lacak Pesanan</span>
+                            </a>
+
+                            @if(session('last_public_order_code'))
+                                <a href="{{ route('public.order.detail', ['public_code' => session('last_public_order_code')]) }}"
+                                    class="flex items-center px-4 py-2 text-gray-600 hover:bg-rose-50 hover:text-rose-600">
+                                    <i class="bi bi-receipt-cutoff mr-2"></i>
+                                    <span>Pesanan Terakhir</span>
+                                </a>
+                            @endif
+
+                            <a href="{{ route('login') }}"
+                                class="flex items-center px-4 py-2 text-gray-600 hover:bg-rose-50 hover:text-rose-600">
+                                <i class="bi bi-person-circle mr-2"></i>
+                                <span>Login</span>
+                            </a>
+                        </div>
+                    </div>
                 </div>
+
+                <!-- Main Navigation -->
+                <div class="w-full mt-4">
+                    <nav class="flex items-center justify-center">
+                        <div class="flex items-center justify-center space-x-2 sm:space-x-4 md:space-x-8">
+                            <a href="{{ route('public.flowers') }}" class="px-3 sm:px-6 py-2 text-center">
+
+                                <span class="text-sm font-medium">BUNGA</span>
+                            </a>
+
+                            <a href="{{ route('public.bouquets') }}" class="px-3 sm:px-6 py-2 text-center">
+                                <span class="text-sm font-medium">BOUQUET</span>
+                            </a>
+
+                            <a href="{{ route('custom.bouquet.create') }}"
+                                class="nav-tab nav-hover-effect group relative items-center space-x-2 px-4 py-3 rounded-xl transition-all duration-300 bg-gradient-to-r from-rose-500 to-red-500 text-white shadow-lg nav-active-gradient' : '' }}">
+                                <span class="text-sm font-medium">CUSTOM</span>
+                            </a>
+                        </div>
+                    </nav>
+                </div>
+                <!-- Add spacing below main navigation -->
+                <div class="mb-6"></div>
             </div>
         </div>
+        </div>
     </header>
-
-    <!-- Hero Section -->
-    <div class="bg-white">
-        <div class="max-w-4xl mx-auto px-4 py-8 text-center">
-            <h2 class="text-3xl font-bold text-gray-800 mb-2">
-                <span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-indigo-600">Custom
-                </span>Bouquet
-            </h2>
-            <p class="text-gray-600 mb-2">Buat bouquet impian Anda dengan memilih bunga sesuai keinginan</p>
-            <p class="text-sm text-gray-500 flex items-center justify-center gap-2">
-                <i class="bi bi-clock text-rose-400"></i>
-                Terakhir diperbarui:
-                {{ \Carbon\Carbon::now()->translatedFormat('d F Y H:i') }}
-            </p>
-        </div>
-    </div>
-
-    <!-- Main Navigation -->
-    <div class="bg-white/80 backdrop-blur-md border-t border-gray-100 sticky top-16 z-30">
-        <div class="max-w-7xl mx-auto px-4">
-            <nav class="flex items-center justify-center py-4">
-                <div class="flex items-center space-x-2 md:space-x-6 lg:space-x-8">
-                    <!-- Bunga Tab -->
-                    <a href="{{ route('public.flowers') }}"
-                        class="nav-tab nav-hover-effect group relative flex items-center space-x-2 px-4 py-3 rounded-xl transition-all duration-300 text-gray-600 hover:text-gray-800 hover:bg-gray-50">
-                        <div
-                            class="flex items-center justify-center w-8 h-8 rounded-lg bg-rose-50 group-hover:bg-rose-100 transition-colors duration-300">
-                            <i class="bi bi-flower3 text-lg text-rose-500"></i>
-                        </div>
-                        <span class="text-sm md:text-base font-semibold hidden sm:block">Bunga</span>
-                        <span class="text-xs md:text-sm font-medium sm:hidden nav-mobile-text">Bunga</span>
-                    </a>
-
-                    <!-- Bouquet Tab -->
-                    <a href="{{ route('public.bouquets') }}"
-                        class="nav-tab nav-hover-effect group relative flex items-center space-x-2 px-4 py-3 rounded-xl transition-all duration-300 text-gray-600 hover:text-gray-800 hover:bg-gray-50">
-                        <div
-                            class="flex items-center justify-center w-8 h-8 rounded-lg bg-rose-50 group-hover:bg-rose-100 transition-colors duration-300">
-                            <i class="bi bi-flower2 text-lg text-rose-500"></i>
-                        </div>
-                        <span class="text-sm md:text-base font-semibold hidden sm:block">Bouquet</span>
-                        <span class="text-xs md:text-sm font-medium sm:hidden nav-mobile-text">Bouquet</span>
-                    </a>
-
-                    <!-- Custom Bouquet Tab -->
-                    <a href="{{ route('custom.bouquet.create') }}"
-                        class="nav-tab nav-hover-effect group relative flex items-center space-x-2 px-4 py-3 rounded-xl transition-all duration-300 bg-gradient-to-r from-purple-500 to-indigo-500 text-white shadow-lg hover:shadow-xl transform hover:scale-105 nav-active-gradient">
-                        <div
-                            class="flex items-center justify-center w-8 h-8 rounded-lg bg-white/20 transition-colors duration-300">
-                            <i class="bi bi-palette text-lg text-white"></i>
-                        </div>
-                        <span class="text-sm md:text-base font-semibold hidden sm:block">Custom Bouquet</span>
-                        <span class="text-xs md:text-sm font-medium sm:hidden nav-mobile-text">Custom</span>
-                        {{-- <span
-                            class="absolute -top-1 -right-1 text-xs bg-gradient-to-r from-yellow-400 to-orange-400 text-orange-900 px-2 py-0.5 rounded-full font-bold shadow-md animate-pulse">
-                            NEW
-                        </span> --}}
-                        <div
-                            class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-6 h-1 bg-white rounded-full">
-                        </div>
-                    </a>
-                </div>
-            </nav>
-        </div>
-    </div>
 
     <!-- Main Content -->
     <div class="w-full max-w-6xl mx-auto px-4 py-6">
@@ -725,85 +795,86 @@
             </div>
             <!-- Products Grid -->
             <div class="p-6">
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4"
-                    id="productsGrid">
-                    @foreach($products as $product)
-                        @php
-                            $customPrices = $product->prices->filter(function ($price) {
-                                return in_array($price->type, ['custom_ikat', 'custom_tangkai', 'custom_khusus']);
-                            });
+                <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
+                    {{-- <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4"
+                        id="productsGrid"> --}}
+                        @foreach($products as $product)
+                            @php
+                                $customPrices = $product->prices->filter(function ($price) {
+                                    return in_array($price->type, ['custom_ikat', 'custom_tangkai', 'custom_khusus']);
+                                });
 
-                            // Prioritaskan tipe harga dalam urutan tertentu
-                            $priceTypes = ['custom_ikat', 'custom_tangkai', 'custom_khusus'];
-                            $defaultPrice = null;
-                            foreach ($priceTypes as $type) {
-                                $price = $customPrices->firstWhere('type', $type);
-                                if ($price) {
-                                    $defaultPrice = $price;
-                                    break;
+                                // Prioritaskan tipe harga dalam urutan tertentu
+                                $priceTypes = ['custom_ikat', 'custom_tangkai', 'custom_khusus'];
+                                $defaultPrice = null;
+                                foreach ($priceTypes as $type) {
+                                    $price = $customPrices->firstWhere('type', $type);
+                                    if ($price) {
+                                        $defaultPrice = $price;
+                                        break;
+                                    }
                                 }
-                            }
-                        @endphp
-                        @if($defaultPrice && $product->current_stock > 0)
-                            <div class="product-card bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-                                data-category="{{ $product->category->name ?? '' }}" data-product-id="{{ $product->id }}">
-                                <!-- Product Image -->
-                                <div class="aspect-w-1 aspect-h-1 bg-gray-100 rounded-t-lg overflow-hidden">
-                                    @if($product->image)
-                                        <img src="{{ Storage::url($product->image) }}" alt="{{ $product->name }}"
-                                            class="w-full h-32 object-cover">
-                                    @else
-                                        <div
-                                            class="w-full h-32 bg-gradient-to-br from-rose-100 to-pink-100 flex items-center justify-center">
-                                            <span class="text-4xl">🌸</span>
-                                        </div>
-                                    @endif
-                                </div>
-                                <!-- Product Info -->
-                                <div class="p-4">
-                                    <h3 class="font-semibold text-gray-900 text-sm mb-1">{{ $product->name }}</h3>
-                                    <p class="text-xs text-gray-500 mb-2">
-                                        {{ $product->category->name ?? 'Uncategorized' }}
-                                    </p>
-                                    <!-- Stock Info -->
-                                    <div class="flex items-center justify-between mb-3">
-                                        <span class="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full">
-                                            📦 {{ $product->current_stock }} {{ $product->base_unit }} tersedia
-                                        </span>
+                            @endphp
+                            @if($defaultPrice && $product->current_stock > 0)
+                                <div class="product-card bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                                    data-category="{{ $product->category->name ?? '' }}" data-product-id="{{ $product->id }}">
+                                    <!-- Product Image -->
+                                    <div class="aspect-w-1 aspect-h-1 bg-gray-100 rounded-t-lg overflow-hidden">
+                                        @if($product->image)
+                                            <img src="{{ Storage::url($product->image) }}" alt="{{ $product->name }}"
+                                                class="w-full h-32 object-cover">
+                                        @else
+                                            <div
+                                                class="w-full h-32 bg-gradient-to-br from-rose-100 to-pink-100 flex items-center justify-center">
+                                                <span class="text-4xl">🌸</span>
+                                            </div>
+                                        @endif
                                     </div>
-                                    <!-- Price Preview (show only custom prices) -->
-                                    @foreach($customPrices as $price)
-                                        <div class="text-sm mb-1">
-                                            <span class="text-rose-600 font-semibold">
-                                                Rp {{ number_format($price->price, 0, ',', '.') }}
-                                            </span>
-                                            <span class="text-gray-500 text-xs">
-                                                /{{ ucwords(str_replace('_', ' ', $price->type)) }}
+                                    <!-- Product Info -->
+                                    <div class="p-4">
+                                        <h3 class="font-semibold text-gray-900 text-sm mb-1">{{ $product->name }}</h3>
+                                        <p class="text-xs text-gray-500 mb-2">
+                                            {{ $product->category->name ?? 'Uncategorized' }}
+                                        </p>
+                                        <!-- Stock Info -->
+                                        <div class="flex items-center justify-between mb-3">
+                                            <span class="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full">
+                                                📦 {{ $product->current_stock }} {{ $product->base_unit }} tersedia
                                             </span>
                                         </div>
-                                    @endforeach
-                                    <!-- Add Button -->
-                                    <button
-                                        class="w-full mt-3 bg-purple-500 hover:bg-purple-600 text-white text-sm py-2 px-3 rounded-md transition-colors add-product-btn"
-                                        data-product-id="{{ $product->id }}">
-                                        + Tambah ke Bouquet
-                                    </button>
+                                        <!-- Price Preview (show only custom prices) -->
+                                        @foreach($customPrices as $price)
+                                            <div class="text-sm mb-1">
+                                                <span class="text-rose-600 font-semibold">
+                                                    Rp {{ number_format($price->price, 0, ',', '.') }}
+                                                </span>
+                                                <span class="text-gray-500 text-xs">
+                                                    /{{ ucwords(str_replace('_', ' ', $price->type)) }}
+                                                </span>
+                                            </div>
+                                        @endforeach
+                                        <!-- Add Button -->
+                                        <button
+                                            class="w-full mt-3 bg-purple-500 hover:bg-purple-600 text-white text-sm py-2 px-3 rounded-md transition-colors add-product-btn"
+                                            data-product-id="{{ $product->id }}">
+                                            + Tambah ke Bouquet
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
-                        @endif
-                    @endforeach
-                </div>
-
-                @if($products->isEmpty())
-                    <div class="text-center py-12">
-                        <div class="text-6xl mb-4">🌸</div>
-                        <h3 class="text-lg font-medium text-gray-900 mb-2">Belum ada produk tersedia</h3>
-                        <p class="text-gray-500">Silakan periksa kembali nanti atau hubungi admin</p>
+                            @endif
+                        @endforeach
                     </div>
-                @endif
+
+                    @if($products->isEmpty())
+                        <div class="text-center py-12">
+                            <div class="text-6xl mb-4">🌸</div>
+                            <h3 class="text-lg font-medium text-gray-900 mb-2">Belum ada produk tersedia</h3>
+                            <p class="text-gray-500">Silakan periksa kembali nanti atau hubungi admin</p>
+                        </div>
+                    @endif
+                </div>
             </div>
         </div>
-    </div>
     </div>
     </div>
     </div>
