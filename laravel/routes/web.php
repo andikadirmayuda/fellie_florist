@@ -112,6 +112,7 @@ Route::middleware('auth')->group(function () {
         'show' => 'sales.show',
         'destroy' => 'sales.destroy',
     ]);
+    Route::post('/sales/bulk-delete', [App\Http\Controllers\SaleController::class, 'bulkDelete'])->name('sales.bulk-delete');
     Route::get('/sales/{sale}/download-pdf', [App\Http\Controllers\SaleController::class, 'downloadPdf'])->name('sales.download_pdf');
 
     // Settings Routes

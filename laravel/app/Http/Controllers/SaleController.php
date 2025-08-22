@@ -49,8 +49,28 @@ class SaleController extends Controller
         DB::beginTransaction();
         try {
             $today = Carbon::now()->format('dmY');
-            $count = Sale::whereDate('order_time', Carbon::today())->count() + 1;
-            $order_number = 'SALE-' . $today . str_pad($count, 3, '0', STR_PAD_LEFT);
+
+            // Cari nomor urut terakhir termasuk yang sudah di-soft delete
+            $latestSale = Sale::withTrashed()
+                ->where('order_number', 'like', 'SALE-' . $today . '%')
+                ->orderByRaw('CAST(SUBSTRING(order_number, -3) AS UNSIGNED) DESC')
+                ->first();
+
+            $counter = 1;
+            if ($latestSale) {
+                // Ambil 3 digit terakhir dan tambah 1
+                $lastNumber = (int) substr($latestSale->order_number, -3);
+                $counter = $lastNumber + 1;
+            }
+
+            // Generate nomor order baru
+            $order_number = 'SALE-' . $today . str_pad($counter, 3, '0', STR_PAD_LEFT);
+
+            // Double check untuk memastikan benar-benar unik
+            while (Sale::withTrashed()->where('order_number', $order_number)->exists()) {
+                $counter++;
+                $order_number = 'SALE-' . $today . str_pad($counter, 3, '0', STR_PAD_LEFT);
+            }
 
             $subtotal = collect($request->items)->sum(function ($item) {
                 return $item['price'] * $item['quantity'];
@@ -203,6 +223,34 @@ class SaleController extends Controller
         } catch (\Exception $e) {
             DB::rollback();
             return back()->withErrors(['error' => 'Gagal membatalkan transaksi: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Bulk delete selected sales
+     */
+    public function bulkDelete(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:sales,id'
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $count = Sale::whereIn('id', $request->ids)->update([
+                'deleted_at' => now(),
+                'deleted_by' => Auth::id(),
+                'deletion_reason' => 'Bulk delete'
+            ]);
+
+            DB::commit();
+            return redirect()->route('sales.index')
+                ->with('success', $count . ' transaksi berhasil dihapus.');
+        } catch (\Exception $e) {
+            DB::rollback();
+            Log::error('Bulk delete sales failed: ' . $e->getMessage());
+            return back()->withErrors(['error' => 'Gagal menghapus transaksi: ' . $e->getMessage()]);
         }
     }
 }

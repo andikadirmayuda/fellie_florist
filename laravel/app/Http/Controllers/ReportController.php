@@ -18,36 +18,32 @@ class ReportController extends Controller
         $start = $request->input('start_date', Carbon::now()->startOfMonth()->toDateString());
         $end = $request->input('end_date', Carbon::now()->endOfMonth()->toDateString());
 
-        $sales = Sale::with('items.product')
-            ->whereBetween('created_at', [$start, $end])
-            ->get();
+        // Base query with date range
+        $query = Sale::whereBetween('created_at', [$start, $end]);
 
-        $totalPendapatan = $sales->sum('total');
-        $totalTransaksi = $sales->count();
+        // Apply status filter if provided
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
 
-        // Produk terlaris dan terendah
-        $produkTerlaris = \App\Models\Product::select('products.id', 'products.name', 'products.code', 'products.category_id', 'products.description', 'products.base_unit', 'products.current_stock', 'products.min_stock', 'products.is_active')
-            ->join('sale_items', 'products.id', '=', 'sale_items.product_id')
-            ->join('sales', 'sales.id', '=', 'sale_items.sale_id')
-            ->whereBetween('sales.created_at', [$start, $end])
-            ->selectRaw('products.*, SUM(sale_items.quantity) as total_terjual')
-            ->groupBy('products.id', 'products.name', 'products.code', 'products.category_id', 'products.description', 'products.base_unit', 'products.current_stock', 'products.min_stock', 'products.is_active')
-            ->orderByDesc('total_terjual')
-            ->first();
+        // Get sales data with relationships
+        $sales = $query->with(['items.product', 'deletedBy'])
+            ->latest()
+            ->paginate(10);
 
-        $produkKurangLaku = \App\Models\Product::select('products.id', 'products.name', 'products.code', 'products.category_id', 'products.description', 'products.base_unit', 'products.current_stock', 'products.min_stock', 'products.is_active')
-            ->leftJoin('sale_items', 'products.id', '=', 'sale_items.product_id')
-            ->leftJoin('sales', 'sales.id', '=', 'sale_items.sale_id')
-            ->where(function ($q) use ($start, $end) {
-                $q->whereNull('sales.created_at')
-                    ->orWhereBetween('sales.created_at', [$start, $end]);
-            })
-            ->selectRaw('products.*, COALESCE(SUM(sale_items.quantity),0) as total_terjual')
-            ->groupBy('products.id', 'products.name', 'products.code', 'products.category_id', 'products.description', 'products.base_unit', 'products.current_stock', 'products.min_stock', 'products.is_active')
-            ->orderBy('total_terjual', 'asc')
-            ->first();
+        // Calculate statistics
+        $totalSales = $query->count();
+        $totalRevenue = $query->sum('total');
+        $averageTransaction = $totalSales > 0 ? ($totalRevenue / $totalSales) : 0;
 
-        return view('reports.sales', compact('sales', 'start', 'end', 'totalPendapatan', 'totalTransaksi', 'produkTerlaris', 'produkKurangLaku'));
+        return view('reports.sales', compact(
+            'sales',
+            'totalSales',
+            'totalRevenue',
+            'averageTransaction',
+            'start',
+            'end'
+        ));
     }
 
     // Laporan Stok Terintegrasi
@@ -93,7 +89,7 @@ class ReportController extends Controller
             $end = $request->input('end_date', now()->endOfMonth()->toDateString());
 
             // Get sales data with relationships
-            $sales = \App\Models\Sale::with(['items.product'])
+            $sales = Sale::with(['items.product'])
                 ->whereBetween('created_at', [$start, $end])
                 ->get();
 
@@ -197,7 +193,7 @@ class ReportController extends Controller
         $end = $request->input('end_date', now()->endOfMonth()->toDateString());
 
         // Total pendapatan dari penjualan
-        $totalPenjualan = \App\Models\Sale::whereBetween('created_at', [$start, $end])->sum('total');
+        $totalPenjualan = Sale::whereBetween('created_at', [$start, $end])->sum('total');
 
         // Total pendapatan dari pemesanan (hitung dari items menggunakan join)
         $totalPemesanan = DB::table('public_orders')
@@ -214,7 +210,7 @@ class ReportController extends Controller
         foreach (range(0, now()->parse($end)->diffInDays(now()->parse($start))) as $i) {
             $date = now()->parse($start)->copy()->addDays($i)->toDateString();
 
-            $dailyPenjualan = \App\Models\Sale::whereDate('created_at', $date)->sum('total');
+            $dailyPenjualan = Sale::whereDate('created_at', $date)->sum('total');
 
             $dailyPemesanan = DB::table('public_orders')
                 ->join('public_order_items', 'public_orders.id', '=', 'public_order_items.public_order_id')
@@ -236,7 +232,7 @@ class ReportController extends Controller
             $weekStart = $date->copy();
             $weekEnd = $date->copy()->endOfWeek();
 
-            $weeklyPenjualan = \App\Models\Sale::whereBetween('created_at', [$weekStart, $weekEnd])->sum('total');
+            $weeklyPenjualan = Sale::whereBetween('created_at', [$weekStart, $weekEnd])->sum('total');
 
             $weeklyPemesanan = DB::table('public_orders')
                 ->join('public_order_items', 'public_orders.id', '=', 'public_order_items.public_order_id')
@@ -261,7 +257,7 @@ class ReportController extends Controller
             $monthStart = $currentMonth->copy()->startOfMonth();
             $monthEnd = $currentMonth->copy()->endOfMonth();
 
-            $monthlyPenjualan = \App\Models\Sale::whereBetween('created_at', [$monthStart, $monthEnd])->sum('total');
+            $monthlyPenjualan = Sale::whereBetween('created_at', [$monthStart, $monthEnd])->sum('total');
 
             $monthlyPemesanan = DB::table('public_orders')
                 ->join('public_order_items', 'public_orders.id', '=', 'public_order_items.public_order_id')
@@ -342,7 +338,7 @@ class ReportController extends Controller
             $end = $request->input('end_date', now()->endOfMonth()->toDateString());
 
             // Total pendapatan dari penjualan
-            $totalPenjualan = \App\Models\Sale::whereBetween('created_at', [$start, $end])->sum('total');
+            $totalPenjualan = Sale::whereBetween('created_at', [$start, $end])->sum('total');
 
             // Total pendapatan dari pemesanan
             $totalPemesanan = DB::table('public_orders')
@@ -358,7 +354,7 @@ class ReportController extends Controller
             foreach (range(0, now()->parse($end)->diffInDays(now()->parse($start))) as $i) {
                 $date = now()->parse($start)->copy()->addDays($i)->toDateString();
 
-                $dailyPenjualan = \App\Models\Sale::whereDate('created_at', $date)->sum('total');
+                $dailyPenjualan = Sale::whereDate('created_at', $date)->sum('total');
                 $dailyPemesanan = DB::table('public_orders')
                     ->join('public_order_items', 'public_orders.id', '=', 'public_order_items.public_order_id')
                     ->whereDate('public_orders.created_at', $date)

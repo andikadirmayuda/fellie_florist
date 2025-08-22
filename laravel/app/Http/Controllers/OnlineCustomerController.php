@@ -22,69 +22,94 @@ class OnlineCustomerController extends Controller
     public function index(Request $request)
     {
         $search = $request->get('search');
-        
-        // Ambil data mentah dari PublicOrder dengan items untuk perhitungan total yang akurat
-        $query = PublicOrder::with(['items'])
-            ->whereNotNull('customer_name')
+
+        // Ambil data pelanggan (baik dari pesanan online maupun yang ditambah manual)
+        $customersQuery = Customer::query();
+        if ($search) {
+            $customersQuery->where(function ($q) use ($search) {
+                $q->where('name', 'LIKE', "%{$search}%")
+                    ->orWhere('phone', 'LIKE', "%{$search}%");
+            });
+        }
+        $customers = $customersQuery->get();
+
+        // Ambil data pesanan online
+        $orderData = PublicOrder::with(['items'])
+            ->select(
+                'wa_number',
+                'customer_name',
+                DB::raw('COUNT(*) as total_orders'),
+                DB::raw('SUM(amount_paid) as total_spent'),
+                DB::raw('MAX(created_at) as last_order_date'),
+                DB::raw('MIN(created_at) as first_order_date')
+            )
             ->whereNotNull('wa_number')
             ->where('wa_number', '!=', '')
             ->where('wa_number', '!=', '-');
 
         if ($search) {
-            $query->where(function($q) use ($search) {
+            $orderData->where(function ($q) use ($search) {
                 $q->where('customer_name', 'LIKE', "%{$search}%")
-                  ->orWhere('wa_number', 'LIKE', "%{$search}%");
+                    ->orWhere('wa_number', 'LIKE', "%{$search}%");
             });
         }
 
-        $publicOrders = $query->get();
-        
-        // Grup berdasarkan wa_number dan kumpulkan informasi
-        $groupedCustomers = $publicOrders->groupBy('wa_number')->map(function($orders, $waNumber) {
-            // Kumpulkan semua nama unik
-            $uniqueNames = $orders->pluck('customer_name')->unique()->values();
-            
-            // Ambil nama yang paling sering muncul
-            $nameFrequency = $orders->countBy('customer_name');
-            $primaryName = $nameFrequency->sortDesc()->keys()->first();
-            
-            // Hitung statistik - gunakan total dari items seperti di ReportController
-            $totalOrders = $orders->count();
-            $totalSpent = $orders->sum('total'); // Gunakan accessor total, bukan amount_paid
-            $lastOrderDate = $orders->max('created_at');
-            $firstOrderDate = $orders->min('created_at');
-            
-            // Ambil data customer jika ada
-            $customer = Customer::where('phone', $waNumber)->first();
-            
-            return (object) [
-                'customer_name' => $primaryName,
-                'all_names' => $uniqueNames->toArray(),
-                'names_count' => $uniqueNames->count(),
+        $orderData = $orderData->groupBy('wa_number', 'customer_name')
+            ->get()
+            ->groupBy('wa_number');
+
+        // Gabungkan data
+        $groupedCustomers = collect();
+
+        // Proses customer yang memiliki pesanan online
+        foreach ($orderData as $waNumber => $orders) {
+            $customer = $customers->firstWhere('phone', $waNumber) ?? Customer::firstOrCreate(
+                ['phone' => $waNumber],
+                ['name' => $orders->first()->customer_name]
+            );
+
+            $firstOrder = $orders->first();
+            $groupedCustomers->push((object)[
+                'customer_name' => $firstOrder->customer_name,
+                'all_names' => $orders->pluck('customer_name')->unique()->values()->toArray(),
+                'names_count' => $orders->pluck('customer_name')->unique()->count(),
                 'wa_number' => $waNumber,
-                'total_orders' => $totalOrders,
-                'total_spent' => $totalSpent,
-                'last_order_date' => $lastOrderDate,
-                'first_order_date' => $firstOrderDate,
-                'is_reseller' => $customer?->is_reseller ?? false,
-                'promo_discount' => $customer?->promo_discount ?? null,
+                'total_orders' => $firstOrder->total_orders,
+                'total_spent' => $firstOrder->total_spent,
+                'last_order_date' => $firstOrder->last_order_date,
+                'first_order_date' => $firstOrder->first_order_date,
+                'is_reseller' => $customer->is_reseller,
+                'promo_discount' => $customer->promo_discount,
                 'customer' => $customer
-            ];
-        })->sortByDesc('last_order_date');
-        
-        // Buat paginator manual
-        $page = $request->get('page', 1);
-        $perPage = 15;
-        $total = $groupedCustomers->count();
-        $items = $groupedCustomers->forPage($page, $perPage)->values();
-        
-        $onlineCustomers = new LengthAwarePaginator(
-            $items,
-            $total,
-            $perPage,
-            $page,
-            ['path' => $request->url(), 'query' => $request->query()]
-        );
+            ]);
+        }
+
+        // Tambahkan customer yang belum memiliki pesanan online
+        foreach ($customers as $customer) {
+            if (!$orderData->has($customer->phone)) {
+                $groupedCustomers->push((object)[
+                    'customer_name' => $customer->name,
+                    'all_names' => [$customer->name],
+                    'names_count' => 1,
+                    'wa_number' => $customer->phone,
+                    'total_orders' => 0,
+                    'total_spent' => 0,
+                    'last_order_date' => null,
+                    'first_order_date' => null,
+                    'is_reseller' => $customer->is_reseller,
+                    'promo_discount' => $customer->promo_discount,
+                    'customer' => $customer
+                ]);
+            }
+        }
+
+        // Urutkan: pelanggan dengan pesanan terbaru di atas, diikuti pelanggan tanpa pesanan
+        $groupedCustomers = $groupedCustomers->sortByDesc(function ($customer) {
+            return $customer->last_order_date ?? '0000-00-00';
+        });
+
+        // Tampilkan semua data tanpa pagination
+        $onlineCustomers = $groupedCustomers->values();
 
         return view('online-customers.index', compact('onlineCustomers', 'search'));
     }
@@ -102,7 +127,41 @@ class OnlineCustomerController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        Log::info('Received store request', $request->all());
+        $request->validate([
+            'wa_number' => 'required|string|unique:customers,phone',
+            'name' => 'required|string|max:255',
+            'is_reseller' => 'boolean',
+            'notes' => 'nullable|string|max:1000'
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $customer = Customer::create([
+                'phone' => $request->wa_number,
+                'name' => $request->name,
+                'is_reseller' => $request->boolean('is_reseller'),
+                'notes' => $request->notes
+            ]);
+
+            DB::commit();
+
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Pelanggan baru berhasil ditambahkan',
+                    'redirect' => route('online-customers.index')
+                ]);
+            }
+
+            return redirect()->route('online-customers.index')
+                ->with('success', 'Pelanggan baru berhasil ditambahkan');
+        } catch (\Exception $e) {
+            DB::rollback();
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
+        }
     }
 
     /**
@@ -110,7 +169,14 @@ class OnlineCustomerController extends Controller
      */
     public function show($wa_number)
     {
-        // Ambil detail pelanggan berdasarkan nomor WhatsApp
+        // Cek dulu di tabel customers
+        $customer = Customer::where('phone', $wa_number)->first();
+
+        if (!$customer) {
+            abort(404, 'Pelanggan tidak ditemukan');
+        }
+
+        // Ambil detail pesanan jika ada
         $customerData = PublicOrder::select(
             'customer_name',
             'wa_number',
@@ -119,22 +185,28 @@ class OnlineCustomerController extends Controller
             DB::raw('MAX(created_at) as last_order_date'),
             DB::raw('MIN(created_at) as first_order_date')
         )
-        ->where('wa_number', $wa_number)
-        ->groupBy('customer_name', 'wa_number')
-        ->first();
+            ->where('wa_number', $wa_number)
+            ->groupBy('customer_name', 'wa_number')
+            ->first();
 
+        // Jika tidak ada data pesanan (pelanggan input manual), buat object dengan data default
         if (!$customerData) {
-            abort(404, 'Pelanggan tidak ditemukan');
+            $customerData = (object)[
+                'customer_name' => $customer->name,
+                'wa_number' => $customer->phone,
+                'total_orders' => 0,
+                'total_spent' => 0,
+                'last_order_date' => $customer->created_at,
+                'first_order_date' => $customer->created_at
+            ];
         }
 
-        // Ambil data customer jika ada
-        $customer = Customer::where('phone', $wa_number)->first();
         $customerData->customer = $customer;
 
         // Ambil kode reseller aktif dan riwayat (inisialisasi dengan collection kosong jika tidak ada)
         $activeResellerCodes = collect();
         $resellerCodeHistory = collect();
-        
+
         if ($customer && $customer->is_reseller) {
             $activeResellerCodes = ResellerCode::forCustomer($wa_number)->active()->get();
             $resellerCodeHistory = ResellerCode::forCustomer($wa_number)
@@ -156,25 +228,35 @@ class OnlineCustomerController extends Controller
      */
     public function edit($wa_number)
     {
+        // Cek dulu di tabel customers
+        $customer = Customer::where('phone', $wa_number)->first();
+
+        if (!$customer) {
+            abort(404, 'Pelanggan tidak ditemukan');
+        }
+
+        // Ambil data pesanan jika ada
         $customerData = PublicOrder::select(
             'customer_name',
             'wa_number'
         )
-        ->where('wa_number', $wa_number)
-        ->first();
+            ->where('wa_number', $wa_number)
+            ->first();
 
+        // Jika tidak ada data pesanan (pelanggan input manual), buat object dengan data default
         if (!$customerData) {
-            abort(404, 'Pelanggan tidak ditemukan');
+            $customerData = (object)[
+                'customer_name' => $customer->name,
+                'wa_number' => $customer->phone
+            ];
         }
 
-        // Ambil data customer jika ada
-        $customer = Customer::where('phone', $wa_number)->first();
         $customerData->customer = $customer;
 
         // Ambil kode reseller aktif dan riwayat
         $activeResellerCodes = collect();
         $resellerCodeHistory = collect();
-        
+
         if ($customer && $customer->is_reseller) {
             $activeResellerCodes = ResellerCode::forCustomer($wa_number)->active()->get();
             $resellerCodeHistory = ResellerCode::forCustomer($wa_number)
@@ -201,7 +283,7 @@ class OnlineCustomerController extends Controller
         try {
             // Cari customer existing atau buat baru jika belum ada
             $customer = Customer::where('phone', $wa_number)->first();
-            
+
             if (!$customer) {
                 // Jika belum ada, buat baru
                 $customer = Customer::create([
@@ -223,7 +305,6 @@ class OnlineCustomerController extends Controller
             DB::commit();
             return redirect()->route('online-customers.show', $wa_number)
                 ->with('success', 'Data pelanggan berhasil diperbarui');
-                
         } catch (\Exception $e) {
             DB::rollback();
             return redirect()->back()
@@ -240,17 +321,19 @@ class OnlineCustomerController extends Controller
         //
     }
 
+
+
     /**
      * Set customer as reseller
      */
     public function setAsReseller(Request $request, $wa_number)
     {
         // Tidak perlu validation discount_percentage lagi
-        
+
         DB::beginTransaction();
         try {
             $customer = Customer::where('phone', $wa_number)->first();
-            
+
             if (!$customer) {
                 // Jika belum ada, buat baru
                 $customer = Customer::create([
@@ -267,7 +350,6 @@ class OnlineCustomerController extends Controller
 
             DB::commit();
             return redirect()->back()->with('success', 'Pelanggan berhasil ditetapkan sebagai reseller');
-            
         } catch (\Exception $e) {
             DB::rollback();
             return redirect()->back()->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
@@ -286,7 +368,7 @@ class OnlineCustomerController extends Controller
         DB::beginTransaction();
         try {
             $customer = Customer::where('phone', $wa_number)->first();
-            
+
             if (!$customer) {
                 // Jika belum ada, buat baru
                 $customer = Customer::create([
@@ -303,7 +385,6 @@ class OnlineCustomerController extends Controller
 
             DB::commit();
             return redirect()->back()->with('success', 'Discount promo berhasil ditetapkan');
-            
         } catch (\Exception $e) {
             DB::rollback();
             return redirect()->back()->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
@@ -338,7 +419,7 @@ class OnlineCustomerController extends Controller
 
         // Generate kode baru dengan kode custom jika diberikan
         $code = $request->code ? strtoupper($request->code) : ResellerCode::generateUniqueCode();
-        
+
         // Jika ada kode custom, cek uniqueness
         if ($request->code && ResellerCode::where('code', $code)->exists()) {
             if ($request->expectsJson()) {
@@ -408,39 +489,38 @@ class OnlineCustomerController extends Controller
             ]);
 
             $validation = ResellerCode::validateCode($request->code, $request->wa_number);
-            
+
             Log::info('Reseller code validation result', $validation);
-            
+
             if ($validation['valid']) {
                 // Cek apakah customer adalah reseller
                 $customer = Customer::where('phone', $request->wa_number)->first();
-            $isReseller = $customer && $customer->is_reseller;
+                $isReseller = $customer && $customer->is_reseller;
 
-            if (!$isReseller) {
+                if (!$isReseller) {
+                    return response()->json([
+                        'valid' => false,
+                        'message' => 'Customer bukan reseller'
+                    ], 400);
+                }
+
                 return response()->json([
-                    'valid' => false,
-                    'message' => 'Customer bukan reseller'
-                ], 400);
+                    'valid' => true,
+                    'message' => $validation['message'],
+                    'code_id' => $validation['code']->id
+                ]);
             }
 
             return response()->json([
-                'valid' => true,
-                'message' => $validation['message'],
-                'code_id' => $validation['code']->id
-            ]);
-        }
-
-        return response()->json([
-            'valid' => false,
-            'message' => $validation['message']
-        ], 400);
-        
+                'valid' => false,
+                'message' => $validation['message']
+            ], 400);
         } catch (\Exception $e) {
             Log::error('Error validating reseller code', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            
+
             return response()->json([
                 'valid' => false,
                 'message' => 'Terjadi kesalahan sistem'
@@ -466,7 +546,7 @@ class OnlineCustomerController extends Controller
 
         if ($resellerCode && $resellerCode->isValid()) {
             $resellerCode->markAsUsed($request->order_id);
-            
+
             return response()->json([
                 'success' => true,
                 'message' => 'Kode reseller berhasil digunakan'

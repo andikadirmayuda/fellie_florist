@@ -69,12 +69,12 @@
 <body class="bg-gradient-to-br from-gray-50 via-pink-50 to-rose-50 min-h-screen py-4 px-4 sm:py-8">
 
     <!-- Back Button (No Print) -->
-    <div class="no-print max-w-3xl mx-auto mb-4">
+    {{-- <div class="no-print max-w-3xl mx-auto mb-4">
         <button onclick="window.history.back()"
             class="inline-flex items-center px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors shadow-sm">
             <i class="bi bi-arrow-left mr-2"></i>Kembali
         </button>
-    </div>
+    </div> --}}
 
     <!-- Receipt Container -->
     <div class="max-w-3xl mx-auto">

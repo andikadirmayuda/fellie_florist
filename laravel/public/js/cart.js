@@ -20,7 +20,7 @@ function getCustomBouquetDetails(item) {
         <div class="text-xs text-gray-600 mt-1">
             ${item.components_summary}
         </div>`;
-    
+
     if (item.ribbon_color) {
         details += `
         <div class="flex items-center gap-2 mt-2">
@@ -29,13 +29,13 @@ function getCustomBouquetDetails(item) {
             <span class="text-xs text-purple-800 capitalize">${item.ribbon_color}</span>
         </div>`;
     }
-    
+
     return details;
 }
 
 function getCartHTML(items) {
     let html = getCartInfoPanel();
-    
+
     items.forEach(item => {
         html += `
         <div class="mb-4 p-3 bg-white rounded-lg border border-gray-200 hover:border-rose-200 transition-colors">
@@ -53,7 +53,7 @@ function getCartHTML(items) {
             </div>
         </div>`;
     });
-    
+
     return html;
 }
 
@@ -86,7 +86,7 @@ function updateCart(silentMode = false) {
     const cartBadge = document.getElementById('cartBadge');
     const cartTotal = document.getElementById('cartTotal');
     const checkoutButton = document.querySelector('#sideCart a[href*="checkout"]');
-    
+
     // Skip loading indicator in silent mode
     if (cartItemsContainer && !silentMode) {
         cartItemsContainer.innerHTML = `
@@ -96,52 +96,52 @@ function updateCart(silentMode = false) {
             </div>
         `;
     }
-    
+
     fetch('/cart/get')
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-    })
-    .then(data => {
-        if (!data.success) {
-            console.error('Cart update failed:', data.message);
-            if (cartItemsContainer) {
-                cartItemsContainer.innerHTML = `
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (!data.success) {
+                console.error('Cart update failed:', data.message);
+                if (cartItemsContainer) {
+                    cartItemsContainer.innerHTML = `
                     <div class="flex flex-col items-center justify-center h-full text-red-500">
                         <i class="bi bi-exclamation-triangle text-3xl mb-2"></i>
                         <p>Gagal memuat keranjang</p>
                     </div>
                 `;
+                }
+                return;
             }
-            return;
-        }
-        
-        if (data.items.length === 0) {
-            cartItemsContainer.innerHTML = getEmptyCartHTML();
-            if (cartBadge) cartBadge.classList.add('hidden');
-            if (cartTotal) cartTotal.textContent = 'Rp 0';
-            if (checkoutButton) checkoutButton.style.display = 'none';
-            return;
-        }
-        
-        updateCartBadgeAndButton(cartBadge, checkoutButton, data.items.length);
-        
-        if (cartItemsContainer) {
-            cartItemsContainer.innerHTML = getCartHTML(data.items);
-        }
-        
-        if (cartTotal) {
-            cartTotal.textContent = `Rp ${formatPrice(data.total)}`;
-        }
-    })
-    .catch(error => {
-        console.error('Error updating cart:', error);
-        if (cartItemsContainer) {
-            cartItemsContainer.innerHTML = getErrorHTML();
-        }
-    });
+
+            if (data.items.length === 0) {
+                cartItemsContainer.innerHTML = getEmptyCartHTML();
+                if (cartBadge) cartBadge.classList.add('hidden');
+                if (cartTotal) cartTotal.textContent = 'Rp 0';
+                if (checkoutButton) checkoutButton.style.display = 'none';
+                return;
+            }
+
+            updateCartBadgeAndButton(cartBadge, checkoutButton, data.items.length);
+
+            if (cartItemsContainer) {
+                cartItemsContainer.innerHTML = getCartHTML(data.items);
+            }
+
+            if (cartTotal) {
+                cartTotal.textContent = `Rp ${formatPrice(data.total)}`;
+            }
+        })
+        .catch(error => {
+            console.error('Error updating cart:', error);
+            if (cartItemsContainer) {
+                cartItemsContainer.innerHTML = getErrorHTML();
+            }
+        });
 }
 
 function getEmptyCartHTML() {
@@ -208,13 +208,13 @@ function getCartItemHTML(item) {
 function getItemImageHTML(item) {
     return `
         <div class="w-20 h-20 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
-            ${item.image ? 
-                `<img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover" />` : 
-                `<svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            ${item.image ?
+            `<img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover" />` :
+            `<svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
                           d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 002 2v12a2 2 0 002 2z" />
                 </svg>`
-            }
+        }
         </div>
     `;
 }
@@ -243,7 +243,7 @@ function getGreetingCardHTML(item) {
     if (!item.greeting_card || !item.greeting_card.trim()) {
         return '';
     }
-    
+
     return `
         <div class="mt-2 p-2 bg-pink-50 border border-pink-200 rounded-lg">
             <div class="flex items-center mb-1">
@@ -259,17 +259,17 @@ function getComponentsSummaryHTML(item) {
     if (!item.components_summary || item.type !== 'custom_bouquet') {
         return '';
     }
-    
+
     return `
         <div class="mt-2 p-2 bg-purple-50 border border-purple-200 rounded-lg">
             <div class="flex items-center mb-1">
                 <i class="bi bi-palette text-purple-600 mr-1"></i>
                 <span class="text-xs font-medium text-purple-700">Komponen:</span>
             </div>
-            <p class="text-xs text-purple-800">${Array.isArray(item.components_summary) ? 
-                item.components_summary.slice(0, 2).join(', ') + 
-                (item.components_summary.length > 2 ? ', +' + (item.components_summary.length - 2) + ' lainnya' : '') : 
-                item.components_summary}</p>
+            <p class="text-xs text-purple-800">${Array.isArray(item.components_summary) ?
+            item.components_summary.slice(0, 2).join(', ') +
+            (item.components_summary.length > 2 ? ', +' + (item.components_summary.length - 2) + ' lainnya' : '') :
+            item.components_summary}</p>
         </div>
     `;
 }
@@ -320,7 +320,7 @@ function updateQuantity(cartKey, change) {
     const quantityElement = itemElement.querySelector('.text-sm.font-medium');
     const currentQuantity = parseInt(quantityElement.textContent);
     const newQuantity = currentQuantity + change;
-    
+
     if (newQuantity < 1) {
         showToast('Jumlah minimum adalah 1', 'warning');
         return;
@@ -328,9 +328,9 @@ function updateQuantity(cartKey, change) {
 
     const buttons = itemElement.querySelectorAll('button');
     buttons.forEach(btn => btn.disabled = true);
-    
+
     quantityElement.textContent = newQuantity;
-    
+
     fetch(`/cart/update/${cartKey}`, {
         method: 'POST',
         headers: {
@@ -339,27 +339,27 @@ function updateQuantity(cartKey, change) {
         },
         body: JSON.stringify({ quantity_change: change })
     })
-    .then(response => {
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        return response.json();
-    })
-    .then(data => {
-        if (data.success) {
-            updateCart();
-            showToast('Jumlah berhasil diperbarui', 'success');
-        } else {
+        .then(response => {
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                updateCart();
+                showToast('Jumlah berhasil diperbarui', 'success');
+            } else {
+                quantityElement.textContent = currentQuantity;
+                showToast(data.message || 'Gagal mengupdate jumlah', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error updating quantity:', error);
             quantityElement.textContent = currentQuantity;
-            showToast(data.message || 'Gagal mengupdate jumlah', 'error');
-        }
-    })
-    .catch(error => {
-        console.error('Error updating quantity:', error);
-        quantityElement.textContent = currentQuantity;
-        showToast('Terjadi kesalahan saat mengupdate jumlah', 'error');
-    })
-    .finally(() => {
-        buttons.forEach(btn => btn.disabled = false);
-    });
+            showToast('Terjadi kesalahan saat mengupdate jumlah', 'error');
+        })
+        .finally(() => {
+            buttons.forEach(btn => btn.disabled = false);
+        });
 }
 
 function removeFromCart(cartKey, itemName = 'produk ini') {
@@ -367,7 +367,7 @@ function removeFromCart(cartKey, itemName = 'produk ini') {
     const backdrop = document.createElement('div');
     backdrop.className = 'fixed inset-0 bg-black bg-opacity-40 z-50 backdrop-blur-sm transition-opacity duration-200';
     backdrop.style.opacity = '0';
-    
+
     // Create modal
     const modal = document.createElement('div');
     modal.className = 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-xl shadow-xl z-[60] transition-all duration-200 scale-95 opacity-0 w-[90%] max-w-sm p-6';
@@ -437,15 +437,15 @@ function removeFromCart(cartKey, itemName = 'produk ini') {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                 }
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    updateCart(true);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        updateCart(true);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
         });
 
         // Click backdrop to cancel
@@ -462,7 +462,7 @@ function showToast(message, type = 'info') {
     const existingOverlay = document.getElementById('toastOverlay');
     if (existingToast) existingToast.remove();
     if (existingOverlay) existingOverlay.remove();
-    
+
     // Create backdrop overlay
     const backdrop = document.createElement('div');
     backdrop.id = 'toastOverlay';
@@ -473,7 +473,7 @@ function showToast(message, type = 'info') {
     const notification = document.createElement('div');
     notification.id = 'cartToast';
     notification.className = `fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 py-3 px-6 rounded-lg shadow-xl z-[60] ${getNotificationColor(type)} transition-all duration-300 scale-95 opacity-0`;
-    
+
     // Add content to notification
     notification.innerHTML = `
         <div class="flex items-center space-x-3">

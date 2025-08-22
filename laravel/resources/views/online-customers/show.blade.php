@@ -245,9 +245,19 @@
                                                     method="POST" onsubmit="return confirm('Yakin ingin membatalkan kode ini?')">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit"
-                                                        class="px-3 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600 transition">
-                                                        <i class="bi bi-x-circle mr-1"></i>
+                                                    <div class="flex space-x-2">
+                                                        <!-- Share to WhatsApp Button -->
+                                                        <a href="#" 
+                                                           onclick="shareToWhatsApp('{{ $customerData->wa_number }}', '{{ $code->code }}', '{{ $code->expires_at->format('d M Y H:i') }}')"
+                                                           class="px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700 transition flex items-center">
+                                                            <i class="bi bi-whatsapp mr-1"></i>
+                                                            Bagikan
+                                                        </a>
+
+                                                        <!-- Revoke Button -->
+                                                        <button type="submit"
+                                                            class="px-3 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600 transition">
+                                                            <i class="bi bi-x-circle mr-1"></i>
                                                         Batalkan
                                                     </button>
                                                 </form>
@@ -363,12 +373,12 @@
                                                 </td>
                                                 <td class="px-6 py-4 whitespace-nowrap">
                                                     @php
-                                                        $statusColors = [
-                                                            'pending' => 'bg-yellow-100 text-yellow-800',
-                                                            'processing' => 'bg-blue-100 text-blue-800',
-                                                            'completed' => 'bg-green-100 text-green-800',
-                                                            'cancelled' => 'bg-red-100 text-red-800',
-                                                        ];
+        $statusColors = [
+            'pending' => 'bg-yellow-100 text-yellow-800',
+            'processing' => 'bg-blue-100 text-blue-800',
+            'completed' => 'bg-green-100 text-green-800',
+            'cancelled' => 'bg-red-100 text-red-800',
+        ];
                                                     @endphp
                                                     <span
                                                         class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $statusColors[$order->status] ?? 'bg-gray-100 text-gray-800' }}">
@@ -441,4 +451,39 @@
             }, 5000);
         </script>
     @endif
+
+    <script>
+        function shareToWhatsApp(waNumber, code, expiryDate) {
+            // Format nomor WhatsApp
+            // Hapus karakter non-digit
+            let formattedNumber = waNumber.replace(/\D/g, '');
+            // Jika dimulai dengan '0', ganti dengan '62'
+            if (formattedNumber.startsWith('0')) {
+                formattedNumber = '62' + formattedNumber.substring(1);
+            }
+            // Jika belum ada kode negara, tambahkan '62'
+            else if (!formattedNumber.startsWith('62')) {
+                formattedNumber = '62' + formattedNumber;
+            }
+
+            // Format pesan
+            const message = `*Kode Reseller - Fellie Florist*\n\n` +
+                          `Hallo! Berikut adalah kode reseller Anda:\n\n` +
+                          `📱 No. WhatsApp: ${waNumber}\n` +
+                          `🔑 Kode: ${code}\n` +
+                          `⏰ Masa Aktif Kode: ${expiryDate}\n\n` +
+                          `- Silakan gunakan kode ini saat melakukan pemesanan untuk mendapatkan harga khusus reseller.\n` +
+                          `- Jika Anda memiliki pertanyaan, jangan ragu untuk menghubungi kami.\n\n` +
+                          `Terima kasih telah berbelanja di Fellie Florist! 🌸😊🙏`;
+
+
+
+
+            // Encode pesan untuk URL
+            const encodedMessage = encodeURIComponent(message);
+            
+            // Buka WhatsApp dengan pesan yang sudah disiapkan
+            window.open(`https://wa.me/${formattedNumber}?text=${encodedMessage}`, '_blank');
+        }
+    </script>
 </x-app-layout>

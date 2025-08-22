@@ -38,13 +38,22 @@
                         </form>
                     </div>
 
+                    <!-- Tambah Pelanggan Button -->
+                    <div class="mb-6">
+                        <button onclick="openAddCustomerModal()"
+                            class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition">
+                            <i class="bi bi-person-plus-fill mr-2"></i>
+                            Tambah Pelanggan Baru
+                        </button>
+                    </div>
+
                     <!-- Stats Cards -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                         <div class="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-4 rounded-lg">
                             <div class="flex items-center">
                                 <div class="flex-1">
                                     <p class="text-blue-100">Total Pelanggan</p>
-                                    <p class="text-2xl font-bold">{{ $onlineCustomers->total() }}</p>
+                                    <p class="text-2xl font-bold">{{ $onlineCustomers->count() }}</p>
                                 </div>
                                 <i class="bi bi-people text-3xl text-blue-200"></i>
                             </div>
@@ -140,7 +149,7 @@
                                                                     @foreach($customer->all_names as $name)
                                                                         <span
                                                                             class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium 
-                                                                                                                                                                                                                                                                                                                                                                            {{ $name === $customer->customer_name ? 'bg-pink-100 text-pink-700' : 'bg-gray-100 text-gray-600' }}">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            {{ $name === $customer->customer_name ? 'bg-pink-100 text-pink-700' : 'bg-gray-100 text-gray-600' }}">
                                                                             {{ $name }}
                                                                             @if($name === $customer->customer_name)
                                                                                 <i class="bi bi-star-fill ml-1 text-xs"></i>
@@ -210,12 +219,14 @@
                                                         class="text-blue-600 hover:text-blue-900 transition"
                                                         title="Lihat Detail">
                                                         <i class="bi bi-eye"></i>
+                                                        <p>lihat</p>
                                                     </a>
                                                     @if(!auth()->user()->hasRole(['customers service', 'karyawan']))
                                                         <a href="{{ route('online-customers.edit', $customer->wa_number) }}"
                                                             class="text-green-600 hover:text-green-900 transition"
                                                             title="Edit Pelanggan">
                                                             <i class="bi bi-pencil"></i>
+                                                            <p>Edit</p>
                                                         </a>
                                                     @endif
                                                     @if($customer->is_reseller)
@@ -234,10 +245,7 @@
                             </table>
                         </div>
 
-                        <!-- Pagination -->
-                        <div class="mt-6">
-                            {{ $onlineCustomers->appends(request()->query())->links() }}
-                        </div>
+                        <!-- No Pagination -->
                     @else
                         <div class="text-center py-12">
                             <i class="bi bi-people text-6xl text-gray-300 mb-4"></i>
@@ -422,6 +430,124 @@
             if (e.target === this) {
                 closeGenerateCodeModal();
             }
+        });
+    </script>
+
+    <!-- Modal Tambah Pelanggan -->
+    <div id="addCustomerModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+                <div class="p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                        <i class="bi bi-person-plus-fill text-green-500 mr-2"></i>
+                        Tambah Pelanggan Baru
+                    </h3>
+
+                    <form id="addCustomerForm" action="{{ route('online-customers.store') }}" method="POST">
+                        @csrf
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Nomor WhatsApp</label>
+                                <input type="text" name="wa_number" required
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
+                                    placeholder="Contoh: 08123456789">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Nama Pelanggan</label>
+                                <input type="text" name="name" required
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
+                                    placeholder="Nama lengkap pelanggan">
+                            </div>
+
+                            <div class="flex items-center space-x-2">
+                                <!-- Tambahkan hidden input untuk nilai default -->
+                                <input type="hidden" name="is_reseller" value="0">
+                                <input type="checkbox" name="is_reseller" id="is_reseller" value="1"
+                                    class="rounded text-green-500 focus:ring-green-500">
+                                <label for="is_reseller" class="text-sm font-medium text-gray-700">Set sebagai
+                                    Reseller</label>
+                            </div>
+
+                            <div class="pt-4 flex justify-end space-x-3">
+                                <button type="button" onclick="closeAddCustomerModal()"
+                                    class="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
+                                    Batal
+                                </button>
+                                <button type="submit" id="submitAddCustomer"
+                                    class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition">
+                                    <i class="bi bi-save mr-1"></i>
+                                    Simpan
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openAddCustomerModal() {
+            document.getElementById('addCustomerModal').classList.remove('hidden');
+        }
+
+        function closeAddCustomerModal() {
+            document.getElementById('addCustomerModal').classList.add('hidden');
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('addCustomerModal').addEventListener('click', function (e) {
+            if (e.target === this) {
+                closeAddCustomerModal();
+            }
+        });
+
+        // Handle form submission
+        document.getElementById('addCustomerForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const form = this;
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalBtnText = submitBtn.innerHTML;
+
+            // Disable submit button and show loading state
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="bi bi-arrow-repeat animate-spin"></i> Menyimpan...';
+
+            const formData = new FormData(form);
+
+            fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Accept': 'application/json'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Success handling
+                        alert('Berhasil: ' + data.message);
+                        closeAddCustomerModal();
+                        if (data.redirect) {
+                            window.location.href = data.redirect;
+                        } else {
+                            window.location.reload();
+                        }
+                    } else {
+                        // Error with message
+                        throw new Error(data.message || 'Terjadi kesalahan saat menyimpan data');
+                    }
+                })
+                .catch(error => {
+                    // Error handling
+                    alert('Error: ' + error.message);
+
+                    // Reset button state
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalBtnText;
+                });
         });
     </script>
 </x-app-layout>
