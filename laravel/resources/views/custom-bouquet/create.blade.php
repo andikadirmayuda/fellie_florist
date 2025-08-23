@@ -450,29 +450,35 @@
     @include('public.partials.cart-panel')
 
     <!-- Header -->
-    <header class="w-full glass-effect border-b border-gray-100 sticky top-0 z-40">
+    <header class="w-full glass-effect border-b border-gray-100 sticky top-0 z-40 transition-transform duration-300"
+        id="main-header">
         <div class="max-w-7xl mx-auto px-4">
             <div class="flex flex-col items-center">
                 <!-- Top Bar -->
-                <div class="w-full flex items-center justify-between h-28 md:h-32">
+                <div class="w-full flex items-center justify-between h-20 md:h-24 pl-7 mt-2">
                     <!-- Brand Text - Left -->
                     <div class="flex items-center">
                         <a href="{{ route('public.flowers') }}" class="flex items-center">
                             <div>
-                                <h1 class="text-xl md:text-2xl lg:text-3xl font-bold text-gray-800">Fellie Florist</h1>
-                                <p class="text-[10px] sm:text-xs text-gray-500">Suplier Bunga Palembang</p>
+                                <h1 class="text-sm md:text-xl lg:text-2xl font-bold text-gray-800">Fellie Florist</h1>
+                                <p class="text-[7px] sm:text-xs text-gray-500">Suplier Bunga Palembang</p>
                             </div>
                         </a>
                     </div>
 
                     <!-- Logo - Center -->
                     <div class="absolute left-1/2 transform -translate-x-1/2">
-                        <img src="{{ asset('logo-fellie-02.png') }}" alt="Logo"
+                        <img src="{{ asset('logo-fellie-02.png') }}" alt="Logo" {{--
                             class="brand-logo w-24 h-24 md:w-28 md:h-28 lg:w-32 lg:h-32 rounded-full shadow-lg hover:shadow-xl transition-all duration-300">
+                        --}}
+                        class="brand-logo w-20 h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 scale-90 rounded-full shadow-lg
+                        hover:shadow-xl
+                        transition-all duration-300">
+
                     </div>
 
                     <!-- Action Buttons -->
-                    <div class="flex items-center">
+                    <div class="flex items-center pr-7">
                         <!-- Desktop Menu -->
                         <div class="hidden md:flex items-center space-x-3">
                             <!-- Track Order -->
@@ -556,17 +562,16 @@
                 <div class="w-full mt-4">
                     <nav class="flex items-center justify-center">
                         <div class="flex items-center justify-center space-x-2 sm:space-x-4 md:space-x-8">
-                            <a href="{{ route('public.flowers') }}" class="px-3 sm:px-6 py-2 text-center">
-
+                            <a href="{{ route('public.flowers') }}" class="px-2 sm:px-4 py-1.5 text-center">
                                 <span class="text-sm font-medium">BUNGA</span>
                             </a>
 
-                            <a href="{{ route('public.bouquets') }}" class="px-3 sm:px-6 py-2 text-center">
+                            <a href="{{ route('public.bouquets') }}" class="px-2 sm:px-4 py-1.5 text-center">
                                 <span class="text-sm font-medium">BOUQUET</span>
                             </a>
 
                             <a href="{{ route('custom.bouquet.create') }}"
-                                class="nav-tab nav-hover-effect group relative items-center space-x-2 px-4 py-3 rounded-xl transition-all duration-300 bg-gradient-to-r from-rose-500 to-red-500 text-white shadow-lg nav-active-gradient' : '' }}">
+                                class="px-2 sm:px-4 py-1.5 text-center nav-tab nav-hover-effect group relative items-center space-x-2 px-3 py-2 rounded-xl transition-all duration-300 bg-gradient-to-r from-rose-500 to-red-500 text-white shadow-lg nav-active-gradient' : '' }}">
                                 <span class="text-sm font-medium">CUSTOM</span>
                             </a>
                         </div>
@@ -1802,6 +1807,33 @@
 
     <!-- Cart JavaScript -->
     <script src="{{ asset('js/cart.js') }}"></script>
+
+    <script>
+        // Header hide/show on scroll
+        let lastScrollY = window.scrollY;
+        const header = document.getElementById('main-header');
+        let ticking = false;
+
+        window.addEventListener('scroll', () => {
+            if (!ticking) {
+                window.requestAnimationFrame(() => {
+                    const currentScrollY = window.scrollY;
+
+                    // Jika scroll ke bawah dan sudah scroll lebih dari 100px
+                    if (currentScrollY > lastScrollY && currentScrollY > 100) {
+                        header.style.transform = 'translateY(-100%)';
+                    } else {
+                        header.style.transform = 'translateY(0)';
+                    }
+
+                    lastScrollY = currentScrollY;
+                    ticking = false;
+                });
+
+                ticking = true;
+            }
+        });
+    </script>
 
 </body>
 

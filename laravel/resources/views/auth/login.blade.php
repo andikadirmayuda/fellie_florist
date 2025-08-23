@@ -1,37 +1,51 @@
 <x-guest-layout>
-    <div class="w-full max-w-md bg-white rounded-sm shadow-lg p-10 flex flex-col items-center">
-        <h1 class="text-2xl font-bold text-black mb-8 tracking-tight">Fellie Florist</h1>
+    <div class="w-full max-w-md bg-pink rounded-sm shadow-lg p-10 flex flex-col items-center">
+        <h1 class="text-2xl font-bold text-pink-600 mb-8 tracking-tight">Fellie Florist</h1>
         <form method="POST" action="{{ route('login') }}" class="w-full space-y-6">
             @csrf
             <div>
-                <label for="email" class="block text-gray-600 text-sm mb-1">Username</label>
+                <label for="email" class="block text-pink-600 text-sm mb-1">Username</label>
                 <div class="relative">
-                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 15c2.5 0 4.847.655 6.879 1.804M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-pink-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M5.121 17.804A13.937 13.937 0 0112 15c2.5 0 4.847.655 6.879 1.804M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
                     </span>
-                    <input id="email" name="email" type="email" required autofocus autocomplete="username" placeholder="Type your username" class="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black text-black bg-white placeholder-gray-400" value="{{ old('email') }}" />
+                    <input id="email" name="email" type="email" required autofocus autocomplete="username"
+                        placeholder="Type your username"
+                        class="pl-10 pr-4 py-2 w-full border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black text-black bg-pink placeholder-gray-400"
+                        value="{{ old('email') }}" />
                 </div>
                 <x-input-error :messages="$errors->get('email')" class="mt-2" />
             </div>
             <div>
-                <label for="password" class="block text-gray-600 text-sm mb-1">Password</label>
+                <label for="password" class="block text-pink-600 text-sm mb-1">Password</label>
                 <div class="relative">
-                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm0 2c-2.21 0-4 1.79-4 4v1h8v-1c0-2.21-1.79-4-4-4z" /></svg>
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-pink-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 11c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm0 2c-2.21 0-4 1.79-4 4v1h8v-1c0-2.21-1.79-4-4-4z" />
+                        </svg>
                     </span>
-                    <input id="password" name="password" type="password" required autocomplete="current-password" placeholder="Type your password" class="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black text-black bg-white placeholder-gray-400" />
+                    <input id="password" name="password" type="password" required autocomplete="current-password"
+                        placeholder="Type your password"
+                        class="pl-10 pr-4 py-2 w-full border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black text-pink bg-pink placeholder-pink-400" />
                 </div>
                 <x-input-error :messages="$errors->get('password')" class="mt-2" />
             </div>
             <div class="flex items-center justify-between">
                 <div></div>
                 @if (Route::has('password.request'))
-                    <a class="text-xs text-gray-400 hover:text-black transition" href="{{ route('password.request') }}">
+                    <a class="text-xs text-pink-400 hover:text-pink-500 transition" href="{{ route('password.request') }}">
                         Forgot password?
                     </a>
                 @endif
             </div>
-            <button type="submit" class="w-full py-3 bg-black text-white rounded-sm font-semibold hover:bg-gray-900 transition">LOGIN</button>
+            <button type="submit"
+                class="w-full py-3 bg-pink-500 text-white rounded-sm font-semibold hover:bg-pink-600 transition">LOGIN</button>
         </form>
         {{-- <div class="mt-2">
             <span class="text-xs text-gray-400">Or Sign Up with </span>

@@ -222,7 +222,7 @@
                             class="brand-logo w-10 h-10 rounded-full">
                         <div>
                             <h1 class="text-lg font-bold text-gray-800">Fellie Florist</h1>
-                            <p class="text-xs text-gray-500">Supplier Bunga</p>
+                            <p class="text-xs text-gray-500">Supplier Bunga Palembang</p>
                         </div>
                     </a>
                 </div>
