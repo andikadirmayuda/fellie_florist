@@ -12,7 +12,7 @@ class UserSeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     */    
+     */
     public function run(): void
     {
         // Check if required roles exist
@@ -28,7 +28,7 @@ class UserSeeder extends Seeder
             ['email' => 'owner@fellieflorist.com'],
             [
                 'name' => 'Owner Florist',
-                'password' => Hash::make('Websitefellie2025@#'),
+                'password' => Hash::make('Owner_fellie2025@###'),
                 'status' => 'active',
             ]
         );
@@ -39,7 +39,7 @@ class UserSeeder extends Seeder
             ['email' => 'admin@fellieflorist.com'],
             [
                 'name' => 'Admin Florist',
-                'password' => Hash::make('Websitefellie2025@#'),
+                'password' => Hash::make('Admin_fellieflorist123@###'),
                 'status' => 'active',
             ]
         );
@@ -50,7 +50,7 @@ class UserSeeder extends Seeder
             ['email' => 'kasir@fellieflorist.com'],
             [
                 'name' => 'Kasir Florist',
-                'password' => Hash::make('Websitefellie2025@#'),
+                'password' => Hash::make('Kasir_fellieflorist123@###'),
                 'status' => 'active',
             ]
         );
@@ -61,7 +61,7 @@ class UserSeeder extends Seeder
             ['email' => 'karyawan@fellieflorist.com'],
             [
                 'name' => 'karyawan',
-                'password' => Hash::make('Websitefellie2025@#'),
+                'password' => Hash::make('Karyawan_fellieflorist'),
                 'status' => 'active',
             ]
         );
@@ -72,7 +72,7 @@ class UserSeeder extends Seeder
             ['email' => 'cs@fellieflorist.com'],
             [
                 'name' => 'Customers Service',
-                'password' => Hash::make('Websitefellie2025@#'),
+                'password' => Hash::make('cs_fellieflorist'),
                 'status' => 'active',
             ]
         );
