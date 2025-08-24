@@ -812,14 +812,16 @@
                         grid: { display: false }
                     },
                     y: { 
+                        beginAtZero: true,
                         ticks: { 
                             color: '#6B7280',
                             font: { size: 11 },
                             callback: function(value) {
+                                if (value === 0) return 'Rp 0';
                                 return 'Rp ' + new Intl.NumberFormat('id-ID', {
                                     minimumFractionDigits: 0,
                                     maximumFractionDigits: 0
-                                }).format(value / 1000000) + 'jt';
+                                }).format(value / 1000) + 'rb';
                             }
                         },
                         grid: { color: '#F3F4F6' }
