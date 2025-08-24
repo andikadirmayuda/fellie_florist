@@ -232,10 +232,11 @@
                         <div class="flex items-center justify-between mb-4">
                             <h3 class="text-lg font-semibold text-gray-800 flex items-center">
                                 <i class="bi bi-pie-chart mr-2 text-rose-600"></i>
-                                Performa Produk
+                                Performa Kategori Produk
                             </h3>
-                            <span class="text-xs text-rose-600 bg-rose-50 px-2 py-1 rounded">Top Categories</span>
+                            <span class="text-xs text-rose-600 bg-rose-50 px-2 py-1 rounded">Penjualan Aktual</span>
                         </div>
+                        <div class="text-sm text-gray-500 mb-3">Total unit terjual dari transaksi yang sudah selesai</div>
                         <div class="relative">
                             <canvas id="productChart" class="w-full h-48"></canvas>
                         </div>
@@ -573,31 +574,37 @@
                                         <td class="text-center">
                                             <div class="flex flex-col items-center">
                                                 @php
-        // Simulasi performance berdasarkan stok (produk dengan stok tinggi dianggap laris)
-        $performance = $stock > 50 ? 'laris' : ($stock > 20 ? 'normal' : 'kurang laris');
+        // Dapatkan status performa dari atribut produk
+        $soldCount = $product->total_sold ?? 0; // Pastikan ada field total_sold di tabel products
+        
+        // Kategorisasi performance berdasarkan penjualan
+        if ($soldCount >= 20) {
+            $performance = 'Laris';
+            $percentage = 85;
+            $color = 'green';
+            $icon = 'bi-fire';
+        } elseif ($soldCount >= 10) {
+            $performance = 'Normal';
+            $percentage = 60;
+            $color = 'blue';
+            $icon = 'bi-graph-up';
+        } else {
+            $performance = 'Kurang';
+            $percentage = 25;
+            $color = 'gray';
+            $icon = 'bi-graph-down';
+        }
                                                 @endphp
-                                                @if($performance === 'laris')
-                                                    <span class="text-xs text-green-600 font-medium">
-                                                        <i class="bi bi-fire text-orange-500"></i> Laris
-                                                    </span>
-                                                    <div class="w-12 h-1 bg-gray-200 rounded-full mt-1">
-                                                        <div class="h-full bg-green-500 rounded-full" style="width: 85%"></div>
-                                                    </div>
-                                                @elseif($performance === 'normal')
-                                                    <span class="text-xs text-blue-600 font-medium">
-                                                        <i class="bi bi-dash-circle"></i> Normal
-                                                    </span>
-                                                    <div class="w-12 h-1 bg-gray-200 rounded-full mt-1">
-                                                        <div class="h-full bg-blue-500 rounded-full" style="width: 60%"></div>
-                                                    </div>
-                                                @else
-                                                    <span class="text-xs text-gray-600 font-medium">
-                                                        <i class="bi bi-arrow-down-circle"></i> Kurang
-                                                    </span>
-                                                    <div class="w-12 h-1 bg-gray-200 rounded-full mt-1">
-                                                        <div class="h-full bg-gray-500 rounded-full" style="width: 25%"></div>
-                                                    </div>
-                                                @endif
+                                                <span class="text-xs text-{{ $color }}-600 font-medium">
+                                                    <i class="bi {{ $icon }} {{ $performance === 'Laris' ? 'text-orange-500' : '' }}"></i> 
+                                                    {{ $performance }}
+                                                </span>
+                                                <div class="w-12 h-1 bg-gray-200 rounded-full mt-1">
+                                                    <div class="h-full bg-{{ $color }}-500 rounded-full" style="width: {{ $percentage }}%"></div>
+                                                </div>
+                                                <span class="text-xs text-gray-500 mt-1">
+                                                    {{ number_format($soldCount) }} terjual
+                                                </span>
                                             </div>
                                         </td>
                                         <td class="text-center">
@@ -883,7 +890,11 @@
                                 const value = context.parsed;
                                 const total = context.dataset.data.reduce((a, b) => a + b, 0);
                                 const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
-                                return label + ': ' + value + ' stok (' + percentage + '%)';
+                                return [
+                                    `Kategori: ${label}`,
+                                    `Terjual: ${new Intl.NumberFormat('id-ID').format(value)} unit`,
+                                    `(${percentage}% dari total penjualan)`
+                                ];
                             }
                         }
                     }

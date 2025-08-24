@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Models\Traits\HasCustomPrices;
 
+
 class Product extends Model
 {
     use HasFactory, SoftDeletes, HasCustomPrices;
@@ -22,11 +23,13 @@ class Product extends Model
         'base_unit',
         'current_stock',
         'min_stock',
+        'total_sold',
         'is_active'
     ];
 
     protected $casts = [
         'current_stock' => 'integer',
+        'total_sold' => 'integer',
         'min_stock' => 'integer',
         'is_active' => 'boolean'
     ];
@@ -47,6 +50,22 @@ class Product extends Model
     public function prices(): HasMany
     {
         return $this->hasMany(ProductPrice::class);
+    }
+
+    /**
+     * Update total sold count for the product
+     *
+     * @param int $quantity
+     * @param bool $increment
+     * @return void
+     */
+    public function updateTotalSold(int $quantity, bool $increment = true): void
+    {
+        if ($increment) {
+            $this->increment('total_sold', $quantity);
+        } else {
+            $this->decrement('total_sold', $quantity);
+        }
     }
 
     public function inventoryLogs(): HasMany

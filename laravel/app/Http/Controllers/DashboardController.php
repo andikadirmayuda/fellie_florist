@@ -14,11 +14,15 @@ use App\Models\PublicOrder;
 use App\Models\InventoryLog;
 use App\Models\BouquetCategory;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class DashboardController extends Controller
 {
     public function index()
     {
+        // Enable query logging
+        DB::enableQueryLog();
+
         $user = Auth::user();
 
         // Statistik utama
@@ -96,6 +100,90 @@ class DashboardController extends Controller
             ->groupBy('date')
             ->orderBy('date')
             ->get();
+
+        // Data untuk Performa Produk (berdasarkan kategori)
+        // Hitung penjualan dari sales
+        $directSales = DB::table('categories as c')
+            ->select([
+                'c.id as category_id',
+                'c.name as category_name',
+                DB::raw('COALESCE(SUM(si.quantity), 0) as total_sold')
+            ])
+            ->join('products as p', 'p.category_id', '=', 'c.id')
+            ->join('sale_items as si', 'si.product_id', '=', 'p.id')
+            ->join('sales as s', function ($join) {
+                $join->on('s.id', '=', 'si.sale_id')
+                    ->whereNull('s.deleted_at');
+            })
+            ->groupBy('c.id', 'c.name');
+
+        // Hitung penjualan dari public orders
+        $onlineOrders = DB::table('categories as c')
+            ->select([
+                'c.id as category_id',
+                'c.name as category_name',
+                DB::raw('COALESCE(SUM(poi.quantity), 0) as total_sold')
+            ])
+            ->join('products as p', 'p.category_id', '=', 'c.id')
+            ->join('public_order_items as poi', 'poi.product_id', '=', 'p.id')
+            ->join('public_orders as po', function ($join) {
+                $join->on('po.id', '=', 'poi.public_order_id')
+                    ->whereIn('po.status', ['completed', 'delivered']);
+            })
+            ->groupBy('c.id', 'c.name');
+
+        // Dapatkan penjualan langsung
+        $directSalesResult = $directSales->get();
+
+        // Dapatkan penjualan online
+        $onlineOrdersResult = $onlineOrders->get();
+
+        // Gabungkan hasil
+        $salesByCategory = collect();
+        foreach ($directSalesResult as $sale) {
+            $salesByCategory[$sale->category_id] = [
+                'category_name' => $sale->category_name,
+                'total_sold' => $sale->total_sold
+            ];
+        }
+
+        foreach ($onlineOrdersResult as $order) {
+            if (!isset($salesByCategory[$order->category_id])) {
+                $salesByCategory[$order->category_id] = [
+                    'category_name' => $order->category_name,
+                    'total_sold' => 0
+                ];
+            }
+            $salesByCategory[$order->category_id]['total_sold'] += $order->total_sold;
+        }
+
+        // Filter yang memiliki penjualan dan urutkan
+        $salesByCategory = $salesByCategory
+            ->filter(function ($value) {
+                return $value['total_sold'] > 0;
+            })
+            ->sortByDesc('total_sold')
+            ->values();
+
+        // Debug info
+        info('Direct Sales:', $directSalesResult->toArray());
+        info('Online Orders:', $onlineOrdersResult->toArray());
+        info('Combined Sales:', $salesByCategory->toArray());
+
+        // Debug: tampilkan query yang dijalankan
+        Log::info('Query Categories Sales:', [
+            'query' => DB::getQueryLog()[count(DB::getQueryLog()) - 1] ?? 'No query logged'
+        ]);
+
+        $productsByCategory = collect($salesByCategory);
+
+        // Debug data penjualan per kategori
+        Log::info('Product Sales by Category:', $productsByCategory->toArray());
+
+        $productChartData = [
+            'labels' => $productsByCategory->pluck('category_name')->toArray(),
+            'data' => $productsByCategory->pluck('total_sold')->toArray()
+        ];
 
         // Hitung revenue terpisah dari items
         $revenueQuery = DB::table('public_orders')
