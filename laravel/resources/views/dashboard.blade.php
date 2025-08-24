@@ -236,7 +236,7 @@
                             </h3>
                             <span class="text-xs text-rose-600 bg-rose-50 px-2 py-1 rounded">Penjualan Aktual</span>
                         </div>
-                        <div class="text-sm text-gray-500 mb-3">Total unit terjual dari transaksi yang sudah selesai</div>
+                        {{-- <div class="text-sm text-gray-500 mb-3">Total unit terjual dari transaksi yang sudah selesai</div> --}}
                         <div class="relative">
                             <canvas id="productChart" class="w-full h-48"></canvas>
                         </div>
@@ -512,17 +512,18 @@
                 </div>
 
                 <div class="overflow-x-auto">
-                    <table class="modern-table w-full">
-                        <thead>
-                            <tr>
-                                <th class="text-left">Nama Produk</th>
-                                <th class="text-left">Kategori</th>
-                                <th class="text-center">Stok Tersedia</th>
-                                <th class="text-center">Status</th>
-                                <th class="text-center">Performance</th>
-                                <th class="text-center">Aksi</th>
-                            </tr>
-                        </thead>
+                    <div class="overflow-x-auto">
+                        <table class="modern-table w-full">
+                            <thead>
+                                <tr>
+                                    <th class="text-left">Nama Produk</th>
+                                    <th class="text-left">Kategori</th>
+                                    <th class="text-center">Stok Tersedia</th>
+                                    <th class="text-center">Status</th>
+                                    <th class="text-center">Penjualan</th>
+                                    <th class="text-center">Aksi</th>
+                                </tr>
+                            </thead>
                         <tbody>
                             @forelse(($readyProducts ?? []) as $product)
                                 @if(is_object($product))
